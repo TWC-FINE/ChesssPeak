@@ -6,7 +6,7 @@
     "lang": "es-CO",
     "maxAlternatives": 5,
     "corpusVersion": "v0",
-    "parser": { "threshold": 1.0, "margin": 0.25, "rankPenalty": 0.05, "nato": false },
+    "parser": { "threshold": 1.0, "margin": 0.25, "rankPenalty": 0.3, "nato": false },
     "userAgent": "FAKE DATA - invented to test scripts/metrics.ts, not a measurement",
     "createdAt": "2026-01-01T00:00:00.000Z",
     "fake": true

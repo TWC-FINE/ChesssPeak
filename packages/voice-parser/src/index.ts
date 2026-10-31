@@ -10,3 +10,18 @@ export {
   type Resolution,
   type ResolveOptions,
 } from './types.js';
+export { phrasesOfSplit, positionOf } from './corpus.js';
+export type {
+  Corpus,
+  CorpusPhrase,
+  CorpusPosition,
+  ExpectedOutcome,
+  Split,
+} from './corpus.js';
+export type {
+  AttemptLatency,
+  AttemptRecord,
+  Condition,
+  ResultsFile,
+  ResultsMeta,
+} from './results.js';

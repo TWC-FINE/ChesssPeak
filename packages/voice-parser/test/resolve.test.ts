@@ -124,6 +124,11 @@ describe('resolve: N-best and options', () => {
     expect(resolve(START, alternatives)).toMatchObject({ kind: 'move', uci: 'g1f3' });
   });
 
+  it('does not let a lower-ranked exact match make a clean first alternative ambiguous', () => {
+    const alternatives = [{ transcript: 'peón e cuatro' }, { transcript: 'peón de cuatro' }];
+    expect(resolve(START, alternatives)).toMatchObject({ kind: 'move', uci: 'e2e4' });
+  });
+
   it('can ignore the extra alternatives', () => {
     const alternatives = [{ transcript: 'buenas tardes' }, { transcript: 'caballo efe tres' }];
     expect(resolve(START, alternatives.slice(0, 1)).kind).toBe('nomatch');

@@ -188,6 +188,12 @@ importers:
         specifier: ^0.15.1
         version: 0.15.1
 
+  spike/web-speech:
+    dependencies:
+      '@chessspeak/voice-parser':
+        specifier: workspace:*
+        version: link:../../packages/voice-parser
+
 packages:
 
   '@badrap/result@0.3.1':

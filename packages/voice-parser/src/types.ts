@@ -22,7 +22,11 @@ export interface ResolveOptions {
   threshold?: number;
   /** Min gap between best and second-best move to avoid `ambiguous`. */
   margin?: number;
-  /** Extra distance added per position in the N-best list (rank 0 adds nothing). */
+  /**
+   * Extra distance added per position in the N-best list (rank 0 adds nothing).
+   * Keep it >= `margin`: otherwise an exact match in a lower-ranked alternative
+   * makes a clean first alternative look ambiguous.
+   */
   rankPenalty?: number;
   /** Accept the NATO alphabet (alfa, bravo, ...) as letter names. */
   nato?: boolean;
@@ -31,6 +35,6 @@ export interface ResolveOptions {
 export const DEFAULT_OPTIONS: Required<ResolveOptions> = {
   threshold: 1.0,
   margin: 0.25,
-  rankPenalty: 0.05,
+  rankPenalty: 0.3,
   nato: false,
 };
