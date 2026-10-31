@@ -4,7 +4,7 @@ Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebr
 
 Proyecto final de Arquitectura de Software (equipo de 2 personas).
 
-> **Estado:** en fase de planificación. Todavía no hay código; los comandos de abajo describen el objetivo y se irán habilitando por fases (ver [PLAN.md](PLAN.md)).
+> **Estado:** en fase de spike. Lo único que existe como código es `packages/voice-parser` y `spike/web-speech` (rama `spike/voice`); el resto de comandos de abajo describe el objetivo y se irá habilitando por fases (ver [PLAN.md](PLAN.md)). Para el spike, empieza por [spike/README.md](spike/README.md).
 
 ## Cómo funciona
 

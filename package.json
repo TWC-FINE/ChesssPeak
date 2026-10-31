@@ -1,0 +1,13 @@
+{
+  "name": "chessspeak",
+  "private": true,
+  "version": "0.0.0",
+  "license": "GPL-3.0-only",
+  "packageManager": "pnpm@12.16.1",
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "metrics": "pnpm --filter @chessspeak/voice-parser metrics",
+    "spike:build": "pnpm --filter @chessspeak/spike-web-speech build"
+  }
+}

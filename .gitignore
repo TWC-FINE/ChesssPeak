@@ -1,0 +1,25 @@
+# dependencies and build output
+node_modules/
+dist/
+web/dist/
+coverage/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# whisper.cpp binaries and models stay outside the repo
+whisper/
+models/
+*.bin
+*.gguf
+ggml-*
+
+# spike audio (results JSON files are kept)
+*.wav
+recordings/
+
+# misc
+*.log
+.DS_Store
