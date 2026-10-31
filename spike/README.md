@@ -112,3 +112,7 @@ Si la decisión es «no cumple», no cambies los criterios: aplica la regla del 
 ## 8. Qué hay en cada archivo de resultados
 
 `meta` (idioma, número de alternativas, parámetros del parser, navegador, hablante) y `attempts`: por intento, la frase esperada, el split, la condición (`quiet`, `noisy`, `silence`, `noise`), la repetición, las alternativas **crudas** del reconocedor con su confianza, el error si lo hubo, la latencia (`recognitionMs`, `resolveMs`, `totalMs`, medida desde que sueltas el botón) y el nombre del WAV si se grabó. No se guarda audio dentro del JSON.
+
+## 9. Parte 2: Whisper local
+
+Para comparar con Whisper (`base` y `small`) usando los mismos clips, y para el agente HTTP local con su prueba de CORS, sigue [spike/whisper-local/README.md](whisper-local/README.md). Notas y límites conocidos: [docs/spike-notes.md](../docs/spike-notes.md).
