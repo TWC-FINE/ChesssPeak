@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "fake-session-for-metrics-tests",
+    "recognizer": "webspeech",
+    "lang": "es-CO",
+    "maxAlternatives": 5,
+    "corpusVersion": "v0",
+    "parser": { "threshold": 1.0, "margin": 0.25, "rankPenalty": 0.05, "nato": false },
+    "userAgent": "FAKE DATA - invented to test scripts/metrics.ts, not a measurement",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "fake": true
+  },
+  "attempts": [
+    { "id": "f01", "phraseId": "x-01", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "peón e cuatro", "expectedOutcome": "move", "expectedUci": "e2e4", "condition": "quiet", "repetition": 1, "alternatives": [{ "transcript": "peón e cuatro" }], "latency": { "recognitionMs": 800, "resolveMs": 5, "totalMs": 900 }, "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f02", "phraseId": "x-02", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "caballo efe tres", "expectedOutcome": "move", "expectedUci": "g1f3", "condition": "quiet", "repetition": 1, "alternatives": [{ "transcript": "caballo efe tres" }], "latency": { "recognitionMs": 1100, "resolveMs": 5, "totalMs": 1200 }, "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f03", "phraseId": "x-03", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "caballo ce tres", "expectedOutcome": "move", "expectedUci": "b1c3", "condition": "quiet", "repetition": 1, "alternatives": [{ "transcript": "caballo de tres" }], "latency": { "recognitionMs": 1000, "resolveMs": 5, "totalMs": 1100 }, "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f04", "phraseId": "x-04", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "peón e cuatro", "expectedOutcome": "move", "expectedUci": "e2e4", "condition": "quiet", "repetition": 2, "alternatives": [{ "transcript": "be cuatro" }], "latency": { "recognitionMs": 900, "resolveMs": 5, "totalMs": 1000 }, "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f05", "phraseId": "x-05", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "caballo efe tres", "expectedOutcome": "move", "expectedUci": "g1f3", "condition": "noisy", "repetition": 1, "alternatives": [{ "transcript": "caballo tres" }], "latency": { "recognitionMs": 1400, "resolveMs": 5, "totalMs": 1500 }, "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f06", "phraseId": "x-06", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "peón e cuatro", "expectedOutcome": "move", "expectedUci": "e2e4", "condition": "noisy", "repetition": 1, "alternatives": [{ "transcript": "hola qué tal" }], "latency": { "recognitionMs": 1900, "resolveMs": 5, "totalMs": 2000 }, "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f07", "phraseId": "x-07", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "peón e cuatro", "expectedOutcome": "move", "expectedUci": "e2e4", "condition": "noisy", "repetition": 2, "alternatives": [], "error": "no-speech", "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f08", "phraseId": "x-08", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "caballo efe tres", "expectedOutcome": "move", "expectedUci": "g1f3", "condition": "quiet", "repetition": 3, "alternatives": [{ "transcript": "buenas tardes" }, { "transcript": "caballo efe tres" }], "latency": { "recognitionMs": 1200, "resolveMs": 5, "totalMs": 1300 }, "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f09", "phraseId": "x-09", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "hola buenos días", "expectedOutcome": "nomatch", "condition": "quiet", "repetition": 1, "alternatives": [{ "transcript": "hola buenos días" }], "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f10", "phraseId": null, "positionId": null, "split": null, "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": null, "expectedOutcome": "nomatch", "condition": "silence", "repetition": 1, "alternatives": [], "error": "no-speech", "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f11", "phraseId": null, "positionId": null, "split": null, "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": null, "expectedOutcome": "nomatch", "condition": "noise", "repetition": 1, "alternatives": [{ "transcript": "e cuatro" }], "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f12", "phraseId": "x-12", "positionId": "x", "split": "test", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "sí", "expectedOutcome": "command", "expectedCommand": "yes", "condition": "quiet", "repetition": 1, "alternatives": [{ "transcript": "sí" }], "createdAt": "2026-01-01T00:00:00.000Z" },
+    { "id": "f13", "phraseId": "d-01", "positionId": "d", "split": "dev", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "spoken": "peón e cuatro", "expectedOutcome": "move", "expectedUci": "e2e4", "condition": "quiet", "repetition": 1, "alternatives": [{ "transcript": "peón e cuatro" }], "latency": { "recognitionMs": 700, "resolveMs": 5, "totalMs": 800 }, "createdAt": "2026-01-01T00:00:00.000Z" }
+  ]
+}
