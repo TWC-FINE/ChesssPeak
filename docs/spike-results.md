@@ -20,6 +20,16 @@ Criterios y definiciones: [spike-criteria.md](spike-criteria.md) (v1, fijados an
 
 <!-- results:end -->
 
+## Resultados de Whisper local
+
+Se rellena con `benchmark --write-results` (`spike/whisper-local`) a partir de los clips WAV reales del arnés. Se niega a escribir con clips o archivos sintéticos (`*.fake.*`) o con un split distinto de `test`.
+
+<!-- whisper:start -->
+
+_Sin mediciones._
+
+<!-- whisper:end -->
+
 ## Regla de decisión
 
 Se evalúa con las métricas agregadas del split `test` (`quiet` + `noisy`):
