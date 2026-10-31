@@ -3,6 +3,7 @@ import { tokenClass } from './lexicon.js';
 const MARKER_COST = 0.3;
 const FILLER_A_COST = 0.3;
 const UNKNOWN_DELETE_COST = 0.5;
+const EDGE_FILLER_COST = 0.25;
 
 /**
  * Pairs of canonical tokens that speech recognizers tend to mix up, with the
@@ -24,11 +25,24 @@ confuse(['a', 'h'], 0.5);
 confuse(['e', 'f'], 0.5);
 confuse(['3', '6'], 0.5);
 
+const PIECE_NAMES = ['peon', 'caballo', 'alfil', 'torre', 'dama', 'rey'];
+
+/** Two words close enough to be a mispronunciation of one another ("cavayo" / "caballo"). */
+function similarWords(a: string, b: string): boolean {
+  if (a.length < 4 || b.length < 4) return false;
+  return levenshtein(a, b) <= Math.floor(0.45 * Math.max(a.length, b.length));
+}
+
+/** An unknown word that is probably a garbled piece name: dropping it would change the move. */
+function looksLikePiece(token: string): boolean {
+  return tokenClass(token) === 'unknown' && PIECE_NAMES.some((name) => similarWords(token, name));
+}
+
 /** Cost of a recognized token that the expected phrase does not have. */
 export function deleteCost(token: string): number {
   if (token === 'a') return FILLER_A_COST; // usually the preposition: "caballo a f3"
   if (token === 'peon' || tokenClass(token) === 'marker') return MARKER_COST;
-  if (tokenClass(token) === 'unknown') return UNKNOWN_DELETE_COST;
+  if (tokenClass(token) === 'unknown') return looksLikePiece(token) ? 1 : UNKNOWN_DELETE_COST;
   return 1;
 }
 
@@ -43,11 +57,18 @@ export function substituteCost(recognized: string, expected: string): number {
   const confusion = CONFUSION.get(`${recognized}|${expected}`);
   if (confusion !== undefined) return confusion;
   // a misspelled or mispronounced word ("cabayo" for "caballo")
-  if (tokenClass(recognized) === 'unknown' && expected.length >= 4 && recognized.length >= 4) {
+  if (tokenClass(recognized) === 'unknown' && similarWords(recognized, expected)) {
     const lev = levenshtein(recognized, expected);
-    if (lev <= 2) return Math.min(1, (1.2 * lev) / Math.max(recognized.length, expected.length));
+    return Math.min(1, (1.2 * lev) / Math.max(recognized.length, expected.length));
   }
   return 1;
+}
+
+/** Unknown words before or after the move ("pues caballo ge cinco por favor") are cheap. */
+function edgeDeleteCost(token: string): number {
+  return tokenClass(token) === 'unknown' && !looksLikePiece(token)
+    ? EDGE_FILLER_COST
+    : deleteCost(token);
 }
 
 /** Weighted token edit distance between a recognized phrase and an expected spoken form. */
@@ -55,7 +76,7 @@ export function weightedDistance(recognized: string[], expected: string[]): numb
   const rows = recognized.length + 1;
   const cols = expected.length + 1;
   const d: number[][] = Array.from({ length: rows }, () => new Array<number>(cols).fill(0));
-  for (let i = 1; i < rows; i++) d[i]![0] = d[i - 1]![0]! + deleteCost(recognized[i - 1]!);
+  for (let i = 1; i < rows; i++) d[i]![0] = d[i - 1]![0]! + edgeDeleteCost(recognized[i - 1]!);
   for (let j = 1; j < cols; j++) d[0]![j] = d[0]![j - 1]! + insertCost(expected[j - 1]!);
   for (let i = 1; i < rows; i++) {
     for (let j = 1; j < cols; j++) {
@@ -66,7 +87,15 @@ export function weightedDistance(recognized: string[], expected: string[]): numb
       );
     }
   }
-  return d[rows - 1]![cols - 1]!;
+  // the phrase may end with trailing filler words
+  let best = Infinity;
+  let trailing = 0;
+  for (let i = rows - 1; i >= 0; i--) {
+    best = Math.min(best, d[i]![cols - 1]! + trailing);
+    if (i === 0 || tokenClass(recognized[i - 1]!) !== 'unknown') break;
+    trailing += edgeDeleteCost(recognized[i - 1]!);
+  }
+  return best;
 }
 
 export function levenshtein(a: string, b: string): number {

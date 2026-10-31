@@ -1,0 +1,71 @@
+{
+  "version": "v0",
+  "language": "es",
+  "positions": [
+    { "id": "p01", "split": "dev", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "description": "Posición inicial" },
+    { "id": "p02", "split": "dev", "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4", "description": "Giuoco Piano, blancas pueden enrocar" },
+    { "id": "p03", "split": "dev", "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3", "description": "Peón de dama, dos caballos blancos llegan a d2" },
+    { "id": "p04", "split": "dev", "fen": "7k/4P3/8/8/8/8/8/6K1 w - - 0 1", "description": "Final: peón blanco a punto de coronar" },
+    { "id": "p06", "split": "dev", "fen": "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4", "description": "Siciliana abierta tras cxd4" },
+    { "id": "p07", "split": "dev", "fen": "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1", "description": "Final de torres" },
+    { "id": "p10", "split": "dev", "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4", "description": "Cuatro caballos italiana" },
+    { "id": "p05", "split": "test", "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8", "description": "Negras pueden enrocar a ambos lados" },
+    { "id": "p08", "split": "test", "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12", "description": "Dos torres blancas llegan a d1" },
+    { "id": "p09", "split": "test", "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1", "description": "Peón en b7 corona empujando o capturando" }
+  ],
+  "phrases": [
+    { "id": "p01-01", "positionId": "p01", "spoken": "peón e cuatro", "expectedOutcome": "move", "expectedUci": "e2e4", "tags": ["pawn"] },
+    { "id": "p01-02", "positionId": "p01", "spoken": "caballo efe tres", "expectedOutcome": "move", "expectedUci": "g1f3", "tags": ["piece"] },
+    { "id": "p01-03", "positionId": "p01", "spoken": "be dos be tres", "expectedOutcome": "move", "expectedUci": "b2b3", "tags": ["coordinates", "confusable"] },
+    { "id": "p01-04", "positionId": "p01", "spoken": "hoy hace mucho calor", "expectedOutcome": "nomatch", "tags": ["noise"] },
+
+    { "id": "p02-01", "positionId": "p02", "spoken": "enroque corto", "expectedOutcome": "move", "expectedUci": "e1g1", "tags": ["castling"] },
+    { "id": "p02-02", "positionId": "p02", "spoken": "alfil toma efe siete", "expectedOutcome": "move", "expectedUci": "c4f7", "tags": ["capture", "piece"] },
+    { "id": "p02-03", "positionId": "p02", "spoken": "caballo toma e cinco", "expectedOutcome": "move", "expectedUci": "f3e5", "tags": ["capture", "piece"] },
+    { "id": "p02-04", "positionId": "p02", "spoken": "pues caballo ge cinco por favor", "expectedOutcome": "move", "expectedUci": "f3g5", "tags": ["filler", "piece"] },
+
+    { "id": "p03-01", "positionId": "p03", "spoken": "caballo be de dos", "expectedOutcome": "move", "expectedUci": "b1d2", "tags": ["disambiguation", "confusable"] },
+    { "id": "p03-02", "positionId": "p03", "spoken": "caballo efe de dos", "expectedOutcome": "move", "expectedUci": "f3d2", "tags": ["disambiguation", "confusable"] },
+    { "id": "p03-03", "positionId": "p03", "spoken": "peón e tres", "expectedOutcome": "move", "expectedUci": "e2e3", "tags": ["pawn"] },
+    { "id": "p03-04", "positionId": "p03", "spoken": "caballo ce tres", "expectedOutcome": "move", "expectedUci": "b1c3", "tags": ["piece", "confusable"] },
+
+    { "id": "p04-01", "positionId": "p04", "spoken": "peón e ocho corona a dama", "expectedOutcome": "move", "expectedUci": "e7e8q", "tags": ["promotion"] },
+    { "id": "p04-02", "positionId": "p04", "spoken": "e siete e ocho corona a caballo", "expectedOutcome": "move", "expectedUci": "e7e8n", "tags": ["promotion", "coordinates"] },
+    { "id": "p04-03", "positionId": "p04", "spoken": "rey ge dos", "expectedOutcome": "move", "expectedUci": "g1g2", "tags": ["piece", "confusable"] },
+
+    { "id": "p06-01", "positionId": "p06", "spoken": "caballo toma de cuatro", "expectedOutcome": "move", "expectedUci": "f3d4", "tags": ["capture", "piece", "confusable"] },
+    { "id": "p06-02", "positionId": "p06", "spoken": "alfil be cinco", "expectedOutcome": "move", "expectedUci": "f1b5", "tags": ["piece", "confusable"] },
+    { "id": "p06-03", "positionId": "p06", "spoken": "dama toma de cuatro", "expectedOutcome": "move", "expectedUci": "d1d4", "tags": ["capture", "piece", "confusable"] },
+    { "id": "p06-04", "positionId": "p06", "spoken": "peón e cinco", "expectedOutcome": "move", "expectedUci": "e4e5", "tags": ["pawn"] },
+
+    { "id": "p07-01", "positionId": "p07", "spoken": "de uno de ocho", "expectedOutcome": "move", "expectedUci": "d1d8", "tags": ["coordinates", "confusable"] },
+    { "id": "p07-02", "positionId": "p07", "spoken": "torre de ocho", "expectedOutcome": "move", "expectedUci": "d1d8", "tags": ["piece", "confusable"] },
+    { "id": "p07-03", "positionId": "p07", "spoken": "efe dos efe cuatro", "expectedOutcome": "move", "expectedUci": "f2f4", "tags": ["coordinates"] },
+    { "id": "p07-04", "positionId": "p07", "spoken": "no sé qué decir ahora", "expectedOutcome": "nomatch", "tags": ["noise"] },
+
+    { "id": "p10-01", "positionId": "p10", "spoken": "caballo ge cinco", "expectedOutcome": "move", "expectedUci": "f3g5", "tags": ["piece", "confusable"] },
+    { "id": "p10-02", "positionId": "p10", "spoken": "peón de tres", "expectedOutcome": "move", "expectedUci": "d2d3", "tags": ["pawn", "confusable"] },
+    { "id": "p10-03", "positionId": "p10", "spoken": "de dos de cuatro", "expectedOutcome": "move", "expectedUci": "d2d4", "tags": ["coordinates", "confusable"] },
+    { "id": "p10-04", "positionId": "p10", "spoken": "sí", "expectedOutcome": "command", "expectedCommand": "yes", "tags": ["command"] },
+    { "id": "p10-05", "positionId": "p10", "spoken": "cancelar", "expectedOutcome": "command", "expectedCommand": "cancel", "tags": ["command"] },
+
+    { "id": "p05-01", "positionId": "p05", "spoken": "enroque corto", "expectedOutcome": "move", "expectedUci": "e8g8", "tags": ["castling"] },
+    { "id": "p05-02", "positionId": "p05", "spoken": "enroque largo", "expectedOutcome": "move", "expectedUci": "e8c8", "tags": ["castling"] },
+    { "id": "p05-03", "positionId": "p05", "spoken": "caballo be cuatro", "expectedOutcome": "move", "expectedUci": "c6b4", "tags": ["piece", "confusable"] },
+    { "id": "p05-04", "positionId": "p05", "spoken": "alfil toma efe tres", "expectedOutcome": "move", "expectedUci": "g4f3", "tags": ["capture", "piece"] },
+    { "id": "p05-05", "positionId": "p05", "spoken": "peón de cinco", "expectedOutcome": "move", "expectedUci": "d6d5", "tags": ["pawn", "confusable"] },
+    { "id": "p05-06", "positionId": "p05", "spoken": "mañana tengo examen de física", "expectedOutcome": "nomatch", "tags": ["noise"] },
+
+    { "id": "p08-01", "positionId": "p08", "spoken": "torre a de uno", "expectedOutcome": "move", "expectedUci": "a1d1", "tags": ["disambiguation", "confusable"] },
+    { "id": "p08-02", "positionId": "p08", "spoken": "torre efe de uno", "expectedOutcome": "move", "expectedUci": "f1d1", "tags": ["disambiguation", "confusable"] },
+    { "id": "p08-03", "positionId": "p08", "spoken": "de toma ce cinco", "expectedOutcome": "move", "expectedUci": "d4c5", "tags": ["capture", "confusable"] },
+    { "id": "p08-04", "positionId": "p08", "spoken": "peón e cuatro", "expectedOutcome": "move", "expectedUci": "e3e4", "tags": ["pawn"] },
+    { "id": "p08-05", "positionId": "p08", "spoken": "hola buenos días a todos", "expectedOutcome": "nomatch", "tags": ["noise"] },
+
+    { "id": "p09-01", "positionId": "p09", "spoken": "be siete toma ce ocho corona a dama", "expectedOutcome": "move", "expectedUci": "b7c8q", "tags": ["promotion", "capture", "confusable"] },
+    { "id": "p09-02", "positionId": "p09", "spoken": "be siete toma a ocho corona a torre", "expectedOutcome": "move", "expectedUci": "b7a8r", "tags": ["promotion", "capture", "confusable"] },
+    { "id": "p09-03", "positionId": "p09", "spoken": "be siete be ocho corona a dama", "expectedOutcome": "move", "expectedUci": "b7b8q", "tags": ["promotion", "coordinates", "confusable"] },
+    { "id": "p09-04", "positionId": "p09", "spoken": "rey hache uno", "expectedOutcome": "move", "expectedUci": "g1h1", "tags": ["piece", "confusable"] },
+    { "id": "p09-05", "positionId": "p09", "spoken": "voy a pensar un momento", "expectedOutcome": "nomatch", "tags": ["noise"] }
+  ]
+}

@@ -107,6 +107,17 @@ describe('resolve: nomatch and commands', () => {
   });
 });
 
+describe('resolve: garbled and filler words', () => {
+  it('ignores filler words around the move', () => {
+    expect(say(START, 'pues caballo efe tres por favor')).toMatchObject({ kind: 'move', uci: 'g1f3' });
+  });
+
+  it('does not drop a garbled piece name and accept the pawn move instead', () => {
+    // "cavayo" is a mangled "caballo": f3 by a pawn would be a wrong acceptance
+    expect(say(START, 'cavayo fe tres')).toMatchObject({ kind: 'move', uci: 'g1f3' });
+  });
+});
+
 describe('resolve: N-best and options', () => {
   it('uses a later alternative when the first one is garbage', () => {
     const alternatives = [{ transcript: 'cavayo fe tres' }, { transcript: 'caballo efe tres' }];
