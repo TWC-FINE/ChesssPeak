@@ -115,7 +115,19 @@ _Pendiente de las mediciones._
 ## Notas de la medición
 
 - **Fecha:** 1 de noviembre de 2026. Idioma `es-CO`, 5 alternativas, un solo hablante (campo «Hablante» sin rellenar).
-- **Micrófono y ruido usado:** _por completar por quien midió (no constan en los archivos)._
+- **Navegador (campo `userAgent` de cada archivo):** los seis archivos son de **Microsoft Edge 156.0.0.0** (Chromium 156), Windows 10 de 64 bits. **No se usó Chrome**, que es lo que pedía la guía.
+
+  | Archivo | Intentos | Navegador | Exportado (UTC) |
+  |---|---|---|---|
+  | `2026-11-01-webspeech-dev.json` | 28 | Edge 156.0.0.0 | 05:42 |
+  | `2026-11-01-webspeech-ambientetranquiloreal.json` | 48 | Edge 156.0.0.0 | 06:02 |
+  | `2026-11-01-webspeech-ruido.json` | 48 | Edge 156.0.0.0 | 06:08 |
+  | `2026-11-01-webspeech-silencio.json` | 10 | Edge 156.0.0.0 | 06:15 |
+  | `2026-11-01-webspeech-sinhablarruido.json` | 10 | Edge 156.0.0.0 | 06:17 |
+  | `2026-11-01-improvised-2026.json` | 10 | Edge 156.0.0.0 | 06:36 |
+
+  Consecuencia: las cifras de Web Speech de este documento son las del reconocedor de Edge. No se ha verificado que coincidan con las de Chrome, y el reconocimiento de voz de Edge puede apoyarse en un servicio distinto al de Google (tampoco verificado). Cualquier decisión sobre «Chrome en la demo» necesita una medición en Chrome.
+- **Micrófono y ruido usado:** _por completar por quien midió (no constan en los archivos ni los anoté antes)._
 - **Parámetros del parser:** los de por defecto, sin cambios tras `dev`: `threshold` 1, `margin` 0,25, `rankPenalty` 0,3, `nato` falso (coinciden en los 5 archivos).
 - **Congelación del parser:** commit `291c84f3e674867c28aca759516d8a281fde3601`, etiqueta `spike-parser-freeze`.
   - **Se hizo después de medir `test`, no antes** como pedía el procedimiento. Se hizo al verificar los datos.

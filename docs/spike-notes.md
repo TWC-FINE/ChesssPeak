@@ -24,6 +24,21 @@ Descubiertos al pasar texto de Whisper por el parser congelado, con voz sintéti
 | `Caballó F3.` | `move g1f3` ✔ | — |
 | `[Música]`, `[SILENCIO]` | `nomatch` ✔ | — |
 
+**Con voz real y Web Speech (medición de `test`, 1 nov 2026; nada se arregló).** Complemento de los 34 fallos de 78; lo que dijo el hablante → lo que escribió Web Speech → qué hizo el parser:
+
+| Patrón | Casos | Ejemplo | ¿Podría ayudar el parser? |
+|---|---|---|---|
+| «toma» + letra fundidos en una palabra | 5 (todos en `p09`) | «be siete toma ce ocho corona a dama» → `B 7 tomase 8 corona a dama.` / `tomarse` / `thomase` → `nomatch` (d=1,30) | Sí: «tomase», «tomarse» = «toma» + «ce/se». Candidato a revisar después de la decisión |
+| «alfil» partido en dos palabras | 2 | `Al fin toma F 3.`, `Al FIL tomarse 3.` | Posible (alias «al fin», «al fil») |
+| Texto truncado al final | 8 | `Caballo b cu.`, `En Roque cor.`, `Torre F.`, `Torrea de.`, `…corona ator.` | No: falta información |
+| Letra omitida o palabra mal oída | 4 | `Peon cuatro.` (sin la «e», 2 veces) → `ambiguous` a4/b4/g4; `Torre F t 1.`; `B 7 toma hace 8 corona torre.` | No |
+| Texto sin relación con lo dicho (todos con ruido) | 12 | `Thor.`, `¿Dónde?` (3 de 3 en «peón de cinco» con ruido), `Zorra.`, `Jorge 1.` | No |
+| Sin texto del reconocedor | 2 | `(vacío)` | No |
+| **Aceptación errónea (1)** | 1 | «caballo be cuatro» (ruido) → `Caballo de cuatro.` → jugada `Nd4` (d=0,00) | «de» es un alias válido de la letra d; no es un error del parser |
+
+- Con texto sin relación (`Thor.`, `¿Dónde?`), el parser devolvió `ambiguous` entre los dos enroques (O-O-O/O-O) en 3 casos. No se aceptó nada, pero conviene mirar por qué un texto así produce candidatos con margen pequeño.
+- El N-best no cambió ningún resultado (ganancia 0,0 puntos).
+
 Notas:
 - Whisper escribe etiquetas como `[Música]` o `[SILENCIO]` para el ruido; el parser las rechaza bien.
 - Posible causa a revisar **después de la decisión**: una palabra desconocida pegada a «peón» podría ser «peón + letra». No se toca ahora.
