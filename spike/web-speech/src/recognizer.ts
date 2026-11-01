@@ -37,8 +37,11 @@ function constructorOf(): SpeechRecognitionCtor | undefined {
 export const isWebSpeechAvailable = (): boolean => constructorOf() !== undefined;
 
 export interface ListeningSession {
-  /** Call when the button is released. Resolves when the recognizer is done. */
-  release(): Promise<RecognitionOutcome>;
+  /**
+   * Call when the button is released. Resolves when the recognizer is done.
+   * `stopDelayMs` waits that long before asking the recognizer to stop (run B).
+   */
+  release(stopDelayMs?: number): Promise<RecognitionOutcome>;
   /** Cancel without a result (e.g. the page lost focus). */
   abort(): void;
 }
@@ -55,6 +58,7 @@ export function listen(
   const Ctor = constructorOf();
   if (Ctor === undefined) throw new Error('Este navegador no tiene Web Speech API. Usa Chrome o Edge.');
 
+  const pressedAt = performance.now();
   const recognition = new Ctor();
   recognition.lang = options.lang;
   recognition.continuous = false;
@@ -64,6 +68,7 @@ export function listen(
   let alternatives: RecognitionOutcome['alternatives'] = [];
   let error: string | undefined;
   let resultAt: number | undefined;
+  let startupMs: number | undefined;
   let ended = false;
   let releasedAt: number | undefined;
   let finish: ((outcome: RecognitionOutcome) => void) | undefined;
@@ -75,11 +80,15 @@ export function listen(
       releasedAt,
       resultAt: resultAt ?? performance.now(),
     };
+    if (startupMs !== undefined) outcome.startupMs = startupMs;
     if (error !== undefined) outcome.error = error;
     finish(outcome);
   };
 
-  recognition.onstart = onStarted;
+  recognition.onstart = () => {
+    startupMs = performance.now() - pressedAt;
+    onStarted();
+  };
   recognition.onresult = (event) => {
     resultAt = performance.now();
     const segments: SpeechResult[] = [];
@@ -110,15 +119,19 @@ export function listen(
   recognition.start();
 
   return {
-    release(): Promise<RecognitionOutcome> {
+    release(stopDelayMs = 0): Promise<RecognitionOutcome> {
       return new Promise((resolve) => {
         finish = resolve;
         releasedAt = performance.now();
-        try {
-          recognition.stop();
-        } catch {
-          // already stopped
-        }
+        const stop = (): void => {
+          try {
+            recognition.stop();
+          } catch {
+            // already stopped
+          }
+        };
+        if (stopDelayMs > 0) setTimeout(stop, stopDelayMs);
+        else stop();
         settle();
       });
     },

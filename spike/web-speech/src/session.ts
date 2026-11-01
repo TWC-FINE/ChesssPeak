@@ -125,6 +125,24 @@ export interface RecognitionOutcome {
   releasedAt: number;
   /** performance.now() when the recognizer delivered its final result (or ended) */
   resultAt: number;
+  /** Button press -> the recognizer's `onstart` (microphone start-up). Absent if it never started. */
+  startupMs?: number;
+}
+
+/** Fields the harness adds to each attempt; `AttemptRecord` itself belongs to the frozen parser package. */
+export interface RunInfo {
+  /** Measurement run label ("A" or "B"). */
+  run: string;
+  /** Wait between releasing the button and calling `stop()` on the recognizer. */
+  releaseDelayMs: number;
+}
+
+export type HarnessAttempt = AttemptRecord & Partial<RunInfo> & { startupMs?: number };
+
+function addRunFields(attempt: HarnessAttempt, outcome: RecognitionOutcome, runInfo: RunInfo | undefined): HarnessAttempt {
+  if (outcome.startupMs !== undefined) attempt.startupMs = Math.round(outcome.startupMs);
+  if (runInfo !== undefined) Object.assign(attempt, runInfo);
+  return attempt;
 }
 
 export function computeLatency(outcome: RecognitionOutcome, resolveMs: number): AttemptLatency {
@@ -149,8 +167,9 @@ export function buildImprovisedAttempt(
   outcome: RecognitionOutcome,
   resolveMs: number,
   now: Date = new Date(),
-): AttemptRecord {
-  const attempt: AttemptRecord = {
+  runInfo?: RunInfo,
+): HarnessAttempt {
+  const attempt: HarnessAttempt = {
     id: `imp:${index}`,
     phraseId: null,
     positionId,
@@ -166,7 +185,7 @@ export function buildImprovisedAttempt(
   };
   if (outcome.error !== undefined) attempt.error = outcome.error;
   if (outcome.alternatives.length > 0) attempt.latency = computeLatency(outcome, resolveMs);
-  return attempt;
+  return addRunFields(attempt, outcome, runInfo);
 }
 
 export function buildAttempt(
@@ -175,9 +194,10 @@ export function buildAttempt(
   resolveMs: number,
   audioFile: string | undefined,
   now: Date = new Date(),
-): AttemptRecord {
+  runInfo?: RunInfo,
+): HarnessAttempt {
   const phrase = trial.phrase;
-  const attempt: AttemptRecord = {
+  const attempt: HarnessAttempt = {
     id: trial.id,
     phraseId: phrase?.id ?? null,
     positionId: trial.position?.id ?? null,
@@ -195,5 +215,5 @@ export function buildAttempt(
   if (outcome.error !== undefined) attempt.error = outcome.error;
   if (outcome.alternatives.length > 0) attempt.latency = computeLatency(outcome, resolveMs);
   if (audioFile !== undefined) attempt.audioFile = audioFile;
-  return attempt;
+  return addRunFields(attempt, outcome, runInfo);
 }

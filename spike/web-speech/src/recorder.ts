@@ -66,11 +66,11 @@ export class Recorder {
     this.capturing = true;
   }
 
-  /** Stop after a short tail so the end of the phrase is not cut. */
-  async end(): Promise<Recording | undefined> {
+  /** Stop after a short tail so the end of the phrase is not cut (`extraTailMs`: the stop delay of run B). */
+  async end(extraTailMs = 0): Promise<Recording | undefined> {
     const context = this.context;
     if (context === undefined) return undefined;
-    await new Promise((resolve) => setTimeout(resolve, TAIL_MS));
+    await new Promise((resolve) => setTimeout(resolve, TAIL_MS + extraTailMs));
     this.capturing = false;
     const samples = concatChunks(this.chunks);
     this.chunks = [];

@@ -23,6 +23,10 @@
           <label>Idioma <input id="lang" type="text" value="es-CO" size="8" /></label>
           <label>Alternativas (N-best) <input id="max-alt" type="number" min="1" max="10" value="5" /></label>
           <label>Hablante <input id="speaker" type="text" placeholder="opcional" size="10" /></label>
+          <label>Corrida
+            <select id="run"><option value="A" selected>A</option><option value="B">B</option></select>
+          </label>
+          <label>Retardo al soltar (ms) <input id="release-delay" type="number" min="0" step="50" value="0" /></label>
           <label>Umbral del parser <input id="threshold" type="number" step="0.05" min="0" /></label>
           <label>Margen <input id="margin" type="number" step="0.05" min="0" /></label>
           <label>Penalización N-best <input id="rank-penalty" type="number" step="0.01" min="0" /></label>

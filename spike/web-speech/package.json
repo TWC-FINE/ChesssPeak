@@ -6,6 +6,7 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "esbuild src/main.ts --bundle --format=esm --target=es2022 --sourcemap --outfile=dist/bundle.js",
+    "check-results": "tsx scripts/check-results.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

@@ -23,6 +23,7 @@ import {
   progress,
   type BlockId,
   type RecognitionOutcome,
+  type RunInfo,
   type Trial,
 } from './session.js';
 import {
@@ -57,6 +58,8 @@ const ui = {
   lang: el<HTMLInputElement>('lang'),
   maxAlt: el<HTMLInputElement>('max-alt'),
   speaker: el<HTMLInputElement>('speaker'),
+  run: el<HTMLSelectElement>('run'),
+  releaseDelay: el<HTMLInputElement>('release-delay'),
   threshold: el<HTMLInputElement>('threshold'),
   margin: el<HTMLInputElement>('margin'),
   rankPenalty: el<HTMLInputElement>('rank-penalty'),
@@ -97,7 +100,7 @@ const ui = {
 let session: StoredSession = loadSession() ?? newSession();
 let improvised: ImprovisedSession = loadImprovised() ?? newImprovised();
 /** Last improvised utterance, waiting for the speaker to say which move was meant. */
-let pending: { outcome: RecognitionOutcome; resolveMs: number; fen: string; positionId: string } | undefined;
+let pending: { outcome: RecognitionOutcome; resolveMs: number; fen: string; positionId: string; runInfo: RunInfo } | undefined;
 let mode: 'corpus' | 'free' | 'improvised' = 'corpus';
 let currentBlock: BlockId = 'dev-quiet';
 let listening: ListeningSession | undefined;
@@ -119,6 +122,37 @@ function parserOptions(): Required<ResolveOptions> {
     nato: ui.nato.checked,
   };
 }
+
+// ---------- measurement run (A / B) ----------
+
+const RUN_KEY = 'chessspeak.spike.web-speech.run';
+
+function runInfo(): RunInfo {
+  return { run: ui.run.value, releaseDelayMs: Math.max(0, Math.round(Number(ui.releaseDelay.value) || 0)) };
+}
+
+// The run and the delay survive a reload: a reload must not silently go back to run A with no delay.
+try {
+  const saved = JSON.parse(localStorage.getItem(RUN_KEY) ?? 'null') as Partial<RunInfo> | null;
+  if (saved?.run === 'A' || saved?.run === 'B') ui.run.value = saved.run;
+  if (typeof saved?.releaseDelayMs === 'number') ui.releaseDelay.value = String(saved.releaseDelayMs);
+} catch {
+  // storage blocked: defaults stay (run A, no delay)
+}
+
+function onRunChange(): void {
+  try {
+    localStorage.setItem(RUN_KEY, JSON.stringify(runInfo()));
+  } catch {
+    // ignore
+  }
+  renderLog();
+}
+ui.run.addEventListener('change', () => {
+  ui.run.blur();
+  onRunChange();
+});
+ui.releaseDelay.addEventListener('input', onRunChange);
 
 // ---------- current trial ----------
 
@@ -273,7 +307,8 @@ function renderLog(): void {
     return `<tr><td>${esc(a.id)}</td><td>${esc(a.spoken ?? '—')}</td><td>${esc(a.alternatives[0]?.transcript ?? a.error ?? '—')}</td><td>${t1.kind}${mark(isCorrect(t1, a))}</td><td>${nb.kind}${mark(isCorrect(nb, a))}</td><td>${a.latency?.totalMs ?? '—'}</td></tr>`;
   });
   ui.logBody.innerHTML = rows.join('');
-  ui.sessionInfo.textContent = `Sesión ${session.sessionId} · ${session.attempts.length} intentos guardados`;
+  const { run, releaseDelayMs } = runInfo();
+  ui.sessionInfo.textContent = `Corrida ${run} · retardo al soltar ${releaseDelayMs} ms · sesión ${session.sessionId} · ${session.attempts.length} intentos guardados`;
 }
 
 function setStatus(text: string): void {
@@ -326,7 +361,11 @@ async function stopListening(): Promise<void> {
       await finishRecordOnly(trial, recording);
       return;
     }
-    const [outcome, wav] = await Promise.all([session_.release(), recording ? recorder.end() : Promise.resolve(undefined)]);
+    const info = runInfo();
+    const [outcome, wav] = await Promise.all([
+      session_.release(info.releaseDelayMs),
+      recording ? recorder.end(info.releaseDelayMs) : Promise.resolve(undefined),
+    ]);
 
     const t0 = performance.now();
     const fen = activeFen(trial);
@@ -342,7 +381,7 @@ async function stopListening(): Promise<void> {
       return;
     }
     if (mode === 'improvised') {
-      pending = { outcome, resolveMs, fen, positionId: improvisedPosition().id };
+      pending = { outcome, resolveMs, fen, positionId: improvisedPosition().id, runInfo: info };
       renderImprovisedPanel();
       setStatus('Elige la jugada que querías decir y pulsa «Guardar intento improvisado».');
       return;
@@ -361,7 +400,7 @@ async function stopListening(): Promise<void> {
         setStatus(`No se pudo guardar el WAV: ${String(error)}`);
       }
     }
-    const attempt = buildAttempt(trial, outcome, resolveMs, audioFile);
+    const attempt = buildAttempt(trial, outcome, resolveMs, audioFile, new Date(), info);
     session.attempts.push(attempt);
     saveSession(session);
     renderResult(attempt.alternatives, attempt.fen, attempt, attempt.error);
@@ -376,7 +415,7 @@ async function stopListening(): Promise<void> {
 }
 
 async function finishRecordOnly(trial: Trial | undefined, recording: boolean): Promise<void> {
-  const wav = recording ? await recorder.end() : undefined;
+  const wav = recording ? await recorder.end(runInfo().releaseDelayMs) : undefined;
   if (trial === undefined || wav === undefined || directory === undefined) {
     setStatus('No se grabó nada (¿elegiste carpeta y activaste «Grabar WAV»?).');
     return;
@@ -462,6 +501,8 @@ ui.impSave.addEventListener('click', () => {
     ui.impMove.value,
     pending.outcome,
     pending.resolveMs,
+    new Date(),
+    pending.runInfo,
   );
   improvised.attempts.push(attempt);
   saveImprovised(improvised);
@@ -477,6 +518,7 @@ ui.impExport.addEventListener('click', () => {
     corpusVersion: corpus.version,
     parser: opts,
     userAgent: navigator.userAgent,
+    ...runInfo(),
     ...(speaker !== '' ? { speaker } : {}),
   });
   downloadJson(`webspeech-improvised-${improvised.sessionId}.json`, file);
@@ -537,9 +579,10 @@ ui.exportBtn.addEventListener('click', () => {
     corpusVersion: corpus.version,
     parser: opts,
     userAgent: navigator.userAgent,
+    ...runInfo(),
     ...(speaker !== '' ? { speaker } : {}),
   });
-  downloadJson(`webspeech-${session.sessionId}.json`, file);
+  downloadJson(`webspeech-run${runInfo().run}-${session.sessionId}.json`, file);
   setStatus('Exportado. Mueve el archivo a spike/results/.');
 });
 

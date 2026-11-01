@@ -46,7 +46,13 @@ export function clearSession(): void {
   }
 }
 
-export function toResultsFile(session: StoredSession, meta: Omit<ResultsMeta, 'schema' | 'sessionId' | 'createdAt' | 'recognizer'>): ResultsFile {
+/** What the harness adds to `ResultsMeta` (that type belongs to the frozen parser package). */
+export interface HarnessMeta extends Omit<ResultsMeta, 'schema' | 'sessionId' | 'createdAt' | 'recognizer'> {
+  run: string;
+  releaseDelayMs: number;
+}
+
+export function toResultsFile(session: StoredSession, meta: HarnessMeta): ResultsFile {
   return {
     meta: {
       schema: 1,
@@ -54,7 +60,7 @@ export function toResultsFile(session: StoredSession, meta: Omit<ResultsMeta, 's
       recognizer: 'webspeech',
       createdAt: session.createdAt,
       ...meta,
-    },
+    } as ResultsMeta,
     attempts: session.attempts,
   };
 }
@@ -92,7 +98,7 @@ export function saveImprovised(session: ImprovisedSession): void {
 
 export function toImprovisedFile(
   session: ImprovisedSession,
-  meta: Omit<ResultsMeta, 'schema' | 'sessionId' | 'createdAt' | 'recognizer'>,
+  meta: HarnessMeta,
 ): ResultsFile {
   return {
     meta: { schema: 1, sessionId: session.sessionId, recognizer: 'webspeech', createdAt: session.createdAt, ...meta, improvised: true } as ResultsMeta,
