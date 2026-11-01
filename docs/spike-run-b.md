@@ -39,6 +39,26 @@ Se repiten los 4 bloques de `test` (el bloque `dev` no se repite):
 - **Ambas corridas se reportan por separado, sin promediar ni mezclar intentos.** Cada corrida tiene su propio informe; la de la corrida B se escribe en este documento, no en el bloque automático de `spike-results.md`.
 - Las métricas, definiciones y umbrales son los de `spike-criteria.md`; el parser, el corpus y los criterios no se modifican.
 
+## Regla de lectura de A y B
+
+Escrita el **1 de noviembre de 2026, antes de medir la corrida B**. No se cambia después de ver los resultados de B.
+
+1. **A y B se reportan por separado**, cada una con su intervalo de confianza al 95 %, sin promediar. **A queda como línea base.**
+2. **Solo hay una corrida B.** No habrá corrida C.
+3. **Comprobación del mecanismo (truncados).**
+   - **Definición:** un intento es *truncado* si la primera alternativa del reconocedor, normalizada con la misma normalización del parser (`tokenize`, que unifica letras, números y alias), es un **prefijo propio** de la frase esperada normalizada (menos palabras que la esperada y todas iguales a las primeras de ella). Se admite que la última palabra reconocida esté **incompleta** (por ejemplo «cu» por «cuatro», «Tor» por «torre»). Se cuenta sobre los 78 intentos válidos del bloque tranquilo y del bloque con ruido, **acierten o no**.
+   - **Corrida A, con esta definición:** 6 de 78 (4 de los 6 fueron fallos; los otros 2, «Torre FD.», se resolvieron bien). El «8» de `spike-notes.md` era una lectura manual que incluía casos que no son prefijos de la frase (por ejemplo «Torrea de.», «Alfilma.», «En Roque cor.»); **la cifra de referencia es 6**.
+   - Se cuentan los truncados de B con la misma definición y se comparan con los de A.
+   - **Control:** los fallos del bloque con ruido que **no** son truncados (en A, texto sin relación con lo dicho y palabras mal oídas). El retardo al soltar no debería cambiarlos mucho; si cambian mucho, el cambio de B no se explica solo por el retardo.
+4. **B cuenta para la decisión solo si** (i) pasa todos los umbrales de [spike-criteria.md](spike-criteria.md) **y** (ii) los truncados bajan de forma clara respecto a A. Si el acierto sube pero los truncados no bajan, la mejora se atribuye a práctica o azar y **no se usa para decidir**.
+   - _Pendiente de fijar antes de medir: qué cifra concreta cuenta como «bajan de forma clara». Con 6 truncados en A, una diferencia pequeña no se distingue del azar._
+5. **Si B no mejora o empeora**, la hipótesis queda refutada: **vale A** y se aplica la regla de acierto < 70 % de `spike-criteria.md`.
+6. **Si Web Speech (B) y Whisper cumplen los umbrales**, se elige por este orden: (i) acierto, (ii) aceptaciones erróneas, (iii) latencia. Como desempate, Whisper, porque no depende del navegador ni de un servicio externo.
+7. **Whisper se evalúa sobre los clips de la corrida B** (la corrida A no tiene audio).
+8. **Limitación declarada: efecto de práctica** (ver abajo). Una mejora de B sobre A puede deberse a que el hablante repite las mismas frases por segunda vez.
+
+El parser, el corpus y los criterios no se modifican en ningún caso.
+
 ## Limitaciones
 
 - **Efecto de práctica.** Es la segunda vez que el hablante dice estas mismas frases: puede hablar más claro o más seguro que en la corrida A. Una mejora en B no se puede atribuir por sí sola al retardo.
