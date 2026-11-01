@@ -47,11 +47,12 @@ Escrita el **1 de noviembre de 2026, antes de medir la corrida B**. No se cambia
 2. **Solo hay una corrida B.** No habrá corrida C.
 3. **Comprobación del mecanismo (truncados).**
    - **Definición:** un intento es *truncado* si la primera alternativa del reconocedor, normalizada con la misma normalización del parser (`tokenize`, que unifica letras, números y alias), es un **prefijo propio** de la frase esperada normalizada (menos palabras que la esperada y todas iguales a las primeras de ella). Se admite que la última palabra reconocida esté **incompleta** (por ejemplo «cu» por «cuatro», «Tor» por «torre»). Se cuenta sobre los 78 intentos válidos del bloque tranquilo y del bloque con ruido, **acierten o no**.
-   - **Corrida A, con esta definición:** 6 de 78 (4 de los 6 fueron fallos; los otros 2, «Torre FD.», se resolvieron bien). El «8» de `spike-notes.md` era una lectura manual que incluía casos que no son prefijos de la frase (por ejemplo «Torrea de.», «Alfilma.», «En Roque cor.»); **la cifra de referencia es 6**.
-   - Se cuentan los truncados de B con la misma definición y se comparan con los de A.
-   - **Control:** los fallos del bloque con ruido que **no** son truncados (en A, texto sin relación con lo dicho y palabras mal oídas). El retardo al soltar no debería cambiarlos mucho; si cambian mucho, el cambio de B no se explica solo por el retardo.
+   - **Corrida A, con esta definición: 6 de 78** (2 de ellos aciertos: «Torre FD.», que se resolvió bien; los otros 4 fueron fallos). Esta es la cifra de referencia. El «8» de `spike-notes.md` era una lectura manual que incluía casos que no son prefijos de la frase (por ejemplo «Torrea de.», «Alfilma.», «En Roque cor.»).
+   - Se cuentan los truncados de B con la misma definición y se comparan con los de A. El conteo lo hace el script `count-truncated` (ver más abajo), que se escribió y se probó contra los archivos reales de la corrida A antes de medir B.
+   - **Control (definición mecánica):** los fallos del bloque con ruido que **no** son truncados (en A, 20: texto sin relación con lo dicho, palabras mal oídas y palabras fundidas). El retardo al soltar no debería cambiarlos mucho; si cambian mucho, el cambio de B no se explica solo por el retardo.
 4. **B cuenta para la decisión solo si** (i) pasa todos los umbrales de [spike-criteria.md](spike-criteria.md) **y** (ii) los truncados bajan de forma clara respecto a A. Si el acierto sube pero los truncados no bajan, la mejora se atribuye a práctica o azar y **no se usa para decidir**.
-   - _Pendiente de fijar antes de medir: qué cifra concreta cuenta como «bajan de forma clara». Con 6 truncados en A, una diferencia pequeña no se distingue del azar._
+   - **«Bajan de forma clara» = la corrida B tiene como máximo 2 truncados de 78.**
+   - **Razón:** si el retardo no tuviera ningún efecto y los truncados siguieran un promedio de 6 (distribución de Poisson con media 6), sacar 2 o menos por azar ocurriría en torno al 6 % de las veces (e⁻⁶ · (1 + 6 + 18) ≈ 6,2 %). Este conteo **no es la prueba principal**: es una comprobación de que la mejora no se atribuye al azar. La prueba principal sigue siendo (i), los umbrales de `spike-criteria.md`.
 5. **Si B no mejora o empeora**, la hipótesis queda refutada: **vale A** y se aplica la regla de acierto < 70 % de `spike-criteria.md`.
 6. **Si Web Speech (B) y Whisper cumplen los umbrales**, se elige por este orden: (i) acierto, (ii) aceptaciones erróneas, (iii) latencia. Como desempate, Whisper, porque no depende del navegador ni de un servicio externo.
 7. **Whisper se evalúa sobre los clips de la corrida B** (la corrida A no tiene audio).
@@ -62,6 +63,7 @@ El parser, el corpus y los criterios no se modifican en ningún caso.
 ## Limitaciones
 
 - **Efecto de práctica.** Es la segunda vez que el hablante dice estas mismas frases: puede hablar más claro o más seguro que en la corrida A. Una mejora en B no se puede atribuir por sí sola al retardo.
+- **La definición de «truncado» se fijó viendo los datos de la corrida A.** Se eligió (tokenización del parser, última palabra incompleta permitida) después de comprobar qué contaba cada variante en A. Aplica igual a A y a B, pero no es una definición ciega: podría estar ajustada a los casos de A.
 - **Dos cambios a la vez.** El retardo (a) y la grabación en paralelo (b) cambian juntos. La grabación abre un segundo flujo del micrófono y podría afectar al reconocimiento por sí misma. No se podrá separar el efecto de cada uno.
 - **El retardo suma a la latencia medida.** La latencia se cuenta desde que se suelta el botón, y los 400 ms se esperan después de soltar. La latencia de B no es comparable 1 a 1 con la de A.
 - **Mismo navegador, otro día.** Edge, no Chrome (ver `spike-results.md`): lo que se aprenda vale para Edge.
