@@ -51,6 +51,13 @@ Hechas con **clips sintéticos** (voz de Windows y ruido generado, archivos `*.f
 - El clip de **silencio digital** lo frena la puerta (`too-quiet`). El **ruido blanco** a bajo volumen pasa la puerta y llega a Whisper, que respondió `[Música]` / `[SILENCIO]`; ninguna jugada fue aceptada.
 - Con el prompt de ajedrez, Whisper escribió «Caballo efe tres» donde sin prompt escribió «Caballó F3»; con voz sintética y una sola frase, no se puede concluir nada.
 
+## 4 bis. Navegador de las mediciones de Web Speech
+
+- Todas las mediciones de Web Speech (dev, test tranquilo, test con ruido, silencio, solo ruido e improvisadas) se hicieron en **Microsoft Edge 156.0.0.0**, según el `userAgent` de los seis JSON. El reconocedor es el de Microsoft.
+- **PLAN.md asume Chrome** (reconocedor de Google) para la demo y como reconocedor por defecto. **Chrome no se midió**, así que el resultado es válido para Edge y no se sabe si se repetiría en Chrome.
+- La guía (`spike/GUIA-RAPIDA.md`) pedía Chrome; no se detectó hasta revisar los `userAgent`.
+- Pendiente tras la decisión: decidir si se mide también en Chrome (con las mismas frases, si el parser no cambia) y actualizar PLAN.md. No se toca ahora.
+
 ## 5. Tareas para la Fase 0
 
 - **Decidir qué builds se permiten en `pnpm-workspace.yaml` antes de montar el CI.** Al clonar el repo en un equipo nuevo (1 nov 2026, pnpm 12.16.1 instalado con `npm i -g`), `pnpm install` instala las 44 dependencias pero termina con código de salida 1 y `ERR_PNPM_IGNORED_BUILDS` (`esbuild@0.28.2`): pnpm 12 bloquea por defecto los scripts de instalación. No impidió nada (esbuild funciona sin su script; el build del spike y los 119 tests pasan), pero un CI que mire el código de salida fallaría. No se arregló ni se ejecutó `pnpm approve-builds`.
