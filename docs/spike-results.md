@@ -129,7 +129,7 @@ _Pendiente de las mediciones._
   | `2026-11-01-improvised-2026.json` | 10 | Edge 156.0.0.0 | 06:36 |
 
   Consecuencia: el resultado de Web Speech es **para Edge (reconocedor de Microsoft)**. El plan asumía **Chrome (reconocedor de Google)** y **Chrome no se midió**. No se sabe si las cifras en Chrome serían mejores, iguales o peores, y la afirmación de que Edge usa el servicio de Microsoft no se comprobó dentro del spike (viene de lo indicado por quien midió). Cualquier decisión sobre «Chrome en la demo» necesita una medición en Chrome con un `test` nuevo si hubiera que cambiar el parser.
-- **Micrófono y ruido usado:** _por completar por quien midió (no constan en los archivos ni los anoté antes)._
+- **Micrófono y ruido usado (corrida A, según quien midió):** micrófono = HyperX amp chat; ruido de fondo = TikToks y música de fondo.
 - **Parámetros del parser:** los de por defecto, sin cambios tras `dev`: `threshold` 1, `margin` 0,25, `rankPenalty` 0,3, `nato` falso (coinciden en los 5 archivos).
 - **Congelación del parser:** commit `291c84f3e674867c28aca759516d8a281fde3601`, etiqueta `spike-parser-freeze`.
   - **Se hizo después de medir `test`, no antes** como pedía el procedimiento. Se hizo al verificar los datos.
