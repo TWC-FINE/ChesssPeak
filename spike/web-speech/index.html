@@ -39,6 +39,7 @@
       <section class="card" id="mode">
         <label class="inline"><input type="radio" name="mode" value="corpus" checked /> Modo corpus</label>
         <label class="inline"><input type="radio" name="mode" value="free" /> Modo libre (no se guarda)</label>
+        <label class="inline"><input type="radio" name="mode" value="improvised" /> Modo improvisado (se guarda aparte)</label>
 
         <div id="corpus-controls">
           <label>Bloque
@@ -51,6 +52,25 @@
             <select id="free-position"></select>
           </label>
           <label>o FEN <input id="custom-fen" type="text" size="50" placeholder="pega un FEN" /></label>
+        </div>
+      </section>
+
+      <section class="card" id="improvised-controls" hidden>
+        <label>Posición
+          <select id="imp-position"></select>
+        </label>
+        <div class="muted">
+          Pulsa Espacio y di la jugada como quieras. Al soltar, elige abajo la jugada que querías decir y guarda el intento.
+          Estos intentos van a un archivo aparte y no cuentan para ninguna decisión.
+        </div>
+        <div class="row">
+          <label>Jugada que quise decir
+            <select id="imp-move" disabled></select>
+          </label>
+          <button id="imp-save" type="button" class="primary" disabled>Guardar intento improvisado</button>
+          <button id="imp-cancel" type="button" disabled>Descartar este intento</button>
+          <button id="imp-export" type="button">Exportar improvisadas (JSON)</button>
+          <span id="imp-count" class="muted"></span>
         </div>
       </section>
 

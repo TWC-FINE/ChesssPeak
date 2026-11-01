@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildAttempt,
   buildBlocks,
+  buildImprovisedAttempt,
   computeLatency,
   DEFAULT_PLAN,
   nextTrial,
@@ -82,6 +83,34 @@ describe('attempt records', () => {
     const silence = blocks.silence[0]!;
     const attempt = buildAttempt(silence, { alternatives: [], error: 'no-speech', releasedAt: 1, resultAt: 2 }, 0, undefined);
     expect(attempt).toMatchObject({ phraseId: null, split: null, expectedOutcome: 'nomatch', error: 'no-speech' });
+    expect(attempt.latency).toBeUndefined();
+  });
+});
+
+describe('improvised attempts', () => {
+  const outcome: RecognitionOutcome = {
+    alternatives: [{ transcript: 'caballo be cuatro', confidence: 0.8 }],
+    releasedAt: 1000,
+    resultAt: 1500,
+  };
+
+  it('belongs to no split, so the deciding metrics never count it', () => {
+    const attempt = buildImprovisedAttempt(2, 'p05', 'fen', 'b1c3', outcome, 3, new Date('2026-11-01T10:00:00Z'));
+    expect(attempt).toMatchObject({
+      id: 'imp:2',
+      phraseId: null,
+      positionId: 'p05',
+      split: null,
+      expectedOutcome: 'move',
+      expectedUci: 'b1c3',
+      condition: 'quiet',
+    });
+    expect(attempt.latency?.totalMs).toBe(503);
+  });
+
+  it('keeps the recognizer error and skips latency when nothing was recognised', () => {
+    const attempt = buildImprovisedAttempt(1, 'p08', 'fen', 'a1d1', { alternatives: [], error: 'no-speech', releasedAt: 1, resultAt: 2 }, 0);
+    expect(attempt.error).toBe('no-speech');
     expect(attempt.latency).toBeUndefined();
   });
 });

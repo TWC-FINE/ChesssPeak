@@ -36,7 +36,12 @@ Hechas con **clips sintéticos** (voz de Windows y ruido generado, archivos `*.f
 - El clip de **silencio digital** lo frena la puerta (`too-quiet`). El **ruido blanco** a bajo volumen pasa la puerta y llega a Whisper, que respondió `[Música]` / `[SILENCIO]`; ninguna jugada fue aceptada.
 - Con el prompt de ajedrez, Whisper escribió «Caballo efe tres» donde sin prompt escribió «Caballó F3»; con voz sintética y una sola frase, no se puede concluir nada.
 
-## 5. Notas técnicas
+## 5. Tareas para la Fase 0
+
+- **Decidir qué builds se permiten en `pnpm-workspace.yaml` antes de montar el CI.** Al clonar el repo en un equipo nuevo (1 nov 2026, pnpm 12.16.1 instalado con `npm i -g`), `pnpm install` instala las 44 dependencias pero termina con código de salida 1 y `ERR_PNPM_IGNORED_BUILDS` (`esbuild@0.28.2`): pnpm 12 bloquea por defecto los scripts de instalación. No impidió nada (esbuild funciona sin su script; el build del spike y los 119 tests pasan), pero un CI que mire el código de salida fallaría. No se arregló ni se ejecutó `pnpm approve-builds`.
+- `corepack enable` falla con EPERM sin permisos de administrador (intenta escribir en `C:\Program Files\nodejs`); se usó `npm i -g pnpm@12.16.1`, la versión de `packageManager`.
+
+## 6. Notas técnicas
 
 - El zip oficial `whisper-bin-x64.zip` de la versión `b5454` **sí** incluye `whisper-server.exe` (en `Release/`, junto a sus DLL: hay que ejecutarlo con esa carpeta como directorio de trabajo). Los tags `v1.9.x` de whisper.cpp no traen binarios; están en los tags `bNNNN`.
 - El `tar` de Git Bash (GNU) falla con rutas `D:\…`; el script de descarga usa el `tar.exe` de Windows.

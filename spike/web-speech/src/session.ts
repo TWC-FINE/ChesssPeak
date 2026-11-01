@@ -136,6 +136,39 @@ export function computeLatency(outcome: RecognitionOutcome, resolveMs: number): 
   };
 }
 
+/**
+ * An improvised phrase: the speaker chooses the position, talks, and says afterwards
+ * which move was meant. It belongs to no split (`split: null`) so `--split test`
+ * never counts it; it is informative only.
+ */
+export function buildImprovisedAttempt(
+  index: number,
+  positionId: string,
+  fen: string,
+  expectedUci: string,
+  outcome: RecognitionOutcome,
+  resolveMs: number,
+  now: Date = new Date(),
+): AttemptRecord {
+  const attempt: AttemptRecord = {
+    id: `imp:${index}`,
+    phraseId: null,
+    positionId,
+    split: null,
+    fen,
+    spoken: null,
+    expectedOutcome: 'move',
+    expectedUci,
+    condition: 'quiet',
+    repetition: 1,
+    alternatives: outcome.alternatives,
+    createdAt: now.toISOString(),
+  };
+  if (outcome.error !== undefined) attempt.error = outcome.error;
+  if (outcome.alternatives.length > 0) attempt.latency = computeLatency(outcome, resolveMs);
+  return attempt;
+}
+
 export function buildAttempt(
   trial: Trial,
   outcome: RecognitionOutcome,

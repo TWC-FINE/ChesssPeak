@@ -1,6 +1,8 @@
 import corpusJson from '@chessspeak/voice-parser/corpus/corpus-v0.json';
 import {
   DEFAULT_OPTIONS,
+  legalMovesWithForms,
+  positionFromFen,
   resolve,
   type Alternative,
   type AttemptRecord,
@@ -16,18 +18,25 @@ import {
   BLOCK_ORDER,
   buildAttempt,
   buildBlocks,
+  buildImprovisedAttempt,
   nextTrial,
   progress,
   type BlockId,
+  type RecognitionOutcome,
   type Trial,
 } from './session.js';
 import {
   clearSession,
   downloadJson,
+  loadImprovised,
   loadSession,
+  newImprovised,
   newSession,
+  saveImprovised,
   saveSession,
+  toImprovisedFile,
   toResultsFile,
+  type ImprovisedSession,
   type StoredSession,
 } from './store.js';
 import { wavFileName } from './wav.js';
@@ -62,6 +71,13 @@ const ui = {
   freeControls: el<HTMLElement>('free-controls'),
   freePosition: el<HTMLSelectElement>('free-position'),
   customFen: el<HTMLInputElement>('custom-fen'),
+  impControls: el<HTMLElement>('improvised-controls'),
+  impPosition: el<HTMLSelectElement>('imp-position'),
+  impMove: el<HTMLSelectElement>('imp-move'),
+  impSave: el<HTMLButtonElement>('imp-save'),
+  impCancel: el<HTMLButtonElement>('imp-cancel'),
+  impExport: el<HTMLButtonElement>('imp-export'),
+  impCount: el<HTMLElement>('imp-count'),
   trialInfo: el<HTMLElement>('trial-info'),
   expected: el<HTMLElement>('expected'),
   hint: el<HTMLElement>('condition-hint'),
@@ -79,7 +95,10 @@ const ui = {
 };
 
 let session: StoredSession = loadSession() ?? newSession();
-let mode: 'corpus' | 'free' = 'corpus';
+let improvised: ImprovisedSession = loadImprovised() ?? newImprovised();
+/** Last improvised utterance, waiting for the speaker to say which move was meant. */
+let pending: { outcome: RecognitionOutcome; resolveMs: number; fen: string; positionId: string } | undefined;
+let mode: 'corpus' | 'free' | 'improvised' = 'corpus';
 let currentBlock: BlockId = 'dev-quiet';
 let listening: ListeningSession | undefined;
 let busy = false;
@@ -112,6 +131,33 @@ function freeFen(): string {
   return custom !== '' ? custom : (corpus.positions.find((p) => p.id === ui.freePosition.value)?.fen ?? corpus.positions[0]!.fen);
 }
 
+const testPositions = corpus.positions.filter((p) => p.split === 'test');
+
+function improvisedPosition(): { id: string; fen: string } {
+  const found = testPositions.find((p) => p.id === ui.impPosition.value) ?? testPositions[0]!;
+  return { id: found.id, fen: found.fen };
+}
+
+function activeFen(trial: Trial | undefined): string {
+  return trial?.fen ?? (mode === 'improvised' ? improvisedPosition().fen : freeFen());
+}
+
+function renderImprovisedPanel(): void {
+  ui.impCount.textContent = `${improvised.attempts.length} improvisadas guardadas`;
+  const options = pending === undefined
+    ? []
+    : legalMovesWithForms(positionFromFen(pending.fen)).map((m) => `<option value="${m.uci}">${esc(m.san)} (${m.uci})</option>`);
+  ui.impMove.innerHTML = `<option value="">— elige la jugada que querías decir —</option>${options.join('')}`;
+  ui.impMove.disabled = pending === undefined;
+  ui.impSave.disabled = pending === undefined || ui.impMove.value === '';
+  ui.impCancel.disabled = pending === undefined;
+}
+
+function clearPending(): void {
+  pending = undefined;
+  renderImprovisedPanel();
+}
+
 function currentTrial(): Trial | undefined {
   return mode === 'corpus' ? nextTrial(blocks, currentBlock, doneIds()) : undefined;
 }
@@ -131,6 +177,15 @@ function renderTrial(): void {
     ui.expected.textContent = 'Di una jugada';
     ui.hint.textContent = '';
     const fen = freeFen();
+    ui.board.innerHTML = renderBoard(fen);
+    ui.fenText.textContent = `${fen} · mueven las ${sideToMove(fen)}`;
+    return;
+  }
+  if (mode === 'improvised') {
+    ui.trialInfo.textContent = 'Modo improvisado: se guarda aparte y no cuenta para la decisión.';
+    ui.expected.textContent = 'Di una jugada como quieras';
+    ui.hint.textContent = 'Ambiente tranquilo. Al soltar, indica abajo la jugada que querías decir.';
+    const fen = improvisedPosition().fen;
     ui.board.innerHTML = renderBoard(fen);
     ui.fenText.textContent = `${fen} · mueven las ${sideToMove(fen)}`;
     return;
@@ -274,15 +329,26 @@ async function stopListening(): Promise<void> {
     const [outcome, wav] = await Promise.all([session_.release(), recording ? recorder.end() : Promise.resolve(undefined)]);
 
     const t0 = performance.now();
-    renderResult(outcome.alternatives, trial?.fen ?? freeFen(), undefined, outcome.error);
+    const fen = activeFen(trial);
+    renderResult(outcome.alternatives, fen, undefined, outcome.error);
     const resolveMs = performance.now() - t0;
 
-    if (mode === 'free' || trial === undefined) {
+    if (mode === 'free') {
       setStatus('Listo (modo libre: no se guarda).');
       return;
     }
     if (outcome.error !== undefined && NOT_RECORDED.has(outcome.error)) {
       setStatus(`Intento NO guardado: error del reconocedor «${outcome.error}». Revisa permisos del micrófono, red o idioma y repite.`);
+      return;
+    }
+    if (mode === 'improvised') {
+      pending = { outcome, resolveMs, fen, positionId: improvisedPosition().id };
+      renderImprovisedPanel();
+      setStatus('Elige la jugada que querías decir y pulsa «Guardar intento improvisado».');
+      return;
+    }
+    if (trial === undefined) {
+      setStatus('Este bloque ya está completo.');
       return;
     }
     let audioFile: string | undefined;
@@ -361,13 +427,61 @@ ui.block.addEventListener('change', () => {
 
 document.querySelectorAll<HTMLInputElement>('input[name="mode"]').forEach((radio) =>
   radio.addEventListener('change', () => {
-    mode = radio.value as 'corpus' | 'free';
+    mode = radio.value as 'corpus' | 'free' | 'improvised';
     ui.corpusControls.hidden = mode !== 'corpus';
     ui.freeControls.hidden = mode !== 'free';
+    ui.impControls.hidden = mode !== 'improvised';
     radio.blur();
+    clearPending();
     renderTrial();
   }),
 );
+
+ui.impPosition.innerHTML = testPositions
+  .map((p) => `<option value="${p.id}">${esc(p.id)} · ${esc(p.description)}</option>`)
+  .join('');
+ui.impPosition.addEventListener('change', () => {
+  ui.impPosition.blur();
+  clearPending();
+  renderTrial();
+});
+ui.impMove.addEventListener('change', () => {
+  ui.impMove.blur();
+  ui.impSave.disabled = pending === undefined || ui.impMove.value === '';
+});
+ui.impCancel.addEventListener('click', () => {
+  clearPending();
+  setStatus('Intento improvisado descartado.');
+});
+ui.impSave.addEventListener('click', () => {
+  if (pending === undefined || ui.impMove.value === '') return;
+  const attempt = buildImprovisedAttempt(
+    improvised.attempts.length + 1,
+    pending.positionId,
+    pending.fen,
+    ui.impMove.value,
+    pending.outcome,
+    pending.resolveMs,
+  );
+  improvised.attempts.push(attempt);
+  saveImprovised(improvised);
+  clearPending();
+  setStatus(`Guardado ${attempt.id} (quería ${attempt.expectedUci}).`);
+});
+ui.impExport.addEventListener('click', () => {
+  const opts = parserOptions();
+  const speaker = ui.speaker.value.trim();
+  const file = toImprovisedFile(improvised, {
+    lang: ui.lang.value.trim() || 'es-CO',
+    maxAlternatives: Number(ui.maxAlt.value) || 5,
+    corpusVersion: corpus.version,
+    parser: opts,
+    userAgent: navigator.userAgent,
+    ...(speaker !== '' ? { speaker } : {}),
+  });
+  downloadJson(`webspeech-improvised-${improvised.sessionId}.json`, file);
+  setStatus('Exportado. Mueve el archivo a spike/results/ (nombre: AAAA-MM-DD-webspeech-improvised.json). No lo pases a «pnpm metrics» junto a los de test.');
+});
 
 ui.freePosition.innerHTML = corpus.positions
   .map((p) => `<option value="${p.id}">${esc(p.id)} · ${esc(p.description)}</option>`)
@@ -396,6 +510,14 @@ ui.recordOnly.addEventListener('change', () => {
 });
 
 ui.discard.addEventListener('click', () => {
+  if (mode === 'improvised') {
+    const lastImp = improvised.attempts.pop();
+    if (lastImp === undefined) return;
+    saveImprovised(improvised);
+    renderImprovisedPanel();
+    setStatus(`Descartado ${lastImp.id}.`);
+    return;
+  }
   const last = session.attempts.pop();
   if (last === undefined) return;
   const blockId = last.id.split(':')[0] as BlockId;
@@ -439,4 +561,5 @@ if (!isWebSpeechAvailable()) {
 
 renderLog();
 renderTrial();
+renderImprovisedPanel();
 if (session.attempts.length > 0) setStatus(`Sesión restaurada: ${session.attempts.length} intentos.`);
