@@ -69,30 +69,31 @@ Hechas con **clips sintéticos** (voz de Windows y ruido generado, archivos `*.f
 - El `tar` de Git Bash (GNU) falla con rutas `D:\…`; el script de descarga usa el `tar.exe` de Windows.
 - `whisper-server` recibe el prompt al arrancar (`--prompt`); el benchmark lanza un proceso por configuración (modelo × prompt) en vez de depender de un prompt por petición.
 
-## 7. Tareas que deja el spike (Fase 0 y Fase 3)
+## 7. Tareas que deja el spike
 
-Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-run-b.md) y los ADR [4](adr/0004-resolucion-contra-jugadas-legales.md) y [5](adr/0005-strategy-y-reconocedor-por-defecto.md). «Fase 3» es la semana 3 del plan (voz de punta a punta).
+Agrupadas por **área**, no por fase: [PLAN.md](../PLAN.md) (sección 9) decide en qué fase y semana se hace cada una. Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-run-b.md) y los ADR [4](adr/0004-resolucion-contra-jugadas-legales.md) y [5](adr/0005-strategy-y-reconocedor-por-defecto.md).
 
-**Fase 0**
-- [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5).
-- [ ] **Actualizar PLAN.md.** Marcar el spike como hecho, anotar que se midió en Edge 156 y no en Chrome, y reflejar la decisión (Web Speech con retardo de 400 ms por defecto; Whisper `small` como alternativa) y que no hay demo en vivo: el proyecto se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome.
-- [ ] Copia de seguridad fuera del repo de `spike/recordings/` (116 WAV, 10 774 256 bytes) y de `spike/results/`.
+### Agente local (`local-agent`)
+- [ ] **Prompt de ajedrez.** Arrancar `whisper-server` con el prompt de `spike/whisper-local/src/prompt.ts` (`--prompt`): sin él, `small` baja de 89,7 % a 61,5 %. Modelo `small` por defecto.
+- [ ] **Puerta de volumen y duración.** Duración ≥ 300 ms y RMS ≥ −50 dBFS antes de transcribir; en el spike frenó 10 de los 20 clips sin habla y ninguno acabó en jugada. No se ajusta con el `test` (sección 2).
+- [ ] **Instalación de Whisper en un solo comando.** Un script (hoy `pnpm --filter @chessspeak/spike-whisper-local download` más editar `.env`) que descargue y verifique el binario y el modelo `small`, deje las rutas en `.env` y arranque el agente local, sin pasos manuales. El proyecto se presenta terminado en el equipo de cualquiera de los dos o del profesor, así que no puede depender de una instalación a mano.
+- [ ] **Medir la latencia de extremo a extremo** (navegador → agente → Whisper), porque la del benchmark es solo inferencia.
 
-**Fase 3 (voz de punta a punta)**
-- [ ] **Retardo de 400 ms en el producto.** En el adaptador Web Speech de `<mf-voice-input>`, esperar 400 ms tras soltar el botón antes de llamar a `stop()` y medir la latencia desde que se suelta. Es un requisito, no un parámetro de prueba (ADR 5).
-- [ ] **Prompt de ajedrez en el agente local.** `local-agent` debe arrancar `whisper-server` con el prompt de `spike/whisper-local/src/prompt.ts` (`--prompt`): sin él, `small` baja de 89,7 % a 61,5 %. Modelo `small` por defecto del agente.
-- [ ] **Puerta de volumen y duración en el agente.** Duración ≥ 300 ms y RMS ≥ −50 dBFS antes de transcribir; en el spike frenó 10 de los 20 clips sin habla y ninguno acabó en jugada. No se ajusta con el `test` (sección 2).
-- [ ] **Declarar la latencia de Whisper** en la interfaz y en la documentación: p50 2,91 s y p95 3,06 s solo de inferencia; medir la latencia de extremo a extremo (navegador → agente → Whisper).
+### Producto (voz e interfaz)
+- [ ] **Retardo de 400 ms.** En el adaptador Web Speech de `<mf-voice-input>`, esperar 400 ms tras soltar el botón antes de llamar a `stop()` y medir la latencia desde que se suelta. Es un requisito, no un parámetro de prueba (ADR 5).
 - [ ] **Confirmación explícita obligatoria** con cualquier reconocedor.
-- [ ] **Sesión de evaluación de la semana 4:** otra voz, frases nuevas y el equipo de la demo; sin tocar los umbrales de `spike-criteria.md`.
-- [ ] **Prueba en Chrome** con las mismas frases (pendiente; todo se midió en Edge 156).
+- [ ] **Declarar la latencia de Whisper** en la interfaz y en la documentación: p50 2,91 s y p95 3,06 s solo de inferencia, en el equipo de la sección 8.
+- [ ] **Avisar en navegadores sin Web Speech (Firefox).** Detectar que `SpeechRecognition` no existe y mostrar un aviso claro, ofreciendo Whisper local (si el agente responde) o la caja de texto de respaldo. Lo mismo, con aviso de «recomendado Edge», si la comprobación de [spike-chrome.md](spike-chrome.md) no cumple en Chrome.
+- [ ] **Validación con otra voz, frases nuevas y otro equipo** en la sesión de evaluación de la semana 4, sin tocar los umbrales de `spike-criteria.md`.
+- [ ] **Prueba en Chrome**, según [spike-chrome.md](spike-chrome.md) (pendiente; todo se midió en Edge 156).
 - [ ] **Posible corrida nueva declarada** con un modelo `small` cuantizado para bajar la latencia de Whisper: se declara antes de medir, con su propia regla de lectura.
 - [ ] Revisar con el corpus v1 los fallos de A anotados en la sección 3 (`toma` + letra fundidos, «alfil» partido, «peone»).
-- [ ] **Avisar en navegadores sin Web Speech (Firefox).** Detectar que `SpeechRecognition` no existe y mostrar un aviso claro en la interfaz, ofreciendo Whisper local (si el agente responde) o la caja de texto de respaldo. Lo mismo, con aviso de «recomendado Edge», si la comprobación de [spike-chrome.md](spike-chrome.md) no cumple en Chrome.
-- [ ] **Instalación de Whisper en un solo comando.** Un script (hoy `pnpm --filter @chessspeak/spike-whisper-local download` más editar `.env`) que descargue y verifique el binario y el modelo `small`, deje las rutas en `.env` y arranque el agente local, sin pasos manuales. El proyecto se presentará terminado en el equipo de cualquiera de los dos o del profesor, así que no puede depender de una instalación a mano.
 
-**Fase 5 (entrega)**
-- [ ] **Probar el README en una máquina limpia antes de entregar:** clonar, `pnpm install`, `.env`, instalación de Whisper y arranque, abriendo la app en Edge y en Chrome, siguiendo solo lo que dice el README. No hay demo en vivo: el README es lo que usará quien evalúe.
+### CI y entrega
+- [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5), y explicarlo en el README.
+- [x] **Actualizar PLAN.md** con el spike cerrado, la decisión y que no hay demo en vivo (hecho el 2 de noviembre de 2026).
+- [ ] **Probar el README en una máquina limpia antes de entregar:** clonar, `pnpm install`, `.env`, instalación de Whisper y arranque, abriendo la app en Edge y en Chrome, siguiendo solo lo que dice el README. No hay demo en vivo: el README es lo que usa quien evalúa.
+- [ ] Copia de seguridad fuera del repo de `spike/recordings/` (116 WAV, 10 774 256 bytes) y de `spike/results/`.
 
 ## 8. Equipo de referencia de la latencia de Whisper
 
