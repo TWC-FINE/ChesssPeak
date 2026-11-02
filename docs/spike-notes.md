@@ -68,3 +68,23 @@ Hechas con **clips sintéticos** (voz de Windows y ruido generado, archivos `*.f
 - El zip oficial `whisper-bin-x64.zip` de la versión `b5454` **sí** incluye `whisper-server.exe` (en `Release/`, junto a sus DLL: hay que ejecutarlo con esa carpeta como directorio de trabajo). Los tags `v1.9.x` de whisper.cpp no traen binarios; están en los tags `bNNNN`.
 - El `tar` de Git Bash (GNU) falla con rutas `D:\…`; el script de descarga usa el `tar.exe` de Windows.
 - `whisper-server` recibe el prompt al arrancar (`--prompt`); el benchmark lanza un proceso por configuración (modelo × prompt) en vez de depender de un prompt por petición.
+
+## 7. Tareas que deja el spike (Fase 0 y Fase 3)
+
+Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-run-b.md) y los ADR [4](adr/0004-resolucion-contra-jugadas-legales.md) y [5](adr/0005-strategy-y-reconocedor-por-defecto.md). «Fase 3» es la semana 3 del plan (voz de punta a punta).
+
+**Fase 0**
+- [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5).
+- [ ] **Actualizar PLAN.md.** Marcar el spike como hecho, anotar que se midió en Edge 156 y no en Chrome, y reflejar la decisión (Web Speech con retardo de 400 ms por defecto; Whisper `small` como alternativa).
+- [ ] Copia de seguridad fuera del repo de `spike/recordings/` (116 WAV, 10 774 256 bytes) y de `spike/results/`.
+
+**Fase 3 (voz de punta a punta)**
+- [ ] **Retardo de 400 ms en el producto.** En el adaptador Web Speech de `<mf-voice-input>`, esperar 400 ms tras soltar el botón antes de llamar a `stop()` y medir la latencia desde que se suelta. Es un requisito, no un parámetro de prueba (ADR 5).
+- [ ] **Prompt de ajedrez en el agente local.** `local-agent` debe arrancar `whisper-server` con el prompt de `spike/whisper-local/src/prompt.ts` (`--prompt`): sin él, `small` baja de 89,7 % a 61,5 %. Modelo `small` por defecto del agente.
+- [ ] **Puerta de volumen y duración en el agente.** Duración ≥ 300 ms y RMS ≥ −50 dBFS antes de transcribir; en el spike frenó 10 de los 20 clips sin habla y ninguno acabó en jugada. No se ajusta con el `test` (sección 2).
+- [ ] **Declarar la latencia de Whisper** en la interfaz y en la documentación: p50 2,91 s y p95 3,06 s solo de inferencia; medir la latencia de extremo a extremo (navegador → agente → Whisper).
+- [ ] **Confirmación explícita obligatoria** con cualquier reconocedor.
+- [ ] **Sesión de evaluación de la semana 4:** otra voz, frases nuevas y el equipo de la demo; sin tocar los umbrales de `spike-criteria.md`.
+- [ ] **Prueba en Chrome** con las mismas frases (pendiente; todo se midió en Edge 156).
+- [ ] **Posible corrida nueva declarada** con un modelo `small` cuantizado para bajar la latencia de Whisper: se declara antes de medir, con su propia regla de lectura.
+- [ ] Revisar con el corpus v1 los fallos de A anotados en la sección 3 (`toma` + letra fundidos, «alfil» partido, «peone»).
