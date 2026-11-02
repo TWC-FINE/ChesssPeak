@@ -1,0 +1,292 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "2026-11-02T17-46-44-559Z",
+    "recognizer": "webspeech",
+    "createdAt": "2026-11-02T17:46:44.559Z",
+    "lang": "es-CO",
+    "maxAlternatives": 5,
+    "corpusVersion": "v0",
+    "parser": {
+      "threshold": 1,
+      "margin": 0.25,
+      "rankPenalty": 0.3,
+      "nato": false
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "run": "B",
+    "releaseDelayMs": 400
+  },
+  "attempts": [
+    {
+      "id": "noise:-:r1",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:17.043Z",
+      "latency": {
+        "recognitionMs": 505,
+        "resolveMs": 0.1,
+        "totalMs": 505
+      },
+      "audioFile": "trial_noise_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r2",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "En el festival con rece por su.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:25.233Z",
+      "latency": {
+        "recognitionMs": 535,
+        "resolveMs": 4.4,
+        "totalMs": 540
+      },
+      "audioFile": "trial_noise_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r3",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Revivir su trauma y hacerse daño.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:29.360Z",
+      "latency": {
+        "recognitionMs": 589,
+        "resolveMs": 5.7,
+        "totalMs": 595
+      },
+      "audioFile": "trial_noise_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r4",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 4,
+      "alternatives": [
+        {
+          "transcript": "30 minutos cada mañana.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:33.863Z",
+      "latency": {
+        "recognitionMs": 476,
+        "resolveMs": 4,
+        "totalMs": 480
+      },
+      "audioFile": "trial_noise_r4_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r5",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 5,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:39.089Z",
+      "latency": {
+        "recognitionMs": 513,
+        "resolveMs": 0.1,
+        "totalMs": 513
+      },
+      "audioFile": "trial_noise_r5_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r6",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 6,
+      "alternatives": [
+        {
+          "transcript": "De interés y asegurado.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:43.829Z",
+      "latency": {
+        "recognitionMs": 591,
+        "resolveMs": 3.3,
+        "totalMs": 595
+      },
+      "audioFile": "trial_noise_r6_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r7",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 7,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:48.255Z",
+      "latency": {
+        "recognitionMs": 555,
+        "resolveMs": 0,
+        "totalMs": 555
+      },
+      "audioFile": "trial_noise_r7_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r8",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 8,
+      "alternatives": [
+        {
+          "transcript": "¿Dónde me aparece para activarlo?",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:48:58.456Z",
+      "latency": {
+        "recognitionMs": 611,
+        "resolveMs": 5.5,
+        "totalMs": 617
+      },
+      "audioFile": "trial_noise_r8_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r9",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 9,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:49:03.943Z",
+      "latency": {
+        "recognitionMs": 517,
+        "resolveMs": 0.1,
+        "totalMs": 517
+      },
+      "audioFile": "trial_noise_r9_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "noise:-:r10",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 10,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:49:08.238Z",
+      "latency": {
+        "recognitionMs": 563,
+        "resolveMs": 0.1,
+        "totalMs": 563
+      },
+      "audioFile": "trial_noise_r10_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    }
+  ]
+}

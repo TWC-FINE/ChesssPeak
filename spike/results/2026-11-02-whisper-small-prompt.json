@@ -1,0 +1,2695 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "whisper-small-prompt-2026-11-02T18-10-22-622Z",
+    "recognizer": "whisper-small",
+    "lang": "es",
+    "maxAlternatives": 1,
+    "corpusVersion": "v0",
+    "parser": {
+      "threshold": 1,
+      "margin": 0.25,
+      "rankPenalty": 0.3,
+      "nato": false
+    },
+    "userAgent": "whisper.cpp b5454 · modelo small · con prompt de ajedrez",
+    "createdAt": "2026-11-02T18:10:22.622Z",
+    "whisper": {
+      "model": "small",
+      "prompt": true,
+      "tag": "b5454",
+      "gate": {
+        "minDurationMs": 300,
+        "minRmsDbfs": -50
+      }
+    }
+  },
+  "attempts": [
+    {
+      "id": "test-noisy:p05-01:r1",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto."
+        }
+      ],
+      "audioFile": "p05-01_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:05:13.355Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 2904,
+        "resolveMs": 0.52,
+        "totalMs": 2905
+      }
+    },
+    {
+      "id": "test-noisy:p05-01:r2",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto."
+        }
+      ],
+      "audioFile": "p05-01_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:05:16.267Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 2911,
+        "resolveMs": 0.75,
+        "totalMs": 2912
+      }
+    },
+    {
+      "id": "test-noisy:p05-01:r3",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto."
+        }
+      ],
+      "audioFile": "p05-01_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:05:19.136Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 2868,
+        "resolveMs": 0.78,
+        "totalMs": 2869
+      }
+    },
+    {
+      "id": "test-quiet:p05-01:r1",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto."
+        }
+      ],
+      "audioFile": "p05-01_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:05:22.057Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 2920,
+        "resolveMs": 0.43,
+        "totalMs": 2920
+      }
+    },
+    {
+      "id": "test-quiet:p05-01:r2",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto."
+        }
+      ],
+      "audioFile": "p05-01_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:05:24.966Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 2909,
+        "resolveMs": 0.49,
+        "totalMs": 2910
+      }
+    },
+    {
+      "id": "test-quiet:p05-01:r3",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto."
+        }
+      ],
+      "audioFile": "p05-01_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:05:27.851Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 2884,
+        "resolveMs": 0.87,
+        "totalMs": 2885
+      }
+    },
+    {
+      "id": "test-noisy:p05-02:r1",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Enroque largo."
+        }
+      ],
+      "audioFile": "p05-02_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:05:30.790Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 2937,
+        "resolveMs": 0.43,
+        "totalMs": 2938
+      }
+    },
+    {
+      "id": "test-noisy:p05-02:r2",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Enroque largo."
+        }
+      ],
+      "audioFile": "p05-02_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:05:33.688Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 2897,
+        "resolveMs": 0.47,
+        "totalMs": 2898
+      }
+    },
+    {
+      "id": "test-noisy:p05-02:r3",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Enroque largo."
+        }
+      ],
+      "audioFile": "p05-02_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:05:36.656Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 2968,
+        "resolveMs": 0.7,
+        "totalMs": 2969
+      }
+    },
+    {
+      "id": "test-quiet:p05-02:r1",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Enroque largo."
+        }
+      ],
+      "audioFile": "p05-02_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:05:39.558Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 2901,
+        "resolveMs": 0.46,
+        "totalMs": 2901
+      }
+    },
+    {
+      "id": "test-quiet:p05-02:r2",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Enroque largo."
+        }
+      ],
+      "audioFile": "p05-02_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:05:42.440Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 2881,
+        "resolveMs": 0.42,
+        "totalMs": 2882
+      }
+    },
+    {
+      "id": "test-quiet:p05-02:r3",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Enroque largo."
+        }
+      ],
+      "audioFile": "p05-02_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:05:45.355Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 2914,
+        "resolveMs": 0.73,
+        "totalMs": 2915
+      }
+    },
+    {
+      "id": "test-noisy:p05-03:r1",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo efe cuatro."
+        }
+      ],
+      "audioFile": "p05-03_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:05:48.348Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 2992,
+        "resolveMs": 0.51,
+        "totalMs": 2993
+      }
+    },
+    {
+      "id": "test-noisy:p05-03:r2",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Caballo V4."
+        }
+      ],
+      "audioFile": "p05-03_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:05:51.271Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 2922,
+        "resolveMs": 0.58,
+        "totalMs": 2922
+      }
+    },
+    {
+      "id": "test-noisy:p05-03:r3",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Caballo efe cuatro."
+        }
+      ],
+      "audioFile": "p05-03_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:05:54.273Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 3001,
+        "resolveMs": 0.51,
+        "totalMs": 3002
+      }
+    },
+    {
+      "id": "test-quiet:p05-03:r1",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo V4."
+        }
+      ],
+      "audioFile": "p05-03_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:05:57.148Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 2875,
+        "resolveMs": 0.84,
+        "totalMs": 2875
+      }
+    },
+    {
+      "id": "test-quiet:p05-03:r2",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Caballo efe cuatro."
+        }
+      ],
+      "audioFile": "p05-03_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:06:00.016Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 2867,
+        "resolveMs": 0.81,
+        "totalMs": 2867
+      }
+    },
+    {
+      "id": "test-quiet:p05-03:r3",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Caballo V4."
+        }
+      ],
+      "audioFile": "p05-03_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:06:02.863Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 2846,
+        "resolveMs": 0.52,
+        "totalMs": 2847
+      }
+    },
+    {
+      "id": "test-noisy:p05-04:r1",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma efe tres."
+        }
+      ],
+      "audioFile": "p05-04_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:06:05.826Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 2963,
+        "resolveMs": 0.52,
+        "totalMs": 2963
+      }
+    },
+    {
+      "id": "test-noisy:p05-04:r2",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma efe tres."
+        }
+      ],
+      "audioFile": "p05-04_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:06:08.755Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 2927,
+        "resolveMs": 0.81,
+        "totalMs": 2928
+      }
+    },
+    {
+      "id": "test-noisy:p05-04:r3",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma efe tres."
+        }
+      ],
+      "audioFile": "p05-04_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:06:11.649Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 2894,
+        "resolveMs": 0.84,
+        "totalMs": 2895
+      }
+    },
+    {
+      "id": "test-quiet:p05-04:r1",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma efe tres."
+        }
+      ],
+      "audioFile": "p05-04_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:06:14.561Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 2910,
+        "resolveMs": 0.52,
+        "totalMs": 2911
+      }
+    },
+    {
+      "id": "test-quiet:p05-04:r2",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma efe tres."
+        }
+      ],
+      "audioFile": "p05-04_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:06:17.457Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 2895,
+        "resolveMs": 0.6,
+        "totalMs": 2896
+      }
+    },
+    {
+      "id": "test-quiet:p05-04:r3",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma efe tres."
+        }
+      ],
+      "audioFile": "p05-04_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:06:20.352Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 2894,
+        "resolveMs": 0.89,
+        "totalMs": 2895
+      }
+    },
+    {
+      "id": "test-noisy:p05-05:r1",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón de cinco."
+        }
+      ],
+      "audioFile": "p05-05_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:06:23.258Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 2906,
+        "resolveMs": 0.73,
+        "totalMs": 2906
+      }
+    },
+    {
+      "id": "test-noisy:p05-05:r2",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Peón de cinco."
+        }
+      ],
+      "audioFile": "p05-05_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:06:26.118Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 2859,
+        "resolveMs": 0.49,
+        "totalMs": 2860
+      }
+    },
+    {
+      "id": "test-noisy:p05-05:r3",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Peón de cinco."
+        }
+      ],
+      "audioFile": "p05-05_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:06:28.972Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 2853,
+        "resolveMs": 0.54,
+        "totalMs": 2853
+      }
+    },
+    {
+      "id": "test-quiet:p05-05:r1",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón de cinco."
+        }
+      ],
+      "audioFile": "p05-05_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:06:31.846Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 2873,
+        "resolveMs": 0.74,
+        "totalMs": 2874
+      }
+    },
+    {
+      "id": "test-quiet:p05-05:r2",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Peón de cinco."
+        }
+      ],
+      "audioFile": "p05-05_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:06:34.712Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 2865,
+        "resolveMs": 0.8,
+        "totalMs": 2865
+      }
+    },
+    {
+      "id": "test-quiet:p05-05:r3",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Peón de cinco."
+        }
+      ],
+      "audioFile": "p05-05_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:06:37.607Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 2894,
+        "resolveMs": 0.45,
+        "totalMs": 2894
+      }
+    },
+    {
+      "id": "test-noisy:p05-06:r1",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Mañana tengo examen de física."
+        }
+      ],
+      "audioFile": "p05-06_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:06:40.528Z",
+      "latency": {
+        "recognitionMs": 2921,
+        "resolveMs": 5.07,
+        "totalMs": 2926
+      }
+    },
+    {
+      "id": "test-noisy:p05-06:r2",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Maniara tengo el examen de física."
+        }
+      ],
+      "audioFile": "p05-06_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:06:43.439Z",
+      "latency": {
+        "recognitionMs": 2905,
+        "resolveMs": 5.15,
+        "totalMs": 2910
+      }
+    },
+    {
+      "id": "test-noisy:p05-06:r3",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Manana tengo también de física."
+        }
+      ],
+      "audioFile": "p05-06_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:06:46.354Z",
+      "latency": {
+        "recognitionMs": 2910,
+        "resolveMs": 5.14,
+        "totalMs": 2915
+      }
+    },
+    {
+      "id": "test-quiet:p05-06:r1",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Mañana tengo chame de física."
+        }
+      ],
+      "audioFile": "p05-06_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:06:49.210Z",
+      "latency": {
+        "recognitionMs": 2851,
+        "resolveMs": 4.87,
+        "totalMs": 2856
+      }
+    },
+    {
+      "id": "test-quiet:p05-06:r2",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Mañana tengo chavendé física."
+        }
+      ],
+      "audioFile": "p05-06_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:06:52.144Z",
+      "latency": {
+        "recognitionMs": 2929,
+        "resolveMs": 5.58,
+        "totalMs": 2934
+      }
+    },
+    {
+      "id": "test-quiet:p05-06:r3",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Maniera tengo chanel de física."
+        }
+      ],
+      "audioFile": "p05-06_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:06:55.573Z",
+      "latency": {
+        "recognitionMs": 3423,
+        "resolveMs": 5.09,
+        "totalMs": 3428
+      }
+    },
+    {
+      "id": "test-noisy:p08-01:r1",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre a de uno."
+        }
+      ],
+      "audioFile": "p08-01_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:06:58.450Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 2872,
+        "resolveMs": 0.46,
+        "totalMs": 2872
+      }
+    },
+    {
+      "id": "test-noisy:p08-01:r2",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Torre A de uno."
+        }
+      ],
+      "audioFile": "p08-01_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:07:01.335Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 2884,
+        "resolveMs": 0.54,
+        "totalMs": 2885
+      }
+    },
+    {
+      "id": "test-noisy:p08-01:r3",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Torre A de uno."
+        }
+      ],
+      "audioFile": "p08-01_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:07:04.210Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 2874,
+        "resolveMs": 0.48,
+        "totalMs": 2875
+      }
+    },
+    {
+      "id": "test-quiet:p08-01:r1",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre a de uno."
+        }
+      ],
+      "audioFile": "p08-01_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:07:07.139Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 2929,
+        "resolveMs": 0.79,
+        "totalMs": 2929
+      }
+    },
+    {
+      "id": "test-quiet:p08-01:r2",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Torre A de uno."
+        }
+      ],
+      "audioFile": "p08-01_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:07:10.165Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 3025,
+        "resolveMs": 0.45,
+        "totalMs": 3025
+      }
+    },
+    {
+      "id": "test-quiet:p08-01:r3",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Torre A de uno."
+        }
+      ],
+      "audioFile": "p08-01_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:07:13.110Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 2944,
+        "resolveMs": 0.46,
+        "totalMs": 2945
+      }
+    },
+    {
+      "id": "test-noisy:p08-02:r1",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre efe de uno."
+        }
+      ],
+      "audioFile": "p08-02_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:07:16.035Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 2925,
+        "resolveMs": 0.82,
+        "totalMs": 2926
+      }
+    },
+    {
+      "id": "test-noisy:p08-02:r2",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Torre fd1"
+        }
+      ],
+      "audioFile": "p08-02_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:07:18.886Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 2850,
+        "resolveMs": 0.55,
+        "totalMs": 2850
+      }
+    },
+    {
+      "id": "test-noisy:p08-02:r3",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Torre efe de uno."
+        }
+      ],
+      "audioFile": "p08-02_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:07:21.777Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 2890,
+        "resolveMs": 0.48,
+        "totalMs": 2891
+      }
+    },
+    {
+      "id": "test-quiet:p08-02:r1",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre efe de uno."
+        }
+      ],
+      "audioFile": "p08-02_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:07:24.700Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 2923,
+        "resolveMs": 0.74,
+        "totalMs": 2924
+      }
+    },
+    {
+      "id": "test-quiet:p08-02:r2",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Torre fd1."
+        }
+      ],
+      "audioFile": "p08-02_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:07:27.580Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 2878,
+        "resolveMs": 0.46,
+        "totalMs": 2879
+      }
+    },
+    {
+      "id": "test-quiet:p08-02:r3",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Torre efe de uno."
+        }
+      ],
+      "audioFile": "p08-02_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:07:30.531Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 2950,
+        "resolveMs": 0.5,
+        "totalMs": 2951
+      }
+    },
+    {
+      "id": "test-noisy:p08-03:r1",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "De, toma, se cinco."
+        }
+      ],
+      "audioFile": "p08-03_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:07:33.409Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 2878,
+        "resolveMs": 0.74,
+        "totalMs": 2878
+      }
+    },
+    {
+      "id": "test-noisy:p08-03:r2",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "De, toma, se cinco."
+        }
+      ],
+      "audioFile": "p08-03_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:07:36.315Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 2905,
+        "resolveMs": 0.53,
+        "totalMs": 2905
+      }
+    },
+    {
+      "id": "test-noisy:p08-03:r3",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "De, toma, seis, cinco."
+        }
+      ],
+      "audioFile": "p08-03_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:07:39.227Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 2912,
+        "resolveMs": 0.49,
+        "totalMs": 2912
+      }
+    },
+    {
+      "id": "test-quiet:p08-03:r1",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "De, toma seis, cinco."
+        }
+      ],
+      "audioFile": "p08-03_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:07:42.172Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 2944,
+        "resolveMs": 0.75,
+        "totalMs": 2945
+      }
+    },
+    {
+      "id": "test-quiet:p08-03:r2",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "De, toma, se cinco."
+        }
+      ],
+      "audioFile": "p08-03_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:07:45.132Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 2959,
+        "resolveMs": 0.47,
+        "totalMs": 2959
+      }
+    },
+    {
+      "id": "test-quiet:p08-03:r3",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "De, toma, seis, cinco."
+        }
+      ],
+      "audioFile": "p08-03_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:07:48.055Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 2923,
+        "resolveMs": 0.47,
+        "totalMs": 2923
+      }
+    },
+    {
+      "id": "test-noisy:p08-04:r1",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro."
+        }
+      ],
+      "audioFile": "p08-04_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:07:50.930Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 2874,
+        "resolveMs": 0.7,
+        "totalMs": 2874
+      }
+    },
+    {
+      "id": "test-noisy:p08-04:r2",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro."
+        }
+      ],
+      "audioFile": "p08-04_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:07:53.793Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 2863,
+        "resolveMs": 0.5,
+        "totalMs": 2863
+      }
+    },
+    {
+      "id": "test-noisy:p08-04:r3",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro."
+        }
+      ],
+      "audioFile": "p08-04_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:07:56.643Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 2848,
+        "resolveMs": 0.4,
+        "totalMs": 2849
+      }
+    },
+    {
+      "id": "test-quiet:p08-04:r1",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro."
+        }
+      ],
+      "audioFile": "p08-04_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:07:59.496Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 2853,
+        "resolveMs": 0.7,
+        "totalMs": 2854
+      }
+    },
+    {
+      "id": "test-quiet:p08-04:r2",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro."
+        }
+      ],
+      "audioFile": "p08-04_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:08:02.368Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 2870,
+        "resolveMs": 0.44,
+        "totalMs": 2871
+      }
+    },
+    {
+      "id": "test-quiet:p08-04:r3",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro."
+        }
+      ],
+      "audioFile": "p08-04_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:08:05.212Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 2844,
+        "resolveMs": 0.43,
+        "totalMs": 2844
+      }
+    },
+    {
+      "id": "test-noisy:p08-05:r1",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Hola, buenos días a todos."
+        }
+      ],
+      "audioFile": "p08-05_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:08:08.097Z",
+      "latency": {
+        "recognitionMs": 2884,
+        "resolveMs": 5.02,
+        "totalMs": 2889
+      }
+    },
+    {
+      "id": "test-noisy:p08-05:r2",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Hola, buenos días a todos."
+        }
+      ],
+      "audioFile": "p08-05_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:08:11.012Z",
+      "latency": {
+        "recognitionMs": 2910,
+        "resolveMs": 4.95,
+        "totalMs": 2915
+      }
+    },
+    {
+      "id": "test-noisy:p08-05:r3",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Hola, buenos días a todos."
+        }
+      ],
+      "audioFile": "p08-05_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:08:13.937Z",
+      "latency": {
+        "recognitionMs": 2920,
+        "resolveMs": 4.99,
+        "totalMs": 2925
+      }
+    },
+    {
+      "id": "test-quiet:p08-05:r1",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Hola, buenos días a todos."
+        }
+      ],
+      "audioFile": "p08-05_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:08:17.033Z",
+      "latency": {
+        "recognitionMs": 3091,
+        "resolveMs": 5.06,
+        "totalMs": 3096
+      }
+    },
+    {
+      "id": "test-quiet:p08-05:r2",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Hola, buenos días a todos."
+        }
+      ],
+      "audioFile": "p08-05_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:08:20.048Z",
+      "latency": {
+        "recognitionMs": 3010,
+        "resolveMs": 5.13,
+        "totalMs": 3015
+      }
+    },
+    {
+      "id": "test-quiet:p08-05:r3",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Hola, buenos días a todos."
+        }
+      ],
+      "audioFile": "p08-05_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:08:22.963Z",
+      "latency": {
+        "recognitionMs": 2909,
+        "resolveMs": 5.13,
+        "totalMs": 2914
+      }
+    },
+    {
+      "id": "test-noisy:p09-01:r1",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma se ocho, corona a dama."
+        }
+      ],
+      "audioFile": "p09-01_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:08:25.951Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 2983,
+        "resolveMs": 0.87,
+        "totalMs": 2983
+      }
+    },
+    {
+      "id": "test-noisy:p09-01:r2",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, se, ocho, corona, a dama."
+        }
+      ],
+      "audioFile": "p09-01_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:08:28.994Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 3042,
+        "resolveMs": 0.97,
+        "totalMs": 3043
+      }
+    },
+    {
+      "id": "test-noisy:p09-01:r3",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, se ocho, corona, a dama."
+        }
+      ],
+      "audioFile": "p09-01_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:08:32.004Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 3008,
+        "resolveMs": 0.84,
+        "totalMs": 3009
+      }
+    },
+    {
+      "id": "test-quiet:p09-01:r1",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Ve siete, toma se ocho, corona a dama."
+        }
+      ],
+      "audioFile": "p09-01_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:08:34.962Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 2957,
+        "resolveMs": 0.86,
+        "totalMs": 2958
+      }
+    },
+    {
+      "id": "test-quiet:p09-01:r2",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, se ocho, corona, a dama."
+        }
+      ],
+      "audioFile": "p09-01_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:08:37.979Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 3016,
+        "resolveMs": 0.86,
+        "totalMs": 3017
+      }
+    },
+    {
+      "id": "test-quiet:p09-01:r3",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, ce, ocho, corona, a dama."
+        }
+      ],
+      "audioFile": "p09-01_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:08:41.042Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 3062,
+        "resolveMs": 0.92,
+        "totalMs": 3063
+      }
+    },
+    {
+      "id": "test-noisy:p09-02:r1",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, a, ocho, corona, a torre."
+        }
+      ],
+      "audioFile": "p09-02_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:08:44.103Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 3059,
+        "resolveMs": 0.83,
+        "totalMs": 3060
+      }
+    },
+    {
+      "id": "test-noisy:p09-02:r2",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma a ocho, corona, a torre."
+        }
+      ],
+      "audioFile": "p09-02_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:08:47.176Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 3072,
+        "resolveMs": 0.84,
+        "totalMs": 3073
+      }
+    },
+    {
+      "id": "test-noisy:p09-02:r3",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, a ocho, corona, a torre."
+        }
+      ],
+      "audioFile": "p09-02_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:08:50.208Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 3032,
+        "resolveMs": 0.82,
+        "totalMs": 3032
+      }
+    },
+    {
+      "id": "test-quiet:p09-02:r1",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, a, ocho, corona, a torre."
+        }
+      ],
+      "audioFile": "p09-02_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:08:53.213Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 3004,
+        "resolveMs": 0.84,
+        "totalMs": 3005
+      }
+    },
+    {
+      "id": "test-quiet:p09-02:r2",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, a ocho, corona, a torre."
+        }
+      ],
+      "audioFile": "p09-02_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:08:56.236Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 3021,
+        "resolveMs": 0.9,
+        "totalMs": 3022
+      }
+    },
+    {
+      "id": "test-quiet:p09-02:r3",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, toma, a ocho, corona, a torre."
+        }
+      ],
+      "audioFile": "p09-02_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:08:59.270Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 3033,
+        "resolveMs": 0.83,
+        "totalMs": 3034
+      }
+    },
+    {
+      "id": "test-noisy:p09-03:r1",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Be siete, be ocho, corona a dama."
+        }
+      ],
+      "audioFile": "p09-03_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:09:02.235Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 2964,
+        "resolveMs": 0.78,
+        "totalMs": 2965
+      }
+    },
+    {
+      "id": "test-noisy:p09-03:r2",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "V7V8, corona a dama."
+        }
+      ],
+      "audioFile": "p09-03_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:09:05.146Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 2910,
+        "resolveMs": 0.97,
+        "totalMs": 2911
+      }
+    },
+    {
+      "id": "test-noisy:p09-03:r3",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "B7/8, corona a dama."
+        }
+      ],
+      "audioFile": "p09-03_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:09:08.155Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 3007,
+        "resolveMs": 0.7,
+        "totalMs": 3008
+      }
+    },
+    {
+      "id": "test-quiet:p09-03:r1",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, be, ocho, corona, a dama."
+        }
+      ],
+      "audioFile": "p09-03_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:09:11.177Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 3022,
+        "resolveMs": 1.05,
+        "totalMs": 3023
+      }
+    },
+    {
+      "id": "test-quiet:p09-03:r2",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, ve, ocho, corona, a dama."
+        }
+      ],
+      "audioFile": "p09-03_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:09:14.200Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 3021,
+        "resolveMs": 1.05,
+        "totalMs": 3023
+      }
+    },
+    {
+      "id": "test-quiet:p09-03:r3",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Be, siete, be, ocho, corona, a dama."
+        }
+      ],
+      "audioFile": "p09-03_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:09:17.191Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 2989,
+        "resolveMs": 1.04,
+        "totalMs": 2990
+      }
+    },
+    {
+      "id": "test-noisy:p09-04:r1",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Rey H1."
+        }
+      ],
+      "audioFile": "p09-04_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:09:20.259Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 3067,
+        "resolveMs": 0.47,
+        "totalMs": 3067
+      }
+    },
+    {
+      "id": "test-noisy:p09-04:r2",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Rey H1."
+        }
+      ],
+      "audioFile": "p09-04_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:09:23.139Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 2879,
+        "resolveMs": 0.78,
+        "totalMs": 2880
+      }
+    },
+    {
+      "id": "test-noisy:p09-04:r3",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Rey H1."
+        }
+      ],
+      "audioFile": "p09-04_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:09:26.009Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 2869,
+        "resolveMs": 0.49,
+        "totalMs": 2869
+      }
+    },
+    {
+      "id": "test-quiet:p09-04:r1",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Rey H1."
+        }
+      ],
+      "audioFile": "p09-04_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:09:28.865Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 2855,
+        "resolveMs": 0.48,
+        "totalMs": 2855
+      }
+    },
+    {
+      "id": "test-quiet:p09-04:r2",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Rey H1."
+        }
+      ],
+      "audioFile": "p09-04_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:09:31.749Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 2884,
+        "resolveMs": 0.78,
+        "totalMs": 2885
+      }
+    },
+    {
+      "id": "test-quiet:p09-04:r3",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Rey H1."
+        }
+      ],
+      "audioFile": "p09-04_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:09:34.617Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 2866,
+        "resolveMs": 0.47,
+        "totalMs": 2867
+      }
+    },
+    {
+      "id": "test-noisy:p09-05:r1",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento."
+        }
+      ],
+      "audioFile": "p09-05_noisy_r1_runB.wav",
+      "createdAt": "2026-11-02T18:09:37.506Z",
+      "latency": {
+        "recognitionMs": 2889,
+        "resolveMs": 5.42,
+        "totalMs": 2895
+      }
+    },
+    {
+      "id": "test-noisy:p09-05:r2",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento."
+        }
+      ],
+      "audioFile": "p09-05_noisy_r2_runB.wav",
+      "createdAt": "2026-11-02T18:09:40.375Z",
+      "latency": {
+        "recognitionMs": 2863,
+        "resolveMs": 5.25,
+        "totalMs": 2868
+      }
+    },
+    {
+      "id": "test-noisy:p09-05:r3",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "noisy",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento."
+        }
+      ],
+      "audioFile": "p09-05_noisy_r3_runB.wav",
+      "createdAt": "2026-11-02T18:09:43.249Z",
+      "latency": {
+        "recognitionMs": 2869,
+        "resolveMs": 5.29,
+        "totalMs": 2874
+      }
+    },
+    {
+      "id": "test-quiet:p09-05:r1",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento."
+        }
+      ],
+      "audioFile": "p09-05_quiet_r1_runB.wav",
+      "createdAt": "2026-11-02T18:09:46.157Z",
+      "latency": {
+        "recognitionMs": 2902,
+        "resolveMs": 5.34,
+        "totalMs": 2908
+      }
+    },
+    {
+      "id": "test-quiet:p09-05:r2",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento."
+        }
+      ],
+      "audioFile": "p09-05_quiet_r2_runB.wav",
+      "createdAt": "2026-11-02T18:09:49.040Z",
+      "latency": {
+        "recognitionMs": 2877,
+        "resolveMs": 5.39,
+        "totalMs": 2882
+      }
+    },
+    {
+      "id": "test-quiet:p09-05:r3",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento."
+        }
+      ],
+      "audioFile": "p09-05_quiet_r3_runB.wav",
+      "createdAt": "2026-11-02T18:09:51.924Z",
+      "latency": {
+        "recognitionMs": 2878,
+        "resolveMs": 5.41,
+        "totalMs": 2884
+      }
+    },
+    {
+      "id": "noise:-:r10",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 10,
+      "alternatives": [
+        {
+          "transcript": "Solo con la cabeza, me la pelan todos, carajo."
+        }
+      ],
+      "audioFile": "trial_noise_r10_runB.wav",
+      "createdAt": "2026-11-02T18:09:54.905Z",
+      "latency": {
+        "recognitionMs": 2976,
+        "resolveMs": 3.83,
+        "totalMs": 2980
+      }
+    },
+    {
+      "id": "noise:-:r1",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Pudiendo concluir que resi no..."
+        }
+      ],
+      "audioFile": "trial_noise_r1_runB.wav",
+      "createdAt": "2026-11-02T18:09:57.839Z",
+      "latency": {
+        "recognitionMs": 2930,
+        "resolveMs": 2.44,
+        "totalMs": 2932
+      }
+    },
+    {
+      "id": "noise:-:r2",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Resultado en el festival con rece por su forma de..."
+        }
+      ],
+      "audioFile": "trial_noise_r2_runB.wav",
+      "createdAt": "2026-11-02T18:10:00.801Z",
+      "latency": {
+        "recognitionMs": 2959,
+        "resolveMs": 3.53,
+        "totalMs": 2963
+      }
+    },
+    {
+      "id": "noise:-:r3",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Revivir su trauma y hacerse daño a ella y..."
+        }
+      ],
+      "audioFile": "trial_noise_r3_runB.wav",
+      "createdAt": "2026-11-02T18:10:03.776Z",
+      "latency": {
+        "recognitionMs": 2971,
+        "resolveMs": 3.82,
+        "totalMs": 2975
+      }
+    },
+    {
+      "id": "noise:-:r4",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 4,
+      "alternatives": [
+        {
+          "transcript": "Hoseo de sombra 30 minutos cada mañana."
+        }
+      ],
+      "audioFile": "trial_noise_r4_runB.wav",
+      "createdAt": "2026-11-02T18:10:06.804Z",
+      "latency": {
+        "recognitionMs": 3025,
+        "resolveMs": 4.18,
+        "totalMs": 3029
+      }
+    },
+    {
+      "id": "noise:-:r5",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 5,
+      "alternatives": [
+        {
+          "transcript": "[Música]"
+        }
+      ],
+      "audioFile": "trial_noise_r5_runB.wav",
+      "createdAt": "2026-11-02T18:10:10.102Z",
+      "latency": {
+        "recognitionMs": 3294,
+        "resolveMs": 0.98,
+        "totalMs": 3294
+      }
+    },
+    {
+      "id": "noise:-:r6",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 6,
+      "alternatives": [
+        {
+          "transcript": "El hecho de interés y asegurado."
+        }
+      ],
+      "audioFile": "trial_noise_r6_runB.wav",
+      "createdAt": "2026-11-02T18:10:13.016Z",
+      "latency": {
+        "recognitionMs": 2912,
+        "resolveMs": 2.99,
+        "totalMs": 2915
+      }
+    },
+    {
+      "id": "noise:-:r7",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 7,
+      "alternatives": [
+        {
+          "transcript": "[Música]"
+        }
+      ],
+      "audioFile": "trial_noise_r7_runB.wav",
+      "createdAt": "2026-11-02T18:10:16.256Z",
+      "latency": {
+        "recognitionMs": 3237,
+        "resolveMs": 1.02,
+        "totalMs": 3238
+      }
+    },
+    {
+      "id": "noise:-:r8",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 8,
+      "alternatives": [
+        {
+          "transcript": "¿Dónde me aparece para activarlo?"
+        }
+      ],
+      "audioFile": "trial_noise_r8_runB.wav",
+      "createdAt": "2026-11-02T18:10:19.190Z",
+      "latency": {
+        "recognitionMs": 2934,
+        "resolveMs": 3.77,
+        "totalMs": 2937
+      }
+    },
+    {
+      "id": "noise:-:r9",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 9,
+      "alternatives": [
+        {
+          "transcript": "[Música]"
+        }
+      ],
+      "audioFile": "trial_noise_r9_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.569Z",
+      "latency": {
+        "recognitionMs": 3375,
+        "resolveMs": 1.21,
+        "totalMs": 3376
+      }
+    },
+    {
+      "id": "silence:-:r10",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 10,
+      "alternatives": [],
+      "audioFile": "trial_silence_r10_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r1",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 1,
+      "alternatives": [],
+      "audioFile": "trial_silence_r1_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r2",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 2,
+      "alternatives": [],
+      "audioFile": "trial_silence_r2_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r3",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 3,
+      "alternatives": [],
+      "audioFile": "trial_silence_r3_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r4",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 4,
+      "alternatives": [],
+      "audioFile": "trial_silence_r4_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r5",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 5,
+      "alternatives": [],
+      "audioFile": "trial_silence_r5_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r6",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 6,
+      "alternatives": [],
+      "audioFile": "trial_silence_r6_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r7",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 7,
+      "alternatives": [],
+      "audioFile": "trial_silence_r7_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r8",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 8,
+      "alternatives": [],
+      "audioFile": "trial_silence_r8_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    },
+    {
+      "id": "silence:-:r9",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 9,
+      "alternatives": [],
+      "audioFile": "trial_silence_r9_runB.wav",
+      "createdAt": "2026-11-02T18:10:22.571Z",
+      "error": "below-gate:too-quiet"
+    }
+  ]
+}
