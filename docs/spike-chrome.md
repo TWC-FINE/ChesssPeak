@@ -21,7 +21,7 @@ Las de la corrida B, salvo el navegador:
 - Mismo hablante, mismo micrófono, mismo equipo y mismo ambiente tranquilo (sin ruido de fondo añadido).
 - Mismos umbrales de [spike-criteria.md](spike-criteria.md).
 
-## Qué se mmide
+## Qué se mide
 
 Solo dos bloques; **no se mide** el bloque con ruido ni el de solo ruido, y no se repite `dev`:
 
