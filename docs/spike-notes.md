@@ -75,7 +75,7 @@ Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-
 
 **Fase 0**
 - [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5).
-- [ ] **Actualizar PLAN.md.** Marcar el spike como hecho, anotar que se midió en Edge 156 y no en Chrome, y reflejar la decisión (Web Speech con retardo de 400 ms por defecto; Whisper `small` como alternativa).
+- [ ] **Actualizar PLAN.md.** Marcar el spike como hecho, anotar que se midió en Edge 156 y no en Chrome, y reflejar la decisión (Web Speech con retardo de 400 ms por defecto; Whisper `small` como alternativa) y que no hay demo en vivo: el proyecto se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome.
 - [ ] Copia de seguridad fuera del repo de `spike/recordings/` (116 WAV, 10 774 256 bytes) y de `spike/results/`.
 
 **Fase 3 (voz de punta a punta)**
@@ -88,6 +88,11 @@ Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-
 - [ ] **Prueba en Chrome** con las mismas frases (pendiente; todo se midió en Edge 156).
 - [ ] **Posible corrida nueva declarada** con un modelo `small` cuantizado para bajar la latencia de Whisper: se declara antes de medir, con su propia regla de lectura.
 - [ ] Revisar con el corpus v1 los fallos de A anotados en la sección 3 (`toma` + letra fundidos, «alfil» partido, «peone»).
+- [ ] **Avisar en navegadores sin Web Speech (Firefox).** Detectar que `SpeechRecognition` no existe y mostrar un aviso claro en la interfaz, ofreciendo Whisper local (si el agente responde) o la caja de texto de respaldo. Lo mismo, con aviso de «recomendado Edge», si la comprobación de [spike-chrome.md](spike-chrome.md) no cumple en Chrome.
+- [ ] **Instalación de Whisper en un solo comando.** Un script (hoy `pnpm --filter @chessspeak/spike-whisper-local download` más editar `.env`) que descargue y verifique el binario y el modelo `small`, deje las rutas en `.env` y arranque el agente local, sin pasos manuales. El proyecto se presentará terminado en el equipo de cualquiera de los dos o del profesor, así que no puede depender de una instalación a mano.
+
+**Fase 5 (entrega)**
+- [ ] **Probar el README en una máquina limpia antes de entregar:** clonar, `pnpm install`, `.env`, instalación de Whisper y arranque, abriendo la app en Edge y en Chrome, siguiendo solo lo que dice el README. No hay demo en vivo: el README es lo que usará quien evalúe.
 
 ## 8. Equipo de referencia de la latencia de Whisper
 
