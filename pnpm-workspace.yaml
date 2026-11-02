@@ -3,3 +3,5 @@ packages:
   - spike/*
   - shared
   - server
+allowBuilds:
+  esbuild: false
