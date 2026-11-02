@@ -71,3 +71,64 @@ El parser, el corpus y los criterios no se modifican en ningún caso.
 - **El retardo suma a la latencia medida.** La latencia se cuenta desde que se suelta el botón, y los 400 ms se esperan después de soltar. La latencia de B no es comparable 1 a 1 con la de A.
 - **Mismo navegador, otro día.** Edge, no Chrome (ver `spike-results.md`): lo que se aprenda vale para Edge.
 - La muestra sigue siendo de 78 intentos válidos por corrida; los intervalos de confianza siguen siendo anchos.
+
+## Resultados de la corrida B
+
+Medida el **2 de noviembre de 2026** con las condiciones declaradas arriba (retardo de 400 ms, WAV en paralelo, Edge 156, `es-CO`, 5 alternativas, parser congelado). Las cifras salen de `pnpm metrics` y del `benchmark` de Whisper sobre los archivos de `spike/results/`; no se escribió ninguna a mano. A y B se muestran por separado. Los WAV de B son 116 archivos `*_runB.wav` (10 774 256 bytes) en `spike/recordings/`, fuera de git.
+
+Archivos de B: `webspeech-runB-2026-11-02T17-24-51-178Z.json` (tranquilo, 48), `webspeech-runB-2026-11-02T17-35-17-848Z.json` (ruido, 48), `…Zsilencio.json` (10) y `…Zsinhablarruido.json` (10). Archivos de Whisper: `2026-11-02-whisper-{base,small}-{prompt,noprompt}.json`.
+
+### Corrida A (línea base)
+
+| Métrica | Umbral | A | Estado |
+|---|---|---|---|
+| Acierto top-1 | ≥ 85 % | 56,4 % (44/78; IC95 45–67 %) | no cumple |
+| Aceptación errónea | ≤ 2 % | 1,3 % (1/78; IC95 0–7 %) | cumple |
+| Ambigüedad | ≤ 10 % | 10,3 % (8/78; IC95 5–19 %) | no cumple |
+| Latencia p50 / p95 | ≤ 1,5 s / ≤ 3 s | 0,18 s / 0,25 s | cumple |
+| Silencio / ruido | 0 aceptadas | 0/38 | cumple |
+| Truncados | (≤ 2 en B) | 6 de 78 | — |
+| Control: fallos con ruido no truncados | — | 20 | — |
+
+### Corrida B
+
+| Métrica | Umbral | B | Estado |
+|---|---|---|---|
+| Acierto top-1 | ≥ 85 % | 87,2 % (68/78; IC95 78–93 %) | cumple |
+| Aceptación errónea | ≤ 2 % | 0,0 % (0/78; IC95 0–5 %) | cumple |
+| Ambigüedad | ≤ 10 % | 0,0 % (0/78; IC95 0–5 %) | cumple |
+| Latencia p50 / p95 | ≤ 1,5 s / ≤ 3 s | 0,57 s / 0,62 s | cumple |
+| Silencio / ruido | 0 aceptadas | 0/38 | cumple |
+| Truncados | ≤ 2 de 78 | 0 de 78 | cumple |
+| Control: fallos con ruido no truncados | — | 6 | — |
+
+Por condición: tranquilo 89,7 % (35/39) y ruido 84,6 % (33/39). El N-best no aporta nada (+0,0 puntos), igual que en A.
+
+### Whisper (whisper.cpp b5454) sobre los clips de B
+
+Puerta fija (≥ 300 ms y ≥ −50 dBFS) y las mismas métricas y umbrales. La puerta frenó 10 de los 20 clips de silencio y ruido; ningún clip sin habla acabó en jugada aceptada (0/38 en las cuatro configuraciones).
+
+| Configuración | Acierto top-1 | Aceptación errónea | Ambigüedad | Latencia p50 / p95 | Cumple |
+|---|---|---|---|---|---|
+| base · con prompt de ajedrez | 74,4 % (58/78) | 0,0 % | 11,5 % | 0,83 / 0,92 s | no: acierto y ambigüedad |
+| base · sin prompt | 61,5 % (48/78) | 0,0 % | 9,0 % | 0,74 / 0,82 s | no: acierto |
+| **small · con prompt de ajedrez** | **89,7 % (70/78; IC95 81–95 %)** | 0,0 % | 7,7 % | **2,91 / 3,06 s** | **no: latencia p50 y p95** |
+| small · sin prompt | 61,5 % (48/78) | 0,0 % | 6,4 % | 2,61 / 2,79 s | no: acierto y p50 |
+
+### Lectura según la regla (puntos 3 a 6)
+
+- **B cuenta para la decisión.** Cumple (i) todos los umbrales de `spike-criteria.md` y (ii) tiene 0 truncados, por debajo del máximo de 2.
+- **A queda como línea base** (falla acierto y ambigüedad). No se promedia con B.
+- **Punto 6 (B frente a Whisper):** el orden de desempate solo se aplica si los dos cumplen los umbrales. Whisper `small` con prompt acierta más (89,7 % frente a 87,2 %) pero no cumple la latencia; las otras tres configuraciones no cumplen el acierto. No se activa el desempate.
+
+### Salvedades
+
+1. **El control no respalda atribuir la mejora solo al retardo.** Los fallos con ruido no truncados bajaron de 20 en A a 6 en B. La regla decía que el retardo no debería cambiarlos mucho; cambiaron mucho. Los truncados bajaron (6 → 0), pero el resto de la mejora no se explica por el retardo.
+2. **Posible efecto de práctica y ruido no idéntico.** Es la segunda vez que el hablante dice las frases y el ruido de fondo no fue el mismo audio exacto en las dos corridas. No se puede separar de la grabación en paralelo, que también cambió.
+3. **Una sola voz y una sola corrida B.** No hay otro hablante ni repetición de B (la regla no admite una corrida C).
+4. **El límite inferior del IC95 de B es 78 %, por debajo del 85 %.** El 87,2 % cumple el umbral como punto estimado, pero la muestra (78 intentos) no excluye que el acierto real sea menor.
+5. **Todo se midió en Edge 156** (reconocedor de Microsoft), no en Chrome.
+6. **La latencia de B incluye los 400 ms de espera** y no es comparable 1 a 1 con la de A.
+7. **La latencia de Whisper es solo inferencia** del clip ya grabado más el parser: excluye grabación y transporte HTTP (ver `spike-notes.md`). La latencia real de extremo a extremo sería mayor.
+8. **Sesgo de selección entre las 4 configuraciones de Whisper.** Que `small` con prompt destaque entre cuatro candidatas puede sobreestimar su acierto; no se midió con un `test` nuevo.
+9. **Las 10 improvisadas adicionales** (sesión re-exportada con 20 intentos en `2026-11-02-webspeech-improvised-20.json`) no se analizaron ni entran en ninguna cifra.
