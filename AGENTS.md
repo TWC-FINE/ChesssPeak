@@ -1,14 +1,21 @@
 # AGENTS.md — instrucciones para asistentes de IA
 
-Léelo completo antes de tocar código. Si algo contradice a [PLAN.md](PLAN.md), manda PLAN.md; el alcance lo define [SPEC.md](SPEC.md) y la estructura [ARCHITECTURE.md](ARCHITECTURE.md).
+Léelo completo antes de tocar código. Si algo contradice a [PLAN.md](PLAN.md), manda PLAN.md; el alcance lo define [SPEC.md](SPEC.md) y la estructura [ARCHITECTURE.md](ARCHITECTURE.md). Para ponerte al día en una página: [docs/CONTEXT.md](docs/CONTEXT.md).
 
 ## Proyecto
 **ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, equipo de 2 personas, entrega supuesta el 27 de noviembre de 2026.
 
-Nombre correcto: **ChessSpeak**. Carpeta `ChessSpeak/`, repo `chessspeak`, paquetes `@chessspeak/*`. “ChessPeak” y “ChesssPeak” son errores; no los propagues.
+Nombre correcto: **ChessSpeak**. Repo `chessspeak` en GitHub (`TWC-FINE/chessspeak`), paquetes `@chessspeak/*`. La carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora. “ChessPeak” y “ChesssPeak” son errores; no los propagues.
+
+**No hay demo en vivo:** el proyecto se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome. Que se pueda instalar y abrir en una máquina limpia siguiendo solo el README es un entregable.
 
 ## Estado actual
-Fase de planificación: todavía no hay código ni `package.json`. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+El **spike de voz está cerrado** (2 de noviembre de 2026; ADR 4 y 5 aceptados en `docs/adr/`). Ya hay código: `packages/voice-parser/` y `spike/` (arnés de Web Speech y benchmark/agente de Whisper), con su `package.json` y `pnpm-workspace.yaml`. Todo lo demás (`shared/`, `server/`, `web/`, `local-agent/`) está **por hacer**: no supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+
+Decisiones del spike que no se reabren sin motivo (detalle en [docs/spike-results.md](docs/spike-results.md)):
+- Reconocedor por defecto: **Web Speech con un retardo de 400 ms tras soltar el botón**. Whisper local (modelo `small`, siempre con el prompt de ajedrez) es la alternativa seleccionable y el módulo local, con su latencia declarada.
+- **La confirmación explícita es obligatoria.** No hay autoconfirmación ni N-best.
+- El parser de `packages/voice-parser/` está **congelado** en la versión de la etiqueta `spike-parser-freeze`: las cifras del spike son de esa versión. Solo se modifica en un lote antes de la validación de la semana 4, registrando la versión (hash), y re-midiendo con frases nuevas. No cambies el parser, el corpus ni `docs/spike-criteria.md` fuera de ese lote.
 
 ## Stack
 - Monorepo con **pnpm workspaces**, TypeScript estricto en todo.
@@ -18,10 +25,10 @@ Fase de planificación: todavía no hay código ni `package.json`. No supongas q
 - Voz: Web Speech API (por defecto), Whisper local vía `whisper-server` (whisper.cpp).
 - Tests: **Jest** en `server`; **Vitest** en `shared`, `voice-parser` y `web`.
 
-## Estructura (objetivo)
+## Estructura (objetivo; existe `packages/voice-parser/`, `spike/` y `docs/`)
 ```
 shared/                 contrato: eventos del socket (zod), eventos cs:*, tipos de contexto
-packages/voice-parser/  TS puro, sin DOM
+packages/voice-parser/  TS puro, sin DOM (existe)
 server/                 NestJS: auth, games, voice-metrics, health
 web/shell/              index.html, router por hash, sesión, único socket
 web/mf-game/            <mf-game>
@@ -29,19 +36,28 @@ web/mf-voice-input/     <mf-voice-input>
 web/mf-history/         <mf-history>
 web/dist/               salida de build:web (solo se commitea en la entrega)
 local-agent/            Node + TS, envuelve whisper-server en 127.0.0.1:8765
-docs/adr/               ADRs de media página
+spike/                  arnés de Web Speech y benchmark de Whisper (existe)
+docs/adr/               ADRs de media página (el 4 y el 5 existen)
 docs/quality.md         escenarios de calidad con cifras medidas
 ```
 
-## Comandos (planificados; verifica que existan antes de usarlos)
+## Comandos
+Existen hoy:
 ```bash
-pnpm install
+pnpm install                   # puede salir con ERR_PNPM_IGNORED_BUILDS (esbuild); ver docs/spike-notes.md
+pnpm test                      # Vitest en voice-parser y spike
+pnpm typecheck
+pnpm spike:build               # arnés del spike
+pnpm metrics <resultados.json...>
+```
+Planificados (verifica que existan antes de usarlos):
+```bash
 pnpm build:web                 # compila web/* a web/dist
+pnpm serve:web                 # servidor estático de Node, sin dependencias, en 127.0.0.1:5500
 pnpm --filter server test      # Jest
-pnpm --filter @chessspeak/voice-parser test   # Vitest
 pnpm lint
 ```
-Web con Live Server en el puerto **5500** (fijo). `local-agent` en `127.0.0.1:8765`.
+Web en el puerto **5500** (fijo; Live Server o `pnpm serve:web`). `local-agent` en `127.0.0.1:8765`.
 
 ## Convenciones
 - Código, comentarios, ramas y commits en **inglés** (Conventional Commits); interfaz y `*.md` en **español**.
@@ -64,12 +80,14 @@ Web con Live Server en el puerto **5500** (fijo). `local-agent` en `127.0.0.1:87
 ## Lo que NO debes hacer
 - No introducir Module Federation, Shadow DOM, microservicios, Redis ni sticky sessions.
 - No guardar **audio** en ninguna parte.
-- No commitear secretos, `.env`, binarios de whisper.cpp ni modelos. Rutas y claves van en `.env` (con `.env.example` en el repo).
+- No commitear secretos, `.env`, binarios de whisper.cpp ni modelos. Rutas y claves van en `.env` (con `.env.example` en el repo). Tampoco los WAV de `spike/recordings/`.
+- No tocar `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` ni los resultados del spike (`spike/results/`, `docs/spike-results.md`, `docs/spike-run-b.md`) salvo en el lote declarado de la semana 4.
 - No hacer push directo a `main`, ni `git push --force`, ni reescribir historia.
 - No commitear `web/dist` (solo en el commit de entrega).
 - No añadir fast-check ni pipelines de percentiles en Mongo (p50/p95 se calculan en Node).
 - No añadir dependencias sin motivo; si lo haces, dilo en el PR.
-- No inventar cifras de rendimiento o precisión: salen de las mediciones (`docs/quality.md`).
+- No inventar cifras de rendimiento o precisión: salen de las mediciones (`docs/spike-results.md`, `docs/quality.md`). Las del spike son de la versión `spike-parser-freeze`.
+- No introducir autoconfirmación ni N-best, ni quitar la confirmación explícita ni el retardo de 400 ms de Web Speech.
 - No modificar `shared/` sin avisar: es el contrato entre A y B y exige aprobación de los dos.
 - No renombrar, borrar ni rehacer lo que no te pidieron.
 
