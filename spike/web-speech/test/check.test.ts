@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkRunFiles, type CheckFile } from '../src/check.js';
+import { browserOf, checkRunFiles, type CheckFile } from '../src/check.js';
 
 const attempts = (block: string, n: number, extra: object = {}) =>
   Array.from({ length: n }, (_, i) => ({ id: `${block}:p05-${i + 1}:r1`, ...extra }));
@@ -49,5 +49,38 @@ describe('checkRunFiles', () => {
     expect(checkRunFiles([file('x.fake.json', 'test-quiet', 48)]).ok).toBe(false);
     expect(checkRunFiles([file('i.json', 'imp', 10, { improvised: true })]).ok).toBe(false);
     expect(checkRunFiles([file('q.json', 'test-quiet', 47)]).warnings.join(' ')).toContain('47 intentos');
+  });
+
+  it('names the browser from the user agent, Edge before Chrome', () => {
+    const edge = 'Mozilla/5.0 AppleWebKit/537.36 Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0';
+    const chrome = 'Mozilla/5.0 AppleWebKit/537.36 Chrome/157.0.0.0 Safari/537.36';
+    expect(browserOf(edge)).toBe('Edge 156');
+    expect(browserOf(chrome)).toBe('Chrome 157');
+    expect(browserOf('Mozilla/5.0 Firefox/130.0')).toBe('Firefox 130');
+    expect(browserOf('algo')).toContain('desconocido');
+    expect(checkRunFiles(full({}, { userAgent: chrome })).info.join(' ')).toContain('navegador: Chrome 157');
+  });
+
+  it('warns when the files come from more than one browser', () => {
+    const edge = 'x Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0';
+    const chrome = 'x Chrome/157.0.0.0 Safari/537.36';
+    const report = checkRunFiles([
+      file('q.json', 'test-quiet', 48, { userAgent: edge }),
+      file('s.json', 'silence', 10, { userAgent: chrome }),
+    ]);
+    const text = report.warnings.join(' ');
+    expect(text).toContain('más de un navegador');
+    expect(text).toContain('Edge 156');
+    expect(text).toContain('Chrome 157');
+  });
+
+  it('with expect, only the listed blocks are expected', () => {
+    const files = [file('q.json', 'test-quiet', 48), file('s.json', 'silence', 10)];
+    expect(checkRunFiles(files).warnings.join(' ')).toContain('test-noisy');
+    expect(checkRunFiles(files, { expect: ['test-quiet', 'silence'] }).warnings).toEqual([]);
+    const short = checkRunFiles([file('q.json', 'test-quiet', 47), file('s.json', 'silence', 10)], { expect: ['test-quiet', 'silence'] });
+    expect(short.warnings.join(' ')).toContain('47 intentos');
+    const extra = checkRunFiles([...files, file('n.json', 'test-noisy', 48)], { expect: ['test-quiet', 'silence'] });
+    expect(extra.warnings.join(' ')).toContain('bloque test-noisy');
   });
 });

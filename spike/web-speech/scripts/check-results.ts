@@ -2,9 +2,16 @@ import { readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { checkRunFiles, type CheckFile } from '../src/check.js';
 
-const files = process.argv.slice(2);
+const args = process.argv.slice(2);
+const expectAt = args.indexOf('--expect');
+const expect = expectAt >= 0 ? (args[expectAt + 1] ?? '').split(',').filter((block) => block !== '') : undefined;
+if (expect !== undefined && expect.length === 0) {
+  console.error('--expect necesita bloques separados por comas, p. ej. --expect test-quiet,silence');
+  process.exit(2);
+}
+const files = args.filter((_, i) => expectAt < 0 || (i !== expectAt && i !== expectAt + 1));
 if (files.length === 0) {
-  console.error('Uso: pnpm check-results <resultados.json...>   (los archivos de UNA sola corrida)');
+  console.error('Uso: pnpm check-results <resultados.json...> [--expect test-quiet,silence]   (los archivos de UNA sola corrida y UN solo navegador)');
   process.exit(2);
 }
 
@@ -15,7 +22,7 @@ const loaded: CheckFile[] = files.map((path) => {
   return { name: basename(path), ...json };
 });
 
-const report = checkRunFiles(loaded);
+const report = checkRunFiles(loaded, expect === undefined ? {} : { expect });
 for (const line of report.info) console.log(line);
 for (const warning of report.warnings) console.log(`AVISO: ${warning}`);
 for (const error of report.errors) console.log(`ERROR: ${error}`);

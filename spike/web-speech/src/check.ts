@@ -28,12 +28,26 @@ export interface CheckReport {
 
 const blockOf = (id: string): string => id.split(':')[0] ?? id;
 
+/** "Edge 156", "Chrome 156" or "Firefox 130" from a user agent. Edge goes first: its agent also says Chrome. */
+export function browserOf(userAgent: string): string {
+  const match = /Edg\/(\d+)/.exec(userAgent) ?? /(Chrome|Firefox)\/(\d+)/.exec(userAgent);
+  if (match === null) return `desconocido («${userAgent}»)`;
+  return match.length === 2 ? `Edge ${match[1]}` : `${match[1]} ${match[2]}`;
+}
+
+export interface CheckOptions {
+  /** Blocks this check measures (e.g. `test-quiet`, `silence`); any other block is reported as not expected. Default: the 4 blocks of run B. */
+  expect?: string[];
+}
+
 /**
  * Guards `pnpm metrics`: it accepts any mix of files and counts duplicated attempt ids twice,
  * so runs A and B must be passed to it in separate invocations.
  * Files from before the run label existed are run A with no delay.
  */
-export function checkRunFiles(files: CheckFile[]): CheckReport {
+export function checkRunFiles(files: CheckFile[], options: CheckOptions = {}): CheckReport {
+  const expected: Record<string, number> =
+    options.expect === undefined ? EXPECTED_BLOCKS : Object.fromEntries(options.expect.map((block) => [block, EXPECTED_BLOCKS[block] ?? 0]));
   const errors: string[] = [];
   const warnings: string[] = [];
   const info: string[] = [];
@@ -53,7 +67,7 @@ export function checkRunFiles(files: CheckFile[]): CheckReport {
     if (file.meta.improvised === true || file.attempts.some((a) => a.id.startsWith('imp:'))) {
       errors.push(`${file.name}: son las improvisadas; no se pasan a pnpm metrics junto a los de test`);
     }
-    if (file.meta.userAgent !== undefined) agents.add(file.meta.userAgent);
+    if (file.meta.userAgent !== undefined) agents.add(browserOf(file.meta.userAgent));
     for (const attempt of file.attempts) {
       total++;
       runs.add(attempt.run ?? file.meta.run ?? 'A');
@@ -75,17 +89,18 @@ export function checkRunFiles(files: CheckFile[]): CheckReport {
   if (run === 'B' && delay !== undefined && delay !== RUN_B_DELAY_MS) {
     errors.push(`corrida B con retardo ${delay} ms: la corrida B se fijó en ${RUN_B_DELAY_MS} ms`);
   }
-  if (agents.size > 1) warnings.push(`hay más de un navegador en los archivos:\n    ${[...agents].join('\n    ')}`);
+  if (agents.size > 1) warnings.push(`hay más de un navegador en los archivos (no los mezcles): ${[...agents].join(', ')}`);
 
-  for (const [block, expected] of Object.entries(EXPECTED_BLOCKS)) {
+  for (const [block, count] of Object.entries(expected)) {
     const got = blocks[block] ?? 0;
-    if (got !== expected) warnings.push(`bloque ${block}: ${got} intentos (se esperaban ${expected})`);
+    if (got !== count) warnings.push(`bloque ${block}: ${got} intentos (se esperaban ${count})`);
   }
   for (const block of Object.keys(blocks)) {
-    if (!(block in EXPECTED_BLOCKS)) warnings.push(`bloque ${block} (${blocks[block]} intentos) no forma parte de la medición de test`);
+    if (!(block in expected)) warnings.push(`bloque ${block} (${blocks[block]} intentos) no forma parte de la medición de test`);
   }
 
   info.push(`corrida: ${run ?? '?'} · retardo al soltar: ${delay ?? '?'} ms · ${total} intentos en ${files.length} archivos`);
+  info.push(`navegador: ${agents.size === 0 ? 'sin dato' : [...agents].join(', ')}`);
   info.push(`intentos por bloque: ${Object.entries(blocks).map(([b, n]) => `${b} ${n}`).join(', ')}`);
   info.push(`intentos con WAV: ${withWav}/${total}`);
   if (startups.length > 0) {
