@@ -12,7 +12,7 @@ import {
 } from '@chessspeak/voice-parser';
 import { renderBoard, sideToMove } from './board.js';
 import { isWebSpeechAvailable, listen, type ListeningSession } from './recognizer.js';
-import { canPickDirectory, pickDirectory, Recorder, saveWav } from './recorder.js';
+import { canPickDirectory, ensureWritable, pickDirectory, recallDirectory, Recorder, rememberDirectory, saveWav } from './recorder.js';
 import {
   BLOCK_LABEL,
   BLOCK_ORDER,
@@ -315,6 +315,35 @@ function setStatus(text: string): void {
   ui.status.textContent = text;
 }
 
+/** WAV problems stay on screen next to the folder button until the next successful save: never a silent drop. */
+function setWavWarning(text: string | undefined): void {
+  if (text !== undefined) {
+    ui.dirStatus.textContent = text;
+    ui.dirStatus.className = 'warn';
+  } else {
+    ui.dirStatus.className = 'muted';
+  }
+}
+
+/**
+ * Makes sure this press can record: folder remembered, permission granted, recorder on. It runs inside the
+ * push-to-talk press (a user gesture, which `requestPermission` needs). Returns true when it can record.
+ */
+async function prepareRecording(): Promise<boolean> {
+  if (directory === undefined) return false;
+  if (!(await ensureWritable(directory))) {
+    setWavWarning('Sin permiso para escribir en la carpeta de WAV: pulsa «Elegir carpeta para los WAV…» y elígela otra vez. Este intento se guardará SIN audio.');
+    return false;
+  }
+  try {
+    await recorder.enable();
+  } catch (error) {
+    setWavWarning(`No se pudo activar el micrófono de grabación (${String(error)}). Este intento se guardará SIN audio.`);
+    return false;
+  }
+  return true;
+}
+
 // ---------- push to talk ----------
 
 // Errors that say nothing about the speech: the attempt is not recorded.
@@ -327,7 +356,13 @@ async function startListening(): Promise<void> {
     setStatus('Este bloque ya está completo.');
     return;
   }
-  const recording = ui.record.checked && recorder.enabled && directory !== undefined;
+  let recording = false;
+  if (ui.record.checked) {
+    recording = await prepareRecording();
+    if (!recording && directory === undefined) {
+      setWavWarning('«Grabar WAV» está marcado pero no hay carpeta elegida (¿se recargó la página?): este intento se guardará SIN audio. Elige la carpeta y repite.');
+    }
+  }
   if (recording) recorder.begin();
   if (ui.recordOnly.checked) {
     listening = { release: () => Promise.reject(new Error('record-only')), abort: () => undefined };
@@ -391,22 +426,27 @@ async function stopListening(): Promise<void> {
       return;
     }
     let audioFile: string | undefined;
+    let wavProblem: string | undefined;
     if (wav !== undefined && directory !== undefined) {
-      const name = wavFileName(trial.phrase?.id ?? null, trial.condition, trial.repetition);
+      const name = wavFileName(trial.phrase?.id ?? null, trial.condition, trial.repetition, info.run);
       try {
         await saveWav(directory, name, wav.wav);
         audioFile = name;
+        setWavWarning(undefined);
       } catch (error) {
-        setStatus(`No se pudo guardar el WAV: ${String(error)}`);
+        wavProblem = `No se pudo guardar el WAV ${name}: ${String(error)}`;
       }
+    } else if (ui.record.checked) {
+      wavProblem = 'este intento no tiene WAV (no hubo audio capturado o falta carpeta/permiso)';
     }
+    if (wavProblem !== undefined) setWavWarning(`${wavProblem}. Revisa la carpeta de WAV.`);
     const attempt = buildAttempt(trial, outcome, resolveMs, audioFile, new Date(), info);
     session.attempts.push(attempt);
     saveSession(session);
     renderResult(attempt.alternatives, attempt.fen, attempt, attempt.error);
     renderLog();
     renderTrial();
-    setStatus(`Guardado ${attempt.id}.`);
+    setStatus(wavProblem === undefined ? `Guardado ${attempt.id}.` : `Guardado ${attempt.id}, pero SIN WAV: ${wavProblem}`);
   } catch (error) {
     setStatus(`Error: ${String(error)}`);
   } finally {
@@ -420,8 +460,15 @@ async function finishRecordOnly(trial: Trial | undefined, recording: boolean): P
     setStatus('No se grabó nada (¿elegiste carpeta y activaste «Grabar WAV»?).');
     return;
   }
-  const name = wavFileName(trial.phrase?.id ?? null, trial.condition, trial.repetition);
-  await saveWav(directory, name, wav.wav);
+  const name = wavFileName(trial.phrase?.id ?? null, trial.condition, trial.repetition, runInfo().run);
+  try {
+    await saveWav(directory, name, wav.wav);
+  } catch (error) {
+    setWavWarning(`No se pudo guardar el WAV ${name}: ${String(error)}`);
+    setStatus(`Audio NO guardado: ${name}. Revisa la carpeta de WAV.`);
+    return;
+  }
+  setWavWarning(undefined);
   session.recordedOnly.push(trial.id);
   saveSession(session);
   setStatus(`Audio guardado: ${name} (${wav.durationMs} ms).`);
@@ -540,11 +587,21 @@ ui.pickDir.addEventListener('click', async () => {
     directory = await pickDirectory();
     await recorder.enable();
     ui.record.checked = true;
+    setWavWarning(undefined);
     ui.dirStatus.textContent = 'Carpeta lista y micrófono de grabación activo.';
+    await rememberDirectory(directory);
   } catch (error) {
-    ui.dirStatus.textContent = `No se pudo activar la grabación: ${String(error)}`;
+    setWavWarning(`No se pudo activar la grabación: ${String(error)}`);
     directory = undefined;
   }
+});
+
+// After a reload the folder is remembered but not writable yet: the first press of the talk button asks again.
+void recallDirectory().then((remembered) => {
+  if (remembered === undefined || directory !== undefined) return;
+  directory = remembered;
+  ui.record.checked = true;
+  ui.dirStatus.textContent = `Carpeta «${remembered.name ?? '?'}» recordada tras recargar. Al pulsar «Hablar» el navegador puede pedir permiso otra vez: acéptalo.`;
 });
 ui.recordOnly.addEventListener('change', () => {
   ui.recordOnly.blur();

@@ -40,6 +40,8 @@ describe('clip names', () => {
   it('parses the names the harness writes', () => {
     expect(parseClipName('p05-01_noisy_r2.wav')).toMatchObject({ phraseId: 'p05-01', condition: 'noisy', repetition: 2, fake: false });
     expect(parseClipName('trial_silence_r3.wav')).toMatchObject({ phraseId: null, condition: 'silence', repetition: 3 });
+    expect(parseClipName('p05-01_noisy_r2_runB.wav')).toMatchObject({ phraseId: 'p05-01', condition: 'noisy', repetition: 2, fake: false });
+    expect(parseClipName('trial_noise_r1_runB.wav')).toMatchObject({ phraseId: null, condition: 'noise', repetition: 1 });
     expect(parseClipName('p01-01_quiet_r1.fake.wav')?.fake).toBe(true);
     expect(parseClipName('notes.wav')).toBeUndefined();
   });

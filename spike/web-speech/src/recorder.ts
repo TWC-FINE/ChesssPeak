@@ -81,13 +81,78 @@ export class Recorder {
 }
 
 interface DirectoryHandle {
+  readonly name?: string;
   getFileHandle(
     name: string,
     options: { create: boolean },
   ): Promise<{ createWritable(): Promise<{ write(data: Uint8Array): Promise<void>; close(): Promise<void> }> }>;
+  queryPermission?(descriptor: { mode: 'readwrite' }): Promise<PermissionState>;
+  requestPermission?(descriptor: { mode: 'readwrite' }): Promise<PermissionState>;
+}
+
+/**
+ * True when the folder can be written now. If the permission is not granted, asks for it: that only
+ * works inside a user gesture (the push-to-talk press), and it is what a page reload makes necessary.
+ */
+export async function ensureWritable(directory: DirectoryHandle): Promise<boolean> {
+  const descriptor = { mode: 'readwrite' } as const;
+  try {
+    if (directory.queryPermission === undefined) return true;
+    if ((await directory.queryPermission(descriptor)) === 'granted') return true;
+    return (await directory.requestPermission?.(descriptor)) === 'granted';
+  } catch {
+    return false;
+  }
+}
+
+// The handle lives in IndexedDB so that a page reload (Live Server, F5) does not forget the folder.
+// Only the handle is kept, never the permission: after a reload it is asked for again (ensureWritable).
+const HANDLE_DB = 'chessspeak.spike.web-speech';
+const HANDLE_STORE = 'handles';
+const HANDLE_KEY = 'wav-directory';
+
+function openHandleDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(HANDLE_DB, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(HANDLE_STORE);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function rememberDirectory(directory: DirectoryHandle): Promise<void> {
+  try {
+    const db = await openHandleDb();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(HANDLE_STORE, 'readwrite');
+      tx.objectStore(HANDLE_STORE).put(directory, HANDLE_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    db.close();
+  } catch {
+    // IndexedDB blocked: the folder just has to be chosen again after a reload
+  }
+}
+
+export async function recallDirectory(): Promise<DirectoryHandle | undefined> {
+  try {
+    const db = await openHandleDb();
+    const handle = await new Promise<DirectoryHandle | undefined>((resolve, reject) => {
+      const request = db.transaction(HANDLE_STORE).objectStore(HANDLE_STORE).get(HANDLE_KEY);
+      request.onsuccess = () => resolve(request.result as DirectoryHandle | undefined);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return handle;
+  } catch {
+    return undefined;
+  }
 }
 
 export const canPickDirectory = (): boolean => 'showDirectoryPicker' in window;
+
+export type WavDirectory = DirectoryHandle;
 
 export async function pickDirectory(): Promise<DirectoryHandle> {
   const picker = (window as unknown as {

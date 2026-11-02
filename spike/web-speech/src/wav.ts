@@ -57,12 +57,14 @@ export function concatChunks(chunks: Float32Array[]): Float32Array {
   return out;
 }
 
-/** File names for recordings: one WAV per attempt, named after the phrase. */
+/** File names for recordings: one WAV per attempt, named after the phrase and the measurement run (A/B). */
 export function wavFileName(
   phraseId: string | null,
   condition: string,
   repetition: number,
+  run?: string,
 ): string {
   const base = phraseId ?? 'trial';
-  return `${base}_${condition}_r${repetition}.wav`.replace(/[^A-Za-z0-9._-]/g, '_');
+  const suffix = run === undefined || run === '' ? '' : `_run${run}`;
+  return `${base}_${condition}_r${repetition}${suffix}.wav`.replace(/[^A-Za-z0-9._-]/g, '_');
 }

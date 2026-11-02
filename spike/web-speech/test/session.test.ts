@@ -143,5 +143,7 @@ describe('wav', () => {
     expect(Array.from(concatChunks([new Float32Array([1, 2]), new Float32Array([3])]))).toEqual([1, 2, 3]);
     expect(wavFileName('p05-01', 'noisy', 2)).toBe('p05-01_noisy_r2.wav');
     expect(wavFileName(null, 'silence', 3)).toBe('trial_silence_r3.wav');
+    expect(wavFileName('p05-01', 'noisy', 2, 'B')).toBe('p05-01_noisy_r2_runB.wav');
+    expect(wavFileName(null, 'noise', 1, 'A')).toBe('trial_noise_r1_runA.wav');
   });
 });

@@ -11,8 +11,9 @@ export interface ClipName {
   fake: boolean;
 }
 
-// matches the names written by spike/web-speech: p05-01_noisy_r2.wav, trial_silence_r3.wav
-const NAME = /^(.+?)_(quiet|noisy|silence|noise)_r(\d+)(\.fake)?\.wav$/i;
+// matches the names written by spike/web-speech: p05-01_noisy_r2_runB.wav, trial_silence_r3_runB.wav
+// (the `_runA`/`_runB` part is optional: older clips do not carry the run)
+const NAME = /^(.+?)_(quiet|noisy|silence|noise)_r(\d+)(?:_run[A-Za-z0-9]+)?(\.fake)?\.wav$/i;
 
 export function parseClipName(file: string): ClipName | undefined {
   const match = NAME.exec(file);
