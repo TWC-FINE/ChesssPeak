@@ -88,3 +88,18 @@ Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-
 - [ ] **Prueba en Chrome** con las mismas frases (pendiente; todo se midió en Edge 156).
 - [ ] **Posible corrida nueva declarada** con un modelo `small` cuantizado para bajar la latencia de Whisper: se declara antes de medir, con su propia regla de lectura.
 - [ ] Revisar con el corpus v1 los fallos de A anotados en la sección 3 (`toma` + letra fundidos, «alfil» partido, «peone»).
+
+## 8. Equipo de referencia de la latencia de Whisper
+
+Las cifras de latencia de Whisper de [spike-run-b.md](spike-run-b.md) (`small` con prompt: p50 2,91 s, p95 3,06 s; `base`: 0,83 s / 0,92 s) se midieron el 2 de noviembre de 2026 en este equipo, que es la referencia:
+
+| Componente | Valor |
+|---|---|
+| CPU | Intel Core i5-12400F (12.ª generación) |
+| Núcleos / hilos | 6 núcleos / 12 hilos (reloj base 2,5 GHz según Windows) |
+| RAM | 15,8 GB (16 GB) |
+| Placa | Gigabyte Z690 AORUS ELITE AX DDR4 |
+| GPU | AMD Radeon RX 6700 XT (no se usó: el binario `whisper-bin-x64` b5454 infiere en CPU) |
+| Sistema | Windows 10 Pro |
+
+**En otros equipos la latencia será distinta.** Depende sobre todo de la CPU, los hilos y la carga de fondo (por ejemplo, el navegador y la partida abiertos); un equipo más lento o con menos núcleos tendrá más latencia con `small`, y uno más rápido, menos. Además, la cifra es solo inferencia (no incluye grabación ni transporte HTTP), así que la latencia real de extremo a extremo es mayor en cualquier equipo. Las cifras informales de la sección 4 se tomaron en otro equipo («esta laptop», según esa nota) con clips sintéticos y no son comparables con estas.
