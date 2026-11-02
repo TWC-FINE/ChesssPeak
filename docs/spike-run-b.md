@@ -20,6 +20,8 @@ Solo dos cosas:
 
 Además, el arnés pasa a **registrar** dos datos que no alteran el comportamiento: el tiempo entre pulsar y `onstart` en cada intento, y el retardo y la etiqueta de corrida en los metadatos de cada JSON. Es instrumentación, no una condición experimental.
 
+**Corrección del guardado de audio (2 de noviembre de 2026, antes de medir B).** El arnés perdía la carpeta de los WAV al recargar la página y no avisaba cuando un WAV no se guardaba. Se corrigió: la carpeta se recuerda, los fallos de guardado se muestran en pantalla y el nombre del WAV incluye la corrida (`..._runB.wav`). No cambia nada de lo declarado aquí: condiciones, bloques, criterios, reglas de lectura, parser y corpus siguen igual.
+
 Lo demás se mantiene igual que en la corrida A: mismo parser (etiqueta `spike-parser-freeze`), mismo corpus v0, mismos parámetros del parser (`threshold` 1, `margin` 0,25, `rankPenalty` 0,3, `nato` falso), idioma `es-CO`, 5 alternativas, mismo hablante, mismo micrófono, mismo tipo de ruido de fondo y el mismo navegador (Edge 156; se comprobará en el `userAgent` de cada archivo).
 
 ## Qué se mide
