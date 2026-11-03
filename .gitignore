@@ -23,3 +23,6 @@ recordings/
 # misc
 *.log
 .DS_Store
+
+# generated Prisma client
+server/src/generated/
