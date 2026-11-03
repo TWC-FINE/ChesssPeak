@@ -24,6 +24,8 @@ export const gameStateSchema = z.object({
   gameId: gameIdSchema,
   fen: fenSchema,
   moves: z.array(moveRecordSchema),
+  /** Half-moves played so far; 0 at the starting position. The next `game:move` must carry ply `plyCount + 1`. */
+  plyCount: z.number().int().min(0),
   status: gameStatusSchema,
   turn: colorSchema,
   seats: z.object({ white: seatSchema.nullable(), black: seatSchema.nullable() }),

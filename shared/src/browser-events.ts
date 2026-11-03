@@ -33,8 +33,8 @@ export const csEventSchemas = {
     v,
     gameId: gameIdSchema,
     fen: fenSchema,
-    /** Last ply played; 0 at the starting position. */
-    ply: z.number().int().min(0),
+    /** Half-moves played so far; 0 at the starting position. The next move is ply `plyCount + 1`. */
+    plyCount: z.number().int().min(0),
     turn: colorSchema,
     yourColor: playerViewSchema,
   }),

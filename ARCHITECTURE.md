@@ -60,7 +60,7 @@ Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`
 ## 3. Flujo de una jugada por voz
 
 ```
-mf-game: cs:position (FEN, ply, turno) ──► document
+mf-game: cs:position (FEN, plyCount, turno) ──► document
 mf-voice-input: botón pulsado → SpeechRecognizer.recognize()
    → (Web Speech: 400 ms de espera tras soltar, antes de stop())
    → texto + alternativas

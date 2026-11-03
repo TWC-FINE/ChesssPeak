@@ -45,6 +45,7 @@ const state = {
   gameId: 'g1',
   fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
   moves: [{ ply: 1, uci: 'e2e4', san: 'e4' }],
+  plyCount: 1,
   status: 'active',
   turn: 'black',
   seats: { white: { displayName: 'Ana', connected: true }, black: null },
@@ -111,6 +112,14 @@ describe('server → client (tolerant)', () => {
     expect(gameStateSchema.safeParse(state).success).toBe(true);
     const newer = gameStateSchema.parse({ ...state, clock: { white: 60 } });
     expect('clock' in newer).toBe(false);
+  });
+
+  it('counts half-moves with plyCount, 0 at the start and never negative', () => {
+    expect(gameStateSchema.safeParse({ ...state, moves: [], plyCount: 0 }).success).toBe(true);
+    expect(gameStateSchema.safeParse({ ...state, plyCount: -1 }).success).toBe(false);
+    expect(gameStateSchema.safeParse({ ...state, plyCount: undefined }).success).toBe(false);
+    // game:move carries the ply being made: plyCount + 1
+    expect(gameMoveSchema.safeParse({ gameId: 'g1', uci: 'g8f6', ply: state.plyCount + 1 }).success).toBe(true);
   });
 
   it('uses the Postgres statuses and rejects the old names', () => {

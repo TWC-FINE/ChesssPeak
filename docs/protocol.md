@@ -34,7 +34,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 | Evento | Payload | Emite | Escucha | Errores posibles (`game:error`) |
 |---|---|---|---|---|
 | `game:join` | `{ gameId }` | `<mf-game>` | servidor | `not_found`, `unauthorized` |
-| `game:move` | `{ gameId, uci, ply }`; `uci` cumple `^[a-h][1-8][a-h][1-8][qrbn]?$`; `ply` entero ≥ 1 (el de la jugada que se hace) | `<mf-game>`, tras `cs:move-confirmed` | servidor | `not_found`, `unauthorized`, `not_your_turn`, `stale_ply`, `illegal` |
+| `game:move` | `{ gameId, uci, ply }`; `uci` cumple `^[a-h][1-8][a-h][1-8][qrbn]?$`; `ply` entero ≥ 1: la media jugada que se hace, que debe ser `plyCount + 1` | `<mf-game>`, tras `cs:move-confirmed` | servidor | `not_found`, `unauthorized`, `not_your_turn`, `stale_ply`, `illegal` |
 | `game:resign` | `{ gameId }` | `<mf-game>` | servidor | `not_found`, `unauthorized` |
 | `voice:attempt` | `VoiceAttempt` sin `player` ni `createdAt`: `gameId, ply, fen, lang, recognizer, alternatives[], transcript, normalized, candidates[≤3], resolvedUci, expectedUci?, outcome, accepted, tryIndex, latency, session` | shell (reenvía `cs:voice-attempt`) | servidor (`voice_attempts`) | se descarta si no valida; no responde |
 
@@ -42,7 +42,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 
 | Evento | Payload | Emite | Escucha | Cuándo |
 |---|---|---|---|---|
-| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], status, turn, seats{ white, black }, yourColor }`; cada asiento es `{ displayName, connected }` o `null` | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
+| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor }`; cada asiento es `{ displayName, connected }` o `null` | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
 | `game:moved` | `{ gameId, ply, uci, san, fen }` | servidor | `<mf-game>` (los dos jugadores) | tras una jugada válida |
 | `game:end` | `{ gameId, result, termination }` | servidor | `<mf-game>` | fin de la partida |
 | `game:error` | `{ code, message }` | servidor | `<mf-game>` | la petición se rechaza; el estado no cambia |
@@ -58,6 +58,20 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
   - `unauthorized`: la identidad no tiene asiento o no puede hacer eso;
   - `not_found`: la partida no existe.
 
+### `plyCount` y `ply`
+
+- **`plyCount`** (en `game:state` y `cs:position`): cuántas media jugadas se han jugado ya. Vale **0** en la posición inicial.
+- **`ply`** (en `game:move`, `game:moved`, `moves[]`, `cs:move-*`): el número de **una** media jugada concreta. La primera de las blancas es `ply: 1`.
+- Una jugada nueva debe llevar `ply = plyCount + 1`; si no, el servidor responde `stale_ply`.
+
+**Ejemplo.** Tras `1. e4 e5` hay `plyCount: 2` y le toca a las blancas. Para jugar `2. Nf3`:
+
+```json
+{ "gameId": "g1", "uci": "g1f3", "ply": 3 }
+```
+
+Tras aceptarla, `game:moved` trae `ply: 3` y el siguiente `game:state` o `cs:position` trae `plyCount: 3`.
+
 ## 4. Eventos del navegador (`cs:*`, todos con `v: 1`)
 
 Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se escuchan en `document`. **Mínimo privilegio:** solo `<mf-game>` tiene el socket; `<mf-voice-input>` y `<mf-history>` solo hablan por estos eventos.
@@ -65,7 +79,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 | Evento | Payload | Emite | Escucha |
 |---|---|---|---|
 | `cs:mf-ready` | `{ v, name }` | cada microfrontend al registrarse | shell |
-| `cs:position` | `{ v, gameId, fen, ply, turn, yourColor }`; `ply` = última jugada hecha (0 al inicio). **Solo el FEN**: sin listas de jugadas legales | `<mf-game>`, tras cada cambio | `<mf-voice-input>` |
+| `cs:position` | `{ v, gameId, fen, plyCount, turn, yourColor }`; `plyCount` = media jugadas jugadas hasta ahora (0 al inicio). **Solo el FEN**: sin listas de jugadas legales | `<mf-game>`, tras cada cambio | `<mf-voice-input>` |
 | `cs:move-candidate` | `{ v, gameId, ply, uci, san, source }`; `source` = `voice` \| `text` | `<mf-voice-input>` | `<mf-game>` (dibuja la flecha) |
 | `cs:move-confirmed` | `{ v, gameId, ply, uci, source }` | `<mf-voice-input>` (voz «sí» o botón) | `<mf-game>` (envía `game:move`) |
 | `cs:move-cancelled` | `{ v, gameId, ply, reason }`; `reason` = `user` \| `position-changed` \| `game-ended` | `<mf-voice-input>` | `<mf-game>` (borra la flecha) |
@@ -97,7 +111,7 @@ sequenceDiagram
     participant S as Servidor
     participant RV as Rival (su mf-game)
 
-    MG-->>MV: cs:position { fen, ply: 4, turn, yourColor }
+    MG-->>MV: cs:position { fen, plyCount: 4, turn, yourColor }
     J->>MV: mantiene pulsado y dice «caballo efe tres»
     MV-->>SH: cs:voice-status { listening }
     J->>MV: suelta el botón
@@ -117,7 +131,7 @@ sequenceDiagram
         S-->>MG: game:moved { ply: 5, uci, san, fen }
         S-->>RV: game:moved { ply: 5, uci, san, fen }
         MG-->>MH: cs:move-applied { ply: 5, uci, san, fen }
-        MG-->>MV: cs:position { fen, ply: 5, turn }
+        MG-->>MV: cs:position { fen, plyCount: 5, turn }
     else rechazada
         S-->>MG: game:error { code: not_your_turn | illegal | stale_ply | unauthorized | not_found }
         Note over MG: borra la flecha y muestra el error; la posición no cambia

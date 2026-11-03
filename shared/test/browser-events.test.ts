@@ -35,10 +35,13 @@ describe('cs:* events (v1)', () => {
     expect(csEventSchemas['cs:mf-ready'].safeParse({ v: 1, name: 'mf-other' }).success).toBe(false);
   });
 
-  it('cs:position carries only the FEN and the turn data, ply 0 at the start', () => {
-    const position = { ...base, fen: START_FEN, ply: 0, turn: 'white', yourColor: 'white' };
+  it('cs:position carries only the FEN and the turn data, plyCount 0 at the start', () => {
+    const position = { ...base, fen: START_FEN, plyCount: 0, turn: 'white', yourColor: 'white' };
     expect(csEventSchemas['cs:position'].safeParse(position).success).toBe(true);
-    expect(csEventSchemas['cs:position'].safeParse({ ...position, ply: -1 }).success).toBe(false);
+    expect(csEventSchemas['cs:position'].safeParse({ ...position, plyCount: -1 }).success).toBe(false);
+    expect(csEventSchemas['cs:position'].safeParse({ ...position, plyCount: undefined }).success).toBe(false);
+    // the old name is not part of v1: it is dropped, not read
+    expect('ply' in csEventSchemas['cs:position'].parse({ ...position, ply: 3 })).toBe(false);
     expect('legalMoves' in csEventSchemas['cs:position'].parse({ ...position, legalMoves: ['e2e4'] })).toBe(false);
   });
 
