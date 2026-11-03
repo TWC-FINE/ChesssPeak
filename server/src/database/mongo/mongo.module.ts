@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MONGO_CONNECT_OPTIONS, mongoUri } from './mongo.config';
 import { GameMovesRepository } from './game-moves.repository';
 import { GameMoves, GameMovesSchema } from './game-moves.schema';
 import { VoiceAttempt, VoiceAttemptSchema } from './voice-attempt.schema';
@@ -13,10 +14,9 @@ import { VoiceAttempt, VoiceAttemptSchema } from './voice-attempt.schema';
   imports: [
     MongooseModule.forRootAsync({
       useFactory: () => ({
-        uri: process.env.MONGO_URI ?? 'mongodb://127.0.0.1:27017/unset',
+        uri: mongoUri(),
         lazyConnection: true,
-        serverSelectionTimeoutMS: 1000,
-        connectTimeoutMS: 1000,
+        ...MONGO_CONNECT_OPTIONS,
         // a failed first connection must not crash the process with an unhandled error
         onConnectionCreate: (connection) => {
           connection.on('error', () => undefined);

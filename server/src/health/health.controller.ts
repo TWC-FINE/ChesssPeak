@@ -1,10 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
+import { HealthService, type HealthReport } from './health.service';
 
 @Controller('health')
 export class HealthController {
-  /** State of the process only; the databases are checked later. */
+  constructor(private readonly health: HealthService) {}
+
+  /** Always 200: `status` is `degraded` when a database is down. */
   @Get()
-  check(): { status: 'ok'; uptimeSeconds: number } {
-    return { status: 'ok', uptimeSeconds: Math.round(process.uptime()) };
+  check(): Promise<HealthReport> {
+    return this.health.check();
   }
 }
