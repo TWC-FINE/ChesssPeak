@@ -1,0 +1,690 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "2026-11-01T05-42-02-672Z",
+    "recognizer": "webspeech",
+    "createdAt": "2026-11-01T05:42:02.672Z",
+    "lang": "es-CO",
+    "maxAlternatives": 5,
+    "corpusVersion": "v0",
+    "parser": {
+      "threshold": 1,
+      "margin": 0.25,
+      "rankPenalty": 0.3,
+      "nato": false
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0"
+  },
+  "attempts": [
+    {
+      "id": "dev-quiet:p01-01:r1",
+      "phraseId": "p01-01",
+      "positionId": "p01",
+      "split": "dev",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "E cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:46:11.289Z",
+      "expectedUci": "e2e4",
+      "latency": {
+        "recognitionMs": 160,
+        "resolveMs": 4.2,
+        "totalMs": 165
+      }
+    },
+    {
+      "id": "dev-quiet:p01-02:r1",
+      "phraseId": "p01-02",
+      "positionId": "p01",
+      "split": "dev",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": "caballo efe tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo, F 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:46:24.014Z",
+      "expectedUci": "g1f3",
+      "latency": {
+        "recognitionMs": 157,
+        "resolveMs": 1.2,
+        "totalMs": 159
+      }
+    },
+    {
+      "id": "dev-quiet:p01-03:r1",
+      "phraseId": "p01-03",
+      "positionId": "p01",
+      "split": "dev",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": "be dos be tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "2 b 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:46:41.261Z",
+      "expectedUci": "b2b3",
+      "latency": {
+        "recognitionMs": 0,
+        "resolveMs": 1.1,
+        "totalMs": 1
+      }
+    },
+    {
+      "id": "dev-quiet:p01-04:r1",
+      "phraseId": "p01-04",
+      "positionId": "p01",
+      "split": "dev",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": "hoy hace mucho calor",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Hoy hace mucho calor.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:46:48.890Z",
+      "latency": {
+        "recognitionMs": 163,
+        "resolveMs": 6,
+        "totalMs": 169
+      }
+    },
+    {
+      "id": "dev-quiet:p02-01:r1",
+      "phraseId": "p02-01",
+      "positionId": "p02",
+      "split": "dev",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:46:59.072Z",
+      "expectedUci": "e1g1",
+      "latency": {
+        "recognitionMs": 179,
+        "resolveMs": 1.3,
+        "totalMs": 180
+      }
+    },
+    {
+      "id": "dev-quiet:p02-02:r1",
+      "phraseId": "p02-02",
+      "positionId": "p02",
+      "split": "dev",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "alfil toma efe siete",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma F 7.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:47:06.000Z",
+      "expectedUci": "c4f7",
+      "latency": {
+        "recognitionMs": 172,
+        "resolveMs": 1.4,
+        "totalMs": 173
+      }
+    },
+    {
+      "id": "dev-quiet:p02-03:r1",
+      "phraseId": "p02-03",
+      "positionId": "p02",
+      "split": "dev",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "caballo toma e cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo toma e 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:47:14.999Z",
+      "expectedUci": "f3e5",
+      "latency": {
+        "recognitionMs": 250,
+        "resolveMs": 2.6,
+        "totalMs": 252
+      }
+    },
+    {
+      "id": "dev-quiet:p02-04:r1",
+      "phraseId": "p02-04",
+      "positionId": "p02",
+      "split": "dev",
+      "fen": "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "pues caballo ge cinco por favor",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Pues caballo g 5 por favor.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:47:25.773Z",
+      "expectedUci": "f3g5",
+      "latency": {
+        "recognitionMs": 164,
+        "resolveMs": 4.5,
+        "totalMs": 169
+      }
+    },
+    {
+      "id": "dev-quiet:p03-01:r1",
+      "phraseId": "p03-01",
+      "positionId": "p03",
+      "split": "dev",
+      "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3",
+      "spoken": "caballo be de dos",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo b d 2.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:47:33.796Z",
+      "expectedUci": "b1d2",
+      "latency": {
+        "recognitionMs": 163,
+        "resolveMs": 1.2,
+        "totalMs": 164
+      }
+    },
+    {
+      "id": "dev-quiet:p03-02:r1",
+      "phraseId": "p03-02",
+      "positionId": "p03",
+      "split": "dev",
+      "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3",
+      "spoken": "caballo efe de dos",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo F d 2.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:47:39.874Z",
+      "expectedUci": "f3d2",
+      "latency": {
+        "recognitionMs": 204,
+        "resolveMs": 1,
+        "totalMs": 205
+      }
+    },
+    {
+      "id": "dev-quiet:p03-03:r1",
+      "phraseId": "p03-03",
+      "positionId": "p03",
+      "split": "dev",
+      "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3",
+      "spoken": "peón e tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón e 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:47:46.847Z",
+      "expectedUci": "e2e3",
+      "latency": {
+        "recognitionMs": 164,
+        "resolveMs": 0.6,
+        "totalMs": 165
+      }
+    },
+    {
+      "id": "dev-quiet:p03-04:r1",
+      "phraseId": "p03-04",
+      "positionId": "p03",
+      "split": "dev",
+      "fen": "rnbqkb1r/ppp1pppp/5n2/3p4/3P4/5N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3",
+      "spoken": "caballo ce tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo c 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:47:52.800Z",
+      "expectedUci": "b1c3",
+      "latency": {
+        "recognitionMs": 142,
+        "resolveMs": 1,
+        "totalMs": 143
+      }
+    },
+    {
+      "id": "dev-quiet:p04-01:r1",
+      "phraseId": "p04-01",
+      "positionId": "p04",
+      "split": "dev",
+      "fen": "7k/4P3/8/8/8/8/8/6K1 w - - 0 1",
+      "spoken": "peón e ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón e 8 corona dama.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:48:00.730Z",
+      "expectedUci": "e7e8q",
+      "latency": {
+        "recognitionMs": 211,
+        "resolveMs": 0.9,
+        "totalMs": 212
+      }
+    },
+    {
+      "id": "dev-quiet:p04-02:r1",
+      "phraseId": "p04-02",
+      "positionId": "p04",
+      "split": "dev",
+      "fen": "7k/4P3/8/8/8/8/8/6K1 w - - 0 1",
+      "spoken": "e siete e ocho corona a caballo",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "E 7 e 8 corona a caballo.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:48:37.779Z",
+      "expectedUci": "e7e8n",
+      "latency": {
+        "recognitionMs": 188,
+        "resolveMs": 0.7,
+        "totalMs": 189
+      }
+    },
+    {
+      "id": "dev-quiet:p04-03:r1",
+      "phraseId": "p04-03",
+      "positionId": "p04",
+      "split": "dev",
+      "fen": "7k/4P3/8/8/8/8/8/6K1 w - - 0 1",
+      "spoken": "rey ge dos",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Rey g dos.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:48:47.466Z",
+      "expectedUci": "g1g2",
+      "latency": {
+        "recognitionMs": 182,
+        "resolveMs": 0.7,
+        "totalMs": 182
+      }
+    },
+    {
+      "id": "dev-quiet:p06-01:r1",
+      "phraseId": "p06-01",
+      "positionId": "p06",
+      "split": "dev",
+      "fen": "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+      "spoken": "caballo toma de cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo toma de cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:48:53.185Z",
+      "expectedUci": "f3d4",
+      "latency": {
+        "recognitionMs": 166,
+        "resolveMs": 1.4,
+        "totalMs": 167
+      }
+    },
+    {
+      "id": "dev-quiet:p06-02:r1",
+      "phraseId": "p06-02",
+      "positionId": "p06",
+      "split": "dev",
+      "fen": "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+      "spoken": "alfil be cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Alfil b 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:48:58.534Z",
+      "expectedUci": "f1b5",
+      "latency": {
+        "recognitionMs": 147,
+        "resolveMs": 1.5,
+        "totalMs": 148
+      }
+    },
+    {
+      "id": "dev-quiet:p06-03:r1",
+      "phraseId": "p06-03",
+      "positionId": "p06",
+      "split": "dev",
+      "fen": "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+      "spoken": "dama toma de cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Dama toma.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:03.954Z",
+      "expectedUci": "d1d4",
+      "latency": {
+        "recognitionMs": 198,
+        "resolveMs": 1,
+        "totalMs": 199
+      }
+    },
+    {
+      "id": "dev-quiet:p06-04:r1",
+      "phraseId": "p06-04",
+      "positionId": "p06",
+      "split": "dev",
+      "fen": "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4",
+      "spoken": "peón e cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón e 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:08.805Z",
+      "expectedUci": "e4e5",
+      "latency": {
+        "recognitionMs": 0,
+        "resolveMs": 1,
+        "totalMs": 1
+      }
+    },
+    {
+      "id": "dev-quiet:p07-01:r1",
+      "phraseId": "p07-01",
+      "positionId": "p07",
+      "split": "dev",
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
+      "spoken": "de uno de ocho",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "D 1 d 8.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:15.936Z",
+      "expectedUci": "d1d8",
+      "latency": {
+        "recognitionMs": 189,
+        "resolveMs": 0.8,
+        "totalMs": 189
+      }
+    },
+    {
+      "id": "dev-quiet:p07-02:r1",
+      "phraseId": "p07-02",
+      "positionId": "p07",
+      "split": "dev",
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
+      "spoken": "torre de ocho",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre, dh.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:21.505Z",
+      "expectedUci": "d1d8",
+      "latency": {
+        "recognitionMs": 188,
+        "resolveMs": 0.8,
+        "totalMs": 189
+      }
+    },
+    {
+      "id": "dev-quiet:p07-03:r1",
+      "phraseId": "p07-03",
+      "positionId": "p07",
+      "split": "dev",
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
+      "spoken": "efe dos efe cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "F 2 F 4.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:29.482Z",
+      "expectedUci": "f2f4",
+      "latency": {
+        "recognitionMs": 153,
+        "resolveMs": 0.8,
+        "totalMs": 154
+      }
+    },
+    {
+      "id": "dev-quiet:p07-04:r1",
+      "phraseId": "p07-04",
+      "positionId": "p07",
+      "split": "dev",
+      "fen": "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
+      "spoken": "no sé qué decir ahora",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "No sé qué decir ahora.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:35.934Z",
+      "latency": {
+        "recognitionMs": 137,
+        "resolveMs": 2.8,
+        "totalMs": 140
+      }
+    },
+    {
+      "id": "dev-quiet:p10-01:r1",
+      "phraseId": "p10-01",
+      "positionId": "p10",
+      "split": "dev",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "caballo ge cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo g 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:43.247Z",
+      "expectedUci": "f3g5",
+      "latency": {
+        "recognitionMs": 158,
+        "resolveMs": 1,
+        "totalMs": 159
+      }
+    },
+    {
+      "id": "dev-quiet:p10-02:r1",
+      "phraseId": "p10-02",
+      "positionId": "p10",
+      "split": "dev",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "peón de tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón de 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:48.038Z",
+      "expectedUci": "d2d3",
+      "latency": {
+        "recognitionMs": 165,
+        "resolveMs": 0.7,
+        "totalMs": 166
+      }
+    },
+    {
+      "id": "dev-quiet:p10-03:r1",
+      "phraseId": "p10-03",
+      "positionId": "p10",
+      "split": "dev",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "de dos de cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Dedos de cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:53.112Z",
+      "expectedUci": "d2d4",
+      "latency": {
+        "recognitionMs": 153,
+        "resolveMs": 1.9,
+        "totalMs": 155
+      }
+    },
+    {
+      "id": "dev-quiet:p10-04:r1",
+      "phraseId": "p10-04",
+      "positionId": "p10",
+      "split": "dev",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "sí",
+      "expectedOutcome": "command",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Sí.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:49:57.635Z",
+      "expectedCommand": "yes",
+      "latency": {
+        "recognitionMs": 156,
+        "resolveMs": 0.1,
+        "totalMs": 156
+      }
+    },
+    {
+      "id": "dev-quiet:p10-05:r1",
+      "phraseId": "p10-05",
+      "positionId": "p10",
+      "split": "dev",
+      "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+      "spoken": "cancelar",
+      "expectedOutcome": "command",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Cancelar.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T05:50:02.506Z",
+      "expectedCommand": "cancel",
+      "latency": {
+        "recognitionMs": 178,
+        "resolveMs": 0.1,
+        "totalMs": 178
+      }
+    }
+  ]
+}

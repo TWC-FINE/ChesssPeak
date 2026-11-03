@@ -1,0 +1,1357 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "2026-11-02T17-24-51-178Z",
+    "recognizer": "webspeech",
+    "createdAt": "2026-11-02T17:24:51.178Z",
+    "lang": "es-CO",
+    "maxAlternatives": 5,
+    "corpusVersion": "v0",
+    "parser": {
+      "threshold": 1,
+      "margin": 0.25,
+      "rankPenalty": 0.3,
+      "nato": false
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "run": "B",
+    "releaseDelayMs": 400
+  },
+  "attempts": [
+    {
+      "id": "test-quiet:p05-01:r1",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:29.117Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 550,
+        "resolveMs": 2.5,
+        "totalMs": 553
+      },
+      "audioFile": "p05-01_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-02:r1",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "En Roque largo.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:32.848Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 603,
+        "resolveMs": 2.7,
+        "totalMs": 606
+      },
+      "audioFile": "p05-02_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-03:r1",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo b cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:36.936Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 597,
+        "resolveMs": 0.9,
+        "totalMs": 598
+      },
+      "audioFile": "p05-03_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-04:r1",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma F 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:41.045Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 555,
+        "resolveMs": 1.3,
+        "totalMs": 556
+      },
+      "audioFile": "p05-04_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-05:r1",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón d 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:45.147Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 565,
+        "resolveMs": 0.9,
+        "totalMs": 566
+      },
+      "audioFile": "p05-05_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-06:r1",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Mañana tengo examen de física.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:49.601Z",
+      "latency": {
+        "recognitionMs": 612,
+        "resolveMs": 7.3,
+        "totalMs": 619
+      },
+      "audioFile": "p05-06_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-01:r1",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre a D 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:53.627Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 597,
+        "resolveMs": 1.1,
+        "totalMs": 598
+      },
+      "audioFile": "p08-01_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-02:r1",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre F d 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:27:59.027Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 573,
+        "resolveMs": 1,
+        "totalMs": 574
+      },
+      "audioFile": "p08-02_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-03:r1",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "D Thomas c 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:03.268Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 400,
+        "resolveMs": 2.4,
+        "totalMs": 402
+      },
+      "audioFile": "p08-03_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-04:r1",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:07.806Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 563,
+        "resolveMs": 0.7,
+        "totalMs": 564
+      },
+      "audioFile": "p08-04_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-05:r1",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Hola. Buenos días a todos.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:12.423Z",
+      "latency": {
+        "recognitionMs": 497,
+        "resolveMs": 6.8,
+        "totalMs": 504
+      },
+      "audioFile": "p08-05_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-01:r1",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "B 7 tomas c 8 corona a dama.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:18.191Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 547,
+        "resolveMs": 4.6,
+        "totalMs": 552
+      },
+      "audioFile": "p09-01_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-02:r1",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "B 7 toma a 8 corona a torre.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:23.777Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 600,
+        "resolveMs": 1.6,
+        "totalMs": 602
+      },
+      "audioFile": "p09-02_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-03:r1",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "B 7 b 8 corona Adama.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:28.820Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 563,
+        "resolveMs": 4.9,
+        "totalMs": 568
+      },
+      "audioFile": "p09-03_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-04:r1",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Rey h 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:32.777Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 503,
+        "resolveMs": 1.1,
+        "totalMs": 504
+      },
+      "audioFile": "p09-04_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-05:r1",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:36.464Z",
+      "latency": {
+        "recognitionMs": 510,
+        "resolveMs": 6.9,
+        "totalMs": 516
+      },
+      "audioFile": "p09-05_quiet_r1_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-01:r2",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:40.317Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 557,
+        "resolveMs": 0.6,
+        "totalMs": 558
+      },
+      "audioFile": "p05-01_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-02:r2",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "En Roque largo.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:44.568Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 517,
+        "resolveMs": 2.2,
+        "totalMs": 519
+      },
+      "audioFile": "p05-02_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-03:r2",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Caballo b cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:48.467Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 367,
+        "resolveMs": 0.7,
+        "totalMs": 367
+      },
+      "audioFile": "p05-03_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-04:r2",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma fres.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:52.729Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 565,
+        "resolveMs": 2.6,
+        "totalMs": 567
+      },
+      "audioFile": "p05-04_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-05:r2",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Peón d 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:28:56.606Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 471,
+        "resolveMs": 0.7,
+        "totalMs": 471
+      },
+      "audioFile": "p05-05_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-06:r2",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Mañana tengo examen de física.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:00.722Z",
+      "latency": {
+        "recognitionMs": 575,
+        "resolveMs": 6.5,
+        "totalMs": 582
+      },
+      "audioFile": "p05-06_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-01:r2",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Torre a D 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:04.454Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 541,
+        "resolveMs": 0.7,
+        "totalMs": 542
+      },
+      "audioFile": "p08-01_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-02:r2",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Torre F d 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:08.708Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 438,
+        "resolveMs": 0.8,
+        "totalMs": 439
+      },
+      "audioFile": "p08-02_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-03:r2",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "D Thomas c 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:12.658Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 411,
+        "resolveMs": 2.4,
+        "totalMs": 414
+      },
+      "audioFile": "p08-03_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-04:r2",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:16.297Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 563,
+        "resolveMs": 0.6,
+        "totalMs": 564
+      },
+      "audioFile": "p08-04_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-05:r2",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Hola. Buenos días a todos.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:20.492Z",
+      "latency": {
+        "recognitionMs": 569,
+        "resolveMs": 6.5,
+        "totalMs": 575
+      },
+      "audioFile": "p08-05_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-01:r2",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "B 7 tomase 8 corona a dama.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:25.691Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 568,
+        "resolveMs": 3.9,
+        "totalMs": 571
+      },
+      "audioFile": "p09-01_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-02:r2",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "B 7 toma a 8 corona a torre.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:30.367Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 635,
+        "resolveMs": 1.5,
+        "totalMs": 637
+      },
+      "audioFile": "p09-02_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-03:r2",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "B 7 b 8 corona Adama.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:34.567Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 591,
+        "resolveMs": 5.4,
+        "totalMs": 596
+      },
+      "audioFile": "p09-03_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-04:r2",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Rey h 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:38.179Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 567,
+        "resolveMs": 0.8,
+        "totalMs": 567
+      },
+      "audioFile": "p09-04_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-05:r2",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:41.944Z",
+      "latency": {
+        "recognitionMs": 547,
+        "resolveMs": 7,
+        "totalMs": 554
+      },
+      "audioFile": "p09-05_quiet_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-01:r3",
+      "phraseId": "p05-01",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque corto",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Enroque corto.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:45.926Z",
+      "expectedUci": "e8g8",
+      "latency": {
+        "recognitionMs": 515,
+        "resolveMs": 0.7,
+        "totalMs": 516
+      },
+      "audioFile": "p05-01_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-02:r3",
+      "phraseId": "p05-02",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "enroque largo",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "En Roque largo.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:49.464Z",
+      "expectedUci": "e8c8",
+      "latency": {
+        "recognitionMs": 586,
+        "resolveMs": 2.1,
+        "totalMs": 588
+      },
+      "audioFile": "p05-02_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-03:r3",
+      "phraseId": "p05-03",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "caballo be cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Caballo b cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:53.078Z",
+      "expectedUci": "c6b4",
+      "latency": {
+        "recognitionMs": 568,
+        "resolveMs": 0.9,
+        "totalMs": 569
+      },
+      "audioFile": "p05-03_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-04:r3",
+      "phraseId": "p05-04",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "alfil toma efe tres",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Al FIL toma F 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:29:57.057Z",
+      "expectedUci": "g4f3",
+      "latency": {
+        "recognitionMs": 551,
+        "resolveMs": 1,
+        "totalMs": 552
+      },
+      "audioFile": "p05-04_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-05:r3",
+      "phraseId": "p05-05",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "peón de cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Peón d 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:00.946Z",
+      "expectedUci": "d6d5",
+      "latency": {
+        "recognitionMs": 376,
+        "resolveMs": 0.7,
+        "totalMs": 377
+      },
+      "audioFile": "p05-05_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p05-06:r3",
+      "phraseId": "p05-06",
+      "positionId": "p05",
+      "split": "test",
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": "mañana tengo examen de física",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Mañana tengo examen de física.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:05.384Z",
+      "latency": {
+        "recognitionMs": 556,
+        "resolveMs": 6.9,
+        "totalMs": 563
+      },
+      "audioFile": "p05-06_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-01:r3",
+      "phraseId": "p08-01",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre a de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Torre a D 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:09.286Z",
+      "expectedUci": "a1d1",
+      "latency": {
+        "recognitionMs": 484,
+        "resolveMs": 0.8,
+        "totalMs": 485
+      },
+      "audioFile": "p08-01_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-02:r3",
+      "phraseId": "p08-02",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "torre efe de uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Torre fd 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:12.988Z",
+      "expectedUci": "f1d1",
+      "latency": {
+        "recognitionMs": 595,
+        "resolveMs": 0.8,
+        "totalMs": 596
+      },
+      "audioFile": "p08-02_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-03:r3",
+      "phraseId": "p08-03",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "de toma ce cinco",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "D Thomas c 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:17.042Z",
+      "expectedUci": "d4c5",
+      "latency": {
+        "recognitionMs": 534,
+        "resolveMs": 2.4,
+        "totalMs": 536
+      },
+      "audioFile": "p08-03_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-04:r3",
+      "phraseId": "p08-04",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "peón e cuatro",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Peón e cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:21.471Z",
+      "expectedUci": "e3e4",
+      "latency": {
+        "recognitionMs": 559,
+        "resolveMs": 0.7,
+        "totalMs": 560
+      },
+      "audioFile": "p08-04_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p08-05:r3",
+      "phraseId": "p08-05",
+      "positionId": "p08",
+      "split": "test",
+      "fen": "r4rk1/pp3ppp/2n1pn2/q1pp4/3P4/2P1PN2/PP3PPP/R4RK1 w - - 0 12",
+      "spoken": "hola buenos días a todos",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Hola. Buenos días a todos.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:26.073Z",
+      "latency": {
+        "recognitionMs": 560,
+        "resolveMs": 7.2,
+        "totalMs": 567
+      },
+      "audioFile": "p08-05_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-01:r3",
+      "phraseId": "p09-01",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma ce ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "B 7 tomase 8 corona a dama.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:31.500Z",
+      "expectedUci": "b7c8q",
+      "latency": {
+        "recognitionMs": 584,
+        "resolveMs": 3.9,
+        "totalMs": 588
+      },
+      "audioFile": "p09-01_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-02:r3",
+      "phraseId": "p09-02",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete toma a ocho corona a torre",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "B 7 toma a 8 corona a torre.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:36.698Z",
+      "expectedUci": "b7a8r",
+      "latency": {
+        "recognitionMs": 611,
+        "resolveMs": 1.4,
+        "totalMs": 612
+      },
+      "audioFile": "p09-02_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-03:r3",
+      "phraseId": "p09-03",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "be siete be ocho corona a dama",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "B 7 b 8 corona Adama.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:41.871Z",
+      "expectedUci": "b7b8q",
+      "latency": {
+        "recognitionMs": 640,
+        "resolveMs": 4.6,
+        "totalMs": 644
+      },
+      "audioFile": "p09-03_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-04:r3",
+      "phraseId": "p09-04",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "rey hache uno",
+      "expectedOutcome": "move",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Rey h 1.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:45.768Z",
+      "expectedUci": "g1h1",
+      "latency": {
+        "recognitionMs": 550,
+        "resolveMs": 0.9,
+        "totalMs": 551
+      },
+      "audioFile": "p09-04_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "test-quiet:p09-05:r3",
+      "phraseId": "p09-05",
+      "positionId": "p09",
+      "split": "test",
+      "fen": "r1b3k1/1P3ppp/8/8/8/8/5PPP/6K1 w - - 0 1",
+      "spoken": "voy a pensar un momento",
+      "expectedOutcome": "nomatch",
+      "condition": "quiet",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "Voy a pensar un momento.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:30:50.003Z",
+      "latency": {
+        "recognitionMs": 389,
+        "resolveMs": 7,
+        "totalMs": 396
+      },
+      "audioFile": "p09-05_quiet_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    }
+  ]
+}

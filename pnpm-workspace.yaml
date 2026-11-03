@@ -1,0 +1,8 @@
+packages:
+  - packages/*
+  - spike/*
+  - shared
+  - server
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false

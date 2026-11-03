@@ -5,7 +5,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 ## 1. Vista general
 
 ```
- Navegador (Chrome/Edge, Live Server :5500)
+ Navegador (Edge/Chrome; URL pública en Vercel, `pnpm serve:web` o Live Server :5500)
  ┌──────────────────────────────────────────────────────┐
  │ shell (TS vanilla): router, sesión, ÚNICO socket     │
  │  ├─ <mf-game>        tablero + jugadas (recibe socket)│
@@ -25,7 +25,9 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
  (Neon)       (Atlas M0)
 ```
 
-El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina del estudiante (Whisper). El servidor solo recibe jugadas en UCI y telemetría.
+El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de quien usa la aplicación (Whisper). El servidor solo recibe jugadas en UCI y telemetría.
+
+**Estado:** existen `packages/voice-parser/` y `spike/` (arnés de Web Speech y prototipo del agente de Whisper); `shared/`, `server/`, `web/` y `local-agent/` están por hacer.
 
 ## 2. Componentes
 
@@ -59,9 +61,10 @@ Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`
 
 ```
 mf-voice-input: botón pulsado → SpeechRecognizer.recognize()
+   → (Web Speech: 400 ms de espera tras soltar, antes de stop())
    → texto + alternativas
    → voice-parser.resolve(texto, FEN)   → move | ambiguous | nomatch | command
-   → mostrar flecha y pedir confirmación
+   → mostrar flecha y pedir confirmación (obligatoria)
    → cs:voice-move-confirmed   ──►  shell  ──►  mf-game
    → game:move (UCI) por socket ──►  server valida y actualiza GameRoom
    → game:state a ambos jugadores ◄── server
@@ -74,14 +77,16 @@ Interfaz `SpeechRecognizer` con adaptadores intercambiables:
 
 | Adaptador | Dónde corre | Uso |
 |---|---|---|
-| Web Speech API | Navegador (nube de Google) | Por defecto |
-| Whisper local | `local-agent` en `127.0.0.1:8765` | Módulo local obligatorio |
+| Web Speech API | Navegador (nube del navegador) | Por defecto, con retardo de 400 ms tras soltar (ADR 5) |
+| Whisper local | `local-agent` en `127.0.0.1:8765` | Alternativa seleccionable y módulo local obligatorio |
 | Fake | Tests | Determinista |
 | Caja de texto | Navegador | Respaldo |
 
-**Resolución:** se genera la forma hablada de cada jugada legal y se elige la más parecida a lo reconocido, con umbral, margen y detección de ambigüedad. Variante del español (código de Web Speech) pendiente de confirmar.
+**Resolución:** se genera la forma hablada de cada jugada legal y se elige la más parecida a lo reconocido, con umbral, margen y detección de ambigüedad. Idioma: `es-CO`. La confirmación del jugador es obligatoria con cualquier adaptador.
 
-**Whisper:** umbral mínimo de volumen y duración antes de transcribir. Modelo `base` por defecto, `small` si no alcanza. El binario y el modelo viven fuera del repo (rutas en `.env`). El navegador llama al agente con CORS y cabecera de acceso a red privada.
+**Whisper:** umbral mínimo de volumen y duración antes de transcribir. Modelo `small` con el prompt de ajedrez (sin prompt el acierto baja de 89,7 % a 61,5 %); latencia declarada: p50 2,91 s y p95 3,06 s solo de inferencia. El binario y el modelo viven fuera del repo (rutas en `.env`) y un script los instala en un solo comando. El navegador llama al agente con CORS y cabecera de acceso a red privada; desde una web pública puede bloquearse por el acceso a red local.
+
+**Parser:** las cifras del spike son de la versión `spike-parser-freeze`. Solo se modifica en un lote antes de la validación de la semana 4, registrando el hash usado.
 
 ## 5. Datos
 
@@ -108,7 +113,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 ## 6. Comunicación y contrato
 - **HTTP (REST):** `/auth/guest` (y `/auth/login` si se hace), `/health`.
 - **Socket.IO:** eventos de partida validados con zod en `shared/`. Un solo socket por cliente, abierto por el shell.
-- **Contrato v0 de `shared/`:** lo firman A y B el jue 5 de noviembre. Cambios posteriores solo por PR revisado por los dos.
+- **Contrato v0 de `shared/`:** borrador mínimo y versionado (`v: 1`) en un PR abierto el jue 5 de noviembre; lo firman A y B el lun 9. Cambios posteriores solo por PR revisado por los dos.
 - **CORS** (HTTP y Socket.IO): `http://127.0.0.1:5500`, `http://localhost:5500` y el dominio de Vercel.
 
 ## 7. Seguridad
@@ -125,10 +130,10 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 ## 9. Despliegue
 | Parte | Dónde |
 |---|---|
-| Backend | Render (una instancia; despertarla antes de la demo) |
+| Backend | Render (una instancia; despertarla antes de evaluar) |
 | Postgres / Mongo | Neon / Atlas M0 |
-| Web | Live Server en local (`web/dist`); Vercel deseable, no requisito |
-| `local-agent` | En la máquina del estudiante |
+| Web | Vercel (URL pública, núcleo); en local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`) o Live Server sobre `web/dist` |
+| `local-agent` | En la máquina de quien usa Whisper |
 
 ## 10. Decisiones (ADRs)
 Media página cada una, escritas cuando se toma la decisión: monolito modular; microfrontends con custom elements; dos bases de datos; resolución contra jugadas legales; `SpeechRecognizer` como Strategy; `local-agent` por HTTP (alternativa: WebSocket saliente); estado en memoria + write-behind; invitados con token firmado; GPL-3.0. Calendario en [PLAN.md](PLAN.md).

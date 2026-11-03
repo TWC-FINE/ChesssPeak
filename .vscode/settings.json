@@ -1,0 +1,13 @@
+{
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.host": "127.0.0.1",
+  "liveServer.settings.ignoreFiles": [
+    ".vscode/**",
+    "node_modules/**",
+    "**/*.ts",
+    "**/*.wav",
+    "**/*.map",
+    "spike/results/**",
+    "spike/recordings/**"
+  ]
+}

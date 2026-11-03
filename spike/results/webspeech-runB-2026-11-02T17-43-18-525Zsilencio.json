@@ -1,0 +1,292 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "2026-11-02T17-43-18-525Z",
+    "recognizer": "webspeech",
+    "createdAt": "2026-11-02T17:43:18.525Z",
+    "lang": "es-CO",
+    "maxAlternatives": 5,
+    "corpusVersion": "v0",
+    "parser": {
+      "threshold": 1,
+      "margin": 0.25,
+      "rankPenalty": 0.3,
+      "nato": false
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "run": "B",
+    "releaseDelayMs": 400
+  },
+  "attempts": [
+    {
+      "id": "silence:-:r1",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:06.642Z",
+      "latency": {
+        "recognitionMs": 510,
+        "resolveMs": 0.2,
+        "totalMs": 510
+      },
+      "audioFile": "trial_silence_r1_runB.wav",
+      "startupMs": 2,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r2",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:11.179Z",
+      "latency": {
+        "recognitionMs": 508,
+        "resolveMs": 0.1,
+        "totalMs": 509
+      },
+      "audioFile": "trial_silence_r2_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r3",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:14.889Z",
+      "latency": {
+        "recognitionMs": 516,
+        "resolveMs": 0,
+        "totalMs": 516
+      },
+      "audioFile": "trial_silence_r3_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r4",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 4,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:18.520Z",
+      "latency": {
+        "recognitionMs": 591,
+        "resolveMs": 0.1,
+        "totalMs": 591
+      },
+      "audioFile": "trial_silence_r4_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r5",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 5,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:21.469Z",
+      "latency": {
+        "recognitionMs": 509,
+        "resolveMs": 0.1,
+        "totalMs": 509
+      },
+      "audioFile": "trial_silence_r5_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r6",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 6,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:24.659Z",
+      "latency": {
+        "recognitionMs": 534,
+        "resolveMs": 0.1,
+        "totalMs": 534
+      },
+      "audioFile": "trial_silence_r6_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r7",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 7,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:35.958Z",
+      "latency": {
+        "recognitionMs": 504,
+        "resolveMs": 0,
+        "totalMs": 504
+      },
+      "audioFile": "trial_silence_r7_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r8",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 8,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:39.861Z",
+      "latency": {
+        "recognitionMs": 529,
+        "resolveMs": 0.1,
+        "totalMs": 529
+      },
+      "audioFile": "trial_silence_r8_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r9",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 9,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:43.068Z",
+      "latency": {
+        "recognitionMs": 507,
+        "resolveMs": 0,
+        "totalMs": 507
+      },
+      "audioFile": "trial_silence_r9_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    },
+    {
+      "id": "silence:-:r10",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "silence",
+      "repetition": 10,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-02T17:44:46.490Z",
+      "latency": {
+        "recognitionMs": 510,
+        "resolveMs": 0.1,
+        "totalMs": 510
+      },
+      "audioFile": "trial_silence_r10_runB.wav",
+      "startupMs": 1,
+      "run": "B",
+      "releaseDelayMs": 400
+    }
+  ]
+}

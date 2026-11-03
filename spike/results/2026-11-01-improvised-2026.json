@@ -1,0 +1,261 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "2026-11-01T06-36-16-945Z",
+    "recognizer": "webspeech",
+    "createdAt": "2026-11-01T06:36:16.945Z",
+    "lang": "es-CO",
+    "maxAlternatives": 5,
+    "corpusVersion": "v0",
+    "parser": {
+      "threshold": 1,
+      "margin": 0.25,
+      "rankPenalty": 0.3,
+      "nato": false
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "improvised": true
+  },
+  "attempts": [
+    {
+      "id": "imp:1",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "e8g8",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "En Roque corto.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:41:46.917Z",
+      "latency": {
+        "recognitionMs": 208,
+        "resolveMs": 4,
+        "totalMs": 212
+      }
+    },
+    {
+      "id": "imp:2",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "e8c8",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "En Roque largo.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:42:01.825Z",
+      "latency": {
+        "recognitionMs": 154,
+        "resolveMs": 3.9,
+        "totalMs": 158
+      }
+    },
+    {
+      "id": "imp:3",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "h8g8",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Torre g 8.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:42:16.795Z",
+      "latency": {
+        "recognitionMs": 190,
+        "resolveMs": 1.9,
+        "totalMs": 192
+      }
+    },
+    {
+      "id": "imp:4",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "d7f5",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Dama F 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:42:37.228Z",
+      "latency": {
+        "recognitionMs": 227,
+        "resolveMs": 2,
+        "totalMs": 229
+      }
+    },
+    {
+      "id": "imp:5",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "a7a6",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Peón a 6.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:43:20.201Z",
+      "latency": {
+        "recognitionMs": 183,
+        "resolveMs": 1.4,
+        "totalMs": 184
+      }
+    },
+    {
+      "id": "imp:6",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "c6d4",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo d cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:44:00.773Z",
+      "latency": {
+        "recognitionMs": 187,
+        "resolveMs": 2.3,
+        "totalMs": 190
+      }
+    },
+    {
+      "id": "imp:7",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "f6h5",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo h 5.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:44:18.340Z",
+      "latency": {
+        "recognitionMs": 151,
+        "resolveMs": 2.5,
+        "totalMs": 154
+      }
+    },
+    {
+      "id": "imp:8",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "e8f8",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Rey F 8.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:44:38.837Z",
+      "latency": {
+        "recognitionMs": 161,
+        "resolveMs": 1.5,
+        "totalMs": 162
+      }
+    },
+    {
+      "id": "imp:9",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "c6b4",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Caballo b cuatro.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:44:55.290Z",
+      "latency": {
+        "recognitionMs": 183,
+        "resolveMs": 2.5,
+        "totalMs": 185
+      }
+    },
+    {
+      "id": "imp:10",
+      "phraseId": null,
+      "positionId": "p05",
+      "split": null,
+      "fen": "r3k2r/pppqbppp/2np1n2/4p3/2B1P1b1/2NP1N2/PPP2PPP/R1BQ1RK1 b kq - 1 8",
+      "spoken": null,
+      "expectedOutcome": "move",
+      "expectedUci": "g4f3",
+      "condition": "quiet",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "Alfil toma F 3.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:45:32.347Z",
+      "latency": {
+        "recognitionMs": 160,
+        "resolveMs": 1.9,
+        "totalMs": 162
+      }
+    }
+  ]
+}

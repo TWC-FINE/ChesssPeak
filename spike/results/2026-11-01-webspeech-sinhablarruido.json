@@ -1,0 +1,250 @@
+{
+  "meta": {
+    "schema": 1,
+    "sessionId": "2026-11-01T06-17-00-070Z",
+    "recognizer": "webspeech",
+    "createdAt": "2026-11-01T06:17:00.070Z",
+    "lang": "es-CO",
+    "maxAlternatives": 5,
+    "corpusVersion": "v0",
+    "parser": {
+      "threshold": 1,
+      "margin": 0.25,
+      "rankPenalty": 0.3,
+      "nato": false
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0"
+  },
+  "attempts": [
+    {
+      "id": "noise:-:r1",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 1,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:17.962Z",
+      "latency": {
+        "recognitionMs": 158,
+        "resolveMs": 0.1,
+        "totalMs": 158
+      }
+    },
+    {
+      "id": "noise:-:r2",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 2,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:22.121Z",
+      "latency": {
+        "recognitionMs": 172,
+        "resolveMs": 0.1,
+        "totalMs": 172
+      }
+    },
+    {
+      "id": "noise:-:r3",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 3,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:27.116Z",
+      "latency": {
+        "recognitionMs": 113,
+        "resolveMs": 0.1,
+        "totalMs": 113
+      }
+    },
+    {
+      "id": "noise:-:r4",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 4,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:31.135Z",
+      "latency": {
+        "recognitionMs": 98,
+        "resolveMs": 0.1,
+        "totalMs": 98
+      }
+    },
+    {
+      "id": "noise:-:r5",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 5,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:37.275Z",
+      "latency": {
+        "recognitionMs": 116,
+        "resolveMs": 0.1,
+        "totalMs": 116
+      }
+    },
+    {
+      "id": "noise:-:r6",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 6,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:40.776Z",
+      "latency": {
+        "recognitionMs": 112,
+        "resolveMs": 0,
+        "totalMs": 112
+      }
+    },
+    {
+      "id": "noise:-:r7",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 7,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:42.972Z",
+      "latency": {
+        "recognitionMs": 141,
+        "resolveMs": 0.1,
+        "totalMs": 141
+      }
+    },
+    {
+      "id": "noise:-:r8",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 8,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:45.522Z",
+      "latency": {
+        "recognitionMs": 146,
+        "resolveMs": 0.1,
+        "totalMs": 146
+      }
+    },
+    {
+      "id": "noise:-:r9",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 9,
+      "alternatives": [
+        {
+          "transcript": "",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:48.404Z",
+      "latency": {
+        "recognitionMs": 112,
+        "resolveMs": 0.1,
+        "totalMs": 112
+      }
+    },
+    {
+      "id": "noise:-:r10",
+      "phraseId": null,
+      "positionId": null,
+      "split": null,
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "spoken": null,
+      "expectedOutcome": "nomatch",
+      "condition": "noise",
+      "repetition": 10,
+      "alternatives": [
+        {
+          "transcript": "CHA.",
+          "confidence": 1
+        }
+      ],
+      "createdAt": "2026-11-01T06:17:51.490Z",
+      "latency": {
+        "recognitionMs": 216,
+        "resolveMs": 2.9,
+        "totalMs": 218
+      }
+    }
+  ]
+}

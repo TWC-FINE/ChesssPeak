@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChessSpeak · Spike Web Speech</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>ChessSpeak · spike de voz (Web Speech)</h1>
+      <p class="muted">
+        Mantén <kbd>Espacio</kbd> para hablar, suéltalo al terminar. Espera a ver «Escuchando» antes de hablar.
+        Di las frases de forma natural, como en una partida.
+      </p>
+      <p id="browser-warning" class="warn" hidden></p>
+    </header>
+
+    <main>
+      <section class="card" id="settings">
+        <h2>Ajustes</h2>
+        <div class="grid">
+          <label>Idioma <input id="lang" type="text" value="es-CO" size="8" /></label>
+          <label>Alternativas (N-best) <input id="max-alt" type="number" min="1" max="10" value="5" /></label>
+          <label>Hablante <input id="speaker" type="text" placeholder="opcional" size="10" /></label>
+          <label>Corrida
+            <select id="run"><option value="A" selected>A</option><option value="B">B</option></select>
+          </label>
+          <label>Retardo al soltar (ms) <input id="release-delay" type="number" min="0" step="50" value="0" /></label>
+          <label>Umbral del parser <input id="threshold" type="number" step="0.05" min="0" /></label>
+          <label>Margen <input id="margin" type="number" step="0.05" min="0" /></label>
+          <label>Penalización N-best <input id="rank-penalty" type="number" step="0.01" min="0" /></label>
+          <label class="inline"><input id="nato" type="checkbox" /> Alfabeto OTAN</label>
+        </div>
+        <div class="grid">
+          <button id="pick-dir" type="button">Elegir carpeta para los WAV…</button>
+          <span id="dir-status" class="muted">Sin carpeta: no se graba audio.</span>
+          <label class="inline"><input id="record" type="checkbox" /> Grabar WAV en paralelo</label>
+          <label class="inline"><input id="record-only" type="checkbox" /> Solo grabar (sin Web Speech)</label>
+        </div>
+      </section>
+
+      <section class="card" id="mode">
+        <label class="inline"><input type="radio" name="mode" value="corpus" checked /> Modo corpus</label>
+        <label class="inline"><input type="radio" name="mode" value="free" /> Modo libre (no se guarda)</label>
+        <label class="inline"><input type="radio" name="mode" value="improvised" /> Modo improvisado (se guarda aparte)</label>
+
+        <div id="corpus-controls">
+          <label>Bloque
+            <select id="block"></select>
+          </label>
+          <span id="block-progress" class="muted"></span>
+        </div>
+        <div id="free-controls" hidden>
+          <label>Posición
+            <select id="free-position"></select>
+          </label>
+          <label>o FEN <input id="custom-fen" type="text" size="50" placeholder="pega un FEN" /></label>
+        </div>
+      </section>
+
+      <section class="card" id="improvised-controls" hidden>
+        <label>Posición
+          <select id="imp-position"></select>
+        </label>
+        <div class="muted">
+          Pulsa Espacio y di la jugada como quieras. Al soltar, elige abajo la jugada que querías decir y guarda el intento.
+          Estos intentos van a un archivo aparte y no cuentan para ninguna decisión.
+        </div>
+        <div class="row">
+          <label>Jugada que quise decir
+            <select id="imp-move" disabled></select>
+          </label>
+          <button id="imp-save" type="button" class="primary" disabled>Guardar intento improvisado</button>
+          <button id="imp-cancel" type="button" disabled>Descartar este intento</button>
+          <button id="imp-export" type="button">Exportar improvisadas (JSON)</button>
+          <span id="imp-count" class="muted"></span>
+        </div>
+      </section>
+
+      <section class="card" id="trial">
+        <div id="trial-info" class="muted"></div>
+        <div id="expected" class="expected"></div>
+        <div id="condition-hint" class="hint"></div>
+        <div class="row">
+          <div id="board-host"></div>
+          <div>
+            <div id="fen-text" class="mono muted"></div>
+            <button id="talk" type="button" class="talk">Mantener para hablar (Espacio)</button>
+            <div id="status" class="status">Listo.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="result-card">
+        <h2>Resultado</h2>
+        <div id="result" class="muted">Aún no hay intentos.</div>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <button id="discard" type="button">Descartar último intento</button>
+          <button id="export" type="button" class="primary">Exportar resultados (JSON)</button>
+          <button id="reset" type="button">Empezar sesión nueva</button>
+          <span id="session-info" class="muted"></span>
+        </div>
+        <table id="log">
+          <thead>
+            <tr><th>Intento</th><th>Dijo</th><th>Reconocido (1ª)</th><th>Top-1</th><th>N-best</th><th>ms</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script type="module" src="dist/bundle.js"></script>
+  </body>
+</html>

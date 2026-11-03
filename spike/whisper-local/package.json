@@ -1,0 +1,17 @@
+{
+  "name": "@chessspeak/spike-whisper-local",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "download": "tsx scripts/download.ts",
+    "benchmark": "tsx scripts/benchmark.ts",
+    "serve": "tsx src/main.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@chessspeak/voice-parser": "workspace:*"
+  }
+}
