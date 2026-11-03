@@ -29,13 +29,14 @@ ALTER TABLE "games" ADD CONSTRAINT "games_seats_by_status" CHECK (
        OR "black_user_id" IS NOT NULL OR "black_guest_id" IS NOT NULL)
   END);
 
--- status links with result and termination.
+-- status links with result and termination. IS NOT NULL is explicit: a CHECK that evaluates to NULL passes.
 ALTER TABLE "games" ADD CONSTRAINT "games_outcome_by_status" CHECK (
   CASE "status"
     WHEN 'finished' THEN
-      "result" IN ('1-0', '0-1', '1/2-1/2') AND "termination" IS NOT NULL AND "termination" <> 'aborted'
+      "result" IS NOT NULL AND "result" IN ('1-0', '0-1', '1/2-1/2')
+      AND "termination" IS NOT NULL AND "termination" <> 'aborted'
     WHEN 'aborted' THEN
-      "result" = '*' AND "termination" = 'aborted'
+      "result" IS NOT NULL AND "result" = '*' AND "termination" IS NOT NULL AND "termination" = 'aborted'
     ELSE
       "result" IS NULL AND "termination" IS NULL
   END);
