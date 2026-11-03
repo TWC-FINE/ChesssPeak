@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { Chessground } from 'chessground';
 import type { Api } from 'chessground/api';
-import { START_FEN, type GameContext } from '@chessspeak/shared';
+import { CS_EVENT_INIT, START_FEN, type CsEventDetail, type GameContext } from '@chessspeak/shared';
 import baseCss from 'chessground/assets/chessground.base.css?inline';
 import brownCss from 'chessground/assets/chessground.brown.css?inline';
 import piecesCss from 'chessground/assets/chessground.cburnett.css?inline';
@@ -29,7 +29,8 @@ export class MfGame extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.dispatchEvent(new CustomEvent('cs:mf-ready', { bubbles: true, detail: { v: 1, name: 'mf-game' } }));
+    const detail: CsEventDetail<'cs:mf-ready'> = { v: 1, name: 'mf-game' };
+    this.dispatchEvent(new CustomEvent('cs:mf-ready', { ...CS_EVENT_INIT, detail }));
   }
 
   override disconnectedCallback(): void {
@@ -50,7 +51,7 @@ export class MfGame extends LitElement {
     const host = this.querySelector<HTMLElement>('.csg-board');
     if (host === null) return;
     const config = {
-      fen: this.context?.fen ?? START_FEN,
+      fen: START_FEN,
       orientation: this.context?.orientation ?? 'white',
       viewOnly: true,
     } as const;

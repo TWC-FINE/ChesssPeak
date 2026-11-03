@@ -7,7 +7,7 @@ document.addEventListener('cs:mf-ready', (event) => {
   if (log !== null) log.textContent += `${event.type} ${JSON.stringify((event as CustomEvent).detail)}\n`;
 });
 if (element !== null) {
-  const context: GameContext = { v: 1, gameId: 'demo', orientation: 'white' };
+  const context: GameContext = { v: 1, gameId: 'demo', orientation: 'white', socket: null };
   (element as HTMLElement & { context: GameContext }).context = context;
 }
 

@@ -1,5 +1,5 @@
 import { LitElement, html } from 'lit';
-import type { HistoryContext } from '@chessspeak/shared';
+import { CS_EVENT_INIT, type CsEventDetail, type HistoryContext } from '@chessspeak/shared';
 import ownCss from './styles.css?inline';
 
 // Light DOM means the styles are global: inject them once.
@@ -11,10 +11,19 @@ if (!document.getElementById(STYLE_ID)) {
   document.head.append(style);
 }
 
-/** Placeholder: shows the context it receives through the `context` property. */
+/** Placeholder: shows its context and the moves it hears through cs:move-applied (idempotent by ply). */
 export class MfHistory extends LitElement {
   static override properties = { context: { attribute: false } };
   declare context: HistoryContext | undefined;
+
+  private moves = new Map<number, CsEventDetail<'cs:move-applied'>>();
+  private readonly onMoveApplied = (event: Event): void => {
+    const detail = (event as CustomEvent<CsEventDetail<'cs:move-applied'>>).detail;
+    const gameId = this.context?.gameId;
+    if (gameId !== undefined && gameId !== null && detail.gameId !== gameId) return;
+    this.moves.set(detail.ply, detail);
+    this.requestUpdate();
+  };
 
   protected override createRenderRoot(): HTMLElement {
     return this;
@@ -22,14 +31,21 @@ export class MfHistory extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.dispatchEvent(new CustomEvent('cs:mf-ready', { bubbles: true, detail: { v: 1, name: 'mf-history' } }));
+    document.addEventListener('cs:move-applied', this.onMoveApplied);
+    const detail: CsEventDetail<'cs:mf-ready'> = { v: 1, name: 'mf-history' };
+    this.dispatchEvent(new CustomEvent('cs:mf-ready', { ...CS_EVENT_INIT, detail }));
+  }
+
+  override disconnectedCallback(): void {
+    document.removeEventListener('cs:move-applied', this.onMoveApplied);
+    super.disconnectedCallback();
   }
 
   protected override render() {
     const context = this.context;
     return html`<div class="csh-root">
       <h2 class="csh-title">mf-history</h2>
-      <p class="csh-info">partida: ${context?.gameId ?? "sin partida"} · jugadas: ${context?.moves?.join(" ") || "—"}</p>
+      <p class="csh-info">partida: ${context?.gameId ?? "sin partida"} · jugadas: ${[...this.moves.values()].sort((a, b) => a.ply - b.ply).map((m) => m.uci).join(" ") || "—"}</p>
     </div>`;
   }
 }

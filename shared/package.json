@@ -16,5 +16,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens.css": "./styles/tokens.css"
-  }
+  },
+  "sideEffects": [
+    "*.css"
+  ]
 }
