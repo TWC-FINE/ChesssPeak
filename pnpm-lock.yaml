@@ -271,6 +271,44 @@ importers:
         specifier: ^8.3.5
         version: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15)
 
+  web/mf-history:
+    dependencies:
+      '@chessspeak/shared':
+        specifier: workspace:*
+        version: link:../../shared
+      chessground:
+        specifier: ^9.2.1
+        version: 9.2.1
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
+    devDependencies:
+      happy-dom:
+        specifier: ^21.0.4
+        version: 21.0.4
+      vite:
+        specifier: ^8.3.5
+        version: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15)
+
+  web/mf-voice-input:
+    dependencies:
+      '@chessspeak/shared':
+        specifier: workspace:*
+        version: link:../../shared
+      chessground:
+        specifier: ^9.2.1
+        version: 9.2.1
+      lit:
+        specifier: ^3.3.3
+        version: 3.3.3
+    devDependencies:
+      happy-dom:
+        specifier: ^21.0.4
+        version: 21.0.4
+      vite:
+        specifier: ^8.3.5
+        version: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15)
+
 packages:
 
   '@angular-devkit/core@19.2.24':
