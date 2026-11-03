@@ -1,0 +1,13 @@
+/* Shared design tokens. Microfrontends use their own prefix for classes (csg-, csv-, csh-) and these variables. */
+:root {
+  --cs-bg: #1b1d21;
+  --cs-surface: #262a30;
+  --cs-border: #3a4049;
+  --cs-text: #e8eaed;
+  --cs-muted: #9aa3ad;
+  --cs-accent: #6cb4ee;
+  --cs-warn: #f2c14e;
+  --cs-radius: 8px;
+  --cs-gap: 12px;
+  --cs-font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}

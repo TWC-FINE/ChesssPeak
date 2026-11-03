@@ -3,6 +3,7 @@ packages:
   - spike/*
   - shared
   - server
+  - web/*
 allowBuilds:
   '@parcel/watcher': false
   esbuild: false
