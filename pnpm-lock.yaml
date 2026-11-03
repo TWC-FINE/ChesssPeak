@@ -309,6 +309,12 @@ importers:
         specifier: ^8.3.5
         version: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15)
 
+  web/shell:
+    dependencies:
+      '@chessspeak/shared':
+        specifier: workspace:*
+        version: link:../../shared
+
 packages:
 
   '@angular-devkit/core@19.2.24':

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChessSpeak</title>
+    <link rel="stylesheet" href="./shell.css" />
+  </head>
+  <body>
+    <header class="cs-header">
+      <strong>ChessSpeak</strong>
+      <nav><a href="#/">Inicio</a> <a href="#/game/demo">Partida de ejemplo</a></nav>
+    </header>
+    <main id="cs-main">
+      <p id="cs-route" class="cs-route"></p>
+      <div class="cs-layout">
+        <section data-mf="mf-game" class="cs-slot"></section>
+        <section data-mf="mf-voice-input" class="cs-slot"></section>
+        <section data-mf="mf-history" class="cs-slot"></section>
+      </div>
+    </main>
+    <script src="./config.js"></script>
+    <script type="module" src="./shell.js"></script>
+  </body>
+</html>

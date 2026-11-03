@@ -1,0 +1,14 @@
+{
+  "name": "@chessspeak/shell",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "@chessspeak/shared": "workspace:*"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}

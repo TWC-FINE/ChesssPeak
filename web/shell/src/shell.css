@@ -1,0 +1,10 @@
+@import '@chessspeak/shared/tokens.css';
+
+body { margin: 0; background: var(--cs-bg); color: var(--cs-text); font-family: var(--cs-font); }
+a { color: var(--cs-accent); }
+.cs-header { display: flex; gap: var(--cs-gap); align-items: baseline; justify-content: space-between; padding: var(--cs-gap) 16px; border-bottom: 1px solid var(--cs-border); }
+.cs-route { margin: 0; padding: var(--cs-gap) 16px 0; color: var(--cs-muted); }
+.cs-layout { display: grid; grid-template-columns: minmax(280px, 480px) minmax(220px, 1fr) minmax(220px, 1fr); gap: var(--cs-gap); padding: 16px; align-items: start; }
+.cs-slot { min-width: 0; }
+.cs-unavailable { margin: 0; padding: var(--cs-gap); border: 1px dashed var(--cs-warn); border-radius: var(--cs-radius); color: var(--cs-warn); }
+@media (max-width: 900px) { .cs-layout { grid-template-columns: 1fr; } }
