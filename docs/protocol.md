@@ -142,3 +142,16 @@ sequenceDiagram
 ```
 
 Si el jugador dice «no» o «cancelar», `<mf-voice-input>` emite `cs:move-cancelled { reason: user }` en lugar de `cs:move-confirmed`, y la telemetría sale con `accepted: false`.
+
+## 7. Decisiones provisionales (pendientes de validar por la segunda persona)
+
+Respuestas provisionales a las dudas de revisión del contrato v1. Quedan **marcadas como provisionales** hasta que las valide la segunda persona el lun 9 de noviembre; si alguna cambia, es un cambio de contrato (ver [contract-versioning.md](contract-versioning.md)).
+
+| Tema | Decisión provisional en v1 |
+|---|---|
+| Tablas, `game:leave`, acks | **No hay** en v1: ni ofrecer o aceptar tablas, ni salida explícita, ni acks de Socket.IO. Las respuestas van por `game:moved`, `game:state` y `game:error`. Se pueden añadir después como eventos nuevos (cambio aditivo) |
+| `voice:attempt` | `fen` y `normalized` **se quedan** en el mensaje |
+| `cs:position` | `turn` y `yourColor` **se quedan** |
+| Asientos | La regla de la sección 2 (color reservado para quien crea la partida; el resto, primer asiento libre) es **correcta** |
+| `game:error.message` | **Solo para depurar**. La interfaz decide el texto a partir de `code` y no muestra `message` |
+| `abandonment` | **Propuesta:** un jugador que lleva **más de 60 s desconectado** pierde la partida por `abandonment`; el plazo es **configurable** en el servidor. **Pendiente de que la segunda persona la valide** |
