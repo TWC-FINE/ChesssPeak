@@ -175,7 +175,7 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 |---|---|---|
 | 1 | Monolito modular NestJS en TypeScript, con los contratos en `shared/` | **Aceptado** (2 nov) |
 | 2 | Microfrontends con custom elements + web estática (sin Module Federation) | **Aceptado** (2 nov) |
-| 3 | Dos bases: Postgres (partidas) y Mongo (jugadas append-only y telemetría) | Fase 0 (jue 5) |
+| 3 | Dos bases: Postgres (partidas) y Mongo (jugadas append-only y telemetría) | **Aceptado** (3 nov) |
 | 4 | Resolución de voz contra jugadas legales + criterios del spike | **Aceptado** (2 nov) |
 | 5 | `SpeechRecognizer` como Strategy; reconocedor por defecto (Web Speech en Edge con retardo de 400 ms; Whisper `small` alternativo) | **Aceptado** (2 nov) |
 | 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | Fase 1 (jue 12) |

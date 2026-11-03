@@ -56,6 +56,22 @@ pnpm serve:web                   # sirve web/dist en http://127.0.0.1:5500 (serv
 
 Cada microfrontend tiene además su página standalone con contexto simulado, para trabajar en uno sin levantar los demás.
 
+### Bases de datos locales (Docker)
+
+PostgreSQL y MongoDB para desarrollo, con Docker Desktop en marcha:
+
+```bash
+pnpm env:init                # crea .env desde .env.example con contraseñas aleatorias (no sobrescribe un .env existente)
+docker compose up -d         # postgres:17 y mongo:8, con volúmenes con nombre
+pnpm --filter @chessspeak/server prisma:migrate   # aplica las migraciones a la base de desarrollo
+pnpm test:integration        # pruebas contra las bases locales (se omiten con un aviso si no están)
+```
+
+- **Postgres usa el puerto 55432** del equipo (no el 5432), para no chocar con un Postgres ya instalado como servicio de Windows, que no hace falta parar. Se cambia con `PG_PORT` en `.env`; MongoDB usa el 27017 (`MONGO_PORT`).
+- Los puertos se publican solo en `127.0.0.1`. Las credenciales salen de `.env`, que está en `.gitignore`: nunca se suben.
+- `pnpm test:integration` solo se ejecuta contra `localhost` o `127.0.0.1` y contra bases cuyo nombre termina en `_test` (`DATABASE_URL_TEST` y `MONGO_URI_TEST`); en cualquier otro caso se niega. `pnpm verify` no necesita Docker.
+- `GET /health` responde siempre 200: `status` vale `degraded` si una base está caída.
+
 ## Documentación
 
 | Archivo | Para qué |
