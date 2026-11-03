@@ -9,7 +9,10 @@
     "typecheck": "pnpm -r typecheck",
     "verify": "pnpm typecheck && pnpm test",
     "metrics": "pnpm --filter @chessspeak/voice-parser metrics",
-    "spike:build": "pnpm --filter @chessspeak/spike-web-speech build"
+    "spike:build": "pnpm --filter @chessspeak/spike-web-speech build",
+    "build:web": "node scripts/build-web.mjs",
+    "serve:web": "node scripts/serve-web.mjs",
+    "smoke:web": "node scripts/smoke-web.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
