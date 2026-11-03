@@ -1,0 +1,6 @@
+@import '@chessspeak/shared/tokens.css';
+
+mf-voice-input { display: block; font-family: var(--cs-font); color: var(--cs-text); }
+.csv-root { display: flex; flex-direction: column; gap: var(--cs-gap); padding: var(--cs-gap); background: var(--cs-surface); border: 1px solid var(--cs-border); border-radius: var(--cs-radius); }
+.csv-title { margin: 0; font-size: 1rem; }
+.csv-info { margin: 0; font-size: 0.9rem; color: var(--cs-muted); }
