@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { GameMovesRepository } from './game-moves.repository';
 import { GameMoves, GameMovesSchema } from './game-moves.schema';
 import { VoiceAttempt, VoiceAttemptSchema } from './voice-attempt.schema';
 
@@ -27,6 +28,7 @@ import { VoiceAttempt, VoiceAttemptSchema } from './voice-attempt.schema';
       { name: VoiceAttempt.name, schema: VoiceAttemptSchema },
     ]),
   ],
-  exports: [MongooseModule],
+  providers: [GameMovesRepository],
+  exports: [MongooseModule, GameMovesRepository],
 })
 export class MongoModule {}
