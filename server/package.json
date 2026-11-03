@@ -4,13 +4,14 @@
   "private": true,
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "pnpm --filter @chessspeak/shared build && nest build",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "test": "pnpm --filter @chessspeak/shared build && jest",
+    "typecheck": "pnpm --filter @chessspeak/shared build && tsc --noEmit"
   },
   "dependencies": {
+    "@chessspeak/shared": "workspace:*",
     "@nestjs/common": "^11.2.8",
     "@nestjs/core": "^11.2.8",
     "@nestjs/platform-express": "^11.2.8",

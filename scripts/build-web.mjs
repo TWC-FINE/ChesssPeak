@@ -28,6 +28,8 @@ await build({
   format: 'esm',
   target: 'es2022',
   minify: true,
+  // read @chessspeak/shared from source (see shared/package.json exports and ADR 1)
+  conditions: ['source'],
   logLevel: 'warning',
 });
 cpSync(join(dist, 'shell-css.css'), join(dist, 'shell.css'));

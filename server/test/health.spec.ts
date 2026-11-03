@@ -19,7 +19,7 @@ describe('GET /health', () => {
 
   it('reports that the process is up', async () => {
     const response = await request(app.getHttpServer()).get('/health').expect(200);
-    expect(response.body).toMatchObject({ status: 'ok' });
+    expect(response.body).toMatchObject({ status: 'ok', protocolVersion: 1 });
     expect(typeof response.body.uptimeSeconds).toBe('number');
   });
 });
