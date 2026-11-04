@@ -26,3 +26,53 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
       - run: pnpm build:web
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: chessspeak
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d chessspeak"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      mongo:
+        image: mongo:8
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ci
+          MONGO_INITDB_ROOT_PASSWORD: ci-password
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet -u ci -p ci-password --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\" | grep -q 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # throwaway credentials of the service containers above (not repository secrets)
+      DATABASE_URL_TEST: postgresql://ci:ci-password@localhost:5432/chessspeak_test
+      MONGO_URI_TEST: mongodb://ci:ci-password@localhost:27017/chessspeak_test?authSource=admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run integration tests
+        run: |
+          set -o pipefail
+          pnpm test:integration 2>&1 | tee integration.log
+      - name: Check that tests actually ran
+        run: |
+          grep -E '^\s*Tests:' integration.log
+          if grep -E '^\s*Tests:' integration.log | grep -q failed; then exit 1; fi
