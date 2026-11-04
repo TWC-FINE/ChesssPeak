@@ -69,6 +69,8 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client
+        run: pnpm --filter ./server prisma:generate
       - name: Run integration tests
         run: |
           set -o pipefail
