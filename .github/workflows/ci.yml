@@ -28,7 +28,8 @@ jobs:
       - run: pnpm build:web
 
   integration:
-    runs-on: ubuntu-latest
+    # mongo:8 does not start on kernels >= 6.19 (SERVER-121912), which ubuntu-latest now has
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     services:
       postgres:
