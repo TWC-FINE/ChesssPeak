@@ -96,3 +96,21 @@ jobs:
           tar -xzf gitleaks.tar.gz -C "$RUNNER_TEMP/gitleaks" gitleaks
       - name: Scan history
         run: '"$RUNNER_TEMP/gitleaks/gitleaks" git --redact --verbose .'
+
+  # Headless Chrome on the runner can be flaky: informational, does not block merging.
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:web
+      - run: pnpm smoke:web
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
