@@ -1,0 +1,61 @@
+// Postgres: the durable record of who played whom and how it ended (ADR 3).
+// The CHECK constraints that Prisma cannot express live in the manual migration
+// prisma/migrations/*_games_checks/migration.sql.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum GameStatus {
+  waiting
+  active
+  finished
+  aborted
+
+  @@map("game_status")
+}
+
+/// Minimal table, only so that games can point to a registered user. No auth logic yet.
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  whiteGames Game[] @relation("WhiteUser")
+  blackGames Game[] @relation("BlackUser")
+
+  @@map("users")
+}
+
+model Game {
+  id          String     @id @default(uuid()) @db.Uuid
+  status      GameStatus @default(waiting)
+  /// '1-0' | '0-1' | '1/2-1/2' | '*'  (TEXT + CHECK in the manual migration)
+  result      String?
+  /// checkmate | stalemate | ... | aborted  (TEXT + CHECK in the manual migration)
+  termination String?
+
+  /// Per color, at most one of user_id and guest_id is set (CHECK).
+  whiteUserId  String? @map("white_user_id") @db.Uuid
+  whiteGuestId String? @map("white_guest_id") @db.Uuid
+  whiteName    String? @map("white_name")
+  blackUserId  String? @map("black_user_id") @db.Uuid
+  blackGuestId String? @map("black_guest_id") @db.Uuid
+  blackName    String? @map("black_name")
+
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  finishedAt DateTime? @map("finished_at") @db.Timestamptz(6)
+
+  whiteUser User? @relation("WhiteUser", fields: [whiteUserId], references: [id], onDelete: Restrict)
+  blackUser User? @relation("BlackUser", fields: [blackUserId], references: [id], onDelete: Restrict)
+
+  @@index([status])
+  @@map("games")
+}

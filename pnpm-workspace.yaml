@@ -6,4 +6,6 @@ packages:
   - web/*
 allowBuilds:
   '@parcel/watcher': false
+  '@prisma/engines': true
   esbuild: false
+  prisma: true

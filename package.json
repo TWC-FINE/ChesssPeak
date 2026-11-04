@@ -12,7 +12,9 @@
     "spike:build": "pnpm --filter @chessspeak/spike-web-speech build",
     "build:web": "node scripts/build-web.mjs",
     "serve:web": "node scripts/serve-web.mjs",
-    "smoke:web": "node scripts/smoke-web.mjs"
+    "smoke:web": "node scripts/smoke-web.mjs",
+    "env:init": "node scripts/env-init.mjs",
+    "test:integration": "node scripts/integration.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
