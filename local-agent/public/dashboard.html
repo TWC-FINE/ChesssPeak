@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balanceador de carga</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --border: #dde1e6;
+    --text: #1b1f24;
+    --muted: #5f6b7a;
+    --up: #1a7f37;
+    --up-soft: #dcf3e3;
+    --starting: #9a6700;
+    --starting-soft: #fff1cc;
+    --down: #c62828;
+    --down-soft: #fde2e1;
+    --accent: #2f6fdb;
+    --bar: #e8ebef;
+    --danger: #d32f2f;
+    --danger-hover: #b71c1c;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1216;
+      --surface: #171b21;
+      --border: #2a313a;
+      --text: #e6e9ee;
+      --muted: #97a3b2;
+      --up: #3fb950;
+      --up-soft: #12301b;
+      --starting: #d29922;
+      --starting-soft: #33270b;
+      --down: #f0605d;
+      --down-soft: #3a1615;
+      --accent: #6ea2ff;
+      --bar: #262c35;
+      --danger: #e5534b;
+      --danger-hover: #f47067;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 18px; }
+  h1 { font-size: 20px; margin: 0; flex: 1 1 auto; }
+  h2 { font-size: 15px; margin: 26px 0 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 13px; border: 1px solid var(--border); background: var(--surface); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .pill.live .dot { background: var(--up); }
+  .pill.lost .dot { background: var(--down); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; box-shadow: var(--shadow); }
+  .tile .label { font-size: 12px; color: var(--muted); }
+  .tile .value { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .tile.ok .value { color: var(--up); }
+  .tile.bad .value { color: var(--down); }
+  .tile.warn .value { color: var(--starting); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--up); border-radius: 10px; padding: 14px; box-shadow: var(--shadow); transition: border-color 0.2s, opacity 0.2s; }
+  .card.starting { border-left-color: var(--starting); }
+  .card.down { border-left-color: var(--down); }
+  .card.down .metrics { opacity: 0.55; }
+  .card.flash { animation: flash 0.6s ease-out; }
+  @keyframes flash { from { box-shadow: 0 0 0 3px var(--accent); } to { box-shadow: var(--shadow); } }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card-id { font-size: 20px; font-weight: 700; }
+  .badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--up-soft); color: var(--up); }
+  .starting .badge { background: var(--starting-soft); color: var(--starting); }
+  .down .badge { background: var(--down-soft); color: var(--down); }
+  .sub { font-size: 12px; color: var(--muted); margin: 2px 0 10px; font-variant-numeric: tabular-nums; }
+  .metrics { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .metrics dt { color: var(--muted); }
+  .metrics dd { margin: 0; text-align: right; font-weight: 600; }
+  .bar { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--bar); overflow: hidden; margin: -1px 0 6px; }
+  .bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.4s; }
+  .bar.load span { background: var(--starting); }
+  .status-line { min-height: 20px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .down .status-line { color: var(--down); }
+  button.kill { margin-top: 10px; width: 100%; padding: 8px; border: 0; border-radius: 8px; background: var(--danger); color: #fff; font-weight: 650; font-size: 14px; cursor: pointer; }
+  button.kill:hover:not(:disabled) { background: var(--danger-hover); }
+  button.kill:disabled { opacity: 0.4; cursor: not-allowed; }
+  .feed { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .feed table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .feed th, .feed td { text-align: left; padding: 6px 12px; border-bottom: 1px solid var(--border); }
+  .feed th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .feed tr:last-child td { border-bottom: 0; }
+  .code { font-weight: 700; }
+  .code.c200 { color: var(--up); }
+  .code.c503, .code.c504, .code.c502 { color: var(--down); }
+  .empty { padding: 14px; color: var(--muted); font-size: 14px; }
+  .note { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.2s; pointer-events: none; max-width: calc(100% - 32px); }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Balanceador de carga · Whisper local</h1>
+    <span class="pill" id="connection"><span class="dot"></span><span id="connection-text">Conectando…</span></span>
+    <span class="pill">Estrategia: <strong id="strategy">—</strong></span>
+  </header>
+
+  <section class="tiles" aria-label="Resumen">
+    <div class="tile"><div class="label">Peticiones/s (últimos 10 s)</div><div class="value" id="rps">0</div></div>
+    <div class="tile"><div class="label">En cola</div><div class="value" id="queued">0</div></div>
+    <div class="tile ok"><div class="label">200 · atendidas</div><div class="value" id="t200">0</div></div>
+    <div class="tile bad"><div class="label">503 · sin capacidad</div><div class="value" id="t503">0</div></div>
+    <div class="tile bad"><div class="label">504 · tiempo agotado</div><div class="value" id="t504">0</div></div>
+    <div class="tile warn"><div class="label">502 · fallo del worker</div><div class="value" id="t502">0</div></div>
+  </section>
+
+  <h2>Workers</h2>
+  <section class="grid" id="workers" aria-live="polite"></section>
+  <p class="note">Los datos llegan cada segundo por Server-Sent Events desde <code>/lb/events</code>; la memoria es la RSS que reporta el sistema operativo para cada proceso <code>whisper-server</code>.</p>
+
+  <h2>Últimas peticiones</h2>
+  <div class="feed">
+    <table>
+      <thead><tr><th>Hora</th><th>Worker</th><th>Respuesta</th><th>Tiempo</th></tr></thead>
+      <tbody id="recent"></tbody>
+    </table>
+    <div class="empty" id="recent-empty">Aún no ha llegado ninguna petición.</div>
+  </div>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const STATE_LABEL = { up: 'Activo', starting: 'Arrancando', down: 'Caído' };
+  const cards = new Map();
+  const history = [];
+
+  const number = (n) => n.toLocaleString('es-CO');
+  const megabytes = (bytes) => (bytes === null ? '—' : `${number(Math.round(bytes / 1048576))} MB`);
+  const duration = (seconds) => {
+    if (seconds === null) return '—';
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m}:${String(s).padStart(2, '0')}`;
+  };
+
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function toast(message) {
+    const node = $('toast');
+    node.textContent = message;
+    node.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => node.classList.remove('show'), 2500);
+  }
+
+  function metric(list, label) {
+    list.append(element('dt', '', label));
+    const value = element('dd', '', '—');
+    list.append(value);
+    return value;
+  }
+
+  function bar(list, className) {
+    const track = element('div', `bar ${className}`);
+    const fill = element('span');
+    track.append(fill);
+    list.append(track);
+    return fill;
+  }
+
+  function createCard(worker) {
+    const card = element('article', 'card');
+    const head = element('div', 'card-head');
+    head.append(element('span', 'card-id', worker.id));
+    const badge = element('span', 'badge', '');
+    head.append(badge);
+    const sub = element('div', 'sub', '');
+    const list = element('dl', 'metrics');
+    const parts = {
+      card,
+      badge,
+      sub,
+      active: metric(list, 'En curso'),
+      loadBar: bar(list, 'load'),
+      served: metric(list, 'Atendidas'),
+      shareBar: bar(list, 'share'),
+      failed: metric(list, 'Errores'),
+      restarts: metric(list, 'Reinicios'),
+      uptime: metric(list, 'Tiempo activo'),
+      memory: metric(list, 'Memoria (RSS)'),
+      status: element('div', 'status-line', ''),
+      button: element('button', 'kill', 'Matar'),
+      lastServed: worker.served,
+    };
+    parts.button.type = 'button';
+    parts.button.addEventListener('click', () => kill(worker.id, parts.button));
+    card.append(head, sub, list, parts.status, parts.button);
+    $('workers').append(card);
+    cards.set(worker.id, parts);
+    return parts;
+  }
+
+  async function kill(id, button) {
+    button.disabled = true;
+    try {
+      const response = await fetch(`/lb/workers/${encodeURIComponent(id)}/kill`, { method: 'POST' });
+      const body = await response.json().catch(() => ({}));
+      toast(response.ok ? `${id} terminado a la fuerza (PID ${body.pid}). El pool lo relanzará.` : `No se pudo matar ${id}: ${body.error ?? response.status}`);
+    } catch (error) {
+      toast(`No se pudo matar ${id}: ${error.message}`);
+    }
+  }
+
+  function render(stats) {
+    $('strategy').textContent = stats.strategy === 'least-connections' ? 'conexiones mínimas' : stats.strategy === 'round-robin' ? 'turno rotativo' : stats.strategy;
+    $('queued').textContent = `${stats.queued} / ${stats.queueMax}`;
+    for (const code of ['200', '503', '504', '502']) $(`t${code}`).textContent = number(stats.totals[code]);
+
+    // answered requests per second over a 10 s window, from the server's own counters
+    history.push({ at: stats.at, ok: stats.totals['200'] });
+    while (history.length > 1 && stats.at - history[0].at > 10000) history.shift();
+    const first = history[0];
+    const seconds = (stats.at - first.at) / 1000;
+    $('rps').textContent = seconds > 0 ? ((stats.totals['200'] - first.ok) / seconds).toLocaleString('es-CO', { maximumFractionDigits: 2 }) : '0';
+
+    const totalServed = stats.workers.reduce((sum, w) => sum + w.served, 0);
+    for (const worker of stats.workers) {
+      const parts = cards.get(worker.id) ?? createCard(worker);
+      parts.card.className = `card ${worker.state}`;
+      parts.badge.textContent = STATE_LABEL[worker.state] ?? worker.state;
+      parts.sub.textContent = `Puerto ${worker.port} · PID ${worker.pid ?? '—'}`;
+      parts.active.textContent = `${worker.active} / ${stats.workerConcurrency}`;
+      parts.loadBar.style.width = `${Math.min(100, (worker.active / stats.workerConcurrency) * 100)}%`;
+      const share = totalServed === 0 ? 0 : (worker.served / totalServed) * 100;
+      parts.served.textContent = `${number(worker.served)} (${Math.round(share)} %)`;
+      parts.shareBar.style.width = `${share}%`;
+      parts.failed.textContent = number(worker.failed);
+      parts.restarts.textContent = number(worker.restarts);
+      parts.uptime.textContent = duration(worker.uptimeSeconds);
+      parts.memory.textContent = megabytes(worker.rssBytes);
+      parts.status.textContent =
+        worker.state === 'down'
+          ? worker.nextRestartInMs === null ? 'Caído' : `Caído · reintento en ${(worker.nextRestartInMs / 1000).toLocaleString('es-CO', { maximumFractionDigits: 1 })} s`
+          : worker.state === 'starting' ? 'Cargando el modelo…' : worker.active > 0 ? 'Transcribiendo' : 'Libre';
+      parts.button.disabled = worker.state !== 'up';
+      if (worker.served > parts.lastServed) {
+        parts.card.classList.remove('flash');
+        void parts.card.offsetWidth;
+        parts.card.classList.add('flash');
+      }
+      parts.lastServed = worker.served;
+    }
+
+    const body = $('recent');
+    body.replaceChildren(
+      ...stats.recent.slice(0, 15).map((request) => {
+        const row = element('tr');
+        row.append(
+          element('td', '', new Date(request.at).toLocaleTimeString('es-CO')),
+          element('td', '', request.worker ?? '—'),
+          element('td', `code c${request.status}`, String(request.status)),
+          element('td', '', `${(request.ms / 1000).toLocaleString('es-CO', { maximumFractionDigits: 2 })} s`),
+        );
+        return row;
+      }),
+    );
+    $('recent-empty').hidden = stats.recent.length > 0;
+  }
+
+  function connect() {
+    const source = new EventSource('/lb/events');
+    source.onopen = () => {
+      $('connection').className = 'pill live';
+      $('connection-text').textContent = 'En vivo';
+    };
+    source.onmessage = (event) => render(JSON.parse(event.data));
+    // EventSource reconnects on its own (the server asks for 2 s); here we only show it
+    source.onerror = () => {
+      $('connection').className = 'pill lost';
+      $('connection-text').textContent = 'Sin conexión con el agente, reintentando…';
+    };
+  }
+
+  connect();
+</script>
+</body>
+</html>
