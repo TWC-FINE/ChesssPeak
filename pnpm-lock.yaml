@@ -261,6 +261,12 @@ importers:
         specifier: ^4.6.7
         version: 4.6.7
 
+  spike/analysis-gate:
+    dependencies:
+      chessops:
+        specifier: ^0.15.1
+        version: 0.15.1
+
   spike/web-speech:
     dependencies:
       '@chessspeak/voice-parser':
