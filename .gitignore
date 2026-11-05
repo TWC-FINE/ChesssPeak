@@ -16,6 +16,9 @@ models/
 *.gguf
 ggml-*
 
+# Stockfish binaries stay outside the repo
+stockfish/
+
 # spike audio (results JSON files are kept)
 *.wav
 recordings/

@@ -1,0 +1,19 @@
+{
+  "name": "@chessspeak/spike-analysis-gate",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "download": "tsx scripts/download.ts",
+    "preflight": "tsx scripts/gate.ts preflight",
+    "calibrate": "tsx scripts/gate.ts calibrate",
+    "measure": "tsx scripts/gate.ts measure",
+    "report": "tsx scripts/gate.ts report",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "chessops": "^0.15.1"
+  }
+}
