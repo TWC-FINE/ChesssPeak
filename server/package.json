@@ -21,6 +21,7 @@
     "@nestjs/platform-express": "^11.2.8",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "chessops": "^0.15.1",
     "mongoose": "^9.11.4",
     "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
