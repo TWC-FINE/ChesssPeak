@@ -1,0 +1,28 @@
+# Render Blueprint of the server. Step by step in docs/deploy.md.
+# Secrets are never written here: `sync: false` makes Render ask for them in its dashboard.
+services:
+  - type: web
+    name: chessspeak-server
+    runtime: node
+    plan: free
+    region: virginia
+    branch: main
+    # --prod=false because the build needs the devDependencies (prisma, typescript) and Render sets NODE_ENV=production
+    buildCommand: npx -y pnpm@12.16.1 install --frozen-lockfile --prod=false && npx -y pnpm@12.16.1 --filter @chessspeak/server build
+    # the free plan has no pre-deploy step, so the migrations run at start; they are idempotent
+    startCommand: cd server && ./node_modules/.bin/prisma migrate deploy && node dist/main.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: DB_CONNECT_TIMEOUT_MS
+        value: "10000"
+      - key: GUEST_TOKEN_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

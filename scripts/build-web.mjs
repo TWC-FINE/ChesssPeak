@@ -41,6 +41,9 @@ for (const line of readFileSync(envFile, 'utf8').split(/\r?\n/)) {
   const match = /^\s*(PUBLIC_[A-Z0-9_]+)\s*=\s*(.*?)\s*$/.exec(line);
   if (match) config[match[1]] = match[2].replace(/^(['"])(.*)\1$/, '$2');
 }
+// a hosting service sets them in the environment, where they win over the file
+const fromEnvironment = Object.keys(process.env).filter((key) => /^PUBLIC_[A-Z0-9_]+$/.test(key));
+for (const key of fromEnvironment) config[key] = process.env[key];
 writeFileSync(join(dist, 'config.js'), `window.CS_CONFIG = ${JSON.stringify(config, null, 2)};\n`);
 
-console.log(`build:web listo en ${dist} (config de ${envFile.replace(root, '.')})`);
+console.log(`build:web listo en ${dist} (config de ${envFile.replace(root, '.')}${fromEnvironment.length > 0 ? ` y del entorno: ${fromEnvironment.join(', ')}` : ''})`);
