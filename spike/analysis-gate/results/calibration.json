@@ -1,0 +1,23 @@
+{
+  "depth": 16,
+  "attempts": [
+    {
+      "depth": 14,
+      "totalMs": 53177.9438
+    },
+    {
+      "depth": 16,
+      "totalMs": 136880.07400000002
+    }
+  ],
+  "positions": 82,
+  "at": "2026-11-05T18:11:47.980Z",
+  "environment": {
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "logicalCores": 12,
+    "totalRamMb": 16222,
+    "freeRamMb": 8885,
+    "os": "win32 10.0.19045 x64",
+    "node": "v24.20.0"
+  }
+}
