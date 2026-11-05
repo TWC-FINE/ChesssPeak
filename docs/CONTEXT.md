@@ -33,7 +33,7 @@ Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; l
 - `packages/voice-parser/` — parser y corpus v0 (`corpus/`), métricas (`scripts/`). **Congelado** para el `test` v0.
 - `spike/web-speech/` — arnés de Web Speech; `spike/whisper-local/` — benchmark y agente HTTP de Whisper; `spike/results/` — JSON de las mediciones; `spike/recordings/` — WAV (fuera de git).
 - `local-agent/` — pool de `whisper-server` con cola, salud, dashboard (`/lb/dashboard`) y generador de carga ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)).
-- `server/` — esqueleto NestJS: `/health`, Prisma y Mongoose, `appendMove`. **Sin Socket.IO, `GameRoom` ni autenticación todavía.**
+- `server/` — esqueleto NestJS: `/health`, Prisma y Mongoose, `appendMove`. `GameRoom` está hecha (reglas de la partida en memoria), pero nada la usa todavía. **Sin Socket.IO ni autenticación.**
 - `web/` — shell y 3 microfrontends de marcador de posición; `pnpm build:web`, `serve:web` y `smoke:web`.
 - `shared/` — borrador; el contrato v1 está en el PR #3, sin fusionar.
 - `spike/analysis-gate/` — prueba de viabilidad del análisis con Stockfish: **no pasó** ([analysis-gate.md](analysis-gate.md)).

@@ -10,7 +10,7 @@ Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “
 **No hay demo en vivo:** el proyecto se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome. Que se pueda instalar y abrir en una máquina limpia siguiendo solo el README es un entregable.
 
 ## Estado actual
-A 5 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo y `appendMove`), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **No existen todavía** Socket.IO, `GameRoom`, la autenticación ni la voz en la interfaz, y el contrato v1 de `shared/` sigue en revisión (PR #3). No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+A 5 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo, `appendMove` y `GameRoom`, que nada usa todavía), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **No existen todavía** Socket.IO, la autenticación ni la voz en la interfaz, y el contrato v1 de `shared/` sigue en revisión (PR #3). No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
 
 **Análisis con Stockfish:** se midió y la prueba **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). Sigue fuera de alcance salvo que se decida una versión nueva del criterio.
 
