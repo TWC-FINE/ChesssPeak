@@ -1,6 +1,6 @@
 # ChessSpeak — Plan del proyecto
 
-> Última actualización: lunes 2 de noviembre de 2026.
+> Última actualización: jueves 5 de noviembre de 2026.
 > Entrega supuesta: viernes 27 de noviembre de 2026 (**por confirmar**).
 > Equipo: una persona sola hasta que se incorpore el compañero (hacia el **lun 9 de noviembre**). Desde entonces, dos personas con los roles A (servidor) y B (shell y microfrontends), que **se asignan el lun 9** según la comodidad de cada una con NestJS o con el front y Lit; el `local-agent` y la integración de voz, entre las dos. Hasta el 9, una sola persona cubre A y B.
 
@@ -13,7 +13,8 @@
 - **Números clave** (split `test`, 78 frases de jugada): Web Speech sin retardo (A) 56,4 % de acierto; con retardo de 400 ms (B) **87,2 %** (IC95 78–93 %), 0 aceptaciones erróneas, 0 ambigüedad, latencia p50 0,57 s. Whisper `small` con prompt: 89,7 % pero p50 2,91 s y p95 3,06 s (solo inferencia, en un i5-12400F), por encima de los umbrales de latencia.
 - **Las cifras pertenecen a la versión del parser de la etiqueta `spike-parser-freeze`.** Si el parser cambia, esas cifras ya no describen el producto (ver 5.7).
 - **Salvedades:** una voz y una corrida B; no está demostrado que la mejora se deba solo al retardo; todo se midió en **Edge 156**. **Chrome no se midió** (hay una comprobación declarada en [docs/spike-chrome.md](docs/spike-chrome.md), pendiente). La validación con **otra voz, frases nuevas y otro equipo** se hace en la semana 4.
-- **Código que existe:** `packages/voice-parser` y `spike/` (arnés de Web Speech y benchmark/agente de Whisper). Todo lo demás (`shared/`, `server/`, `web/`, `local-agent/`) está por hacer.
+- **Código que existe (5 de noviembre):** `packages/voice-parser`, `spike/`, `local-agent` (pool de Whisper con dashboard y prueba de carga, adelantado respecto a la Fase 1), esqueleto de `server/` con las dos bases, `web/` con marcadores de posición y CI. Copia de seguridad de los WAV hecha. **Falta de la Fase 0:** desplegar (`docs/deploy.md`, requiere crear las cuentas), medir Chrome y firmar el contrato (PR #3).
+- **Balanceo de carga (requisito nuevo del profesor):** está en `local-agent` (ADR 10), con carga de prueba sintética, porque en una partida real ese balanceador ve una petición a la vez. Se evaluó un análisis post-partida con Stockfish como caso con carga natural y su prueba de viabilidad **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). El alcance exigido está por confirmar con el profesor.
 - Lo que el spike deja por hacer está en [docs/spike-notes.md](docs/spike-notes.md) (sección 7), agrupado por área: **agente local**, **producto** y **CI y entrega**.
 
 ## 2. Qué es
@@ -41,6 +42,7 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
 | Mínimo 2 bases de datos | Postgres (`games`, y `users` si se hace el login) + Mongo (`game_moves`, `voice_attempts`) |
 | 100% en GitHub | Repo público `chessspeak`, GPL-3.0, ramas por feature con PR, CI |
 | Microfrontends | 3 custom elements independientes (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`) que conviven en un index servido como web estática |
+| Balanceo de carga sobre un proceso crítico | Pool de `whisper-server` en `local-agent`, con dashboard y prueba de carga (ADR 10). **Alcance exigido por confirmar con el profesor** |
 
 ## 5. Arquitectura
 
@@ -154,7 +156,7 @@ Decidida por el spike (ADR [4](docs/adr/0004-resolucion-contra-jugadas-legales.m
   2. `voice-parser` no importa DOM, Nest ni `web`.
   3. `GameRoom` no importa `@nestjs/*`.
 - Código y commits en inglés; interfaz en español. Ramas por feature con PR.
-- Nombre: **ChessSpeak**. El repositorio en GitHub ya se llama **`chessspeak`** (`https://github.com/TWC-FINE/chessspeak`) y el remoto local apunta a él. La carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora. “ChessPeak” y “ChesssPeak” son errores.
+- Nombre: **ChessSpeak**. El repositorio en GitHub se llama hoy **`TWC-FINE/ChesssPeak`** y el remoto local apunta a él. La carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora. Fuera de esos dos casos, “ChessPeak” y “ChesssPeak” son errores.
 
 ### 6.1 Escenarios de atributos de calidad (`docs/quality.md`)
 Formato: fuente, estímulo, entorno, respuesta y medida. Las cifras salen del spike y de la sesión de evaluación de la semana 4; **no se inventan**.
@@ -181,7 +183,8 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 | 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | Fase 1 (jue 12) |
 | 7 | Estado en memoria + write-behind idempotente | Fase 1 (semana 2) |
 | 8 | Invitados con token firmado; login opcional | Fase 1 (semana 2) |
-| 9 | Licencia GPL-3.0 (por chessground) | Fase 0 (mar 3) |
+| 9 | Licencia GPL-3.0 (por chessground) | Fase 0 (mar 3); **sin escribir** |
+| 10 | Balanceo de carga de la transcripción en `local-agent` | **Aceptado** (4 nov) |
 
 ## 8. Spike — cerrado el 2 de noviembre
 Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`/`small`. Criterios fijados antes de medir (no se cambian), en [docs/spike-criteria.md](docs/spike-criteria.md):
@@ -312,7 +315,7 @@ Ahora el proyecto se presenta terminado, en un equipo ajeno y sin que haya nadie
 3. **El `local-agent` básico del jue 12 – vie 13 es el punto de no retorno del módulo local.** El prototipo del spike (`spike/whisper-local`) lo reduce a portarlo, pero si ese viernes no transcribe un WAV desde el navegador, hay que escalarlo antes de la semana 3.
 4. **Colchón casi nulo.** La semana 4 es validación y entrega, y es el único margen. Si algo de la semana 3 se retrasa, se aplica el orden de recorte sin discutir.
 5. **`quality.md` necesita la validación.** Sin `expectedUci` y sin el hash del parser no hay cifras comparables. Protege el lun 23 – mar 24.
-6. **Repositorio:** ya se llama `chessspeak` en GitHub y el remoto local está actualizado. La carpeta local anidada se deja por ahora. Decisión cerrada.
+6. **Repositorio:** se llama `TWC-FINE/ChesssPeak` en GitHub. Renombrarlo a `chessspeak` queda como decisión del equipo. La carpeta local anidada se deja por ahora.
 7. **No adoptar el N-best:** el spike lo midió y no mejora nada (+0,0 puntos). **Tampoco hay autoconfirmación.**
 8. **Confirmar la fecha de entrega cuanto antes:** todo el calendario cuelga del vie 27. Si se adelanta, se aplica el orden de recorte desde ya.
 9. **La medición de Chrome va el mar 3 por la mañana, después de subir todo y respaldar los WAV:** decide si el README y la app recomiendan solo Edge o ambos.
@@ -325,6 +328,7 @@ Ahora el proyecto se presenta terminado, en un equipo ajeno y sin que haya nadie
 **Pendientes para el profesor:**
 1. ¿Hay que poder abrir el proyecto con Live Server sin compilar? (Hoy el plan sirve `web/dist`, ya compilado; con la URL pública y `serve:web` el riesgo baja, pero si la respuesta es sí, `web/dist` tendría que estar en el repo desde la entrega.)
 2. ¿Cuál es la fecha real de entrega y el formato de la presentación?
+3. **Balanceo:** ¿basta con integrarlo en Whisper con carga de prueba, o exige carga natural de usuarios reales? ¿Acepta procesos en la misma máquina como instancias? ¿Debe poder ejecutarlo él mismo, o bastan el dashboard y las mediciones?
 
 **Para el equipo (se deciden el lun 9):**
 - Roles A y B: según la comodidad de cada persona con NestJS o con el front y Lit.

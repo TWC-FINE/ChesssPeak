@@ -20,6 +20,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 | R5 | Mínimo 2 bases de datos | Postgres + Mongo |
 | R6 | 100% en GitHub | Repo público, PRs, CI |
 | R7 | Microfrontends | 3 custom elements que conviven en un index (Vercel, `pnpm serve:web` o Live Server) |
+| R8 | Balanceo de carga sobre un proceso crítico | Pool de `whisper-server` en `local-agent`, con dashboard y prueba de carga ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)). Alcance exigido por confirmar con el profesor |
 
 ## 4. Requisitos funcionales
 **Núcleo (debe estar):**
