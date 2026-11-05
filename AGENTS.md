@@ -5,12 +5,14 @@ Léelo completo antes de tocar código. Si algo contradice a [PLAN.md](PLAN.md),
 ## Proyecto
 **ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, equipo de 2 personas, entrega supuesta el 27 de noviembre de 2026.
 
-Nombre correcto: **ChessSpeak**. Repo `chessspeak` en GitHub (`TWC-FINE/chessspeak`), paquetes `@chessspeak/*`. La carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora. “ChessPeak” y “ChesssPeak” son errores; no los propagues.
+Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “ChesssPeak” son errores; no los propagues. **Única excepción:** el repositorio de GitHub se llama hoy `TWC-FINE/ChesssPeak`, y la carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora.
 
 **No hay demo en vivo:** el proyecto se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome. Que se pueda instalar y abrir en una máquina limpia siguiendo solo el README es un entregable.
 
 ## Estado actual
-El **spike de voz está cerrado** (2 de noviembre de 2026; ADR 4 y 5 aceptados en `docs/adr/`). Ya hay código: `packages/voice-parser/` y `spike/` (arnés de Web Speech y benchmark/agente de Whisper), con su `package.json` y `pnpm-workspace.yaml`. Todo lo demás (`shared/`, `server/`, `web/`, `local-agent/`) está **por hacer**: no supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+A 5 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo y `appendMove`), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **No existen todavía** Socket.IO, `GameRoom`, la autenticación ni la voz en la interfaz, y el contrato v1 de `shared/` sigue en revisión (PR #3). No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+
+**Análisis con Stockfish:** se midió y la prueba **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). Sigue fuera de alcance salvo que se decida una versión nueva del criterio.
 
 Decisiones del spike que no se reabren sin motivo (detalle en [docs/spike-results.md](docs/spike-results.md)):
 - Reconocedor por defecto: **Web Speech con un retardo de 400 ms tras soltar el botón**. Whisper local (modelo `small`, siempre con el prompt de ajedrez) es la alternativa seleccionable y el módulo local, con su latencia declarada.
@@ -25,19 +27,19 @@ Decisiones del spike que no se reabren sin motivo (detalle en [docs/spike-result
 - Voz: Web Speech API (por defecto), Whisper local vía `whisper-server` (whisper.cpp).
 - Tests: **Jest** en `server`; **Vitest** en `shared`, `voice-parser` y `web`.
 
-## Estructura (objetivo; existe `packages/voice-parser/`, `spike/` y `docs/`)
+## Estructura
 ```
 shared/                 contrato: eventos del socket (zod), eventos cs:*, tipos de contexto
-packages/voice-parser/  TS puro, sin DOM (existe)
+packages/voice-parser/  TS puro, sin DOM
 server/                 NestJS: auth, games, voice-metrics, health
 web/shell/              index.html, router por hash, sesión, único socket
 web/mf-game/            <mf-game>
 web/mf-voice-input/     <mf-voice-input>
 web/mf-history/         <mf-history>
 web/dist/               salida de build:web (solo se commitea en la entrega)
-local-agent/            Node + TS, envuelve whisper-server en 127.0.0.1:8765
-spike/                  arnés de Web Speech y benchmark de Whisper (existe)
-docs/adr/               ADRs de media página (el 4 y el 5 existen)
+local-agent/            Node + TS, pool de whisper-server en 127.0.0.1:8765
+spike/                  código de medición: Web Speech, Whisper y viabilidad del análisis
+docs/adr/               ADRs de media página
 docs/quality.md         escenarios de calidad con cifras medidas
 ```
 
