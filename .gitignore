@@ -16,6 +16,9 @@ models/
 *.gguf
 ggml-*
 
+# Stockfish binaries stay outside the repo
+stockfish/
+
 # spike audio (results JSON files are kept)
 *.wav
 recordings/
@@ -23,3 +26,9 @@ recordings/
 # misc
 *.log
 .DS_Store
+
+# generated Prisma client
+server/src/generated/
+
+# load test reports of the local agent
+local-agent/results/

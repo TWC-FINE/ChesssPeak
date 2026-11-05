@@ -1,12 +1,12 @@
 # ChessSpeak — contexto para ponerse al día
 
-Una página. Estado a **2 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
+Una página. Estado a **5 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
 
 ## Qué es
 Ajedrez en línea donde las jugadas **se dicen en voz alta** en español (“caballo efe tres”). El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide **confirmación explícita** y la aplica en tiempo real entre dos jugadores. Proyecto final de Arquitectura de Software (2 personas). **No hay demo en vivo:** se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome; por eso la instalación en una máquina limpia (solo con el README) es un entregable.
 
 ## Requisitos del profesor
-Desplegado en la nube (Render, Neon, Atlas; la web pública en Vercel) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements). Pendiente con el profesor: fecha real de entrega y si debe abrirse con Live Server sin compilar (entonces `web/dist` va en el repo).
+Desplegado en la nube (Render, Neon, Atlas; la web pública en Vercel) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements) · **balanceo de carga** sobre un proceso crítico. Pendiente con el profesor: qué exige exactamente del balanceo, fecha real de entrega y si debe abrirse con Live Server sin compilar (entonces `web/dist` va en el repo).
 
 ## Enfoque: la voz
 Se genera la forma hablada de **cada jugada legal** y se elige la más parecida a lo reconocido (umbral, margen, ambigüedad). Nunca propone una jugada ilegal. Un `SpeechRecognizer` intercambiable (Strategy) permite Web Speech, Whisper local, caja de texto y uno falso para tests. El servidor **no sabe de voz**: solo valida jugadas en UCI.
@@ -32,13 +32,18 @@ Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; l
 ## Estructura del repo (lo que existe hoy)
 - `packages/voice-parser/` — parser y corpus v0 (`corpus/`), métricas (`scripts/`). **Congelado** para el `test` v0.
 - `spike/web-speech/` — arnés de Web Speech; `spike/whisper-local/` — benchmark y agente HTTP de Whisper; `spike/results/` — JSON de las mediciones; `spike/recordings/` — WAV (fuera de git).
-- `docs/` — `spike-*.md`, `adr/`, este archivo. Raíz: `PLAN.md`, `SPEC.md`, `ARCHITECTURE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`.
-- Por crear: `shared/`, `server/`, `web/`, `local-agent/`, y el script `pnpm serve:web`. Ignorados por git: `.env`, `whisper/`, `models/`, `spike/recordings/`. Repo en GitHub: `TWC-FINE/chessspeak` (la carpeta local anidada se deja por ahora).
+- `local-agent/` — pool de `whisper-server` con cola, salud, dashboard (`/lb/dashboard`) y generador de carga ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)).
+- `server/` — esqueleto NestJS: `/health`, Prisma y Mongoose, `appendMove`. **Sin Socket.IO, `GameRoom` ni autenticación todavía.**
+- `web/` — shell y 3 microfrontends de marcador de posición; `pnpm build:web`, `serve:web` y `smoke:web`.
+- `shared/` — borrador; el contrato v1 está en el PR #3, sin fusionar.
+- `spike/analysis-gate/` — prueba de viabilidad del análisis con Stockfish: **no pasó** ([analysis-gate.md](analysis-gate.md)).
+- `docs/` — `spike-*.md`, `adr/`, `deploy.md`, este archivo. Raíz: `PLAN.md`, `SPEC.md`, `ARCHITECTURE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`.
+- Ignorados por git: `.env`, `whisper/`, `models/`, `stockfish/`, `spike/recordings/`, `local-agent/results/`. Repo en GitHub: `TWC-FINE/ChesssPeak` (la carpeta local anidada se deja por ahora).
 
 ## Cómo correr el arnés del spike
 Abre en VS Code la carpeta interna del repo (la que tiene `.git`), no la exterior: así se aplica `.vscode/settings.json` (Live Server en 5500 e `ignoreFiles`).
 ```bash
-pnpm install           # puede salir con ERR_PNPM_IGNORED_BUILDS (esbuild): es inofensivo, ver spike-notes
+pnpm install
 pnpm test && pnpm typecheck
 pnpm spike:build       # genera spike/web-speech/dist/bundle.js
 # Live Server sobre spike/web-speech/index.html → http://127.0.0.1:5500/spike/web-speech/index.html (Edge o Chrome, con micrófono)
@@ -59,11 +64,24 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [spike-chrome.md](spike-chrome.md) | Comprobación declarada en Chrome (pendiente de medir) |
 | [protocol.md](protocol.md) · [contract-versioning.md](contract-versioning.md) | Contrato v1 (socket, REST, eventos cs:*, contextos) · cómo se versiona |
 | [spike-notes.md](spike-notes.md) | Notas, equipo de referencia y **tareas pendientes por área** |
-| [adr/](adr/) | ADR 4 y 5 aceptados; los demás se escriben al decidir |
+| [deploy.md](deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
+| [load-balancing.md](load-balancing.md) · [analysis-gate.md](analysis-gate.md) | Prueba de carga de Whisper · prueba del análisis con Stockfish |
+| [adr/](adr/) | ADR 1 a 5 y 10 aceptados; los demás se escriben al decidir |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) | Ramas, commits, PR · reglas para asistentes de IA |
 
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` corre en cada pull request y en cada push a `main`. Trabajos:
+
+- **verify**: `pnpm install --frozen-lockfile`, `pnpm verify` (typecheck + pruebas) y `pnpm build:web`.
+- **integration**: pruebas de integración contra `postgres:17` y `mongo:8` (bases `chessspeak_test`). En CI, que se omitan las pruebas es un fallo (`scripts/integration.mjs` sale con 1 si existe `CI`).
+- **secrets**: gitleaks 8.30.1 (binario con checksum verificado) sobre todo el historial.
+- **smoke**: `pnpm smoke:web` con el Chrome del runner. No bloqueante (`continue-on-error`).
+
+Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pnpm build:web`; para integración, `pnpm env:init`, `docker compose up -d` y `pnpm test:integration`; para el smoke, `pnpm smoke:web` (con `CHROME_PATH` si hace falta).
+
 ## Qué sigue
-- **Mar 3 – vie 6 (una persona), Fase 0:** primero subir todo y respaldar los WAV, luego medir Chrome ([spike-chrome.md](spike-chrome.md)); monorepo, `shared/`, Nest + `health`, shell y 3 proyectos Vite, `pnpm serve:web`, Neon/Atlas, Render, Vercel y CI. El jueves, borrador mínimo y versionado (`v: 1`) del contrato en un PR abierto. El fin de semana 7–8 es opcional (solo `GameRoom`).
+- **Hasta el vie 6, cierre de la Fase 0:** crear las cuentas y desplegar ([deploy.md](deploy.md)), y medir Chrome ([spike-chrome.md](spike-chrome.md)). Hecho: monorepo, esqueletos, CI, copia de los WAV y borrador del contrato. Resolver con el profesor el alcance del balanceo. El fin de semana 7–8 es opcional (solo `GameRoom`).
 - **Lun 9, Fase 1:** puesta al día, **firma del contrato v0**, y se deciden **los roles A (servidor) y B (shell y microfrontends)** según la comodidad de cada quien con NestJS o con el front y Lit, y el **responsable del lote del parser**. Juntos: `local-agent`, integración de voz y corpus v1 (40 frases cada uno).
 - **Semana 3:** voz de punta a punta (Web Speech con 400 ms, Whisper, confirmación). **Semana 4:** sesión de evaluación con otra voz, frases nuevas y otro equipo, prueba en máquina limpia, entrega el **vie 27 de nov** (por confirmar).
 - Tareas del spike por área (agente local, producto, CI y entrega): [spike-notes.md](spike-notes.md), sección 7.

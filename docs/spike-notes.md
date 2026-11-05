@@ -90,6 +90,7 @@ Agrupadas por **área**, no por fase: [PLAN.md](../PLAN.md) (sección 9) decide 
 - [ ] **Lote único de mejoras del parser** (alias para «toma» fundido con la letra, «alfil» partido en dos palabras, «peone»; sección 3), antes de la validación de la semana 4. Las cifras del spike son de la versión `spike-parser-freeze`; la validación usa frases nuevas y **registra el hash del parser usado**. El responsable se asigna el lun 9.
 
 ### CI y entrega
+- [x] **`protocolVersion` en `GET /health`** cuando se fusione el contrato v0 (PR #3). La rama de la capa de datos no lo incluye a propósito: ese campo se añadió en el contrato y hay que reincorporarlo al fusionar. Al fusionar también hay que **alinear** los valores de `result` y `termination` del CHECK de `games` (migración `*_games_checks`, ADR 3) con los del contrato si cambiaron en la revisión.
 - [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5), y explicarlo en el README.
 - [x] **Actualizar PLAN.md** con el spike cerrado, la decisión y que no hay demo en vivo (hecho el 2 de noviembre de 2026).
 - [ ] **`pnpm serve:web`:** servidor estático de Node, sin dependencias, en `127.0.0.1:5500`, para equipos sin VS Code (Fase 0 o Fase 3; el plan lo pone el mié 4).
@@ -111,3 +112,7 @@ Las cifras de latencia de Whisper de [spike-run-b.md](spike-run-b.md) (`small` c
 | Sistema | Windows 10 Pro |
 
 **En otros equipos la latencia será distinta.** Depende sobre todo de la CPU, los hilos y la carga de fondo (por ejemplo, el navegador y la partida abiertos); un equipo más lento o con menos núcleos tendrá más latencia con `small`, y uno más rápido, menos. Además, la cifra es solo inferencia (no incluye grabación ni transporte HTTP), así que la latencia real de extremo a extremo es mayor en cualquier equipo. Las cifras informales de la sección 4 se tomaron en otro equipo («esta laptop», según esa nota) con clips sintéticos y no son comparables con estas.
+
+## Tareas pendientes
+
+- [ ] Lint: el repo no tiene configuración de lint (ESLint u otro); el CI solo corre typecheck y pruebas. Definir una configuración y añadir un paso al trabajo `verify`.

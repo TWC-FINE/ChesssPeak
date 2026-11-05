@@ -27,7 +27,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 
 El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de quien usa la aplicación (Whisper). El servidor solo recibe jugadas en UCI y telemetría.
 
-**Estado:** existen `packages/voice-parser/` y `spike/` (arnés de Web Speech y prototipo del agente de Whisper); `shared/`, `server/`, `web/` y `local-agent/` están por hacer.
+**Estado (5 de noviembre):** existen `packages/voice-parser/`, `spike/`, `local-agent/`, el esqueleto de `server/` y `web/` con marcadores de posición. Faltan Socket.IO, `GameRoom`, la autenticación y la voz en la interfaz; el contrato de `shared/` está en revisión.
 
 ## 2. Componentes
 
@@ -40,7 +40,7 @@ El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de
 | `web/mf-game/` | Tablero (chessground, `viewOnly`), estado de la partida, envía `game:move` | Reconocimiento |
 | `web/mf-voice-input/` | Botón de hablar, adaptadores de reconocimiento, confirmación | Acceso al socket |
 | `web/mf-history/` | Lista de jugadas; pestaña Precisión (opcional) | Acceso al socket |
-| `local-agent/` | Servicio HTTP que transcribe un WAV con whisper-server; umbral de volumen y duración | Reglas de ajedrez |
+| `local-agent/` | Servicio HTTP que transcribe un WAV con un pool de whisper-server (1 worker por defecto, ADR 10); umbral de volumen y duración; dashboard | Reglas de ajedrez |
 
 ### 2.1 Backend (monolito modular NestJS)
 Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`. `analysis` opcional; sin `signaling`.

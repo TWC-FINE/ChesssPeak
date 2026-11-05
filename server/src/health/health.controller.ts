@@ -1,11 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
 import { PROTOCOL_VERSION } from '@chessspeak/shared';
+import { HealthService, type HealthReport } from './health.service';
 
 @Controller('health')
 export class HealthController {
-  /** State of the process only; the databases are checked later. */
+  constructor(private readonly health: HealthService) {}
+
+  /** Always 200: `status` is `degraded` when a database is down. */
   @Get()
-  check(): { status: 'ok'; uptimeSeconds: number; protocolVersion: number } {
-    return { status: 'ok', uptimeSeconds: Math.round(process.uptime()), protocolVersion: PROTOCOL_VERSION };
+  async check(): Promise<HealthReport & { protocolVersion: number }> {
+    return { ...(await this.health.check()), protocolVersion: PROTOCOL_VERSION };
   }
 }
