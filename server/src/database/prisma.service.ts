@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { dbConnectTimeoutMs } from '../deploy-config';
 import { PrismaClient } from '../generated/prisma/client';
 
 /**
@@ -10,7 +11,7 @@ import { PrismaClient } from '../generated/prisma/client';
 export class PrismaService extends PrismaClient implements OnModuleDestroy {
   constructor() {
     const connectionString = process.env.DATABASE_URL ?? 'postgresql://unset:unset@127.0.0.1:5432/unset';
-    super({ adapter: new PrismaPg({ connectionString, connectionTimeoutMillis: 1000 }) });
+    super({ adapter: new PrismaPg({ connectionString, connectionTimeoutMillis: dbConnectTimeoutMs() }) });
   }
 
   async onModuleDestroy(): Promise<void> {

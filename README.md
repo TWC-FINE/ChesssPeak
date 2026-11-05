@@ -82,6 +82,7 @@ pnpm test:integration        # pruebas contra las bases locales (se omiten con u
 | [SPEC.md](SPEC.md) | Qué construimos y cuándo algo está “terminado” |
 | [PLAN.md](PLAN.md) | Estado, calendario, reparto y riesgos |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Componentes, datos, comunicación y decisiones |
+| [docs/deploy.md](docs/deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, commits y pull requests |
 | [AGENTS.md](AGENTS.md) | Reglas para asistentes de IA |
 | `docs/adr/` | Decisiones de arquitectura (media página cada una; el 4 y el 5 están aceptados) |
