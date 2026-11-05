@@ -3,11 +3,11 @@
 Léelo completo antes de tocar código. Si algo contradice a [PLAN.md](PLAN.md), manda PLAN.md; el alcance lo define [SPEC.md](SPEC.md) y la estructura [ARCHITECTURE.md](ARCHITECTURE.md). Para ponerte al día en una página: [docs/CONTEXT.md](docs/CONTEXT.md).
 
 ## Proyecto
-**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, equipo de 2 personas, entrega supuesta el 27 de noviembre de 2026.
+**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, equipo de 2 personas, entrega el **jueves 19 de noviembre de 2026**.
 
 Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “ChesssPeak” son errores; no los propagues. **Única excepción:** el repositorio de GitHub se llama hoy `TWC-FINE/ChesssPeak`, y la carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora.
 
-**No hay demo en vivo:** el proyecto se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome. Que se pueda instalar y abrir en una máquina limpia siguiendo solo el README es un entregable.
+**Hay demo en vivo:** la presentamos nosotros, en Edge, con la web en local (`pnpm serve:web`) y el backend en Render. Guion y calendario en [PLAN.md](PLAN.md), secciones 3 y 9. No añadas funcionalidades fuera del núcleo: los opcionales salieron del plan por la fecha.
 
 ## Estado actual
 A 5 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo y `appendMove`), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **No existen todavía** Socket.IO, `GameRoom`, la autenticación ni la voz en la interfaz, y el contrato v1 de `shared/` sigue en revisión (PR #3). No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
@@ -17,7 +17,7 @@ A 5 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y existe
 Decisiones del spike que no se reabren sin motivo (detalle en [docs/spike-results.md](docs/spike-results.md)):
 - Reconocedor por defecto: **Web Speech con un retardo de 400 ms tras soltar el botón**. Whisper local (modelo `small`, siempre con el prompt de ajedrez) es la alternativa seleccionable y el módulo local, con su latencia declarada.
 - **La confirmación explícita es obligatoria.** No hay autoconfirmación ni N-best.
-- El parser de `packages/voice-parser/` está **congelado** en la versión de la etiqueta `spike-parser-freeze`: las cifras del spike son de esa versión. Solo se modifica en un lote antes de la validación de la semana 4, registrando la versión (hash), y re-midiendo con frases nuevas. No cambies el parser, el corpus ni `docs/spike-criteria.md` fuera de ese lote.
+- El parser de `packages/voice-parser/` está **congelado** en la versión de la etiqueta `spike-parser-freeze`: las cifras del spike son de esa versión. Solo se modifica en un lote antes de la validación del 17 de noviembre, registrando la versión (hash), y re-midiendo con frases nuevas. No cambies el parser, el corpus ni `docs/spike-criteria.md` fuera de ese lote.
 
 ## Stack
 - Monorepo con **pnpm workspaces**, TypeScript estricto en todo.
@@ -83,7 +83,7 @@ Web en el puerto **5500** (fijo; Live Server o `pnpm serve:web`). `local-agent` 
 - No introducir Module Federation, Shadow DOM, microservicios, Redis ni sticky sessions.
 - No guardar **audio** en ninguna parte.
 - No commitear secretos, `.env`, binarios de whisper.cpp ni modelos. Rutas y claves van en `.env` (con `.env.example` en el repo). Tampoco los WAV de `spike/recordings/`.
-- No tocar `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` ni los resultados del spike (`spike/results/`, `docs/spike-results.md`, `docs/spike-run-b.md`) salvo en el lote declarado de la semana 4.
+- No tocar `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` ni los resultados del spike (`spike/results/`, `docs/spike-results.md`, `docs/spike-run-b.md`) salvo en el lote declarado antes de la validación del 17 de noviembre.
 - No hacer push directo a `main`, ni `git push --force`, ni reescribir historia.
 - No commitear `web/dist` (solo en el commit de entrega).
 - No añadir fast-check ni pipelines de percentiles en Mongo (p50/p95 se calculan en Node).

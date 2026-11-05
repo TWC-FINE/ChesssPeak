@@ -3,10 +3,10 @@
 Una página. Estado a **5 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
 
 ## Qué es
-Ajedrez en línea donde las jugadas **se dicen en voz alta** en español (“caballo efe tres”). El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide **confirmación explícita** y la aplica en tiempo real entre dos jugadores. Proyecto final de Arquitectura de Software (2 personas). **No hay demo en vivo:** se presenta terminado, en el equipo de cualquiera de los dos o del profesor, con Edge o Chrome; por eso la instalación en una máquina limpia (solo con el README) es un entregable.
+Ajedrez en línea donde las jugadas **se dicen en voz alta** en español (“caballo efe tres”). El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide **confirmación explícita** y la aplica en tiempo real entre dos jugadores. Proyecto final de Arquitectura de Software (2 personas). **Entrega el jueves 19 de noviembre, con demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
 ## Requisitos del profesor
-Desplegado en la nube (Render, Neon, Atlas; la web pública en Vercel) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements) · **balanceo de carga** sobre un proceso crítico. Pendiente con el profesor: qué exige exactamente del balanceo, fecha real de entrega y si debe abrirse con Live Server sin compilar (entonces `web/dist` va en el repo).
+Desplegado en la nube (Render, Neon, Atlas; la web en Vercel es opcional) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements) · **balanceo de carga** sobre un proceso crítico. Pendiente con el profesor: detalles de la demo, qué exige exactamente del balanceo y si debe abrirse con Live Server sin compilar (entonces `web/dist` va en el repo).
 
 ## Enfoque: la voz
 Se genera la forma hablada de **cada jugada legal** y se elige la más parecida a lo reconocido (umbral, margen, ambigüedad). Nunca propone una jugada ilegal. Un `SpeechRecognizer` intercambiable (Strategy) permite Web Speech, Whisper local, caja de texto y uno falso para tests. El servidor **no sabe de voz**: solo valida jugadas en UCI.
@@ -20,7 +20,7 @@ Se genera la forma hablada de **cada jugada legal** y se elige la más parecida 
 | Web Speech, 400 ms (B) | **87,2 %** (IC95 78–93) | 0 % | 0 % | 0,57 / 0,62 s | sí |
 | Whisper `small` + prompt | 89,7 % | 0 % | 7,7 % | 2,91 / 3,06 s | no (latencia) |
 
-Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; las mejoras conocidas del parser van en **un solo lote antes de la validación de la semana 4**, que usa frases nuevas y registra el hash del parser. **Salvedades:** una voz y una corrida B; el límite inferior del IC95 de B (78 %) queda por debajo del 85 %; no se puede atribuir la mejora solo al retardo (fallos no truncados con ruido: 20 en A, 6 en B; posible efecto de práctica); todo en **Edge 156**, **Chrome no se midió**; la latencia de Whisper es solo inferencia, en un i5-12400F (6 núcleos/12 hilos; en otros equipos será distinta); y hay sesgo de selección entre las 4 configuraciones de Whisper.
+Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; las mejoras conocidas del parser van en **un solo lote antes de la validación del mar 17**, que usa frases nuevas y registra el hash del parser. **Salvedades:** una voz y una corrida B; el límite inferior del IC95 de B (78 %) queda por debajo del 85 %; no se puede atribuir la mejora solo al retardo (fallos no truncados con ruido: 20 en A, 6 en B; posible efecto de práctica); todo en **Edge 156**, **Chrome no se midió**; la latencia de Whisper es solo inferencia, en un i5-12400F (6 núcleos/12 hilos; en otros equipos será distinta); y hay sesgo de selección entre las 4 configuraciones de Whisper.
 
 ## Arquitectura en 5 líneas
 1. **Shell** estático (TypeScript vanilla) abre el único socket y monta 3 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`, Lit en light DOM), servidos con Live Server en el puerto 5500.
@@ -80,7 +80,9 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pnpm build:web`; para integración, `pnpm env:init`, `docker compose up -d` y `pnpm test:integration`; para el smoke, `pnpm smoke:web` (con `CHROME_PATH` si hace falta).
 
 ## Qué sigue
-- **Hasta el vie 6, cierre de la Fase 0:** crear las cuentas y desplegar ([deploy.md](deploy.md)), y medir Chrome ([spike-chrome.md](spike-chrome.md)). Hecho: monorepo, esqueletos, CI, copia de los WAV y borrador del contrato. Resolver con el profesor el alcance del balanceo. El fin de semana 7–8 es opcional (solo `GameRoom`).
-- **Lun 9, Fase 1:** puesta al día, **firma del contrato v0**, y se deciden **los roles A (servidor) y B (shell y microfrontends)** según la comodidad de cada quien con NestJS o con el front y Lit, y el **responsable del lote del parser**. Juntos: `local-agent`, integración de voz y corpus v1 (40 frases cada uno).
-- **Semana 3:** voz de punta a punta (Web Speech con 400 ms, Whisper, confirmación). **Semana 4:** sesión de evaluación con otra voz, frases nuevas y otro equipo, prueba en máquina limpia, entrega el **vie 27 de nov** (por confirmar).
+Calendario completo en [PLAN.md](../PLAN.md), sección 9. No tiene colchón.
+- **Hasta el vie 6, cierre de la Fase 0:** crear las cuentas y desplegar ([deploy.md](deploy.md)), y auth de invitados. Hecho: monorepo, esqueletos, CI, copia de los WAV, borrador del contrato (PR #3) y `GameRoom` (PR #10). Resolver con el profesor los detalles de la demo y el alcance del balanceo.
+- **Lun 9:** puesta al día, **firma del contrato v0** y fusión de los PR #3 y #10, y se deciden **los roles A (servidor) y B (shell y microfrontends)** según la comodidad de cada quien con NestJS o con el front y Lit, y el **responsable del lote del parser**.
+- **Mié 11, hito:** dos invitados juegan escribiendo, con el backend en la nube. **Vie 13, hito:** partida completa por voz con Web Speech y reconexión. Juntos: 40 frases de validación (20 cada uno).
+- **Lun 16:** Whisper desde el navegador y **congelación de funcionalidades**. **Mar 17:** validación con otra voz, frases nuevas y la otra laptop, y primer ensayo. **Mié 18:** segundo ensayo, video de respaldo y tag `v1.0`. **Jue 19: entrega y demo.**
 - Tareas del spike por área (agente local, producto, CI y entrega): [spike-notes.md](spike-notes.md), sección 7.

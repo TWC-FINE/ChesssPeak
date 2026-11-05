@@ -5,7 +5,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 ## 1. Vista general
 
 ```
- Navegador (Edge/Chrome; URL pública en Vercel, `pnpm serve:web` o Live Server :5500)
+ Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; opcionalmente, Vercel)
  ┌──────────────────────────────────────────────────────┐
  │ shell (TS vanilla): router, sesión, ÚNICO socket     │
  │  ├─ <mf-game>        tablero + jugadas (recibe socket)│
@@ -86,7 +86,7 @@ Interfaz `SpeechRecognizer` con adaptadores intercambiables:
 
 **Whisper:** umbral mínimo de volumen y duración antes de transcribir. Modelo `small` con el prompt de ajedrez (sin prompt el acierto baja de 89,7 % a 61,5 %); latencia declarada: p50 2,91 s y p95 3,06 s solo de inferencia. El binario y el modelo viven fuera del repo (rutas en `.env`) y un script los instala en un solo comando. El navegador llama al agente con CORS y cabecera de acceso a red privada; desde una web pública puede bloquearse por el acceso a red local.
 
-**Parser:** las cifras del spike son de la versión `spike-parser-freeze`. Solo se modifica en un lote antes de la validación de la semana 4, registrando el hash usado.
+**Parser:** las cifras del spike son de la versión `spike-parser-freeze`. Solo se modifica en un lote antes de la validación del 17 de noviembre, registrando el hash usado.
 
 ## 5. Datos
 
@@ -122,7 +122,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 - Atlas abierto a `0.0.0.0/0`, mitigado con usuario de mínimos privilegios y contraseña fuerte.
 - Secretos solo en `.env` (con `.env.example` en el repo); gitleaks en CI.
 
-## 8. Reglas de dependencia (dependency-cruiser, semana 4)
+## 8. Reglas de dependencia (dependency-cruiser, Fase 3, solo si hay tiempo)
 1. Los `web/mf-*` no se importan entre sí (solo `shared`).
 2. `voice-parser` no importa DOM, Nest ni `web`.
 3. `GameRoom` no importa `@nestjs/*`.
@@ -132,7 +132,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 |---|---|
 | Backend | Render (una instancia; despertarla antes de evaluar) |
 | Postgres / Mongo | Neon / Atlas M0 |
-| Web | Vercel (URL pública, núcleo); en local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`) o Live Server sobre `web/dist` |
+| Web | En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist`; opcionalmente, Vercel (URL pública) |
 | `local-agent` | En la máquina de quien usa Whisper |
 
 ## 10. Decisiones (ADRs)
