@@ -61,6 +61,17 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [adr/](adr/) | ADR 4 y 5 aceptados; los demás se escriben al decidir |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) | Ramas, commits, PR · reglas para asistentes de IA |
 
+## CI (GitHub Actions)
+
+`.github/workflows/ci.yml` corre en cada pull request y en cada push a `main`. Trabajos:
+
+- **verify**: `pnpm install --frozen-lockfile`, `pnpm verify` (typecheck + pruebas) y `pnpm build:web`.
+- **integration**: pruebas de integración contra `postgres:17` y `mongo:8` (bases `chessspeak_test`). En CI, que se omitan las pruebas es un fallo (`scripts/integration.mjs` sale con 1 si existe `CI`).
+- **secrets**: gitleaks 8.30.1 (binario con checksum verificado) sobre todo el historial.
+- **smoke**: `pnpm smoke:web` con el Chrome del runner. No bloqueante (`continue-on-error`).
+
+Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pnpm build:web`; para integración, `pnpm env:init`, `docker compose up -d` y `pnpm test:integration`; para el smoke, `pnpm smoke:web` (con `CHROME_PATH` si hace falta).
+
 ## Qué sigue
 - **Mar 3 – vie 6 (una persona), Fase 0:** primero subir todo y respaldar los WAV, luego medir Chrome ([spike-chrome.md](spike-chrome.md)); monorepo, `shared/`, Nest + `health`, shell y 3 proyectos Vite, `pnpm serve:web`, Neon/Atlas, Render, Vercel y CI. El jueves, borrador mínimo y versionado (`v: 1`) del contrato en un PR abierto. El fin de semana 7–8 es opcional (solo `GameRoom`).
 - **Lun 9, Fase 1:** puesta al día, **firma del contrato v0**, y se deciden **los roles A (servidor) y B (shell y microfrontends)** según la comodidad de cada quien con NestJS o con el front y Lit, y el **responsable del lote del parser**. Juntos: `local-agent`, integración de voz y corpus v1 (40 frases cada uno).
