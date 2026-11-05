@@ -6,6 +6,8 @@
 
 ChessSpeak permite jugar ajedrez diciendo las jugadas en voz alta. Una de sus dos formas de reconocer la voz es **Whisper local**: el navegador envía un clip WAV a un agente en `127.0.0.1:8765`, que lo transcribe en la CPU de la propia máquina. Cada transcripción consume varios segundos de CPU y no guarda estado, así que es el proceso crítico que elegimos balancear.
 
+**Límite que hay que tener presente:** en una partida real este balanceador ve **una petición a la vez**, porque los turnos alternan y cada jugador tiene su propio agente. Las escaleras de carga de este documento son **sintéticas**. Por eso `LB_WORKERS` vale 1 por defecto. El caso con carga natural que se evaluó, un análisis post-partida con Stockfish, no pasó su prueba: [analysis-gate.md](analysis-gate.md).
+
 Comparamos dos configuraciones con los mismos 12 hilos de CPU y la misma cola:
 
 - un **monolito**, con un solo proceso `whisper-server` de 12 hilos;
@@ -49,7 +51,9 @@ navegador ──HTTP──► local-agent :8765 (gateway · cola · conexiones m
                         └─► whisper-server w3 :8803
 ```
 
-**Por qué conexiones mínimas.** Las peticiones duran segundos y su duración varía con la del clip. El turno rotativo reparte por orden y puede asignar trabajo a un worker ocupado mientras otro está libre. IP hash no sirve porque todas las peticiones llegan desde `127.0.0.1`. Las variantes ponderadas se justifican con instancias desiguales, y aquí son idénticas. Conexiones mínimas mira justo lo que importa: quién está libre ahora.
+**Por qué conexiones mínimas.** Las peticiones duran segundos y su duración varía con la del clip, así que importa quién está libre ahora. IP hash no sirve porque todas las peticiones llegan desde `127.0.0.1`. Las variantes ponderadas se justifican con instancias desiguales, y aquí son idénticas.
+
+**Precisión.** El pool solo ofrece a la estrategia workers libres, con una petición por worker. Con este código, conexiones mínimas y turno rotativo se comportan como una cola común con el siguiente worker libre, y solo cambia el orden entre los libres. Por eso estas corridas no comparan algoritmos.
 
 ## 3. Equipo de pruebas
 

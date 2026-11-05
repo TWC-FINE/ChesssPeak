@@ -15,7 +15,7 @@ ChessSpeak tiene dos candidatos:
 ## Decisión
 
 1. **Se balancea la transcripción con Whisper dentro del `local-agent`.** El agente sigue en `127.0.0.1:8765` con el mismo contrato (`POST /transcribe`, `GET /health`). Detrás hay un pool de `LB_WORKERS` procesos `whisper-server` en puertos consecutivos desde el 8801. Por defecto, los hilos de la CPU se reparten entre ellos (`LB_THREADS_PER_WORKER`). El navegador y el adaptador Whisper no cambian.
-2. **Algoritmo: conexiones mínimas (*least connections*).** Cada petición va al worker con menos peticiones en curso. Los empates rotan para que los workers libres se repartan el trabajo. Turno rotativo (*round robin*) queda implementado como segunda estrategia (`LB_STRATEGY=round-robin`) para las comparativas.
+2. **Algoritmo: conexiones mínimas (*least connections*).** Cada petición va al worker con menos peticiones en curso. Los empates rotan para que los workers libres se repartan el trabajo. Turno rotativo (*round robin*) queda implementado como segunda estrategia (`LB_STRATEGY=round-robin`) para las comparativas. **Precisión (5 de noviembre):** el pool solo ofrece a la estrategia workers libres, y cada worker atiende una petición a la vez. Por eso todos los candidatos tienen 0 peticiones en curso y, con este código, las dos estrategias se comportan como "una cola común y el siguiente worker libre". Solo cambia el orden en que se reparten los libres. La diferencia entre algoritmos aparecería con una concurrencia por worker mayor que 1.
 3. **Capacidad explícita.**
    - Cada worker atiende una petición a la vez, porque `whisper-server` procesa una inferencia a la vez. Esto se asume y falta medirlo.
    - Las demás peticiones esperan en una cola de `LB_QUEUE_MAX`. Con la cola llena, el agente responde **503** con `Retry-After`. Una petición sin respuesta a los 15 s (`LB_TIMEOUT_MS`) recibe **504**.
@@ -35,7 +35,7 @@ ChessSpeak tiene dos candidatos:
 ## Alternativas
 
 - **Réplicas de NestJS detrás de nginx:** exigiría sesiones pegajosas (IP hash) para Socket.IO y un adaptador Redis, o sacar `GameRoom` de la memoria. Eso rompe los ADR 1 y 7 y no cabe en Render gratuito. Además, la partida no se satura por CPU: se tumbaría por diseño, no por carga.
-- **Turno rotativo como algoritmo principal:** reparte por orden sin mirar la carga. Con peticiones de segundos que varían con la duración del clip, puede mandar trabajo a un worker ocupado mientras otro está libre. Se conserva para comparar.
+- **Turno rotativo como algoritmo principal:** en un balanceador clásico reparte por orden sin mirar la carga y puede mandar trabajo a un worker ocupado. En este pool ese caso no ocurre, porque solo elige entre workers libres (ver la decisión 2). Se conserva para comparar.
 - **IP hash:** todas las peticiones llegan desde `127.0.0.1`, así que todas irían al mismo worker.
 - **Variantes ponderadas y menor tiempo de respuesta:** tienen sentido con instancias desiguales. Aquí todos los workers son iguales (mismo binario, modelo e hilos).
 - **Contenedores Docker por worker:** más aislamiento, pero obliga a quien evalúa a tener Docker, y el binario de `whisper.cpp` que usa el proyecto es de Windows. El profesor aceptó procesos de la misma máquina.
@@ -48,4 +48,5 @@ ChessSpeak tiene dos candidatos:
 - (−) Cada worker carga su copia del modelo `small`: en el equipo de desarrollo, unos 580–700 MB de RSS cada uno. La RAM limita cuántos caben.
 - (−) Todos los workers comparten la misma CPU. Con los mismos hilos totales, balancear no crea capacidad de cómputo: lo que aporta está en el aislamiento de fallos y en el reparto bajo concurrencia, y las cifras de [load-balancing.md](../load-balancing.md) deben leerse así.
 - (−) El reconocedor por defecto es Web Speech (ADR 5). El proceso balanceado es el de la alternativa Whisper, que exige instalar el agente.
+- (−) **En una partida real, este balanceador ve una petición a la vez:** los turnos alternan y cada jugador tiene su propio agente. Con una sola petición, el balanceado es más lento, así que **`LB_WORKERS` vale 1 por defecto**. Varios workers aportan con concurrencia (reintentos, lotes de transcripción) y aíslan fallos, y no aceleran el uso normal. Se evaluó un análisis post-partida con Stockfish como caso con carga natural, y su prueba de viabilidad no pasó ([analysis-gate.md](../analysis-gate.md)).
 - (−) El binario de Whisper del proyecto es de Windows x64. En otro sistema hay que descargar otro.
