@@ -4,6 +4,7 @@ packages:
   - shared
   - server
   - web/*
+  - local-agent
 allowBuilds:
   '@parcel/watcher': false
   '@prisma/engines': true

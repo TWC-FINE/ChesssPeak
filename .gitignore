@@ -29,3 +29,6 @@ recordings/
 
 # generated Prisma client
 server/src/generated/
+
+# load test reports of the local agent
+local-agent/results/
