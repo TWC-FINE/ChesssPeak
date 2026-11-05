@@ -1,7 +1,8 @@
 // Runs the server integration tests against the LOCAL databases (docker compose up -d).
 // Safety: it refuses to run unless both URLs point to localhost / 127.0.0.1 and to a database whose
 // name ends in _test, so it can never touch Neon, Atlas or the development databases.
-// If the databases are not reachable it skips with a clear message (exit 0).
+// If the databases are not reachable it skips with a clear message (exit 0), except when CI is set:
+// there a skip exits with 1, so a green CI can never mean that nothing was tested.
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -13,6 +14,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const server = join(root, 'server');
 
 if (existsSync(join(root, '.env'))) process.loadEnvFile(join(root, '.env'));
+
+const skipExitCode = process.env.CI ? 1 : 0;
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1']);
 
@@ -42,7 +45,7 @@ const mongo = parseTarget('MONGO_URI_TEST', ['mongodb:'], 27017);
 
 if (!pg || !mongo) {
   console.log('test:integration: omitido. Faltan DATABASE_URL_TEST y/o MONGO_URI_TEST en .env (ejecuta: pnpm env:init, y luego: docker compose up -d).');
-  process.exit(0);
+  process.exit(skipExitCode);
 }
 
 const reachable = (host, port) =>
@@ -57,7 +60,7 @@ const [pgUp, mongoUp] = await Promise.all([reachable(pg.host, pg.port), reachabl
 if (!pgUp || !mongoUp) {
   const down = [!pgUp && `Postgres (${pg.host}:${pg.port})`, !mongoUp && `Mongo (${mongo.host}:${mongo.port})`].filter(Boolean).join(' y ');
   console.log(`test:integration: omitido. No responde ${down}. Levanta las bases con: docker compose up -d`);
-  process.exit(0);
+  process.exit(skipExitCode);
 }
 
 // create the _test database if it does not exist (connecting to the maintenance database of the same server)

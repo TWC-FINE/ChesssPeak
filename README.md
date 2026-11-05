@@ -1,5 +1,7 @@
 # ChessSpeak
 
+[![CI](https://github.com/TWC-FINE/ChesssPeak/actions/workflows/ci.yml/badge.svg)](https://github.com/TWC-FINE/ChesssPeak/actions/workflows/ci.yml)
+
 Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebraica (en español), en lugar de moverlas con el mouse. El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide confirmación y la aplica en la partida en tiempo real.
 
 Proyecto final de Arquitectura de Software (equipo de 2 personas).

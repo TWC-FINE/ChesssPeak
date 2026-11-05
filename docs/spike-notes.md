@@ -112,3 +112,7 @@ Las cifras de latencia de Whisper de [spike-run-b.md](spike-run-b.md) (`small` c
 | Sistema | Windows 10 Pro |
 
 **En otros equipos la latencia será distinta.** Depende sobre todo de la CPU, los hilos y la carga de fondo (por ejemplo, el navegador y la partida abiertos); un equipo más lento o con menos núcleos tendrá más latencia con `small`, y uno más rápido, menos. Además, la cifra es solo inferencia (no incluye grabación ni transporte HTTP), así que la latencia real de extremo a extremo es mayor en cualquier equipo. Las cifras informales de la sección 4 se tomaron en otro equipo («esta laptop», según esa nota) con clips sintéticos y no son comparables con estas.
+
+## Tareas pendientes
+
+- [ ] Lint: el repo no tiene configuración de lint (ESLint u otro); el CI solo corre typecheck y pruebas. Definir una configuración y añadir un paso al trabajo `verify`.
