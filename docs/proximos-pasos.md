@@ -17,6 +17,16 @@ pnpm install
 - **Dominio:** el profesor pide obtenerlo con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain). Supuesto: si sobra tiempo; es un riesgo asumido (ADR 11). Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **Despliegue:** supuesto Render, Neon y Atlas. Ya no se espera una sugerencia del profesor. Crear las cuentas y las credenciales queda en manos del equipo.
 
+## Puntos abiertos
+**Ninguno está resuelto.** Solo salen de aquí con evidencia o con una confirmación expresa.
+
+- **`smoke` en CI falla sin causa conocida.**
+  - **Qué pasó:** falló 3 de 3 en `fa5c168`, con `tiempo agotado esperando: el navegador`, y pasó 3 de 3 en `cbe8abb`. Entre ambos commits solo cambió que el script guarda la salida de error de Chrome en lugar de descartarla, y no se sabe si eso influye.
+  - **Otros datos:** un control sobre `90ab665` pasó a la misma hora, y el mismo error ya apareció en `main` (`2d287ea`).
+  - **Si vuelve a fallar:** el registro de CI muestra ahora el estado del navegador y su salida de error.
+- **El resultado global de CI puede decir verde aunque `smoke` falle,** porque `ci.yml` lo marca con `continue-on-error`. Ocurrió en `fa5c168`: la ejecución figuró como `success`. **Hay que mirar siempre cada trabajo por separado,** con `gh pr checks <número>`.
+- **La fecha de entrega sigue sin confirmar:** margen interno del equipo 19 de noviembre; tentativa 27 de noviembre. El calendario trabaja con el 19, pero no debe presentarse como fecha confirmada.
+
 ## Dominio
 - **Prioridad:** si sobra tiempo. Si se hace, solo la web en Vercel. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **Elegido:** `chessspeak.dpdns.org`, estaba disponible al comprobarlo. Comprobar en el panel si el registro ya se completó.
