@@ -14,7 +14,7 @@
 - **Las cifras pertenecen a la versión del parser de la etiqueta `spike-parser-freeze`.** Si el parser cambia, esas cifras ya no describen el producto (ver 5.7).
 - **Salvedades:** una voz y una corrida B; no está demostrado que la mejora se deba solo al retardo; todo se midió en **Edge 156**. **Chrome no se midió** (hay una comprobación declarada en [docs/spike-chrome.md](docs/spike-chrome.md), pendiente). La validación con **otra voz, frases nuevas y otro equipo** se hace el mar 17. La demo se hace en Edge, así que medir Chrome ya no bloquea nada.
 - **Código que existe (5 de noviembre):** `packages/voice-parser`, `spike/`, `local-agent` (pool de Whisper con dashboard y prueba de carga, adelantado respecto a la Fase 1), esqueleto de `server/` con las dos bases, `web/` con marcadores de posición y CI. Copia de seguridad de los WAV hecha. **`GameRoom` está escrita, en el PR #10, abierto y sin revisar.** **Falta de la Fase 0:** desplegar (`docs/deploy.md`, requiere crear las cuentas) y firmar el contrato (PR #3).
-- **Balanceo de carga (requisito nuevo del profesor):** está en `local-agent` (ADR 10), con carga de prueba sintética, porque en una partida real ese balanceador ve una petición a la vez. Se evaluó un análisis post-partida con Stockfish como caso con carga natural y su prueba de viabilidad **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). **El 5 de noviembre se decidió añadir un pool de `move-workers` (ADR 11, aún sin código), sobre un supuesto sin confirmar:** el profesor cuestionó los procesos locales y ya no puede responder más sobre esto.
+- **Balanceo de carga (requisito nuevo del profesor):** está en `local-agent` (ADR 10), con carga de prueba sintética, porque en una partida real ese balanceador ve una petición a la vez. Se evaluó un análisis post-partida con Stockfish como caso con carga natural y su prueba de viabilidad **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). **El 5 de noviembre se decidió añadir un pool de `move-workers` (ADR 11, aún sin código), sobre supuestos sin confirmar:** el profesor cuestionó los procesos locales y ya no puede responder más sobre esto.
 - Lo que el spike deja por hacer está en [docs/spike-notes.md](docs/spike-notes.md) (sección 7), agrupado por área: **agente local**, **producto** y **CI y entrega**.
 
 ## 2. Qué es
@@ -193,7 +193,7 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 | 8 | Invitados con token firmado; login fuera del plan | mar 10 – mié 11 |
 | 9 | Licencia GPL-3.0 (por chessground) | vie 6; **sin escribir** |
 | 10 | Balanceo de carga de la transcripción en `local-agent` | **Aceptado** (4 nov); revisado el 5 nov |
-| 11 | Balanceo del guardado de jugadas con `move-workers` | **Aceptado** (5 nov), sobre un supuesto sin confirmar; sin código |
+| 11 | Balanceo del guardado de jugadas con `move-workers` | **Aceptado** (5 nov), sobre supuestos sin confirmar; sin código |
 
 ## 8. Spike — cerrado el 2 de noviembre
 Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`/`small`. Criterios fijados antes de medir (no se cambian), en [docs/spike-criteria.md](docs/spike-criteria.md):

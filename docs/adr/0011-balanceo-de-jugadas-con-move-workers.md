@@ -1,13 +1,16 @@
 # ADR 11 — Balanceo del guardado de jugadas con un pool de `move-workers`
 
-- **Estado:** Aceptado (5 de noviembre de 2026), **sobre un supuesto sin confirmar** (ver abajo). Aún no hay código.
+- **Estado:** Aceptado (5 de noviembre de 2026), **sobre dos supuestos débiles sin confirmar** (a continuación). Aún no hay código.
 - **Relacionado:** [ADR 1](0001-nestjs-typescript-contratos-en-shared.md) · [ADR 3](0003-postgres-y-mongodb.md) · [ADR 10](0010-balanceo-de-carga-en-local-agent.md) · [ARCHITECTURE.md](../../ARCHITECTURE.md) §2.1
 
-## Supuesto más débil: procesos en la misma instancia como «servicios distintos»
+## Supuestos débiles: leer primero
 
-**Todo este diseño se apoya en un supuesto que puede no sostenerse.** El profesor habló de «diferentes servicios». No dijo que procesos separados dentro de una misma instancia cuenten como tales, y su frase sobre los procesos locales apunta en contra, aunque el ADR 10 registra que antes aceptó procesos de la misma máquina. Ya no se le puede preguntar.
+**Todo este diseño se apoya en dos supuestos que pueden no sostenerse.** Ya no se le puede preguntar al profesor.
 
-Si en la evaluación no lo acepta, este pool no cumple el requisito tal como está, y no hay una alternativa construida ni probada. Hay que decirlo al presentar, sin esperar a que lo pregunte.
+1. **Procesos en la misma instancia cuentan como servicios distintos.** El profesor habló de «diferentes servicios». No dijo que procesos separados dentro de una misma instancia cuenten como tales, y su frase sobre los procesos locales apunta en contra, aunque el ADR 10 registra que antes aceptó procesos de la misma máquina.
+2. **«Eso puede ser» es aprobación tentativa, no confirmación.** Además, la transcripción no indica quién habla: que esa frase sea suya es la atribución de quien mantuvo la conversación.
+
+Si en la evaluación no acepta alguno de los dos, este pool no cumple el requisito tal como está, y no hay una alternativa construida ni probada. Hay que decirlo al presentar, sin esperar a que lo pregunte.
 
 ## Contexto
 
@@ -17,7 +20,7 @@ El profesor no aprobó ni rechazó ese modo. Habló de otra cosa: las peticiones
 
 ### Qué dijo, según la transcripción
 
-La transcripción es automática, tiene errores y no indica quién habla. La atribución al profesor viene de quien mantuvo la conversación. No consta la fecha exacta; se recibió el 5 de noviembre.
+La transcripción es automática, tiene errores y no indica quién habla. **La fecha de la conversación no consta**; se recibió el 5 de noviembre. El texto completo está en el [anexo](0011-anexo-transcripcion.md).
 
 **Procesos locales (paráfrasis):** si todo son procesos locales dentro del procesamiento, no habría balanceo real.
 
@@ -31,12 +34,9 @@ La transcripción es automática, tiene errores y no indica quién habla. La atr
 
 Lecturas nuestras, no confirmadas: «uvas» sería «jugadas» o «peticiones». En la frase del gateway, la transcripción dice «condiciones», que leemos como «peticiones». En la de los procesos locales dice «por ida», y no sabemos qué quiso decir; podría ser «por IA».
 
-## Otros supuestos
+## Otro supuesto
 
-**El profesor no puede responder más preguntas sobre esto**, así que se decide con lo que hay:
-
-1. **Tomamos «Eso puede ser» como aprobación tentativa, no como confirmación.** Puede rechazar este diseño en la evaluación.
-2. **Suponemos que su propio ejemplo cumple su condición de «un poquito pesadas».** Medido con esa condición, este diseño no la cumple (ver «Carga real por jugada»).
+**Suponemos que su propio ejemplo cumple su condición de «un poquito pesadas».** Medido con esa condición, este diseño no la cumple (ver «Carga real por jugada»).
 
 ## Decisión
 
