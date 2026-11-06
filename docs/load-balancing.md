@@ -6,7 +6,7 @@
 
 ChessSpeak permite jugar ajedrez diciendo las jugadas en voz alta. Una de sus dos formas de reconocer la voz es **Whisper local**: el navegador envía un clip WAV a un agente en `127.0.0.1:8765`, que lo transcribe en la CPU de la propia máquina. Cada transcripción consume varios segundos de CPU y no guarda estado, así que es el proceso crítico que elegimos balancear.
 
-**Límite que hay que tener presente:** en una partida real este balanceador ve **una petición a la vez**, porque los turnos alternan y cada jugador tiene su propio agente. Las escaleras de carga de este documento son **sintéticas**. Por eso `LB_WORKERS` vale 1 por defecto. El caso con carga natural que se evaluó, un análisis post-partida con Stockfish, no pasó su prueba: [analysis-gate.md](analysis-gate.md).
+**Límite que hay que tener presente:** en una partida real este balanceador ve **una petición a la vez**, porque los turnos alternan y cada jugador tiene su propio agente. Las escaleras de carga de este documento son **sintéticas**. Por eso `LB_WORKERS` vale 1 por defecto. El caso con carga natural que se evaluó, un análisis post-partida con Stockfish, no pasó su prueba: [analysis-gate.md](analysis-gate.md). **No está confirmado que este balanceador cumpla por sí solo el requisito:** ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) y el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md).
 
 Comparamos dos configuraciones con los mismos 12 hilos de CPU y la misma cola:
 

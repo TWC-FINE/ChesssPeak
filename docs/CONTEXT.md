@@ -6,7 +6,7 @@ Una página. Estado a **5 de noviembre de 2026**. El detalle está en [PLAN.md](
 Ajedrez en línea donde las jugadas **se dicen en voz alta** en español (“caballo efe tres”). El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide **confirmación explícita** y la aplica en tiempo real entre dos jugadores. Proyecto final de Arquitectura de Software (2 personas). **Entrega el jueves 19 de noviembre, con demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
 ## Requisitos del profesor
-Desplegado en la nube (Render, Neon, Atlas; la web en Vercel es opcional) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements) · **balanceo de carga** sobre un proceso crítico. Pendiente con el profesor: detalles de la demo, qué exige exactamente del balanceo y si debe abrirse con Live Server sin compilar (entonces `web/dist` va en el repo).
+Desplegado en la nube (Render, Neon, Atlas; la web en Vercel es opcional) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements) · **balanceo de carga** sobre un proceso crítico (ADR 10 y 11; cumplimiento sin confirmar). Pendiente con el profesor: detalles de la demo y si debe abrirse con Live Server sin compilar (entonces `web/dist` va en el repo).
 
 ## Enfoque: la voz
 Se genera la forma hablada de **cada jugada legal** y se elige la más parecida a lo reconocido (umbral, margen, ambigüedad). Nunca propone una jugada ilegal. Un `SpeechRecognizer` intercambiable (Strategy) permite Web Speech, Whisper local, caja de texto y uno falso para tests. El servidor **no sabe de voz**: solo valida jugadas en UCI.
@@ -65,7 +65,7 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [spike-notes.md](spike-notes.md) | Notas, equipo de referencia y **tareas pendientes por área** |
 | [deploy.md](deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [load-balancing.md](load-balancing.md) · [analysis-gate.md](analysis-gate.md) | Prueba de carga de Whisper · prueba del análisis con Stockfish |
-| [adr/](adr/) | ADR 1 a 5 y 10 aceptados; los demás se escriben al decidir |
+| [adr/](adr/) | ADR 1 a 5, 10 y 11 aceptados; los demás se escriben al decidir |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) | Ramas, commits, PR · reglas para asistentes de IA |
 
 ## CI (GitHub Actions)
@@ -80,8 +80,8 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pnpm build:web`; para integración, `pnpm env:init`, `docker compose up -d` y `pnpm test:integration`; para el smoke, `pnpm smoke:web` (con `CHROME_PATH` si hace falta).
 
 ## Qué sigue
-Calendario completo en [PLAN.md](../PLAN.md), sección 9. No tiene colchón. **Tareas, preguntas para el profesor, dominio y propuesta para el balanceo: [proximos-pasos.md](proximos-pasos.md).**
-- **Hasta el vie 6:** auth de invitados. El despliegue espera a lo que sugiera el profesor. Hecho: monorepo, esqueletos, CI, copia de los WAV, borrador del contrato (PR #3) y `GameRoom` (PR #10). Resolver con el profesor los detalles de la demo y el alcance del balanceo.
+Calendario completo en [PLAN.md](../PLAN.md), sección 9. No tiene colchón. **Tareas, preguntas para el profesor, dominio y balanceo: [proximos-pasos.md](proximos-pasos.md).**
+- **Hasta el vie 6:** auth de invitados. El despliegue espera a lo que sugiera el profesor. Hecho: monorepo, esqueletos, CI, copia de los WAV, borrador del contrato (PR #3) y `GameRoom` (PR #10). Resolver con el profesor los detalles de la demo.
 - **Lun 9:** puesta al día, **firma del contrato v0** y fusión de los PR #3 y #10, y se deciden **los roles A (servidor) y B (shell y microfrontends)** según la comodidad de cada quien con NestJS o con el front y Lit, y el **responsable del lote del parser**.
 - **Mié 11, hito:** dos invitados juegan escribiendo, con el backend desplegado o, si aún no hay despliegue, en local. **Vie 13, hito:** partida completa por voz con Web Speech y reconexión. Juntos: 40 frases de validación (20 cada uno).
 - **Lun 16:** Whisper desde el navegador y **congelación de funcionalidades**. **Mar 17:** validación con otra voz, frases nuevas y la otra laptop, y primer ensayo. **Mié 18:** segundo ensayo, video de respaldo y tag `v1.0`. **Jue 19: entrega y demo.**

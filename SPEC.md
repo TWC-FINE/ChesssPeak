@@ -20,7 +20,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 | R5 | Mínimo 2 bases de datos | Postgres + Mongo |
 | R6 | 100% en GitHub | Repo público, PRs, CI |
 | R7 | Microfrontends | 3 custom elements que conviven en un index (`pnpm serve:web`, Live Server o, si se despliega, Vercel) |
-| R8 | Balanceo de carga sobre un proceso crítico | Pool de `whisper-server` en `local-agent`, con dashboard y prueba de carga ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)). Alcance exigido por confirmar con el profesor |
+| R8 | Balanceo de carga sobre un proceso crítico | Pool de `whisper-server` en `local-agent`, con dashboard y prueba de carga ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)), y pool de `move-workers` en el servidor ([ADR 11](docs/adr/0011-balanceo-de-jugadas-con-move-workers.md), aún sin código). Cumplimiento sin confirmar: aprobación tentativa del profesor |
 
 ## 4. Requisitos funcionales
 **Núcleo (debe estar):**
@@ -69,5 +69,5 @@ Las cifras reales se registran en `docs/quality.md` tras la sesión de evaluaci�
 
 ## 7. Supuestos y pendientes
 - Entrega: **jueves 19 de noviembre de 2026**, con **demo en vivo** (se supone ese mismo día).
-- Pendiente con el profesor: detalles de la demo, alcance del balanceo y si hay que abrir el proyecto con Live Server sin compilar (PLAN.md, sección 12).
+- Pendiente con el profesor: detalles de la demo y si hay que abrir el proyecto con Live Server sin compilar (PLAN.md, sección 12).
 - Decidido por el spike: idioma `es-CO`; reconocedor por defecto Web Speech con retardo de 400 ms (ADR 5). La demo se hace en Edge; Chrome sigue sin medirse.

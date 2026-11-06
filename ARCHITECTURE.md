@@ -49,6 +49,7 @@ Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`
 - **Persistencia write-behind:** cada jugada se guarda en Mongo de forma idempotente con `updateOne({gameId, plyCount: ply-1}, {$push, $inc: {plyCount: 1}})`.
 - **Rehidratación:** al reconectar se reconstruye la sala desde Mongo.
 - **Una sola instancia** en Render; no hace falta sticky session.
+- **Guardado por pool (previsto, aún sin código; ADR 11):** con `MOVE_WORKERS` mayor que 0, el gateway reparte `appendMove` entre procesos `move-worker`. `GameRoom` sigue siendo la única que valida. Con `MOVE_WORKERS=0`, el valor por defecto, se escribe directo.
 
 ### 2.2 Microfrontends
 - Custom elements con Lit en light DOM, un proyecto Vite por microfrontend, salida única `web/dist/`.

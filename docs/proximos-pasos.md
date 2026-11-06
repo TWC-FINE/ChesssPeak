@@ -24,8 +24,11 @@ pnpm install
 - **Después:** los registros DNS se crean al definir el hosting. Habrá que añadir el dominio a `CORS_ORIGINS` y a `docs/deploy.md`.
 - **Riesgo:** si la demo se abre desde el dominio, el navegador puede bloquear la llamada de la web a `127.0.0.1` (Whisper). Hay que ensayarlo en Edge.
 
-## Propuesta para el balanceo: modo de dictado (sin aprobar)
-**No construir ni añadir a SPEC.md hasta que el profesor la acepte.**
+## Balanceo: pool de `move-workers` (ADR 11)
+**Decisión del 5 de noviembre.** El profesor no aprobó el modo de dictado y habló de repartir las jugadas entre servicios camino a la base de datos. Su «Eso puede ser» se toma como aprobación tentativa, no como confirmación. El supuesto más débil, el diseño, los límites y el criterio de éxito están en el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md). También cambió lo que se puede afirmar del pool de Whisper: ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre).
+
+## Propuesta descartada: modo de dictado
+**No se construye** (motivos en el ADR 11). Se conserva solo como registro.
 
 **Problema.** En una partida, el balanceador de Whisper recibe una petición a la vez, porque los turnos alternan y cada jugador tiene su agente ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)). Toda la carga medida hasta ahora es sintética.
 
@@ -48,22 +51,12 @@ pnpm install
 
 **Qué esperar.** Con las tasas medidas el 4 de noviembre (0,37 y 0,45 respuestas por segundo), balancear no crea CPU: el total para 80 medias jugadas pasaría de unos 216 s a unos 178 s. Es una estimación, porque el dictado real aún no se ha medido. El argumento más fuerte es la tolerancia a fallos: si un worker cae a mitad del dictado, los demás siguen.
 
-**Comprobación pendiente:** el profesor pidió la prueba de carga en el equipo de menores prestaciones del grupo, y las corridas se hicieron en el equipo de desarrollo. Si la otra laptop es menos potente, hay que repetirla allí.
-
 **Descartadas:** modo club con varios tableros (el micrófono no funciona por HTTP en la red local), Whisper central en la nube (sin CPU en el plan gratuito y se pierde el módulo local), balancear NestJS (exige Redis y sesiones pegajosas) y Stockfish (no pasó su prueba).
 
 ## Preguntas para el profesor
-Si hay poco tiempo, priorizar la 1, la 2, la 7 y la 8.
+Si hay poco tiempo, priorizar la 7 y la 8.
 
-**Para presentar la propuesta:**
-> En una partida normal, el balanceador de Whisper solo recibe una petición a la vez porque los turnos alternan. Proponemos añadir un modo para dictar una planilla de torneo ya jugada. Al dictar a menos de 2 segundos por jugada, las peticiones llegan más rápido de lo que un Whisper puede procesarlas y se forma una cola real sobre el mismo módulo local. El tablero se actualiza conforme se transcriben las jugadas. Compararíamos un solo proceso contra la versión balanceada, y en la demo mataríamos un worker a mitad del dictado sin perder jugadas.
-
-**Balanceo**
-1. ¿Este modo cumple el requisito del balanceo?
-2. Si no lo hiciéramos, ¿bastaría con Whisper y la carga de prueba que ya tenemos?
-3. ¿Le parece bien que el modo exporte la partida a PGN, sin guardarla en las bases de datos?
-4. ¿La prueba comparativa debe hacerse con dictado real, o sirve la que ya está hecha?
-5. ¿Le basta con ver el balanceo en la demo, o quiere ejecutarlo él mismo?
+**Balanceo (1 a 5): cerradas sin respuesta.** El profesor no puede responder más sobre esto; lo decidido está en el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md). Se conserva la numeración para no romper las referencias.
 
 **Microfrontends y Live Server**
 
@@ -87,7 +80,7 @@ Si hay poco tiempo, priorizar la 1, la 2, la 7 y la 8.
 
 15. ¿Qué niveles de C4 pide y en qué formato? ¿Espera también ADR o escenarios de calidad?
 
-**Ya no hace falta preguntar:** si acepta procesos en la misma máquina. Según el ADR 10, ya lo aceptó; basta con mencionarlo.
+**Procesos en la misma máquina:** ya no se da por resuelto. El ADR 10 registra que lo aceptó, pero una conversación posterior lo puso en duda. Queda como supuesto en el ADR 11 y hay que decirlo al presentar.
 
 ## Lista de tareas
 Ninguna de estas tareas depende de las respuestas del profesor, salvo las que lo indican.
@@ -119,15 +112,21 @@ Ninguna de estas tareas depende de las respuestas del profesor, salvo las que lo
 **Según las respuestas del profesor**
 - [ ] 17. Terminar el registro del dominio y crear sus registros DNS (preguntas 8 a 10).
 - [ ] 18. Desplegar el backend y las bases (pregunta 8). Hay que hacerlo antes del ensayo del mar 17.
-- [ ] 19. Modo de dictado (preguntas 1 a 5).
+
+**Balanceo (ADR 11)**
+- [ ] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. Es lo único de este bloque antes del mié 11.
+- [ ] 20. Pool y `move-workers`, del jue 12 al dom 15. Se pausa si el hito del mié 11 se atrasa, y entonces queda solo el balanceo de Whisper.
+- [ ] 21. Pruebas del ADR 11, con el criterio de éxito: matar un worker a mitad de partida sin perder ninguna jugada.
+- [ ] 22. Comprobar cuál es el equipo más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Si se puede, antes del lun 9.
+- [ ] 23. Arrancar la demo de Whisper con `LB_WORKERS=3`.
 
 **Meta para el mié 11:** dos pestañas de Edge jugando por texto contra el servidor; en local mientras no haya despliegue (tareas 3 a 6 y 10 a 12).
 
 ## Qué no tocar por ahora
 - **`shared/`:** el contrato exige la aprobación de los dos. Si falta algo, se anota.
-- **PR #3 y #10:** nadie aprueba su propio PR. Se trabaja encima de esas ramas sin fusionarlas.
+- **PR #3 y #10:** nadie aprueba su propio PR. Se trabaja encima de esas ramas sin fusionarlas. Nada se fusiona a `main` sin aprobación expresa.
 - **Parser y spike:** `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` y los resultados siguen congelados hasta el lote previo a la validación.
-- **Balanceo:** no se amplía hasta tener respuesta.
+- **Balanceo:** solo lo que fija el ADR 11. `GameRoom` y la validación no se tocan.
 - **`web/dist`:** solo en el commit de entrega.
 
 **Espera a la otra persona:** la validación con otra voz, los ensayos con dos laptops y la firma del contrato.

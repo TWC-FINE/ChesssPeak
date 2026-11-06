@@ -14,7 +14,7 @@
 - **Las cifras pertenecen a la versión del parser de la etiqueta `spike-parser-freeze`.** Si el parser cambia, esas cifras ya no describen el producto (ver 5.7).
 - **Salvedades:** una voz y una corrida B; no está demostrado que la mejora se deba solo al retardo; todo se midió en **Edge 156**. **Chrome no se midió** (hay una comprobación declarada en [docs/spike-chrome.md](docs/spike-chrome.md), pendiente). La validación con **otra voz, frases nuevas y otro equipo** se hace el mar 17. La demo se hace en Edge, así que medir Chrome ya no bloquea nada.
 - **Código que existe (5 de noviembre):** `packages/voice-parser`, `spike/`, `local-agent` (pool de Whisper con dashboard y prueba de carga, adelantado respecto a la Fase 1), esqueleto de `server/` con las dos bases, `web/` con marcadores de posición y CI. Copia de seguridad de los WAV hecha. **`GameRoom` está escrita, en el PR #10, abierto y sin revisar.** **Falta de la Fase 0:** desplegar (`docs/deploy.md`, requiere crear las cuentas) y firmar el contrato (PR #3).
-- **Balanceo de carga (requisito nuevo del profesor):** está en `local-agent` (ADR 10), con carga de prueba sintética, porque en una partida real ese balanceador ve una petición a la vez. Se evaluó un análisis post-partida con Stockfish como caso con carga natural y su prueba de viabilidad **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). El alcance exigido está por confirmar con el profesor.
+- **Balanceo de carga (requisito nuevo del profesor):** está en `local-agent` (ADR 10), con carga de prueba sintética, porque en una partida real ese balanceador ve una petición a la vez. Se evaluó un análisis post-partida con Stockfish como caso con carga natural y su prueba de viabilidad **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). **El 5 de noviembre se decidió añadir un pool de `move-workers` (ADR 11, aún sin código), sobre un supuesto sin confirmar:** el profesor cuestionó los procesos locales y ya no puede responder más sobre esto.
 - Lo que el spike deja por hacer está en [docs/spike-notes.md](docs/spike-notes.md) (sección 7), agrupado por área: **agente local**, **producto** y **CI y entrega**.
 
 ## 2. Qué es
@@ -32,9 +32,10 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
   2. Jugar por voz con Web Speech, confirmando con flecha.
   3. Decir una frase ambigua o ilegible y ver que ninguna pieza se mueve.
   4. Desconectar un jugador y ver que la partida continúa al volver.
-  5. Hacer una jugada con Whisper local y mostrar el dashboard del balanceo (`/lb/dashboard`).
-  6. Enseñar `game_moves` y `voice_attempts` en Mongo, y `games` en Postgres.
-  7. Terminar la partida (se puede partir de una posición cercana al mate o usar el abandono).
+  5. Hacer una jugada con Whisper local, con el agente arrancado con `LB_WORKERS=3`, y mostrar el dashboard del balanceo (`/lb/dashboard`). Con el valor por defecto no se ve balanceo.
+  6. Si el pool de `move-workers` llegó a tiempo (ADR 11): matar un worker a mitad de partida y seguir jugando.
+  7. Enseñar `game_moves` y `voice_attempts` en Mongo, y `games` en Postgres.
+  8. Terminar la partida (se puede partir de una posición cercana al mate o usar el abandono).
 - **Respaldos:** la **caja de texto** si falla el micrófono o el reconocedor, datos del celular si falla la red de la sala y el **video grabado el mié 18** si falla todo lo demás.
 - **Reproducibilidad, reducida:** el README sigue siendo necesario (repo público y criterio 7 de SPEC.md), pero ya no es lo que usa quien evalúa. Se comprueba con un **clon nuevo en la segunda laptop**, siguiendo solo el README. Para instalar Whisper se reutiliza `pnpm --filter @chessspeak/spike-whisper-local download`.
 - La aplicación avisa si el navegador no tiene Web Speech (Firefox) y ofrece Whisper local o la caja de texto. Es poco trabajo, pero en la demo no se usa, por eso entra en el orden de recorte (9.7).
@@ -49,7 +50,7 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
 | Mínimo 2 bases de datos | Postgres (`games`, y `users` si se hace el login) + Mongo (`game_moves`, `voice_attempts`) |
 | 100% en GitHub | Repo público `chessspeak`, GPL-3.0, ramas por feature con PR, CI |
 | Microfrontends | 3 custom elements independientes (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`) que conviven en un index servido como web estática |
-| Balanceo de carga sobre un proceso crítico | Pool de `whisper-server` en `local-agent`, con dashboard y prueba de carga (ADR 10). **Alcance exigido por confirmar con el profesor** |
+| Balanceo de carga sobre un proceso crítico | Pool de `whisper-server` en `local-agent`, con dashboard y prueba de carga (ADR 10), y pool de `move-workers` en el servidor (ADR 11, aún sin código). **Cumplimiento sin confirmar: aprobación tentativa** |
 
 ## 5. Arquitectura
 
@@ -191,7 +192,8 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 | 7 | Estado en memoria + write-behind idempotente | mar 10 – mié 11 |
 | 8 | Invitados con token firmado; login fuera del plan | mar 10 – mié 11 |
 | 9 | Licencia GPL-3.0 (por chessground) | vie 6; **sin escribir** |
-| 10 | Balanceo de carga de la transcripción en `local-agent` | **Aceptado** (4 nov) |
+| 10 | Balanceo de carga de la transcripción en `local-agent` | **Aceptado** (4 nov); revisado el 5 nov |
+| 11 | Balanceo del guardado de jugadas con `move-workers` | **Aceptado** (5 nov), sobre un supuesto sin confirmar; sin código |
 
 ## 8. Spike — cerrado el 2 de noviembre
 Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`/`small`. Criterios fijados antes de medir (no se cambian), en [docs/spike-criteria.md](docs/spike-criteria.md):
@@ -281,8 +283,12 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 | Sáb 7 – Dom 8 | Gateway Socket.IO básico sobre `GameRoom` | Menos carga el mar 10 – mié 11; asegura el hito del mié 11 |
 | Sáb 14 – Dom 15 | Lo que falte del hito del vie 13; si no falta nada, el adaptador Whisper | Deja el lun 16 libre para el lote del parser y los errores |
 
+**Pool de `move-workers` (ADR 11): jue 12 – dom 15**, solo después del hito del mié 11. Antes del mié 11 se hace únicamente el puerto `MovePersistence` con escritura directa. Debe entrar antes de la congelación del lun 16. El jue 12 y el vie 13 ya están llenos para el rol A, así que en la práctica depende de trabajar el fin de semana 14–15.
+
 ### 9.7 Orden de recorte si hay retraso
 **Ya fuera del plan por la fecha (no se hacen):** `speechSynthesis`, login/registro, alfabeto OTAN, pestaña Precisión y la corrida con un modelo cuantizado.
+
+**Antes que todo lo demás:** si el hito del mié 11 se atrasa, el pool de `move-workers` se pausa (`MOVE_WORKERS=0`) y queda solo el balanceo de Whisper.
 
 **Si aun así hay retraso, se recorta en este orden, sin discutir:**
 1. Vercel (la demo usa `serve:web`)
@@ -310,6 +316,7 @@ El proyecto se presenta en vivo, con nosotros delante, el jue 19. Los riesgos pr
 | El resultado de B no se repite con otra voz o con frases nuevas (una voz, una corrida, IC95 inferior de 78 %) | Validación del mar 17 con otra voz, frases nuevas y otra laptop; las cifras reales van a `quality.md` sin maquillar |
 | Cambiar el parser invalida las cifras del spike | Un solo lote antes de la validación y se registra el hash del parser usado; si no da tiempo, se queda la versión `spike-parser-freeze` |
 | Divergencia entre servidor y frontend | Contrato v0 de `shared/` versionado (`v: 1`), firmado el lun 9; cambios solo por PR revisado por los dos |
+| El profesor no acepta procesos en la misma instancia como servicios distintos (ADR 11), o descarta el pool de Whisper por ser local (revisión del ADR 10) | Decirlo al presentar y mostrar lo medido. **No hay alternativa construida** |
 | Trabajo en solitario hasta el lun 9 sobre PR sin fusionar | Las ramas salen de `feat/game-room`; si la revisión del contrato cambia algo, se ajusta el lunes por la tarde |
 
 ## 11. Recomendaciones y objeciones
@@ -331,7 +338,7 @@ El proyecto se presenta en vivo, con nosotros delante, el jue 19. Los riesgos pr
 - ✅ **La documentación de arquitectura se hace con C4.**
 - ✅ **El dominio se obtiene con DigitalPlat FreeDomain.**
 
-**Pendientes para el profesor:** la lista completa, con la propuesta del modo de dictado para el balanceo (sin aprobar), está en [docs/proximos-pasos.md](docs/proximos-pasos.md).
+**Pendientes para el profesor:** la lista completa está en [docs/proximos-pasos.md](docs/proximos-pasos.md). El balanceo ya no se pregunta: ver el ADR 11.
 
 **Para el equipo (se deciden el lun 9):**
 - Roles A y B: según la comodidad de cada persona con NestJS o con el front y Lit.
