@@ -1,0 +1,97 @@
+KIT PARA LA OTRA LAPTOP: PRUEBA DE CARGA DE WHISPER
+====================================================
+
+Objetivo: saber cuál es el equipo más débil y repetir allí la comparación.
+Se necesitan los dos equipos el mismo día: las cifras cambian entre días, así que
+no se compara contra una cifra anterior.
+
+Todos los comandos son para PowerShell, en Windows x64.
+El binario de Whisper del proyecto es de Windows; en otro sistema no sirve.
+
+El WAV no está en git, porque es una grabación de voz: se lleva aparte y no se sube.
+Su hash está en p05-01_quiet_r1_runB.wav.sha256.
+
+
+1. VER EL EQUIPO (no instala nada)
+----------------------------------
+En cada equipo, pega esto y anota la salida:
+
+Get-CimInstance Win32_Processor | Select-Object Name,NumberOfCores,NumberOfLogicalProcessors
+Get-CimInstance Win32_ComputerSystem | ForEach-Object { "RAM total: {0:N1} GB" -f ($_.TotalPhysicalMemory/1GB) }
+
+Esto solo orienta. Lo que decide es el paso 3.
+
+
+2. PREPARAR LA OTRA LAPTOP (solo la primera vez)
+------------------------------------------------
+git clone https://github.com/TWC-FINE/ChesssPeak.git
+cd ChesssPeak
+git switch main
+pnpm install
+pnpm env:init
+pnpm --filter @chessspeak/spike-whisper-local download
+
+Comprueba el WAV. El hash debe coincidir con el del archivo .sha256:
+
+Get-FileHash RUTA_AL_KIT\p05-01_quiet_r1_runB.wav -Algorithm SHA256
+
+Copia el WAV a spike\recordings\ (crea la carpeta si no existe).
+
+
+3. MEDIR LOS DOS EQUIPOS EL MISMO DÍA, UNO TRAS OTRO
+----------------------------------------------------
+Orden: equipo A, equipo B, equipo A, equipo B. Son 4 corridas de unos 30 segundos.
+Deja los dos enchufados y cierra lo que consuma CPU.
+
+En el equipo que toca, terminal 1:
+$env:LB_WORKERS=1; $env:LB_QUEUE_MAX=12; pnpm --filter @chessspeak/local-agent start
+
+Con el agente listo, en la terminal 2, registra el entorno antes de CADA corrida.
+Cambia $equipo por el nombre del equipo:
+
+$equipo = "A"
+$f = "entorno-$equipo-$(Get-Date -Format yyyyMMdd-HHmmss).txt"
+& {
+  Get-Date
+  "RAM libre: {0:N0} MB" -f ((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1KB)
+  "msedge.exe: {0} procesos" -f @(Get-Process msedge -ErrorAction SilentlyContinue).Count
+  Get-Process | Sort-Object CPU -Descending | Select-Object -First 15 Name,Id,CPU,@{n='RAM_MB';e={[math]::Round($_.WS/1MB)}} | Format-Table -AutoSize
+} | Out-File $f -Encoding utf8
+
+Y después, también en la terminal 2. Usa ronda1 o ronda2 en la etiqueta:
+
+pnpm --filter @chessspeak/local-agent load --steps 1 --requests 10 --label referencia-$equipo-ronda1
+
+Para el agente con Ctrl+C al terminar.
+
+Cómo leer el resultado, con el p50 de cada corrida:
+- Si un equipo tiene el p50 más alto en las dos rondas, ese es el más débil.
+- Si las rondas no coinciden, no se puede decidir: revisa los registros de entorno,
+  repite y anota que no fue concluyente.
+
+
+4. REPETIR LA COMPARACIÓN EN EL EQUIPO MÁS DÉBIL
+------------------------------------------------
+Si el más débil es el equipo de desarrollo, este paso ya está hecho.
+
+Haz cada pareja dos veces y registra el entorno antes de cada corrida, como en el paso 3.
+Antes de cambiar de configuración, para el agente con Ctrl+C.
+3 workers ocupan unos 2 GB de RAM: mira la memoria libre antes.
+
+Monolito, terminal 1:
+$env:LB_WORKERS=1; $env:LB_QUEUE_MAX=12; pnpm --filter @chessspeak/local-agent start
+Monolito, terminal 2:
+pnpm --filter @chessspeak/local-agent load --label monolito
+
+Balanceado, terminal 1:
+$env:LB_WORKERS=3; $env:LB_QUEUE_MAX=12; pnpm --filter @chessspeak/local-agent start
+Balanceado, terminal 2:
+pnpm --filter @chessspeak/local-agent load --label balanceado
+
+
+5. QUÉ DEVOLVER
+---------------
+- La salida del paso 1 de cada equipo.
+- Los archivos entorno-*.txt. Muestran qué programas estaban abiertos: revísalos antes
+  de compartirlos y no los subas a git.
+- Los JSON de local-agent\results\ (esa carpeta no está en git).

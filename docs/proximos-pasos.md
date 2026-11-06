@@ -117,7 +117,7 @@ Ninguna de estas tareas depende de las respuestas del profesor, salvo las que lo
 - [ ] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. Es lo único de este bloque antes del mié 11.
 - [ ] 20. Pool y `move-workers`, del jue 12 al dom 15. Se pausa si el hito del mié 11 se atrasa, y entonces queda solo el balanceo de Whisper.
 - [ ] 21. Pruebas del ADR 11, con el criterio de éxito: matar un worker a mitad de partida sin perder ninguna jugada.
-- [ ] 22. Comprobar cuál es el equipo más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Si se puede, antes del lun 9.
+- [ ] 22. Medir los dos equipos el mismo día para saber cuál es el más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Instrucciones: [docs/kit-equipo-debil/LEEME.txt](kit-equipo-debil/LEEME.txt). Si se puede, antes del lun 9.
 - [ ] 23. Arrancar la demo de Whisper con `LB_WORKERS=3`.
 
 **Meta para el mié 11:** dos pestañas de Edge jugando por texto contra el servidor; en local mientras no haya despliegue (tareas 3 a 6 y 10 a 12).
