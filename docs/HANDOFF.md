@@ -89,6 +89,10 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 
 **Regla de PARA:** ante cualquier fallo, incluidos los errores del propio script de Claude, se para, se muestra la salida y se espera la decisión del responsable del repo. No se reintenta ni se corrige por cuenta propia.
 
+**Carpetas privadas:** `evidencia-web/` y `privado/` viven **fuera del repo**, porque git no las ignora y el repo es público. **Nunca usar `git add .` ni `git add -A`: los archivos se añaden por nombre.** `E2E_OUT` debe apuntar fuera del repo.
+
+**Clon limpio sin probar:** el equipo donde se retomó el trabajo el 6 de noviembre reutiliza su `.env` y su `node_modules`, así que lo que corra ahí no demuestra que el proyecto funcione en un clon limpio.
+
 ## 4. Avance estimado
 
 **Es una estimación, no una medida.** El plan no trae días-persona por bloque: trae un calendario de 18 días-persona entre el 5 y el 18 de noviembre. El reparto dentro de cada fila es una suposición de este documento.
