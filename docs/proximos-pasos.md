@@ -12,13 +12,13 @@ pnpm install
 - **Fuera de git:** `.env` (`pnpm env:init`), Whisper y sus modelos (`pnpm --filter @chessspeak/spike-whisper-local download`) y los WAV del spike.
 
 ## Decisiones ya tomadas
-- **Entrega:** 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno), con **demo en vivo**.
+- **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con **demo en vivo**.
 - **Documentación de arquitectura:** el profesor pide **C4**. Los niveles y el formato son un supuesto.
-- **Dominio:** el profesor pide obtenerlo con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain). Supuesto: si sobra tiempo.
+- **Dominio:** el profesor pide obtenerlo con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain). Supuesto: si sobra tiempo; es un riesgo asumido (ADR 11). Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **Despliegue:** supuesto Render, Neon y Atlas. Ya no se espera una sugerencia del profesor. Crear las cuentas y las credenciales queda en manos del equipo.
 
 ## Dominio
-- **Prioridad:** si sobra tiempo. Si se hace, solo la web en Vercel.
+- **Prioridad:** si sobra tiempo. Si se hace, solo la web en Vercel. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **Elegido:** `chessspeak.dpdns.org`, estaba disponible al comprobarlo. Comprobar en el panel si el registro ya se completó.
 - **Opciones del formulario:** **DigitalPlat DNS** y **cupo gratuito**. El cupo gratuito exige verificar la cuenta.
 - **Límites:** hay un cupo gratuito por cuenta y el dominio tiene fecha de vencimiento.
@@ -59,9 +59,9 @@ pnpm install
 
 | Tema | Supuesto | Riesgo o pendiente |
 |---|---|---|
-| Entrega | 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno) | No se presenta como confirmada. Se supone que la demo es ese mismo día |
+| Entrega | Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre | No se presenta como confirmada. Se supone que la demo es ese mismo día |
 | Despliegue | Render, Neon y Atlas, como en `render.yaml` y `docs/deploy.md`. `MOVE_WORKERS=0` en Render hasta medir la memoria | El profesor iba a sugerir dónde y cómo. Hay que crear las cuentas |
-| Dominio | Si sobra tiempo. Si se hace, solo la web en Vercel | Sin comprobar si el registro se completó |
+| Dominio | Si sobra tiempo. Si se hace, solo la web en Vercel. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app` | Riesgo asumido: el profesor pidió el dominio (ADR 11). Sin comprobar si el registro se completó |
 | Microfrontends y Live Server | 3 custom elements sin Module Federation ni despliegues independientes (ADR 2). `web/dist` va en el commit de entrega, solo al congelar el código, y abre en `http://127.0.0.1:5500/web/dist/index.html` | Ensayar exactamente ese modo. La demo sigue usando `serve:web` |
 | Chrome | Sigue como recorte. Si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre | La medición es con voz real |
 | Rúbrica | No se conocen pesos: se cubren todos los requisitos de SPEC.md por igual | Podría pesar más algo que tratamos como secundario |
@@ -99,7 +99,7 @@ Las tareas que dependen de un supuesto lo indican.
 
 **Según los supuestos**
 - [ ] 17. Si sobra tiempo: terminar el registro del dominio y apuntarlo a la web en Vercel.
-- [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas. Es de la Fase 0, necesita crear las cuentas y hay que hacerlo antes del ensayo del mar 17.
+- [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Es de la Fase 0, necesita crear las cuentas y hay que hacerlo antes del ensayo del mar 17.
 
 **Balanceo (ADR 11)**
 - [ ] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. Es lo único de este bloque antes del mié 11.

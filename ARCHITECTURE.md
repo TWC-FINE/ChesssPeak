@@ -5,7 +5,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 ## 1. Vista general
 
 ```
- Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; opcionalmente, Vercel)
+ Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; publicada también en Vercel)
  ┌──────────────────────────────────────────────────────┐
  │ shell (TS vanilla): router, sesión, ÚNICO socket     │
  │  ├─ <mf-game>        tablero + jugadas (recibe socket)│
@@ -133,7 +133,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 |---|---|
 | Backend | Render (una instancia; despertarla antes de evaluar) |
 | Postgres / Mongo | Neon / Atlas M0 |
-| Web | En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist`; opcionalmente, Vercel (URL pública) |
+| Web | En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist`; publicada también en Vercel (URL `vercel.app`) |
 | `local-agent` | En la máquina de quien usa Whisper |
 
 ## 10. Decisiones (ADRs)

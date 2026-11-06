@@ -1,7 +1,7 @@
 # ChessSpeak — Plan del proyecto
 
 > Última actualización: jueves 5 de noviembre de 2026.
-> **Entrega y demo en vivo: 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno).** Antes se suponía el vie 27 sin demo. Calendario en la sección 9.
+> **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con demo en vivo. Calendario en la sección 9.
 > Equipo: una persona sola hasta que se incorpore el compañero (hacia el **lun 9 de noviembre**). Desde entonces, dos personas con los roles A (servidor) y B (shell y microfrontends), que **se asignan el lun 9** según la comodidad de cada una con NestJS o con el front y Lit; el `local-agent` y la integración de voz, entre las dos. Hasta el 9, una sola persona cubre A y B.
 
 ## 1. Estado a 5 de noviembre de 2026
@@ -26,7 +26,7 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
 **La demo es en vivo** (5 de noviembre; reemplaza a la decisión anterior de “no hay demo en vivo”). Se supone que es el mismo día de la entrega y que la presentamos los dos con nuestras laptops; son supuestos (ver 12). Ya no hay que preparar el proyecto para alguien que lo abra solo: hay que preparar **una presentación que no falle**.
 
 - **Montaje de la demo:** dos laptops con **Edge** (el navegador medido en el spike), diademas y la web en local con `pnpm serve:web` (`127.0.0.1:5500`), conectada al backend en Render. Servir en local evita el permiso de red local que puede bloquear a Whisper desde una página pública.
-- **Vercel deja de ser núcleo.** La demo no lo necesita. `vercel.json` ya existe, así que se despliega si no quita tiempo, y es lo primero que se recorta.
+- **Mínimo garantizado:** la web publicada en Vercel con su URL `vercel.app`. La demo no lo necesita, pero ya no se recorta: es lo que queda publicado si no da tiempo al dominio. `vercel.json` ya existe.
 - **Guion (criterios de aceptación de SPEC.md, sección 6):**
   1. Crear una partida y unirse desde la otra laptop.
   2. Jugar por voz con Web Speech, confirmando con flecha.
@@ -43,7 +43,7 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
 ## 4. Requisitos del profesor y cómo se cumplen
 | Requisito | Cómo se cumple |
 |---|---|
-| Desplegado en la nube | Backend NestJS en Render, Postgres en Neon, Mongo en Atlas M0. Web estática en Vercel opcional (la demo la sirve en local) |
+| Desplegado en la nube | Backend NestJS en Render, Postgres en Neon, Mongo en Atlas M0. Web estática publicada en Vercel con su URL `vercel.app`, mínimo garantizado (la demo la sirve en local) |
 | Módulo local | `local-agent` (Node + TS) en la laptop de la demo; envuelve `whisper-server` (whisper.cpp) en `http://127.0.0.1:8765`. **El profesor confirmó que cuenta como módulo local** |
 | Sockets | Socket.IO: partida en tiempo real (un único socket, abierto por el shell) |
 | Cámara o micrófono | Micrófono: jugadas por voz (Web Speech API o Whisper local). **El profesor confirmó que es aceptable que Web Speech use la nube de Google** |
@@ -209,9 +209,9 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 
 **Resultado:** la corrida A (sin retardo) no cumplió; la corrida B (retardo de 400 ms) cumplió todos los umbrales y es la que cuenta según la regla de lectura. Whisper `small` con prompt acierta 89,7 % pero no cumple la latencia. Detalle, salvedades y datos: [docs/spike-results.md](docs/spike-results.md) y [docs/spike-run-b.md](docs/spike-run-b.md). Pendientes derivados: comprobación en Chrome ([docs/spike-chrome.md](docs/spike-chrome.md)) y validación con otra voz, frases nuevas y otro equipo (Fase 3).
 
-## 9. Calendario (recalculado el jue 5 de nov para entregar el jue 19)
+## 9. Calendario (recalculado el jue 5 de nov para el margen interno del jue 19)
 
-**Este calendario toma como entrega el 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno).** La entrega se adelantó del vie 27 al **jue 19 de noviembre**: de hoy hasta el último día de trabajo pasamos de 16 a **10 días**. El plan se sostiene por tres cosas: el `local-agent` y `GameRoom` ya están escritos, la validación se reduce a medio día y los opcionales salen del plan.
+**Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Este calendario trabaja con el margen interno del **jue 19 de noviembre**: de hoy hasta el último día de trabajo pasamos de 16 a **10 días**. El plan se sostiene por tres cosas: el `local-agent` y `GameRoom` ya están escritos, la validación se reduce a medio día y los opcionales salen del plan.
 
 ### 9.1 Fases
 | Fase | Qué incluye | Cuándo |
@@ -223,7 +223,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 | **Fase 3 — Validación, ensayo y entrega** | Validación (con el hash del parser), `quality.md`, ensayos, video de respaldo, README, tag | mar 17 – **jue 19** |
 
 ### 9.2 Escenarios de capacidad
-Días de trabajo entre hoy (jue 5) y el mié 18 (el jue 19 es la entrega):
+Días de trabajo entre hoy (jue 5) y el mié 18 (el jue 19 es el margen interno de entrega):
 | | Se trabaja el festivo (lun 16) | No se trabaja el lun 16 |
 |---|---|---|
 | **Yo** | **Escenario base:** 10 días | 9 días (ver 9.5) |
@@ -267,7 +267,7 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 | Lun 16 (festivo) | Endurecimiento de la validación; ADR 6. **Lote del parser** (máximo 1 día, solo si se cumplió el hito del vie 13; lo hace el responsable y el otro revisa) | **Adaptador Whisper en el navegador probado contra `local-agent` en Edge**, latencia declarada en la interfaz, aviso en navegadores sin Web Speech |
 | Mar 17 | **Juntos. Por la mañana: validación** con las frases nuevas, los dos reconocedores, otra voz y la otra laptop → cifras reales en `docs/quality.md`, **registrando el hash del parser usado**. **Por la tarde: primer ensayo** con dos laptops y diademas, los dos hablando; clon nuevo en la segunda laptop siguiendo el README; corrección de errores | igual |
 | Mié 18 | **Juntos. Solo corrección de errores.** Segundo ensayo, cronometrado, con el guion de la sección 3. **Grabación del video de respaldo.** README, ADRs y `quality.md` revisados. Commit de entrega con `web/dist` y tag `v1.0` | igual |
-| Jue 19 | **Entrega y demo.** Antes de empezar: despertar Render y comprobar `/health`, probar micrófonos y arrancar `local-agent` | igual |
+| Jue 19 | **Entrega y demo (margen interno).** Antes de empezar: despertar Render y comprobar `/health`, probar micrófonos y arrancar `local-agent` | igual |
 
 **Hito lun 16 (congelación de funcionalidades):** una jugada por voz con Whisper local desde el navegador; el parser queda **congelado de nuevo** antes de la validación. Desde aquí no entra nada nuevo.
 
@@ -291,20 +291,19 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 **Antes que todo lo demás:** si el hito del mié 11 se atrasa, el pool de `move-workers` se pausa (`MOVE_WORKERS=0`) y queda solo el balanceo de Whisper.
 
 **Si aun así hay retraso, se recorta en este orden, sin discutir:**
-1. Vercel (la demo usa `serve:web`)
-2. Medición en Chrome (la demo usa Edge; el README recomienda Edge y dice que Chrome no se midió). **Nota: si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre.**
-3. dependency-cruiser
-4. Lote del parser (se queda `spike-parser-freeze`, cuyas cifras siguen siendo válidas)
-5. Aviso en navegadores sin Web Speech
+1. Medición en Chrome (la demo usa Edge; el README recomienda Edge y dice que Chrome no se midió). **Nota: si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre.**
+2. dependency-cruiser
+3. Lote del parser (se queda `spike-parser-freeze`, cuyas cifras siguen siendo válidas)
+4. Aviso en navegadores sin Web Speech
 
-**No se recortan:** voz con confirmación explícita, sockets, las 2 bases de datos, reconexión, `local-agent` con Whisper y su balanceo, los microfrontends, `serve:web`, `quality.md` con cifras reales, al menos un ensayo y el video de respaldo.
+**No se recortan:** la web publicada en Vercel con su URL `vercel.app`, voz con confirmación explícita, sockets, las 2 bases de datos, reconexión, `local-agent` con Whisper y su balanceo, los microfrontends, `serve:web`, `quality.md` con cifras reales, al menos un ensayo y el video de respaldo.
 
 ## 10. Riesgos
-El proyecto se presenta en vivo, con nosotros delante, el jue 19. Los riesgos principales ahora son el tiempo y lo que pueda fallar en la sala.
+El proyecto se presenta en vivo, con nosotros delante, en la fecha de entrega. Los riesgos principales ahora son el tiempo y lo que pueda fallar en la sala.
 
 | Riesgo | Mitigación |
 |---|---|
-| **No se llega al hito del mié 11** (partida escrita en la nube) | Es lo primero que se vigila. El jue 12 por la mañana se aplican de una vez los recortes 1 a 4 de 9.7 |
+| **No se llega al hito del mié 11** (partida escrita en la nube) | Es lo primero que se vigila. El jue 12 por la mañana se aplican de una vez los recortes 1 a 3 de 9.7 |
 | **El compañero entra después del lun 9** o tarda en ponerse al día | [docs/CONTEXT.md](docs/CONTEXT.md) y contrato ya escritos; pedirle que revise los PR #3 y #10 antes del lunes si puede. Si entra tarde, se aplica 9.7 desde ese día |
 | Falla la red de la sala | Datos del celular como alternativa; video de respaldo. Web Speech y el backend necesitan internet |
 | Instancia gratuita de Render dormida al empezar | Despertarla antes de la demo y comprobar `/health` |
@@ -339,9 +338,9 @@ El proyecto se presenta en vivo, con nosotros delante, el jue 19. Los riesgos pr
 
 **Supuestos:** ya no se le puede preguntar nada más al profesor, así que lo que seguía abierto se decide con supuestos. La lista completa está en [docs/proximos-pasos.md](docs/proximos-pasos.md).
 
-- **Entrega:** 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno).
+- **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.**
 - **Despliegue:** Render, Neon y Atlas.
-- **Dominio:** si sobra tiempo; si se hace, solo la web en Vercel.
+- **Dominio:** si sobra tiempo; si se hace, solo la web en Vercel. Es un riesgo asumido (ADR 11). Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **`web/dist`:** en el commit de entrega, solo al congelar el código.
 - **Chrome:** sigue como recorte (ver 9.7).
 

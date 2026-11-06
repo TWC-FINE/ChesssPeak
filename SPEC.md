@@ -13,13 +13,13 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 ## 3. Requisitos del curso (obligatorios)
 | # | Requisito | Cómo se cumple |
 |---|---|---|
-| R1 | Desplegado en la nube | Backend en Render, Postgres en Neon, Mongo en Atlas; web estática en Vercel opcional (la demo la sirve en local) |
+| R1 | Desplegado en la nube | Backend en Render, Postgres en Neon, Mongo en Atlas; web estática publicada en Vercel con su URL `vercel.app`, mínimo garantizado (la demo la sirve en local) |
 | R2 | Módulo local | `local-agent` con Whisper en `127.0.0.1:8765` (confirmado con el profesor) |
 | R3 | Sockets | Socket.IO para la partida |
 | R4 | Cámara o micrófono | Micrófono para la entrada de jugadas |
 | R5 | Mínimo 2 bases de datos | Postgres + Mongo |
 | R6 | 100% en GitHub | Repo público, PRs, CI |
-| R7 | Microfrontends | 3 custom elements que conviven en un index (`pnpm serve:web`, Live Server o, si se despliega, Vercel) |
+| R7 | Microfrontends | 3 custom elements que conviven en un index (`pnpm serve:web`, Live Server o Vercel) |
 | R8 | Balanceo de carga sobre un proceso crítico | Pool de `whisper-server` en `local-agent`, con dashboard y prueba de carga ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)), y pool de `move-workers` en el servidor ([ADR 11](docs/adr/0011-balanceo-de-jugadas-con-move-workers.md), aún sin código). Cumplimiento sin confirmar: aprobación tentativa del profesor |
 
 ## 4. Requisitos funcionales
@@ -40,7 +40,6 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 
 **Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.7):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.
-- Web pública en Vercel.
 
 **Fuera de alcance:** login/registro, pestaña “Precisión”, alfabeto OTAN, `speechSynthesis` (los cuatro, recortados por la fecha de entrega); chat de voz entre jugadores (WebRTC/TURN), análisis con Stockfish, inglés, ranking/ELO, partidas contra computador. No hay autoconfirmación ni N-best (descartados por el spike).
 
@@ -68,6 +67,6 @@ Las cifras reales se registran en `docs/quality.md` tras la sesión de evaluaci�
 7. Existen `docs/quality.md` con cifras medidas (con el hash del parser usado), los ADRs y un README que permite instalar y abrir el proyecto sin ayuda, comprobado con un clon nuevo en la segunda laptop.
 
 ## 7. Supuestos y pendientes
-- Entrega: **19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno)**, con **demo en vivo** (se supone ese mismo día).
+- **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con **demo en vivo** (se supone ese mismo día).
 - Ya no se le puede preguntar al profesor. Los detalles de la demo, el despliegue, el dominio y Live Server son **supuestos**, listados en [docs/proximos-pasos.md](docs/proximos-pasos.md).
 - Decidido por el spike: idioma `es-CO`; reconocedor por defecto Web Speech con retardo de 400 ms (ADR 5). La demo se hace en Edge; Chrome sigue sin medirse.

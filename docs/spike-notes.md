@@ -94,7 +94,7 @@ Agrupadas por **área**, no por fase: [PLAN.md](../PLAN.md) (sección 9) decide 
 - [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5), y explicarlo en el README.
 - [x] **Actualizar PLAN.md** con el spike cerrado, la decisión y que no hay demo en vivo (hecho el 2 de noviembre de 2026).
 - [ ] **`pnpm serve:web`:** servidor estático de Node, sin dependencias, en `127.0.0.1:5500`, para equipos sin VS Code (Fase 0 o Fase 3; el plan lo pone el mié 4).
-- [ ] **Web pública en Vercel** (opcional desde el 5 de noviembre: la demo en vivo sirve la web en local). Desde una página pública, Whisper local puede bloquearse por el acceso a red local del navegador y además requiere instalar el agente.
+- [ ] **Web pública en Vercel** (mínimo garantizado, con su URL `vercel.app`; la demo en vivo sirve la web en local). Desde una página pública, Whisper local puede bloquearse por el acceso a red local del navegador y además requiere instalar el agente.
 - [ ] **Probar el README con un clon nuevo en la segunda laptop antes de entregar** (mar 17): clonar, `pnpm install`, `.env`, instalación de Whisper y arranque, abriendo la app en Edge, siguiendo solo lo que dice el README.
 - [ ] Copia de seguridad fuera del repo de `spike/recordings/` (116 WAV, 10 774 256 bytes) y de `spike/results/`.
 

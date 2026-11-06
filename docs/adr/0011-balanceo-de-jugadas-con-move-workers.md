@@ -48,7 +48,7 @@ Lecturas nuestras, no confirmadas: «uvas» sería «jugadas» o «peticiones».
    ```
 
 2. **`GameRoom` sigue siendo la única fuente de verdad y la única que valida.** El worker no revalida: solo guarda.
-3. **Puerto `MovePersistence` con dos implementaciones:** directa y por pool. **`MOVE_WORKERS=0` es el valor por defecto** y escribe directo, sin procesos extra.
+3. **Puerto `MovePersistence` con dos implementaciones:** directa y por pool. **`MOVE_WORKERS=0` es el valor por defecto** y escribe directo, sin procesos extra. Mientras no exista el pool, un valor mayor que 0 aborta el arranque, en lugar de aparentar un pool escribiendo directo. **Este aborto es temporal, hasta la tarea 7** (pool y `move-workers`; tarea 20 de `proximos-pasos.md`).
 4. **Si el pool falla, la partida sigue:** el adaptador escribe directo con el mismo repositorio, y los reintentos no duplican la jugada.
 5. **Orden por partida:** la jugada `n+1` se envía solo cuando la `n` quedó guardada. Las jugadas alternas pueden ir a workers distintos, pero nunca se adelantan. `appendMove` ya es idempotente, así que los reintentos son seguros y un hueco se detecta en lugar de ocultarse.
 6. **El cambio se queda dentro de los límites** de la sección siguiente.
@@ -108,6 +108,10 @@ Sale del código actual. **Los tiempos todavía no se han medido.**
 | Mongo `voice_attempts` | Nada por jugada: es un documento por intento de reconocimiento, y va por `voice-metrics` | No |
 
 **Conclusión: es una petición ligera y limitada por la base de datos, no por la CPU del worker.** Esperamos poca o ninguna mejora de rendimiento. Whisper sigue siendo el proceso pesado del proyecto (ADR 10).
+
+## Riesgo asumido: dominio
+
+[PLAN.md](../../PLAN.md) registra que el profesor pidió el dominio, y el equipo lo deja como «si sobra tiempo». Si en la evaluación lo exige y no está hecho, ese pedido queda sin cumplir. **Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.**
 
 ## Alternativas
 
