@@ -20,7 +20,7 @@ El profesor no aprobó ni rechazó ese modo. Habló de otra cosa: las peticiones
 
 ### Qué dijo, según la transcripción
 
-La transcripción es automática, tiene errores y no indica quién habla. **La fecha de la conversación no consta**; se recibió el 5 de noviembre. El texto completo está en el [anexo](0011-anexo-transcripcion.md).
+La transcripción es automática, tiene errores y no indica quién habla. **Fecha de recepción: 5 de noviembre de 2026.** El texto completo está en el [anexo](0011-anexo-transcripcion.md).
 
 **Procesos locales (paráfrasis):** si todo son procesos locales dentro del procesamiento, no habría balanceo real.
 
