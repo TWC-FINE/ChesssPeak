@@ -202,8 +202,13 @@ try {
   page?.close();
   kill(browser);
   kill(server);
-  await sleep(300);
-  rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  await sleep(1000);
+  // Windows can keep the browser profile locked for a moment: a leftover temp folder must not change the result
+  try {
+    rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+  } catch (error) {
+    console.log(`aviso: no se pudo borrar ${profile} (${error.code})`);
+  }
 }
 
 const failed = results.filter((r) => !r.ok);
