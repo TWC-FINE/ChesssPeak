@@ -112,7 +112,7 @@ Sale del código actual. **Los tiempos todavía no se han medido.**
 
 ## Dominio: en espera del profesor
 
-[PLAN.md](../../PLAN.md) registra que el profesor pidió el dominio. Está delegado a su hosting y queda en espera de que lo agregue allí. Si en la evaluación lo exige y no funciona, ese pedido queda sin cumplir. **Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.**
+[PLAN.md](../../PLAN.md) registra que el profesor pidió el dominio. Está delegado al hosting y queda en espera de que lo agregue allí. Si en la evaluación lo exige y no funciona, ese pedido queda sin cumplir. **Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.**
 
 ## Alternativas
 

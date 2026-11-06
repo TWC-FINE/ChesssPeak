@@ -128,13 +128,13 @@ Los percentiles (p50/p95) se calculan en Node, no con pipelines de agregación d
 - La pestaña “Precisión” de `<mf-history>` (una tabla) queda **fuera del plan** por la fecha del 19.
 
 ### 5.6 Contrato v0 de `shared/`
-- **Jueves 5 de noviembre:** un **borrador mínimo y versionado** (campo `v: 1`) en un **PR abierto**. Mínimo: lo imprescindible para que A y B trabajen por separado.
-- **Lunes 9 de noviembre:** lo firman A y B (PR aprobado por los dos), cuando se incorpora el compañero.
+- **Jueves 5 de noviembre:** un **borrador mínimo y versionado** (campo `v: 1`) en un **PR abierto**. Mínimo: lo imprescindible para trabajar por separado en el servidor y en la web.
+- **Aprobación:** sin firma. Lo aprueba el responsable del repo, único aprobador, al fusionar el PR #3 (decisión del 6 de noviembre).
 - Incluye:
   - eventos del socket (cliente → servidor y servidor → cliente) con schemas zod;
   - eventos `cs:*` entre microfrontends;
   - tipos de contexto que reciben los microfrontends.
-- Cualquier cambio posterior va en un PR revisado por los dos y sube la versión.
+- Cualquier cambio posterior va en un PR, lo aprueba el responsable del repo y sube la versión.
 
 ### 5.7 Entrada por voz
 Decidida por el spike (ADR [4](docs/adr/0004-resolucion-contra-jugadas-legales.md) y [5](docs/adr/0005-strategy-y-reconocedor-por-defecto.md)).
@@ -239,34 +239,34 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 
 **Hito vie 6:** auth de invitados en un PR abierto. El despliegue tiene que hacerse antes del ensayo del mar 17.
 
-### 9.4 Desde el lun 9 nov · Dos personas
-**Roles A y B: se deciden el lun 9**, con el compañero, según su comodidad con NestJS o con el front y Lit. Hasta entonces se llaman así:
+### 9.4 Desde el lun 9 nov · Una persona
+**Una sola persona lleva los dos frentes.** Los días de abajo vienen del reparto anterior para dos personas y **aún no se han recalculado**: el recálculo y los recortes están pendientes de decisión. Hasta entonces, léelos como lista de trabajo, no como fechas comprometidas.
 
-| Rol | Responsabilidad |
+| Frente | Qué incluye |
 |---|---|
-| **A** | Servidor: auth, `games`, Socket.IO, Postgres, write-behind en Mongo, reconexión, `voice-metrics` |
-| **B** | Shell y microfrontends: shell con sesión y router, `<mf-game>`, `<mf-voice-input>`, `<mf-history>`, adaptadores de reconocimiento (Web Speech, caja de texto, Whisper en el navegador) |
-| **Juntos** | Contrato v0 de `shared/`, integración de voz, frases de validación (20 cada uno), validación, ensayos |
-| **Por asignar el lun 9** | Responsable del lote de mejoras del parser (ver 5.7) |
+| **Servidor** | Auth, `games`, Socket.IO, Postgres, write-behind en Mongo, reconexión, `voice-metrics` |
+| **Web** | Shell y microfrontends: shell con sesión y router, `<mf-game>`, `<mf-voice-input>`, `<mf-history>`, adaptadores de reconocimiento (Web Speech, caja de texto, Whisper en el navegador) |
+| **Común** | Contrato v0 de `shared/`, integración de voz, 40 frases de validación, validación, ensayos |
+| **Lote del parser** | Lo hace el responsable del repo, si se mantiene (ver 5.7) |
 
 **Semana 2 · lun 9 – vie 13 nov · Fase 1 y primera mitad de la Fase 2**
-| Fecha | A | B |
+| Fecha | Servidor | Web |
 |---|---|---|
-| Lun 9 | **Juntos, por la mañana:** puesta al día con [docs/CONTEXT.md](docs/CONTEXT.md), **firma del contrato v0** y fusión de los PR #3 y #10, **asignación de roles** y del responsable del parser; el compañero instala el proyecto en su laptop. **Por la tarde:** arranca cada rol | igual |
+| Lun 9 | Aprobar el contrato v0 y fusionar la cadena de PR en orden. Después, seguir con los frentes de abajo | igual |
 | Mar 10 – Mié 11 | Auth de invitados (si falta), gateway Socket.IO, `games` en Postgres, write-behind idempotente en Mongo; ADR 7 y 8 | Shell con sesión, router y socket único; `<mf-game>` (chessground `viewOnly`); caja de texto → parser → `game:move` |
 | Jue 12 – Vie 13 | Fin de partida (mate, ahogado, tablas, abandono), reconexión y rehidratación, `voice-metrics` (ingesta de `voice_attempts` con `player` puesto por el servidor) | `<mf-voice-input>` (pulsar para hablar) con Web Speech y retardo de 400 ms, confirmación explícita con flecha y sí/no/cancelar, `<mf-history>`, eventos `cs:` de punta a punta, telemetría vía shell |
-| Toda la semana | 20 frases de validación | 20 frases de validación |
+| Toda la semana | 40 frases de validación | igual |
 
 **Hito mié 11:** dos invitados juegan escribiendo jugadas, con el backend desplegado o, si aún no hay despliegue, en local. **Es el punto de control más importante del plan** (ver 11.1).
 
 **Hito vie 13:** partida completa por voz con Web Speech; la reconexión funciona; 40 frases de validación escritas.
 
 **Semana 3 · lun 16 – jue 19 nov · Fin de la Fase 2 y Fase 3**
-| Fecha | A | B |
+| Fecha | Servidor | Web |
 |---|---|---|
-| Lun 16 (festivo) | Endurecimiento de la validación; ADR 6. **Lote del parser** (máximo 1 día, solo si se cumplió el hito del vie 13; lo hace el responsable y el otro revisa) | **Adaptador Whisper en el navegador probado contra `local-agent` en Edge**, latencia declarada en la interfaz, aviso en navegadores sin Web Speech |
-| Mar 17 | **Juntos. Por la mañana: validación** con las frases nuevas, los dos reconocedores, otra voz y la otra laptop → cifras reales en `docs/quality.md`, **registrando el hash del parser usado**. **Por la tarde: primer ensayo** con dos laptops y diademas, los dos hablando; clon nuevo en la segunda laptop siguiendo el README; corrección de errores | igual |
-| Mié 18 | **Juntos. Solo corrección de errores.** Segundo ensayo, cronometrado, con el guion de la sección 3. **Grabación del video de respaldo.** README, ADRs y `quality.md` revisados. Commit de entrega con `web/dist` y tag `v1.0` | igual |
+| Lun 16 (festivo) | Endurecimiento de la validación; ADR 6. **Lote del parser** (máximo 1 día, solo si se cumplió el hito del vie 13; lo hace el responsable del repo, sin revisión de otra persona) | **Adaptador Whisper en el navegador probado contra `local-agent` en Edge**, latencia declarada en la interfaz, aviso en navegadores sin Web Speech |
+| Mar 17 | **Por la mañana: validación** con las frases nuevas, los dos reconocedores, otra voz y otra laptop (**sin definir quién aporta la voz ni de dónde sale la laptop**) → cifras reales en `docs/quality.md`, **registrando el hash del parser usado**. **Por la tarde: primer ensayo** con dos laptops, diademas y dos voces; clon nuevo en la segunda laptop siguiendo el README; corrección de errores | igual |
+| Mié 18 | **Solo corrección de errores.** Segundo ensayo, cronometrado, con el guion de la sección 3. **Grabación del video de respaldo.** README, ADRs y `quality.md` revisados. Commit de entrega con `web/dist` y tag `v1.0` | igual |
 | Jue 19 | **Entrega y demo (margen interno).** Antes de empezar: despertar Render y comprobar `/health`, probar micrófonos y arrancar `local-agent` | igual |
 
 **Hito lun 16 (congelación de funcionalidades):** una jugada por voz con Whisper local desde el navegador; el parser queda **congelado de nuevo** antes de la validación. Desde aquí no entra nada nuevo.
@@ -299,32 +299,32 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 **No se recortan:** la web publicada en Vercel con su URL `vercel.app`, voz con confirmación explícita, sockets, las 2 bases de datos, reconexión, `local-agent` con Whisper y su balanceo, los microfrontends, `serve:web`, `quality.md` con cifras reales, al menos un ensayo y el video de respaldo.
 
 ## 10. Riesgos
-El proyecto se presenta en vivo, con nosotros delante, en la fecha de entrega. Los riesgos principales ahora son el tiempo y lo que pueda fallar en la sala.
+El proyecto se presenta en vivo, en la fecha de entrega. Los riesgos principales ahora son el tiempo y lo que pueda fallar en la sala.
 
 | Riesgo | Mitigación |
 |---|---|
 | **No se llega al hito del mié 11** (partida escrita en la nube) | Es lo primero que se vigila. El jue 12 por la mañana se aplican de una vez los recortes 1 a 3 de 9.7 |
-| **El compañero entra después del lun 9** o tarda en ponerse al día | [docs/CONTEXT.md](docs/CONTEXT.md) y contrato ya escritos; pedirle que revise los PR #3 y #10 antes del lunes si puede. Si entra tarde, se aplica 9.7 desde ese día |
+| **Una sola persona, sin revisión independiente,** y menos días que trabajo restante | Cada trabajo de CI se revisa por separado antes de fusionar. Se recorta según 9.7; el recálculo del calendario para una persona está pendiente de decisión |
 | Falla la red de la sala | Datos del celular como alternativa; video de respaldo. Web Speech y el backend necesitan internet |
 | Instancia gratuita de Render dormida al empezar | Despertarla antes de la demo y comprobar `/health` |
-| En la sala, el micrófono capta al otro jugador | Pulsar para hablar, diademas, **confirmación explícita**; ensayo con los dos hablando el mar 17 |
+| En la sala, el micrófono capta al otro jugador | Pulsar para hablar, diademas, **confirmación explícita**; ensayo con dos voces el mar 17 (sin definir quién aporta la otra) |
 | El reconocedor falla delante del profesor (B acertó 87,2 % en el spike, con una voz: **alrededor de 1 de cada 8 frases puede fallar**) | Mostrarlo como parte del diseño: la confirmación evita jugadas erróneas y se repite la frase; caja de texto como respaldo; ensayar el guion con jugadas probadas |
 | Whisper `small` tarda demasiado en la laptop de la demo (en un i5-12400F: p50 2,91 s) o el pool la satura | Medirlo en esa laptop el mar 17; correrlo en la laptop más potente; latencia declarada en la interfaz; es alternativa, no el reconocedor por defecto |
 | El acceso de Edge a `127.0.0.1:8765` no funciona (solo se verificó con Chrome sin interfaz) | Probarlo el lun 16 con el adaptador real, no el día de la demo |
 | Whisper transcribe algo con silencio o ruido | Umbral de volumen y duración; **confirmación explícita obligatoria**, así que nada se juega solo |
-| El resultado de B no se repite con otra voz o con frases nuevas (una voz, una corrida, IC95 inferior de 78 %) | Validación del mar 17 con otra voz, frases nuevas y otra laptop; las cifras reales van a `quality.md` sin maquillar |
+| El resultado de B no se repite con otra voz o con frases nuevas (una voz, una corrida, IC95 inferior de 78 %) | Validación del mar 17 con otra voz, frases nuevas y otra laptop (sin definir quién aporta la voz ni de dónde sale la laptop); las cifras reales van a `quality.md` sin maquillar |
 | Cambiar el parser invalida las cifras del spike | Un solo lote antes de la validación y se registra el hash del parser usado; si no da tiempo, se queda la versión `spike-parser-freeze` |
-| Divergencia entre servidor y frontend | Contrato v0 de `shared/` versionado (`v: 1`), firmado el lun 9; cambios solo por PR revisado por los dos |
+| Divergencia entre servidor y frontend | Contrato v0 de `shared/` versionado (`v: 1`); cambios solo por PR aprobado por el responsable del repo |
 | El profesor no acepta procesos en la misma instancia como servicios distintos (ADR 11), o descarta el pool de Whisper por ser local (revisión del ADR 10) | Decirlo al presentar y mostrar lo medido. **No hay alternativa construida** |
-| Trabajo en solitario hasta el lun 9 sobre PR sin fusionar | Las ramas salen de `feat/game-room`; si la revisión del contrato cambia algo, se ajusta el lunes por la tarde |
+| Trabajo sobre PR sin fusionar | La cadena se fusiona en orden antes de seguir con la voz y el despliegue; si algo cambia, se ajusta en ese momento |
 
 ## 11. Recomendaciones y objeciones
 1. **Este calendario no tiene colchón.** Tiene tres puntos de control: **mié 11** (partida escrita en la nube), **vie 13** (partida por voz) y **lun 16** (congelación). Si uno falla, se recorta ese mismo día según 9.7, no al final.
-2. **Pedir la revisión de los PR #3 y #10 antes del lun 9, si el compañero puede.** Son la base de todo lo demás y nadie aprueba su propio PR.
+2. **Sin revisión de otra persona.** El responsable del repo aprueba los PR #3 y #10 a #14, la base de todo lo demás, después de revisar por separado cada trabajo de CI.
 3. **El lote del parser es lo más prescindible del núcleo.** Mejora frases concretas, pero obliga a volver a medir y añade riesgo a tres días de la demo. Si el lun 16 hay cualquier duda, no se toca.
 4. **La validación se reduce a 40 frases y medio día.** Antes eran 80 frases y dos días. Con menos frases el intervalo de confianza es más ancho, y `quality.md` debe decirlo. El mar 17 por la mañana se protege: sin esas cifras no se cumple un requisito que no se recorta.
 5. **Los detalles de la demo son supuestos** (ver 12): ya no se le puede preguntar al profesor, así que se prepara también una versión corta del guion.
-6. **Repositorio:** se llama `TWC-FINE/ChesssPeak` en GitHub. Renombrarlo a `chessspeak` queda como decisión del equipo. La carpeta local anidada se deja por ahora.
+6. **Repositorio:** se llama `TWC-FINE/ChesssPeak` en GitHub. Renombrarlo a `chessspeak` queda como decisión del responsable del repo. La carpeta local anidada se deja por ahora.
 7. **No adoptar el N-best:** el spike lo midió y no mejora nada (+0,0 puntos). **Tampoco hay autoconfirmación.**
 
 ## 12. Preguntas abiertas y supuestos

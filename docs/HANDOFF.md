@@ -95,7 +95,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 
 **Clon limpio sin probar:** el equipo donde se retomó el trabajo el 6 de noviembre reutiliza su `.env` y su `node_modules`, así que lo que corra ahí no demuestra que el proyecto funcione en un clon limpio.
 
-**Instalación y pruebas:** se harán en el equipo de escritorio. En ese otro equipo no se llegó a instalar: `pnpm verify`, Docker y los demás comandos siguen sin ejecutarse allí.
+**Instalación y pruebas:** se hicieron el 6 de noviembre en el equipo de escritorio (ver las notas siguientes). En el otro equipo no se llegó a instalar: `pnpm verify`, Docker y los demás comandos siguen sin ejecutarse allí.
 
 ### Notas para el README (hallazgos del 6 de noviembre)
 - **Espacio en disco:** `pnpm install --frozen-lockfile` falló con `Espacio en disco insuficiente` (`os error 112`) al escribir en la caché de pnpm, `D:\.pnpm-store`. El lockfile era correcto. El README debe avisar del espacio necesario, que aún no se ha medido. Tras un fallo así, `node_modules` puede quedar incompleto y no sirve para probar nada.
@@ -103,6 +103,22 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 - **`.env.example` es distinto entre ramas:** por ejemplo, `feat/web-game` trae `GUEST_AUTH_LIMIT_PER_MINUTE` y `ABANDON_TIMEOUT_MS`, y `docs/delivery-nov-19` trae `MOVE_WORKERS_KILL_SECRET`. El `.env` hay que generarlo en la rama que se va a ejecutar, y unificarlo al fusionar.
 - **Un `.env` viejo no se actualiza solo:** `pnpm env:init` no lo sobrescribe y sale con código 1. Hay que respaldarlo en una ruta externa al repo, regenerarlo y restaurar a mano las variables de Whisper.
 - **`pnpm test:integration` puede engañar:** sin `DATABASE_URL_TEST` ni `MONGO_URI_TEST` dice «omitido» y, fuera de CI, sale con código 0. Hay que comprobar que los tests corrieron.
+- **Migración:** `pnpm prisma:migrate` no existe en la raíz. El comando es `pnpm --filter @chessspeak/server prisma:migrate`.
+- **`cp` frente a `pnpm env:init`:** el README de `feat/web-game` da las dos instrucciones (líneas 55 y 68). Con `cp .env.example .env`, `GUEST_TOKEN_SECRET` queda vacío y las contraseñas se quedan en su valor de ejemplo. El README debe dejar solo `pnpm env:init`.
+- **Contraseñas con volúmenes existentes:** Postgres y Mongo solo aplican las credenciales iniciales cuando el volumen está vacío. Si se regenera `.env` con volúmenes ya creados, las contraseñas nuevas no se aplican a esas bases. No se probó el fallo: se restauraron del respaldo las credenciales de las bases y la integración pasó.
+- **Nombres de volúmenes:** Compose antepone el proyecto, así que en `docker volume ls` aparecen `chessspeak_chessspeak_pg` y `chessspeak_chessspeak_mongo`, no `chessspeak_pg` y `chessspeak_mongo`.
+- **Arranque automático:** con `restart: unless-stopped`, los contenedores se vieron en marcha antes de ejecutar `docker compose up -d`. La causa probable, no comprobada, es que arrancan al abrir Docker Desktop. `docker compose up -d` no los recreó.
+- **Estado previo reutilizado:** en el equipo de escritorio, sobre `cbe8abb`, `pnpm verify` pasó con 485 tests y `pnpm test:integration` ejecutó 6 suites y 33 tests, sin «omitido». Pero `pnpm install --frozen-lockfile` reutilizó `node_modules` (199 ms) y la migración respondió `No pending migrations to apply`, porque ya estaban aplicadas. Esto no prueba ni una instalación limpia ni las migraciones sobre una base vacía: sigue pendiente el clon nuevo.
+
+### Plan de despliegue aprobado (Paso C), sin implementar
+**Es solo un plan: nada de esto está hecho.** Se hace después de fusionar la cadena, con ramas desde `main`, un PR por tema y *squash*. Las cuentas y credenciales las pone el responsable del repo en cada panel, nunca en el repo.
+
+- **`/health/live`:** ruta sin bases para el sondeo de Render. `/health` conserva el detalle con `HEALTH_PROBE_TIMEOUT_MS`. No se presenta como beneficio que Render deje de despertar a Neon: es una suposición.
+- **`build-web.mjs`:** falla sin `PUBLIC_API_URL` solo en despliegue, con una condición explícita (por ejemplo, `VERCEL=1`). Hay que probar los dos casos y que CI siga pasando.
+- **`render.yaml`:** versión exacta de Node (hay que confirmar que Render la soporta), `MOVE_WORKERS=0` y tiempo de sondeo declarados.
+- **`docs/deploy.md`:** lista de cuentas (Neon, Atlas, Render y Vercel) y orden: backend, compilar la web con su URL, subir la web y añadir el origen a `CORS_ORIGINS`.
+- **Dominio en `docs/deploy.md`:** su conexión queda como supuesto, según qué sea el hosting.
+- **Riesgos en `docs/deploy.md`:** HTTPS obligatorio para el micrófono; web pública que llama a `127.0.0.1` (Whisper local), con la prueba en la consola de Edge; y `0.0.0.0/0` en Atlas como riesgo aceptado, con contraseña larga y aleatoria.
 
 ## 4. Avance estimado
 

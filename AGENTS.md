@@ -3,11 +3,11 @@
 Léelo completo antes de tocar código. Si algo contradice a [PLAN.md](PLAN.md), manda PLAN.md; el alcance lo define [SPEC.md](SPEC.md) y la estructura [ARCHITECTURE.md](ARCHITECTURE.md). Para ponerte al día en una página: [docs/CONTEXT.md](docs/CONTEXT.md).
 
 ## Proyecto
-**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, equipo de 2 personas. **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.**
+**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, en solitario: el responsable del repo es el único que aprueba. **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.**
 
 Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “ChesssPeak” son errores; no los propagues. **Única excepción:** el repositorio de GitHub se llama hoy `TWC-FINE/ChesssPeak`, y la carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora.
 
-**Hay demo en vivo:** la presentamos nosotros, en Edge, con la web en local (`pnpm serve:web`) y el backend en Render. Guion y calendario en [PLAN.md](PLAN.md), secciones 3 y 9. No añadas funcionalidades fuera del núcleo: los opcionales salieron del plan por la fecha.
+**Hay demo en vivo,** en Edge, con la web en local (`pnpm serve:web`) y el backend en Render. Guion y calendario en [PLAN.md](PLAN.md), secciones 3 y 9. No añadas funcionalidades fuera del núcleo: los opcionales salieron del plan por la fecha.
 
 ## Estado actual
 A 5 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo y `appendMove`), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **No existen todavía** Socket.IO, `GameRoom`, la autenticación ni la voz en la interfaz, y el contrato v1 de `shared/` sigue en revisión (PR #3). No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
@@ -90,7 +90,7 @@ Web en el puerto **5500** (fijo; Live Server o `pnpm serve:web`). `local-agent` 
 - No añadir dependencias sin motivo; si lo haces, dilo en el PR.
 - No inventar cifras de rendimiento o precisión: salen de las mediciones (`docs/spike-results.md`, `docs/quality.md`). Las del spike son de la versión `spike-parser-freeze`.
 - No introducir autoconfirmación ni N-best, ni quitar la confirmación explícita ni el retardo de 400 ms de Web Speech.
-- No modificar `shared/` sin avisar: es el contrato entre A y B y exige aprobación de los dos.
+- No modificar `shared/` sin avisar: es el contrato entre el servidor y la web. Cualquier cambio va en un PR, lo aprueba el responsable del repo y sube la versión.
 - No renombrar, borrar ni rehacer lo que no te pidieron.
 
 ## Cómo trabajar

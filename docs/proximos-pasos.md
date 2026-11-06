@@ -98,29 +98,29 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 | Balanceo | Ver el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md) y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Procesos en la misma máquina: no se da por resuelto, y hay que decirlo al presentar |
 
 ## Lista de tareas
-Las tareas que dependen de un supuesto lo indican.
+Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:** `[x]` significa hecho en un PR abierto, todavía sin fusionar en `main`.
 
 **Preparación**
 - [ ] 1. Abrir el PR de `docs/delivery-nov-19`.
 - [ ] 2. Levantar el entorno local: `pnpm env:init` y `docker compose up -d`.
 
 **Servidor**
-- [ ] 3. Auth de invitados: `POST /auth/guest`, token firmado y throttler.
-- [ ] 4. Partidas: `POST /games`, con guardado en la tabla `games`.
-- [ ] 5. Gateway Socket.IO: `game:join`, `game:move` y `game:resign` sobre `GameRoom`.
-- [ ] 6. Guardado de jugadas en Mongo con `appendMove`, y rehidratación desde ahí.
-- [ ] 7. Reconexión y abandono, con plazo configurable (60 s por defecto, provisional).
+- [x] 3. Auth de invitados: `POST /auth/guest`, token firmado y throttler. (PR #11)
+- [x] 4. Partidas: `POST /games`, con guardado en la tabla `games`. (PR #12)
+- [x] 5. Gateway Socket.IO: `game:join`, `game:move` y `game:resign` sobre `GameRoom`. (PR #13)
+- [x] 6. Guardado de jugadas en Mongo con `appendMove`, y rehidratación desde ahí. (PR #13)
+- [x] 7. Reconexión y abandono, con plazo configurable (60 s por defecto, provisional). (PR #13)
 - [ ] 8. Telemetría de voz: ingesta de `voice:attempt`; `player` lo pone el servidor.
 
 **Web**
-- [ ] 9. `<mf-history>`: lista de jugadas a partir de `cs:move-applied`.
-- [ ] 10. Shell real: sesión y socket único, en lugar de `web/shell/src/mocks.ts`.
-- [ ] 11. `<mf-game>`: tablero real, `game:state`, `game:moved` y flecha de confirmación.
-- [ ] 12. `<mf-voice-input>`: caja de texto → `resolve()` del parser → `cs:move-candidate`.
+- [ ] 9. `<mf-history>`: lista de jugadas a partir de `cs:move-applied`. Hoy es un marcador de posición que muestra las jugadas en UCI.
+- [x] 10. Shell real: sesión y socket único, en lugar de `web/shell/src/mocks.ts`. (PR #14)
+- [x] 11. `<mf-game>`: tablero real, `game:state`, `game:moved` y flecha de confirmación. (PR #14)
+- [x] 12. `<mf-voice-input>`: caja de texto → `resolve()` del parser → `cs:move-candidate`. (PR #14)
 - [ ] 13. Reconocedores: Web Speech con 400 ms, Whisper contra `/transcribe` y uno falso para tests.
 
 **Documentos**
-- [ ] 14. ADR 9 (licencia), y ADR 7 y 8 al terminar las tareas 3 y 6.
+- [ ] 14. ADR 9 (licencia), y ADR 7 y 8 al terminar las tareas 3 y 6. ADR 8 en el PR #11 y ADR 7 en el PR #13; falta el ADR 9.
 - [ ] 15. 20 frases de validación, en un archivo nuevo, sin editar el corpus v0.
 - [ ] 16. Documentación de arquitectura con C4 (supuesto: niveles 1 a 3 en Mermaid).
 
@@ -129,7 +129,7 @@ Las tareas que dependen de un supuesto lo indican.
 - [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Es de la Fase 0, necesita crear las cuentas y hay que hacerlo antes del ensayo del mar 17.
 
 **Balanceo (ADR 11)**
-- [ ] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. Es lo único de este bloque antes del mié 11.
+- [x] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. Es lo único de este bloque antes del mié 11. (PR #13)
 - [ ] 20. Pool y `move-workers`, del jue 12 al dom 15. Se pausa si el hito del mié 11 se atrasa, y entonces queda solo el balanceo de Whisper.
 - [ ] 21. Pruebas del ADR 11, con el criterio de éxito: matar un worker a mitad de partida sin perder ninguna jugada.
 - [ ] 22. Medir los dos equipos el mismo día para saber cuál es el más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Instrucciones: [docs/kit-equipo-debil/LEEME.txt](kit-equipo-debil/LEEME.txt). Si se puede, antes del lun 9.
