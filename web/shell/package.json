@@ -5,7 +5,8 @@
   "type": "module",
   "license": "GPL-3.0-only",
   "dependencies": {
-    "@chessspeak/shared": "workspace:*"
+    "@chessspeak/shared": "workspace:*",
+    "socket.io-client": "^4.8.4"
   },
   "scripts": {
     "test": "vitest run",

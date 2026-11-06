@@ -316,6 +316,9 @@ importers:
       chessground:
         specifier: ^9.2.1
         version: 9.2.1
+      chessops:
+        specifier: ^0.15.1
+        version: 0.15.1(patch_hash=08e49f347e3763fce81fbfb592ac32718f69feed853c5e165462b23b1acaaa9b)
       lit:
         specifier: ^3.3.3
         version: 3.3.3
@@ -351,6 +354,9 @@ importers:
       '@chessspeak/shared':
         specifier: workspace:*
         version: link:../../shared
+      '@chessspeak/voice-parser':
+        specifier: workspace:*
+        version: link:../../packages/voice-parser
       chessground:
         specifier: ^9.2.1
         version: 9.2.1
@@ -370,6 +376,9 @@ importers:
       '@chessspeak/shared':
         specifier: workspace:*
         version: link:../../shared
+      socket.io-client:
+        specifier: ^4.8.4
+        version: 4.8.4(supports-color@8.1.1)
 
 packages:
 
