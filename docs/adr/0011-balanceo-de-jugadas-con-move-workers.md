@@ -110,9 +110,9 @@ Sale del código actual. **Los tiempos todavía no se han medido.**
 
 **Conclusión: es una petición ligera y limitada por la base de datos, no por la CPU del worker.** Esperamos poca o ninguna mejora de rendimiento. Whisper sigue siendo el proceso pesado del proyecto (ADR 10).
 
-## Riesgo asumido: dominio
+## Dominio: en espera del profesor
 
-[PLAN.md](../../PLAN.md) registra que el profesor pidió el dominio, y el equipo lo deja como «si sobra tiempo». Si en la evaluación lo exige y no está hecho, ese pedido queda sin cumplir. **Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.**
+[PLAN.md](../../PLAN.md) registra que el profesor pidió el dominio. Está delegado a su hosting y queda en espera de que lo agregue allí. Si en la evaluación lo exige y no funciona, ese pedido queda sin cumplir. **Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.**
 
 ## Alternativas
 

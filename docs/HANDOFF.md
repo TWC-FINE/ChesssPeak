@@ -4,6 +4,8 @@
 
 **En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Casi todo eso está en 6 PR apilados sin revisar, así que `main` todavía no lo tiene. Faltan la voz en el producto, el despliegue, la validación y los ensayos. La entrega sigue sin fecha confirmada.
 
+**Equipo (decisión del 6 de noviembre):** el responsable del repo trabaja solo, sin revisión del compañero, y es el único que aprueba. Por eso ya no se espera ninguna firma para el contrato (#3) ni para la cadena de PR.
+
 ## Ramas y hashes
 
 | Rama | Local | Remoto | Situación |
@@ -64,23 +66,23 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | # | Tarea | Responsable |
 |---|---|---|
 | 1 | Confirmar la fecha de entrega | Responsable del repo |
-| 2 | Firmar #3 y revisar #10 a #14, incluidos los códigos de error provisionales | Responsable del repo y compañero |
-| 3 | Acordar la excepción de commits de fusión en `CONTRIBUTING.md` | Responsable del repo y compañero |
-| 4 | Fusionar la cadena en orden; cada fusión necesita aprobación expresa | Responsable del repo y compañero |
+| 2 | Revisar #3 y #10 a #14, incluidos los códigos de error provisionales | Responsable del repo |
+| 3 | Añadir la excepción de commits de fusión a `CONTRIBUTING.md` | Responsable del repo |
+| 4 | Fusionar la cadena en orden; cada fusión necesita aprobación expresa | Responsable del repo |
 | 5 | Crear las cuentas de Neon, Atlas, Render y Vercel, y desplegar con esas credenciales. Después, probar `trust proxy` | Responsable del repo |
-| 6 | Asignar roles A y B y el responsable del parser; decidir si se trabaja el 14–15 y el 16 | Responsable del repo y compañero |
+| 6 | Decidir si se hace el lote del parser y si se trabaja el 14–15 y el 16 | Responsable del repo |
 | 7 | Decidir cuándo sigue la voz, porque ahora no se abren ramas nuevas sin OK del responsable | Responsable del repo |
-| 8 | Web Speech, pulsar para hablar y confirmación por voz | Claude o rol B, tras el OK del responsable |
-| 9 | `voice-metrics` y telemetría | Claude o rol A, tras el OK del responsable |
-| 10 | Adaptador Whisper en el navegador, probado en Edge | Claude o rol B, tras el OK del responsable |
-| 11 | `<mf-history>` real | Claude o rol B, tras el OK del responsable |
+| 8 | Web Speech, pulsar para hablar y confirmación por voz | Claude, tras el OK del responsable |
+| 9 | `voice-metrics` y telemetría | Claude, tras el OK del responsable |
+| 10 | Adaptador Whisper en el navegador, probado en Edge | Claude, tras el OK del responsable |
+| 11 | `<mf-history>` real | Claude, tras el OK del responsable |
 | 12 | Pool de `move-workers`: no antes del jueves 12 y con OK explícito | Claude, tras el OK del responsable |
 | 13 | ADR 9, ADR 6, C4 y poner al día los documentos | Claude, tras el OK del responsable |
-| 14 | 40 frases de validación (20 cada persona) | Responsable del repo y compañero |
-| 15 | Medir los dos equipos con el kit y repetir la carga de Whisper en el más débil | Responsable del repo o compañero |
+| 14 | 40 frases de validación | Responsable del repo |
+| 15 | Medir los dos equipos con el kit y repetir la carga de Whisper en el más débil | Responsable del repo |
 | 16 | Medir en Chrome antes del 16 de noviembre, si aplica | Responsable del repo (voz real) |
-| 17 | Validación con otra voz y `quality.md` | Responsable del repo y compañero |
-| 18 | Ensayos con dos laptops, clon nuevo y video de respaldo | Responsable del repo y compañero |
+| 17 | Validación con otra voz y `quality.md`. **Sin definir quién aporta la otra voz** | Responsable del repo |
+| 18 | Ensayos con dos laptops, clon nuevo y video de respaldo. **Sin definir la segunda laptop** | Responsable del repo |
 | 19 | Commit de entrega con `web/dist` y tag `v1.0`. Antes, llevar `docs/delivery-nov-19` a `main` con un PR: la rama ya está subida como trabajo en curso, sin PR | Responsable del repo decide; Claude lo prepara |
 | 20 | Dominio: esperar a que el profesor lo agregue en el hosting y, cuando deje de rechazar consultas, conectarlo. No registrar otro ni cambiar los nameservers | Responsable del repo |
 | 21 | Borrar las 2 partidas de prueba de la base local (comandos en `proximos-pasos.md`) | Responsable del repo |
@@ -145,7 +147,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 - **«Hecho» significa verificado con CI y pruebas.** Nada de lo contado como PR tiene revisión de otra persona, y puede cambiar con el contrato.
 - **Se cuenta entero un bloque verificado en local,** aunque aún no se haya probado en la nube.
 - **Los pesos no miden esfuerzo real:** los 8 días-persona contados en PR se escribieron en muy poco tiempo y sin revisión. Lo que falta depende más de personas, voz real y laptops, así que no se puede extrapolar ese ritmo.
-- **Capacidad restante del plan:** 17 días-persona, contando festivo y sin fines de semana, frente a 13,5 restantes. La revisión de la cadena no está incluida.
+- **Capacidad restante, con una sola persona:** 9 días del 6 al 18 de noviembre, contando el festivo y sin fines de semana, o 13 con los dos fines de semana, frente a 13,5 restantes (estimación de este documento). **No alcanza sin recortar;** el calendario de `PLAN.md` aún no se recalculó. La revisión de la cadena no está incluida.
 
 ## 5. Riesgos abiertos
 
@@ -154,13 +156,13 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | **`smoke` inestable en CI** | **Abierto, sin causa conocida.** Falló 3 de 3 en `fa5c168` y pasó 3 de 3 en `cbe8abb`. Mismo error antes en `main` (`2d287ea`). Con `continue-on-error`, el resultado global puede decir verde aunque falle |
 | **Fecha de entrega sin confirmar** | **Abierto.** Margen interno del equipo 19 de noviembre; tentativa 27 de noviembre. El calendario usa el 19 |
 | **Dominio** | **En espera del profesor; mínimo garantizado: la URL `vercel.app`.** Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*). No se sabe qué hosting es, qué permite alojar ni si tiene HTTPS, que es obligatorio para el micrófono |
-| **Cadena de 6 PR sin fusionar** | **Abierto y creciendo en importancia.** Nada del núcleo está en `main`, y `render.yaml` despliega desde `main`. El *squash* rompe la cadena según una simulación local; los commits de fusión funcionaron, pero falta acordar la excepción y probarlo en GitHub |
+| **Cadena de 6 PR sin fusionar** | **Abierto y creciendo en importancia.** Nada del núcleo está en `main`, y `render.yaml` despliega desde `main`. El *squash* rompe la cadena según una simulación local; los commits de fusión funcionaron, pero falta añadir la excepción y probarlo en GitHub |
 | **Pérdida de jugadas si el servidor muere** | **Aceptado y documentado (ADR 7), sin prueba.** Las jugadas pendientes de guardar se pierden. Los jugadores pueden haberlas visto |
 | **Fase 0 sin desplegar** | **Abierto y vencido hoy según el plan.** Depende de crear las cuentas. `trust proxy`, CORS y la memoria en Render siguen sin probar |
 | **Chrome sin medir** | **Abierto, como recorte.** Medir antes del 16 de noviembre si la entrega la abre otra persona |
 | **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
-| **Sin revisión independiente** | **Abierto.** `main` no tiene protección: que nadie fusione sin aprobación depende solo de la convención |
+| **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
 | **Documentos desactualizados** | **Abierto.** La lista de tareas de `proximos-pasos.md` no refleja lo hecho |
 | **Nombre del anexo en la historia pública** | **Abierto; quitarlo exigiría `--force`.** El nombre del archivo del anexo de la transcripción aparece en un enlace antiguo de 4 commits de `docs/delivery-nov-19`: `8246b8c`, `c703ae7`, `e6cd3c7` y `c62712f`. El archivo nunca se subió y la punta de la rama no lo nombra |
 | **Reflog pendiente de limpiar** | **Abierto; espera el OK del responsable del repo.** El anexo y la historia anterior a parafrasear las citas siguen en el `.git` local de este equipo, fuera de cualquier rama. Esa carpeta `.git` no debe copiarse a otro equipo antes de limpiarlo |
@@ -180,5 +182,5 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 - **Commits intermedios de cada PR:** se verificó la punta de cada rama.
 - **Pasos manuales de `web/README.md`** tal como están escritos.
 - **Equipo más débil:** no se sabe cuál es, ni la situación de la otra laptop.
-- **Disponibilidad del compañero** y si el profesor aceptará los supuestos.
+- **Si el profesor aceptará los supuestos.**
 - **Copia de respaldo de `docs/delivery-nov-19`:** hay un *bundle* local, fuera del repo, con el estado anterior a parafrasear las citas. Solo se comprobó con `git bundle verify`.

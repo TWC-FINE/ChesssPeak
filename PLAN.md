@@ -1,8 +1,8 @@
 # ChessSpeak — Plan del proyecto
 
-> Última actualización: jueves 5 de noviembre de 2026.
+> Última actualización: viernes 6 de noviembre de 2026.
 > **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con demo en vivo. Calendario en la sección 9.
-> Equipo: una persona sola hasta que se incorpore el compañero (hacia el **lun 9 de noviembre**). Desde entonces, dos personas con los roles A (servidor) y B (shell y microfrontends), que **se asignan el lun 9** según la comodidad de cada una con NestJS o con el front y Lit; el `local-agent` y la integración de voz, entre las dos. Hasta el 9, una sola persona cubre A y B.
+> Equipo: **una persona trabaja sola, sin revisión del compañero, y es la única que aprueba** (decisión del 6 de noviembre). Las menciones posteriores a compañero, roles A y B, firma del contrato y trabajo «juntos» ya no aplican. **El calendario de la sección 9 aún no se ha recalculado para una persona.** Sigue sin definir quién aporta la otra voz y la segunda laptop de la validación y los ensayos.
 
 ## 1. Estado a 5 de noviembre de 2026
 - **Spike cerrado el 2 de noviembre**, con los ADR 4 y 5 aceptados. Informe: [docs/spike-results.md](docs/spike-results.md) y [docs/spike-run-b.md](docs/spike-run-b.md).
@@ -340,7 +340,7 @@ El proyecto se presenta en vivo, con nosotros delante, en la fecha de entrega. L
 
 - **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.**
 - **Despliegue:** Render, Neon y Atlas.
-- **Dominio:** si sobra tiempo; si se hace, solo la web en Vercel. Es un riesgo asumido (ADR 11). Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
+- **Dominio:** en espera del profesor, que debe agregarlo en el hosting (ADR 11). Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **`web/dist`:** en el commit de entrega, solo al congelar el código.
 - **Chrome:** sigue como recorte (ver 9.7).
 
