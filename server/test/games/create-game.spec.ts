@@ -1,11 +1,14 @@
 import 'reflect-metadata';
 import { Global, Logger, Module } from '@nestjs/common';
+import { getModelToken } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { createGameResponseSchema } from '@chessspeak/shared';
 import request from 'supertest';
 import { GuestTokenService } from '../../src/auth/guest-token.service';
+import { GameMovesRepository } from '../../src/database/mongo/game-moves.repository';
+import { GameMoves } from '../../src/database/mongo/game-moves.schema';
 import { PrismaService } from '../../src/database/prisma.service';
 import { GamesModule } from '../../src/games/games.module';
 import { pickColor } from '../../src/games/games.service';
@@ -16,8 +19,15 @@ const originalSecret = process.env.GUEST_TOKEN_SECRET;
 const create = jest.fn();
 
 @Global()
-@Module({ providers: [{ provide: PrismaService, useValue: { game: { create } } }], exports: [PrismaService] })
-class FakePrismaModule {}
+@Module({
+  providers: [
+    { provide: PrismaService, useValue: { game: { create } } },
+    { provide: GameMovesRepository, useValue: {} },
+    { provide: getModelToken(GameMoves.name), useValue: {} },
+  ],
+  exports: [PrismaService, GameMovesRepository, getModelToken(GameMoves.name)],
+})
+class FakeInfraModule {}
 
 let app: NestExpressApplication;
 let token: string;
@@ -33,7 +43,7 @@ const savedData = () => create.mock.calls[0][0].data as Record<string, unknown>;
 beforeEach(async () => {
   process.env.GUEST_TOKEN_SECRET = SECRET;
   create.mockReset().mockResolvedValue({ id: GAME_ID });
-  const moduleRef = await Test.createTestingModule({ imports: [FakePrismaModule, GamesModule] }).compile();
+  const moduleRef = await Test.createTestingModule({ imports: [FakeInfraModule, GamesModule] }).compile();
   app = moduleRef.createNestApplication<NestExpressApplication>();
   await app.init();
   const issued = app.get(GuestTokenService, { strict: false }).issue('Ana');
