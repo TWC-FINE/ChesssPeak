@@ -25,6 +25,22 @@ pnpm install
 - **Después:** los registros DNS apuntan a la web en Vercel. Habrá que añadir el dominio a `CORS_ORIGINS` y a `docs/deploy.md`.
 - **Riesgo:** si la demo se abre desde el dominio, el navegador puede bloquear la llamada de la web a `127.0.0.1` (Whisper). Hay que ensayarlo en Edge.
 
+## Antes de cualquier medición
+Vale para la medición en Chrome, la laptop más débil y cualquier prueba de carga.
+
+1. **Apagar Docker** primero. Las bases locales consumen CPU y RAM, y eso puede cambiar las cifras.
+2. **Registrar si estaba encendido,** junto con los resultados. El comando está en [docs/kit-equipo-debil/LEEME.txt](kit-equipo-debil/LEEME.txt), paso 3.
+
+## Limpiar las partidas de prueba
+Una prueba del 5 de noviembre dejó 2 partidas en la base local de desarrollo. Se borran con Docker encendido, desde la raíz del repo:
+
+```powershell
+docker compose exec postgres psql -U chessspeak -d chessspeak -c "select id, status, white_name, black_name, created_at from games"
+docker compose exec postgres psql -U chessspeak -d chessspeak -c "delete from games where id in ('04e554c8-d946-4ea4-88b9-e6bf352b1b99','eee3c41f-5fb2-46b6-8831-33e2a16e4f11')"
+```
+
+El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa base local: no toca la de tests ni la nube.
+
 ## Balanceo: pool de `move-workers` (ADR 11)
 **Decisión del 5 de noviembre.** El profesor no aprobó el modo de dictado y habló de repartir las jugadas entre servicios camino a la base de datos. Su «Eso puede ser» se toma como aprobación tentativa, no como confirmación. El supuesto más débil, el diseño, los límites y el criterio de éxito están en el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md). También cambió lo que se puede afirmar del pool de Whisper: ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre).
 

@@ -42,6 +42,7 @@ Copia el WAV a spike\recordings\ (crea la carpeta si no existe).
 ----------------------------------------------------
 Orden: equipo A, equipo B, equipo A, equipo B. Son 4 corridas de unos 30 segundos.
 Deja los dos enchufados y cierra lo que consuma CPU.
+Apaga Docker Desktop en los dos equipos: Quit Docker Desktop, en su icono de la bandeja.
 
 En el equipo que toca, terminal 1:
 $env:LB_WORKERS=1; $env:LB_QUEUE_MAX=12; pnpm --filter @chessspeak/local-agent start
@@ -55,6 +56,7 @@ $f = "entorno-$equipo-$(Get-Date -Format yyyyMMdd-HHmmss).txt"
   Get-Date
   "RAM libre: {0:N0} MB" -f ((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1KB)
   "msedge.exe: {0} procesos" -f @(Get-Process msedge -ErrorAction SilentlyContinue).Count
+  "Docker: {0}" -f $(if (Get-Process 'Docker Desktop','com.docker.backend' -ErrorAction SilentlyContinue) { 'encendido' } else { 'apagado' })
   Get-Process | Sort-Object CPU -Descending | Select-Object -First 15 Name,Id,CPU,@{n='RAM_MB';e={[math]::Round($_.WS/1MB)}} | Format-Table -AutoSize
 } | Out-File $f -Encoding utf8
 
@@ -77,6 +79,7 @@ Si el más débil es el equipo de desarrollo, este paso ya está hecho.
 Haz cada pareja dos veces y registra el entorno antes de cada corrida, como en el paso 3.
 Antes de cambiar de configuración, para el agente con Ctrl+C.
 3 workers ocupan unos 2 GB de RAM: mira la memoria libre antes.
+Docker sigue apagado también en este paso.
 
 Monolito, terminal 1:
 $env:LB_WORKERS=1; $env:LB_QUEUE_MAX=12; pnpm --filter @chessspeak/local-agent start

@@ -267,6 +267,7 @@ Pruebas funcionales en el mismo equipo de la sección 3, en sesiones aparte de l
 - **Pocas repeticiones.** Son 3 corridas por configuración, 2 de ellas nuevas, y en días distintos no dieron lo mismo. No alcanzan para estimar la variación real.
 - **Una sola máquina.** Todas las corridas son del mismo equipo.
 - **Causa de la diferencia entre días, sin investigar.** La RAM libre era mayor el 5 de noviembre, pero eso no prueba que sea la causa.
+- **Docker no se registró en ninguna corrida.** Unos 40 minutos después de las del 5 de noviembre, Docker no respondía; de las del 4 no consta nada. Desde ahora se apaga y se registra antes de medir.
 - **Rejilla de escalones gruesa** (1, 2, 4, 8): el punto de quiebre exacto está entre 4 y 8 y no se pudo distinguir entre las dos configuraciones. El escalón de 16 no se ejecutó.
 - Todas las instancias comparten la misma CPU y la misma RAM. Es un balanceo entre procesos de una máquina, no entre máquinas.
 - Se mide un solo clip repetido. La latencia real varía con la duración de cada frase.
