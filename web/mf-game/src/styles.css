@@ -4,3 +4,6 @@ mf-game { display: block; font-family: var(--cs-font); color: var(--cs-text); }
 .csg-root { display: flex; flex-direction: column; gap: var(--cs-gap); max-width: 480px; }
 .csg-board { width: 100%; aspect-ratio: 1; }
 .csg-info { margin: 0; font-size: 0.9rem; color: var(--cs-muted); }
+.csg-players, .csg-status, .csg-error { margin: 0; }
+.csg-status { font-weight: 600; }
+.csg-error { color: var(--cs-warn); }
