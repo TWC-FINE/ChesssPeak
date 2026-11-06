@@ -30,4 +30,5 @@ Quien juega entra sin registrarse (RF1), y el servidor debe decidir siempre la i
 - (−) Un token no se puede revocar antes de que caduque. Solo se invalidan todos a la vez, cambiando el secreto.
 - (−) Quien pierde su token, por ejemplo al borrar los datos del navegador, pierde su asiento: entra como otro invitado.
 - (−) Una sesión que dure más de 24 horas necesita un token nuevo.
+- (−) **Riesgo conocido: `POST /games` no tiene límite de creación.** Quien tenga un token válido puede crear partidas sin tope, y cada una es una fila en `games`. El contrato no define un 429 para esta ruta, y añadirlo es un cambio de `shared/` y de `docs/protocol.md`. El límite de `/auth/guest` frena la obtención de tokens, pero no el uso de uno ya emitido, que dura 24 horas.
 - (−) **Sin verificar:** que `trust proxy = 1` sea el valor correcto en Render. **Se prueba en cuanto haya despliegue en Render,** con el paso descrito en [docs/deploy.md](../deploy.md). Si no es correcto, varios clientes podrían compartir el mismo límite.
