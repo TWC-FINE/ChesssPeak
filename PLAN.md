@@ -1,8 +1,8 @@
 # ChessSpeak — Plan del proyecto
 
 > Última actualización: viernes 6 de noviembre de 2026.
-> **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con demo en vivo. Calendario en la sección 9.
-> Equipo: **una persona trabaja sola, sin revisión del compañero, y es la única que aprueba** (decisión del 6 de noviembre). Las menciones posteriores a compañero, roles A y B, firma del contrato y trabajo «juntos» ya no aplican. **El calendario de la sección 9 aún no se ha recalculado para una persona.** Sigue sin definir quién aporta la otra voz y la segunda laptop de la validación y los ensayos.
+> **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Con demo en vivo. Orden de trabajo en la sección 9.
+> Equipo: **una persona trabaja sola, sin revisión de otra persona, y es la única que aprueba** (decisión del 6 de noviembre). Sigue sin definir quién aporta la otra voz, la segunda laptop de los ensayos y la máquina limpia del README.
 
 ## 1. Estado a 5 de noviembre de 2026
 - **Spike cerrado el 2 de noviembre**, con los ADR 4 y 5 aceptados. Informe: [docs/spike-results.md](docs/spike-results.md) y [docs/spike-run-b.md](docs/spike-run-b.md).
@@ -12,8 +12,8 @@
   - **Confirmación explícita obligatoria** con cualquier reconocedor.
 - **Números clave** (split `test`, 78 frases de jugada): Web Speech sin retardo (A) 56,4 % de acierto; con retardo de 400 ms (B) **87,2 %** (IC95 78–93 %), 0 aceptaciones erróneas, 0 ambigüedad, latencia p50 0,57 s. Whisper `small` con prompt: 89,7 % pero p50 2,91 s y p95 3,06 s (solo inferencia, en un i5-12400F), por encima de los umbrales de latencia.
 - **Las cifras pertenecen a la versión del parser de la etiqueta `spike-parser-freeze`.** Si el parser cambia, esas cifras ya no describen el producto (ver 5.7).
-- **Salvedades:** una voz y una corrida B; no está demostrado que la mejora se deba solo al retardo; todo se midió en **Edge 156**. **Chrome no se midió** (hay una comprobación declarada en [docs/spike-chrome.md](docs/spike-chrome.md), pendiente). La validación con **otra voz, frases nuevas y otro equipo** se hace el mar 17. La demo se hace en Edge, así que medir Chrome ya no bloquea nada.
-- **Código que existe (5 de noviembre):** `packages/voice-parser`, `spike/`, `local-agent` (pool de Whisper con dashboard y prueba de carga, adelantado respecto a la Fase 1), esqueleto de `server/` con las dos bases, `web/` con marcadores de posición y CI. Copia de seguridad de los WAV hecha. **`GameRoom` está escrita, en el PR #10, abierto y sin revisar.** **Falta de la Fase 0:** desplegar (`docs/deploy.md`, requiere crear las cuentas) y firmar el contrato (PR #3).
+- **Salvedades:** una voz y una corrida B; no está demostrado que la mejora se deba solo al retardo; todo se midió en **Edge 156**. **Chrome no se midió** (hay una comprobación declarada en [docs/spike-chrome.md](docs/spike-chrome.md), pendiente). La validación con **otra voz, frases nuevas y otro equipo** se hace en el paso 6 del orden de trabajo (sección 9). La demo se hace en Edge, así que medir Chrome ya no bloquea nada.
+- **Código que existe (5 de noviembre):** `packages/voice-parser`, `spike/`, `local-agent` (pool de Whisper con dashboard y prueba de carga, adelantado respecto a la Fase 1), esqueleto de `server/` con las dos bases, `web/` con marcadores de posición y CI. Copia de seguridad de los WAV hecha. **`GameRoom` está escrita, en el PR #10, abierto.** **Falta de la Fase 0:** desplegar (`docs/deploy.md`, requiere crear las cuentas) y fusionar el contrato (PR #3).
 - **Balanceo de carga (requisito nuevo del profesor):** está en `local-agent` (ADR 10), con carga de prueba sintética, porque en una partida real ese balanceador ve una petición a la vez. Se evaluó un análisis post-partida con Stockfish como caso con carga natural y su prueba de viabilidad **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). **El 5 de noviembre se decidió añadir un pool de `move-workers` (ADR 11, aún sin código), sobre supuestos sin confirmar:** el profesor cuestionó los procesos locales y ya no puede responder más sobre esto.
 - Lo que el spike deja por hacer está en [docs/spike-notes.md](docs/spike-notes.md) (sección 7), agrupado por área: **agente local**, **producto** y **CI y entrega**.
 
@@ -23,9 +23,9 @@ Proyecto final de Arquitectura de Software: web de ajedrez donde las jugadas se 
 Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/señalización), análisis con Stockfish, inglés.
 
 ## 3. Cómo se entrega: demo en vivo
-**La demo es en vivo** (5 de noviembre; reemplaza a la decisión anterior de “no hay demo en vivo”). Se supone que es el mismo día de la entrega y que la presentamos los dos con nuestras laptops; son supuestos (ver 12). Ya no hay que preparar el proyecto para alguien que lo abra solo: hay que preparar **una presentación que no falle**.
+**La demo es en vivo** (5 de noviembre; reemplaza a la decisión anterior de “no hay demo en vivo”). Se supone que es el mismo día de la entrega (ver 12). **Sin definir:** hora y duración de la demo, y si el profesor abrirá el proyecto él mismo. Hay que preparar **una presentación que no falle**, y el README debe bastar por si lo abre él mismo.
 
-- **Montaje de la demo:** dos laptops con **Edge** (el navegador medido en el spike), diademas y la web en local con `pnpm serve:web` (`127.0.0.1:5500`), conectada al backend en Render. Servir en local evita el permiso de red local que puede bloquear a Whisper desde una página pública.
+- **Montaje de la demo:** dos laptops (la segunda, sin definir) con **Edge** (el navegador medido en el spike), diademas y la web en local con `pnpm serve:web` (`127.0.0.1:5500`), conectada al backend en Render. Servir en local evita el permiso de red local que puede bloquear a Whisper desde una página pública.
 - **Mínimo garantizado:** la web publicada en Vercel con su URL `vercel.app`. La demo no lo necesita, pero ya no se recorta: es lo que queda publicado si no da tiempo al dominio. `vercel.json` ya existe.
 - **Guion (criterios de aceptación de SPEC.md, sección 6):**
   1. Crear una partida y unirse desde la otra laptop.
@@ -36,9 +36,10 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
   6. Si el pool de `move-workers` llegó a tiempo (ADR 11): matar un worker a mitad de partida y seguir jugando.
   7. Enseñar `game_moves` y `voice_attempts` en Mongo, y `games` en Postgres.
   8. Terminar la partida (se puede partir de una posición cercana al mate o usar el abandono).
-- **Respaldos:** la **caja de texto** si falla el micrófono o el reconocedor, datos del celular si falla la red de la sala y el **video grabado el mié 18** si falla todo lo demás.
-- **Reproducibilidad, reducida:** el README sigue siendo necesario (repo público y criterio 7 de SPEC.md), pero ya no es lo que usa quien evalúa. Se comprueba con un **clon nuevo en la segunda laptop**, siguiendo solo el README. Para instalar Whisper se reutiliza `pnpm --filter @chessspeak/spike-whisper-local download`.
-- La aplicación avisa si el navegador no tiene Web Speech (Firefox) y ofrece Whisper local o la caja de texto. Es poco trabajo, pero en la demo no se usa, por eso entra en el orden de recorte (9.7).
+- **Respaldos:** la **caja de texto** si falla el micrófono o el reconocedor, datos del celular si falla la red de la sala y el **video de respaldo** si falla todo lo demás.
+- **Antes de empezar la demo:** despertar Render y comprobar `/health`, probar micrófonos y arrancar `local-agent`.
+- **Reproducibilidad:** el README es necesario (repo público y criterio 7 de SPEC.md) y su prueba nunca se recorta. Se comprueba con un **clon nuevo en una máquina limpia**, siguiendo solo el README. Para instalar Whisper se reutiliza `pnpm --filter @chessspeak/spike-whisper-local download`.
+- La aplicación avisa si el navegador no tiene Web Speech (Firefox) y ofrece Whisper local o la caja de texto. Es poco trabajo, pero en la demo no se usa, por eso entra en el orden de recorte (9.2).
 
 ## 4. Requisitos del profesor y cómo se cumplen
 | Requisito | Cómo se cumple |
@@ -143,7 +144,7 @@ Decidida por el spike (ADR [4](docs/adr/0004-resolucion-contra-jugadas-legales.m
 - **`SpeechRecognizer` (patrón Strategy):** adaptadores Web Speech (por defecto), Whisper local (módulo local), Fake (tests) y caja de texto de respaldo.
 - **Idioma:** `es-CO` (el medido en el spike). **N-best: no se adopta** (ganancia 0,0 puntos).
 - **Vocabulario (español):** piezas; letras con alias (be/ve, ce/se, ge/je); coordenadas (“e2 e4”); “toma”; enroque corto/largo; “corona a dama”; comandos sí/no/cancelar. Alfabeto OTAN e inglés, fuera del plan.
-- **voice-parser:** TS puro con tests en Vitest, ya existente. **Las cifras del spike pertenecen a la versión de la etiqueta `spike-parser-freeze`.** Las mejoras conocidas (alias para «toma» fundido con la letra, «alfil» partido en dos palabras, «peone») se aplican **en un solo lote, con un máximo de 1 día, antes de la validación del mar 17**, que usa **frases nuevas** y **registra el hash del parser usado**. El parser solo se modifica registrando la versión y re-midiendo en esa validación. Si no da tiempo, se queda `spike-parser-freeze`. El responsable del lote se asigna el lun 9. El lote se guía por los fallos ya anotados en el spike, no por las frases nuevas. **Las 40 frases de validación las escriben los dos (20 cada uno)**, en lugar de las 80 del corpus v1 previsto: el intervalo de confianza será más ancho y se declara así. La sesión puede usar el arnés de `spike/web-speech` y `pnpm metrics` si la app aún no registra `expectedUci`.
+- **voice-parser:** TS puro con tests en Vitest, ya existente. **Las cifras del spike pertenecen a la versión de la etiqueta `spike-parser-freeze`.** **El lote de mejoras queda fuera del plan:** el parser no se modifica. La validación usa **frases nuevas** y **registra el hash del parser usado**. **Las 40 frases de validación las escribe el responsable del repo**, en lugar de las 80 del corpus v1 previsto: el intervalo de confianza será más ancho y se declara así. La sesión puede usar el arnés de `spike/web-speech` y `pnpm metrics` si la app aún no registra `expectedUci`.
 - La aplicación avisa si el navegador no tiene Web Speech (Firefox) y ofrece Whisper local o la caja de texto.
 - Anunciar la jugada del rival con `speechSynthesis`: fuera del plan por la fecha del 19.
 
@@ -159,7 +160,7 @@ Decidida por el spike (ADR [4](docs/adr/0004-resolucion-contra-jugadas-legales.m
 ## 6. Calidad y convenciones
 - Tests: Jest en `server`; Vitest en `shared`, `voice-parser` y `web`. Sin fast-check.
 - **CI inicial (Fase 0): solo lint y gitleaks.** Tests en CI cuando existan. El `pnpm install` debe terminar con código 0 (ver `ERR_PNPM_IGNORED_BUILDS` en [docs/spike-notes.md](docs/spike-notes.md)).
-- **dependency-cruiser después** (Fase 3, solo si hay tiempo; ver 9.7), con 3 reglas:
+- **dependency-cruiser después** (Fase 3, solo si hay tiempo; ver 9.2), con 3 reglas:
   1. Los `web/mf-*` no se importan entre sí (solo `shared`).
   2. `voice-parser` no importa DOM, Nest ni `web`.
   3. `GameRoom` no importa `@nestjs/*`.
@@ -167,7 +168,7 @@ Decidida por el spike (ADR [4](docs/adr/0004-resolucion-contra-jugadas-legales.m
 - Nombre: **ChessSpeak**. El repositorio en GitHub se llama hoy **`TWC-FINE/ChesssPeak`** y el remoto local apunta a él. La carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora. Fuera de esos dos casos, “ChessPeak” y “ChesssPeak” son errores.
 
 ### 6.1 Escenarios de atributos de calidad (`docs/quality.md`)
-Formato: fuente, estímulo, entorno, respuesta y medida. Las cifras salen del spike y de la sesión de evaluación del mar 17; **no se inventan**.
+Formato: fuente, estímulo, entorno, respuesta y medida. Las cifras salen del spike y de la sesión de evaluación; **no se inventan**.
 
 | Atributo | Escenario | Medida |
 |---|---|---|
@@ -177,21 +178,21 @@ Formato: fuente, estímulo, entorno, respuesta y medida. Las cifras salen del sp
 | Disponibilidad / recuperación | Un jugador pierde la conexión a mitad de la partida | Tiempo de reconexión y jugadas perdidas (objetivo: 0) |
 | Seguridad | Un cliente intenta jugar por otro o abusa de `/auth/guest` | Rechazo por identidad del servidor; 429 del throttler |
 | Modificabilidad | Añadir un reconocedor nuevo | Archivos tocados: solo un adaptador nuevo (ni parser ni servidor) |
-| Reproducibilidad | Un clon nuevo en la segunda laptop, siguiendo solo el README | Pasos del README hasta abrir la app y jugar una jugada por voz; fallos encontrados |
+| Reproducibilidad | Un clon nuevo en una máquina limpia, siguiendo solo el README | Pasos del README hasta abrir la app y jugar una jugada por voz; fallos encontrados |
 
 ## 7. ADRs
 Media página cada uno, **escritos cuando se toma la decisión**, no al final.
-| ADR | Decisión | Estado / cuándo se escribe |
+| ADR | Decisión | Estado |
 |---|---|---|
 | 1 | Monolito modular NestJS en TypeScript, con los contratos en `shared/` | **Aceptado** (2 nov) |
 | 2 | Microfrontends con custom elements + web estática (sin Module Federation) | **Aceptado** (2 nov) |
 | 3 | Dos bases: Postgres (partidas) y Mongo (jugadas append-only y telemetría) | **Aceptado** (3 nov) |
 | 4 | Resolución de voz contra jugadas legales + criterios del spike | **Aceptado** (2 nov) |
 | 5 | `SpeechRecognizer` como Strategy; reconocedor por defecto (Web Speech en Edge con retardo de 400 ms; Whisper `small` alternativo) | **Aceptado** (2 nov) |
-| 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | lun 16 |
-| 7 | Estado en memoria + write-behind idempotente | mar 10 – mié 11 |
-| 8 | Invitados con token firmado; login fuera del plan | mar 10 – mié 11 |
-| 9 | Licencia GPL-3.0 (por chessground) | vie 6; **sin escribir** |
+| 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | Sin escribir |
+| 7 | Estado en memoria + write-behind idempotente | En el PR #13 |
+| 8 | Invitados con token firmado; login fuera del plan | En el PR #11 |
+| 9 | Licencia GPL-3.0 (por chessground) | **Sin escribir** |
 | 10 | Balanceo de carga de la transcripción en `local-agent` | **Aceptado** (4 nov); revisado el 5 nov |
 | 11 | Balanceo del guardado de jugadas con `move-workers` | **Aceptado** (5 nov), sobre supuestos sin confirmar; sin código |
 
@@ -209,120 +210,68 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 
 **Resultado:** la corrida A (sin retardo) no cumplió; la corrida B (retardo de 400 ms) cumplió todos los umbrales y es la que cuenta según la regla de lectura. Whisper `small` con prompt acierta 89,7 % pero no cumple la latencia. Detalle, salvedades y datos: [docs/spike-results.md](docs/spike-results.md) y [docs/spike-run-b.md](docs/spike-run-b.md). Pendientes derivados: comprobación en Chrome ([docs/spike-chrome.md](docs/spike-chrome.md)) y validación con otra voz, frases nuevas y otro equipo (Fase 3).
 
-## 9. Calendario (recalculado el jue 5 de nov para el margen interno del jue 19)
+## 9. Orden de trabajo
 
-**Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Este calendario trabaja con el margen interno del **jue 19 de noviembre**: de hoy hasta el último día de trabajo pasamos de 16 a **10 días**. El plan se sostiene por tres cosas: el `local-agent` y `GameRoom` ya están escritos, la validación se reduce a medio día y los opcionales salen del plan.
+**Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** La prioridad es este orden de trabajo, no un calendario por días.
 
-### 9.1 Fases
-| Fase | Qué incluye | Cuándo |
+### 9.1 Orden
+1. **Fusionar la cadena** #3 y #10 a #14, y después el PR de `docs/delivery-nov-19`, antes del despliegue.
+2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
+3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
+4. **Adaptador de Whisper local.**
+5. **Pool de `move-workers`** (ADR 11), con OK explícito del responsable del repo antes de empezar.
+6. **Cierre:** validación con otra voz (sin otra voz, con la del responsable del repo, declarado en `docs/quality.md`), C4 niveles 1 y 2, README probado en máquina limpia, ensayo y tag.
+
+### 9.2 Recortes
+**Nunca se recorta:** voz, despliegue y README probado.
+
+**Si algo se atrasa, se avisa al responsable del repo** y se recorta primero, en este orden:
+1. Dashboard integrado: no se hace; queda `/lb/dashboard` de `local-agent` para la demo.
+2. Medición en Chrome (la demo usa Edge; el README recomienda Edge y dice que Chrome no se midió).
+3. Repetición de la carga de Whisper.
+
+Después: dependency-cruiser y el aviso en navegadores sin Web Speech.
+
+**Fuera del plan:** el lote del parser (queda `spike-parser-freeze`, cuyas cifras siguen siendo válidas), `speechSynthesis`, login/registro, alfabeto OTAN, pestaña Precisión y la corrida con un modelo cuantizado.
+
+**Consecuencias, si se llegara a recortar** (también en `SPEC.md` y en el ADR 11):
+- **Si se recorta el pool de `move-workers`:** el balanceo queda solo en Whisper, riesgo asumido. Si el balanceo es obligatorio, el pool no es recortable.
+- **Si se recorta el adaptador de Whisper:** queda sin cumplir el criterio 2 de `SPEC.md`, se pone en duda R2 y suma 1,0 día neto frente a recortar el pool (estimación).
+
+### 9.3 Fases
+| Fase | Qué incluye | Estado |
 |---|---|---|
-| **Spike** | Web Speech + chessops, Whisper, decisión y ADR 4 y 5 | ✅ Cerrado el lun 2 |
-| **Fase 0 — Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos Vite, `serve:web` y CI ✅. **Falta:** desplegar Neon, Atlas y Render, y firmar el contrato | **Cierra el vie 6** (la firma, el lun 9) |
-| **Fase 1 — Partida entre invitados** | Auth de invitados, Socket.IO, `games` y write-behind, shell con sesión, `<mf-game>`, caja de texto → parser → jugada. `GameRoom` ✅ en el PR #10; `local-agent` ✅ en `main` | lun 9 – **mié 11** |
-| **Fase 2 — Voz de punta a punta** | Reconexión y fin de partida, `voice-metrics`, `<mf-voice-input>` (Web Speech con 400 ms, Whisper), confirmación explícita, `<mf-history>`, lote del parser | jue 12 – **lun 16** |
-| **Fase 3 — Validación, ensayo y entrega** | Validación (con el hash del parser), `quality.md`, ensayos, video de respaldo, README, tag | mar 17 – **jue 19** |
-
-### 9.2 Escenarios de capacidad
-Días de trabajo entre hoy (jue 5) y el mié 18 (el jue 19 es el margen interno de entrega):
-| | Se trabaja el festivo (lun 16) | No se trabaja el lun 16 |
-|---|---|---|
-| **Yo** | **Escenario base:** 10 días | 9 días (ver 9.5) |
-| **Compañero (desde el lun 9)** | 8 días | 7 días |
-
-Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuentan. No hay trabajo “si sobra tiempo”.
-
-### 9.3 Semana 1 · jue 5 – vie 6 nov · Yo, solo
-| Fecha | Tareas |
-|---|---|
-| Jue 5 | ✅ `GameRoom` (PR #10) y borrador del contrato (PR #3), abiertos y con CI en verde. Replanificación con la fecha nueva |
-| Vie 6 | **Auth de invitados + throttler**, sobre `feat/game-room`, con las bases locales. ADR 9 (licencia). **Despliegue (Fase 0):** supuesto Render, Neon y Atlas; necesita que se creen las cuentas (ver [docs/proximos-pasos.md](docs/proximos-pasos.md)) |
-
-**Hito vie 6:** auth de invitados en un PR abierto. El despliegue tiene que hacerse antes del ensayo del mar 17.
-
-### 9.4 Desde el lun 9 nov · Una persona
-**Una sola persona lleva los dos frentes.** Los días de abajo vienen del reparto anterior para dos personas y **aún no se han recalculado**: el recálculo y los recortes están pendientes de decisión. Hasta entonces, léelos como lista de trabajo, no como fechas comprometidas.
-
-| Frente | Qué incluye |
-|---|---|
-| **Servidor** | Auth, `games`, Socket.IO, Postgres, write-behind en Mongo, reconexión, `voice-metrics` |
-| **Web** | Shell y microfrontends: shell con sesión y router, `<mf-game>`, `<mf-voice-input>`, `<mf-history>`, adaptadores de reconocimiento (Web Speech, caja de texto, Whisper en el navegador) |
-| **Común** | Contrato v0 de `shared/`, integración de voz, 40 frases de validación, validación, ensayos |
-| **Lote del parser** | Lo hace el responsable del repo, si se mantiene (ver 5.7) |
-
-**Semana 2 · lun 9 – vie 13 nov · Fase 1 y primera mitad de la Fase 2**
-| Fecha | Servidor | Web |
-|---|---|---|
-| Lun 9 | Aprobar el contrato v0 y fusionar la cadena de PR en orden. Después, seguir con los frentes de abajo | igual |
-| Mar 10 – Mié 11 | Auth de invitados (si falta), gateway Socket.IO, `games` en Postgres, write-behind idempotente en Mongo; ADR 7 y 8 | Shell con sesión, router y socket único; `<mf-game>` (chessground `viewOnly`); caja de texto → parser → `game:move` |
-| Jue 12 – Vie 13 | Fin de partida (mate, ahogado, tablas, abandono), reconexión y rehidratación, `voice-metrics` (ingesta de `voice_attempts` con `player` puesto por el servidor) | `<mf-voice-input>` (pulsar para hablar) con Web Speech y retardo de 400 ms, confirmación explícita con flecha y sí/no/cancelar, `<mf-history>`, eventos `cs:` de punta a punta, telemetría vía shell |
-| Toda la semana | 40 frases de validación | igual |
-
-**Hito mié 11:** dos invitados juegan escribiendo jugadas, con el backend desplegado o, si aún no hay despliegue, en local. **Es el punto de control más importante del plan** (ver 11.1).
-
-**Hito vie 13:** partida completa por voz con Web Speech; la reconexión funciona; 40 frases de validación escritas.
-
-**Semana 3 · lun 16 – jue 19 nov · Fin de la Fase 2 y Fase 3**
-| Fecha | Servidor | Web |
-|---|---|---|
-| Lun 16 (festivo) | Endurecimiento de la validación; ADR 6. **Lote del parser** (máximo 1 día, solo si se cumplió el hito del vie 13; lo hace el responsable del repo, sin revisión de otra persona) | **Adaptador Whisper en el navegador probado contra `local-agent` en Edge**, latencia declarada en la interfaz, aviso en navegadores sin Web Speech |
-| Mar 17 | **Por la mañana: validación** con las frases nuevas, los dos reconocedores, otra voz y otra laptop (**sin definir quién aporta la voz ni de dónde sale la laptop**) → cifras reales en `docs/quality.md`, **registrando el hash del parser usado**. **Por la tarde: primer ensayo** con dos laptops, diademas y dos voces; clon nuevo en la segunda laptop siguiendo el README; corrección de errores | igual |
-| Mié 18 | **Solo corrección de errores.** Segundo ensayo, cronometrado, con el guion de la sección 3. **Grabación del video de respaldo.** README, ADRs y `quality.md` revisados. Commit de entrega con `web/dist` y tag `v1.0` | igual |
-| Jue 19 | **Entrega y demo (margen interno).** Antes de empezar: despertar Render y comprobar `/health`, probar micrófonos y arrancar `local-agent` | igual |
-
-**Hito lun 16 (congelación de funcionalidades):** una jugada por voz con Whisper local desde el navegador; el parser queda **congelado de nuevo** antes de la validación. Desde aquí no entra nada nuevo.
-
-### 9.5 Si no se trabaja el lunes festivo
-- El **lote del parser sale del plan**: se queda la versión `spike-parser-freeze`.
-- El adaptador Whisper pasa al fin de semana 14–15 si se trabaja; si no, al mar 17 por la mañana.
-- La validación pasa al mar 17 por la tarde y el único ensayo es el del mié 18, junto con el video.
-
-### 9.6 Fines de semana (bloques opcionales con tarea concreta)
-**Recomendación:** trabajar al menos el 14–15, porque es el único colchón real que tiene este calendario. Se decide el lun 9.
-| Fin de semana | Tarea | Qué libera |
-|---|---|---|
-| Sáb 7 – Dom 8 | Gateway Socket.IO básico sobre `GameRoom` | Menos carga el mar 10 – mié 11; asegura el hito del mié 11 |
-| Sáb 14 – Dom 15 | Lo que falte del hito del vie 13; si no falta nada, el adaptador Whisper | Deja el lun 16 libre para el lote del parser y los errores |
-
-**Pool de `move-workers` (ADR 11): jue 12 – dom 15**, solo después del hito del mié 11. Antes del mié 11 se hace únicamente el puerto `MovePersistence` con escritura directa. Debe entrar antes de la congelación del lun 16. El jue 12 y el vie 13 ya están llenos para el rol A, así que en la práctica depende de trabajar el fin de semana 14–15.
-
-### 9.7 Orden de recorte si hay retraso
-**Ya fuera del plan por la fecha (no se hacen):** `speechSynthesis`, login/registro, alfabeto OTAN, pestaña Precisión y la corrida con un modelo cuantizado.
-
-**Antes que todo lo demás:** si el hito del mié 11 se atrasa, el pool de `move-workers` se pausa (`MOVE_WORKERS=0`) y queda solo el balanceo de Whisper.
-
-**Si aun así hay retraso, se recorta en este orden, sin discutir:**
-1. Medición en Chrome (la demo usa Edge; el README recomienda Edge y dice que Chrome no se midió). **Nota: si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre.**
-2. dependency-cruiser
-3. Lote del parser (se queda `spike-parser-freeze`, cuyas cifras siguen siendo válidas)
-4. Aviso en navegadores sin Web Speech
-
-**No se recortan:** la web publicada en Vercel con su URL `vercel.app`, voz con confirmación explícita, sockets, las 2 bases de datos, reconexión, `local-agent` con Whisper y su balanceo, los microfrontends, `serve:web`, `quality.md` con cifras reales, al menos un ensayo y el video de respaldo.
+| **Spike** | Web Speech + chessops, Whisper, decisión y ADR 4 y 5 | ✅ Cerrado |
+| **Fase 0 — Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos Vite, `serve:web` y CI ✅. **Falta:** desplegar Neon, Atlas, Render y Vercel, y fusionar el contrato | En curso |
+| **Fase 1 — Partida entre invitados** | Auth de invitados, Socket.IO, `games` y write-behind, shell con sesión, `<mf-game>`, caja de texto → parser → jugada. `local-agent` ✅ en `main` | Escrita en los PR #3 y #10 a #14; falta fusionar y desplegar |
+| **Fase 2 — Voz de punta a punta** | Reconexión y fin de partida, `voice-metrics`, `<mf-voice-input>` (Web Speech con 400 ms, Whisper), confirmación explícita, `<mf-history>` | Reconexión, fin de partida y confirmación por texto en los PR; falta la voz |
+| **Fase 3 — Validación, ensayo y entrega** | Validación (con el hash del parser), `quality.md`, ensayo, video de respaldo, README, tag | Sin empezar |
 
 ## 10. Riesgos
 El proyecto se presenta en vivo, en la fecha de entrega. Los riesgos principales ahora son el tiempo y lo que pueda fallar en la sala.
 
 | Riesgo | Mitigación |
 |---|---|
-| **No se llega al hito del mié 11** (partida escrita en la nube) | Es lo primero que se vigila. El jue 12 por la mañana se aplican de una vez los recortes 1 a 3 de 9.7 |
-| **Una sola persona, sin revisión independiente,** y menos días que trabajo restante | Cada trabajo de CI se revisa por separado antes de fusionar. Se recorta según 9.7; el recálculo del calendario para una persona está pendiente de decisión |
+| **Se atrasa un paso del orden de trabajo** | Se avisa al responsable del repo y se recorta según 9.2, en ese momento y no al final |
+| **Una sola persona, sin revisión independiente** | Cada trabajo de CI se revisa por separado antes de fusionar |
 | Falla la red de la sala | Datos del celular como alternativa; video de respaldo. Web Speech y el backend necesitan internet |
 | Instancia gratuita de Render dormida al empezar | Despertarla antes de la demo y comprobar `/health` |
-| En la sala, el micrófono capta al otro jugador | Pulsar para hablar, diademas, **confirmación explícita**; ensayo con dos voces el mar 17 (sin definir quién aporta la otra) |
+| En la sala, el micrófono capta al otro jugador | Pulsar para hablar, diademas, **confirmación explícita**; ensayo con dos voces (sin definir quién aporta la otra) |
 | El reconocedor falla delante del profesor (B acertó 87,2 % en el spike, con una voz: **alrededor de 1 de cada 8 frases puede fallar**) | Mostrarlo como parte del diseño: la confirmación evita jugadas erróneas y se repite la frase; caja de texto como respaldo; ensayar el guion con jugadas probadas |
-| Whisper `small` tarda demasiado en la laptop de la demo (en un i5-12400F: p50 2,91 s) o el pool la satura | Medirlo en esa laptop el mar 17; correrlo en la laptop más potente; latencia declarada en la interfaz; es alternativa, no el reconocedor por defecto |
-| El acceso de Edge a `127.0.0.1:8765` no funciona (solo se verificó con Chrome sin interfaz) | Probarlo el lun 16 con el adaptador real, no el día de la demo |
+| Whisper `small` tarda demasiado en la laptop de la demo (en un i5-12400F: p50 2,91 s) o el pool la satura | Medirlo en esa laptop antes del ensayo; correrlo en la laptop más potente; latencia declarada en la interfaz; es alternativa, no el reconocedor por defecto |
+| El acceso de Edge a `127.0.0.1:8765` no funciona (solo se verificó con Chrome sin interfaz) | Probarlo con el adaptador real antes del ensayo, no el día de la demo |
 | Whisper transcribe algo con silencio o ruido | Umbral de volumen y duración; **confirmación explícita obligatoria**, así que nada se juega solo |
-| El resultado de B no se repite con otra voz o con frases nuevas (una voz, una corrida, IC95 inferior de 78 %) | Validación del mar 17 con otra voz, frases nuevas y otra laptop (sin definir quién aporta la voz ni de dónde sale la laptop); las cifras reales van a `quality.md` sin maquillar |
-| Cambiar el parser invalida las cifras del spike | Un solo lote antes de la validación y se registra el hash del parser usado; si no da tiempo, se queda la versión `spike-parser-freeze` |
+| El resultado de B no se repite con otra voz o con frases nuevas (una voz, una corrida, IC95 inferior de 78 %) | Validación con otra voz, frases nuevas y otra laptop (sin definir quién aporta la voz ni de dónde sale la laptop); las cifras reales van a `quality.md` sin maquillar |
+| Cambiar el parser invalida las cifras del spike | El parser queda en `spike-parser-freeze`, sin lote de mejoras; se registra el hash usado |
 | Divergencia entre servidor y frontend | Contrato v0 de `shared/` versionado (`v: 1`); cambios solo por PR aprobado por el responsable del repo |
 | El profesor no acepta procesos en la misma instancia como servicios distintos (ADR 11), o descarta el pool de Whisper por ser local (revisión del ADR 10) | Decirlo al presentar y mostrar lo medido. **No hay alternativa construida** |
 | Trabajo sobre PR sin fusionar | La cadena se fusiona en orden antes de seguir con la voz y el despliegue; si algo cambia, se ajusta en ese momento |
 
 ## 11. Recomendaciones y objeciones
-1. **Este calendario no tiene colchón.** Tiene tres puntos de control: **mié 11** (partida escrita en la nube), **vie 13** (partida por voz) y **lun 16** (congelación). Si uno falla, se recorta ese mismo día según 9.7, no al final.
+1. **Manda el orden de trabajo de 9.1.** Si un paso se atrasa, se recorta según 9.2 en ese momento, no al final.
 2. **Sin revisión de otra persona.** El responsable del repo aprueba los PR #3 y #10 a #14, la base de todo lo demás, después de revisar por separado cada trabajo de CI.
-3. **El lote del parser es lo más prescindible del núcleo.** Mejora frases concretas, pero obliga a volver a medir y añade riesgo a tres días de la demo. Si el lun 16 hay cualquier duda, no se toca.
-4. **La validación se reduce a 40 frases y medio día.** Antes eran 80 frases y dos días. Con menos frases el intervalo de confianza es más ancho, y `quality.md` debe decirlo. El mar 17 por la mañana se protege: sin esas cifras no se cumple un requisito que no se recorta.
+3. **El lote del parser queda fuera.** Se queda `spike-parser-freeze`, cuyas cifras siguen siendo válidas, y no hay que volver a medir por ese cambio.
+4. **La validación se reduce a 40 frases.** Antes eran 80. Con menos frases el intervalo de confianza es más ancho, y `quality.md` debe decirlo. Se protege: sin esas cifras no se cumple un requisito que no se recorta.
 5. **Los detalles de la demo son supuestos** (ver 12): ya no se le puede preguntar al profesor, así que se prepara también una versión corta del guion.
 6. **Repositorio:** se llama `TWC-FINE/ChesssPeak` en GitHub. Renombrarlo a `chessspeak` queda como decisión del responsable del repo. La carpeta local anidada se deja por ahora.
 7. **No adoptar el N-best:** el spike lo midió y no mejora nada (+0,0 puntos). **Tampoco hay autoconfirmación.**
@@ -338,13 +287,13 @@ El proyecto se presenta en vivo, en la fecha de entrega. Los riesgos principales
 
 **Supuestos:** ya no se le puede preguntar nada más al profesor, así que lo que seguía abierto se decide con supuestos. La lista completa está en [docs/proximos-pasos.md](docs/proximos-pasos.md).
 
-- **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.**
+- **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).**
 - **Despliegue:** Render, Neon y Atlas.
 - **Dominio:** en espera del profesor, que debe agregarlo en el hosting (ADR 11). Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **`web/dist`:** en el commit de entrega, solo al congelar el código.
-- **Chrome:** sigue como recorte (ver 9.7).
+- **Chrome:** sigue como recorte (ver 9.2).
 
-**Para el equipo (se deciden el lun 9):**
-- Roles A y B: según la comodidad de cada persona con NestJS o con el front y Lit.
-- Responsable del lote de mejoras del parser.
-- Si se trabajan los fines de semana (recomendado el 14–15) y el lunes festivo del 16.
+**Sin definir:**
+- Hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
+- Quién aporta la otra voz para la validación. Sin otra voz, se valida con la del responsable del repo y se declara en `docs/quality.md`.
+- De dónde sale la segunda laptop de los ensayos y cuál es la máquina limpia para probar el README.

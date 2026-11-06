@@ -4,11 +4,11 @@
 
 Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebraica (en español), en lugar de moverlas con el mouse. El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide confirmación y la aplica en la partida en tiempo real.
 
-Proyecto final de Arquitectura de Software (equipo de 2 personas).
+Proyecto final de Arquitectura de Software.
 
 > **Estado (5 de noviembre de 2026):** Todavía **no se puede jugar**. Existen el parser de voz, el agente local con su pool de Whisper, el esqueleto del servidor (`/health` y las dos bases), el shell con 3 microfrontends de marcador de posición y el CI. Faltan la partida en tiempo real, la voz en la interfaz y el despliegue (ver [PLAN.md](PLAN.md)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
 
-**Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** El proyecto se presenta en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
+**Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** El proyecto se presenta en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
 ## Cómo funciona
 

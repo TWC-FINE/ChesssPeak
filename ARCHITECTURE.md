@@ -87,7 +87,7 @@ Interfaz `SpeechRecognizer` con adaptadores intercambiables:
 
 **Whisper:** umbral mínimo de volumen y duración antes de transcribir. Modelo `small` con el prompt de ajedrez (sin prompt el acierto baja de 89,7 % a 61,5 %); latencia declarada: p50 2,91 s y p95 3,06 s solo de inferencia. El binario y el modelo viven fuera del repo (rutas en `.env`) y un script los instala en un solo comando. El navegador llama al agente con CORS y cabecera de acceso a red privada; desde una web pública puede bloquearse por el acceso a red local.
 
-**Parser:** las cifras del spike son de la versión `spike-parser-freeze`. Solo se modifica en un lote antes de la validación del 17 de noviembre, registrando el hash usado.
+**Parser:** las cifras del spike son de la versión `spike-parser-freeze`. Sigue congelado: el lote de mejoras queda fuera del plan. La validación registra el hash usado.
 
 ## 5. Datos
 
@@ -114,7 +114,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 ## 6. Comunicación y contrato
 - **HTTP (REST):** `/auth/guest` (y `/auth/login` si se hace), `/health`.
 - **Socket.IO:** eventos de partida validados con zod en `shared/`. Un solo socket por cliente, abierto por el shell.
-- **Contrato v0 de `shared/`:** borrador mínimo y versionado (`v: 1`) en un PR abierto el jue 5 de noviembre; lo firman A y B el lun 9. Cambios posteriores solo por PR revisado por los dos.
+- **Contrato v0 de `shared/`:** borrador mínimo y versionado (`v: 1`) en el PR #3. Lo aprueba el responsable del repo. Cambios posteriores solo por PR aprobado por el responsable del repo.
 - **CORS** (HTTP y Socket.IO): `http://127.0.0.1:5500`, `http://localhost:5500` y el dominio de Vercel.
 
 ## 7. Seguridad

@@ -3,21 +3,21 @@
 Léelo completo antes de tocar código. Si algo contradice a [PLAN.md](PLAN.md), manda PLAN.md; el alcance lo define [SPEC.md](SPEC.md) y la estructura [ARCHITECTURE.md](ARCHITECTURE.md). Para ponerte al día en una página: [docs/CONTEXT.md](docs/CONTEXT.md).
 
 ## Proyecto
-**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, en solitario: el responsable del repo es el único que aprueba. **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.**
+**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, en solitario: el responsable del repo es el único que aprueba. **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).**
 
 Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “ChesssPeak” son errores; no los propagues. **Única excepción:** el repositorio de GitHub se llama hoy `TWC-FINE/ChesssPeak`, y la carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora.
 
 **Hay demo en vivo,** en Edge, con la web en local (`pnpm serve:web`) y el backend en Render. Guion y calendario en [PLAN.md](PLAN.md), secciones 3 y 9. No añadas funcionalidades fuera del núcleo: los opcionales salieron del plan por la fecha.
 
 ## Estado actual
-A 5 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo y `appendMove`), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **No existen todavía** Socket.IO, `GameRoom`, la autenticación ni la voz en la interfaz, y el contrato v1 de `shared/` sigue en revisión (PR #3). No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+A 6 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y en `main` existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo y `appendMove`), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **Solo en los PR #3 y #10 a #14, sin fusionar:** el contrato v1 de `shared/`, `GameRoom`, la autenticación, `POST /games`, Socket.IO y la partida por texto. **No existen todavía** la voz en la interfaz, `voice_attempts`, `<mf-history>` real ni el despliegue. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
 
 **Análisis con Stockfish:** se midió y la prueba **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). Sigue fuera de alcance salvo que se decida una versión nueva del criterio.
 
 Decisiones del spike que no se reabren sin motivo (detalle en [docs/spike-results.md](docs/spike-results.md)):
 - Reconocedor por defecto: **Web Speech con un retardo de 400 ms tras soltar el botón**. Whisper local (modelo `small`, siempre con el prompt de ajedrez) es la alternativa seleccionable y el módulo local, con su latencia declarada.
 - **La confirmación explícita es obligatoria.** No hay autoconfirmación ni N-best.
-- El parser de `packages/voice-parser/` está **congelado** en la versión de la etiqueta `spike-parser-freeze`: las cifras del spike son de esa versión. Solo se modifica en un lote antes de la validación del 17 de noviembre, registrando la versión (hash), y re-midiendo con frases nuevas. No cambies el parser, el corpus ni `docs/spike-criteria.md` fuera de ese lote.
+- El parser de `packages/voice-parser/` está **congelado** en la versión de la etiqueta `spike-parser-freeze`: las cifras del spike son de esa versión. El lote de mejoras queda fuera del plan: no cambies el parser, el corpus ni `docs/spike-criteria.md`. La validación usa frases nuevas y registra el hash del parser.
 
 ## Stack
 - Monorepo con **pnpm workspaces**, TypeScript estricto en todo.
@@ -83,7 +83,7 @@ Web en el puerto **5500** (fijo; Live Server o `pnpm serve:web`). `local-agent` 
 - No introducir Module Federation, Shadow DOM, microservicios, Redis ni sticky sessions.
 - No guardar **audio** en ninguna parte.
 - No commitear secretos, `.env`, binarios de whisper.cpp ni modelos. Rutas y claves van en `.env` (con `.env.example` en el repo). Tampoco los WAV de `spike/recordings/`.
-- No tocar `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` ni los resultados del spike (`spike/results/`, `docs/spike-results.md`, `docs/spike-run-b.md`) salvo en el lote declarado antes de la validación del 17 de noviembre.
+- No tocar `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` ni los resultados del spike (`spike/results/`, `docs/spike-results.md`, `docs/spike-run-b.md`).
 - No hacer push directo a `main`, ni `git push --force`, ni reescribir historia.
 - No commitear `web/dist` (solo en el commit de entrega).
 - No añadir fast-check ni pipelines de percentiles en Mongo (p50/p95 se calculan en Node).

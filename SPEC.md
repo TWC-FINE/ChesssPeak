@@ -8,7 +8,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 ## 2. Usuarios
 - **Jugador invitado:** entra sin registro, crea o se une a una partida y juega por voz o escribiendo.
 - **Jugador registrado (opcional):** igual, con cuenta y partidas ligadas a su usuario.
-- **Evaluadores (profesor):** revisan los requisitos de la materia en una **demo en vivo** que presentamos nosotros, en Edge.
+- **Evaluadores (profesor):** revisan los requisitos de la materia en una **demo en vivo**, en Edge.
 
 ## 3. Requisitos del curso (obligatorios)
 | # | Requisito | Cómo se cumple |
@@ -38,7 +38,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF11. Historial de jugadas de la partida (`<mf-history>`).
 - RF12. Telemetría de voz por intento (`voice_attempts`), sin audio.
 
-**Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.7):**
+**Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.2):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.
 
 **Fuera de alcance:** login/registro, pestaña “Precisión”, alfabeto OTAN, `speechSynthesis` (los cuatro, recortados por la fecha de entrega); chat de voz entre jugadores (WebRTC/TURN), análisis con Stockfish, inglés, ranking/ELO, partidas contra computador. No hay autoconfirmación ni N-best (descartados por el spike).
@@ -46,16 +46,16 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 ## 5. Requisitos no funcionales
 | Atributo | Requisito |
 |---|---|
-| Precisión de voz | Umbrales del spike: acierto top-1 ≥ 85 %; aceptación errónea ≤ 2 %; ambigüedad ≤ 10 %; 0 jugadas aceptadas con silencio o ruido. Web Speech con 400 ms los cumplió en el spike (87,2 %, Edge 156, una voz); la validación del 17 de noviembre los vuelve a medir con frases nuevas |
+| Precisión de voz | Umbrales del spike: acierto top-1 ≥ 85 %; aceptación errónea ≤ 2 %; ambigüedad ≤ 10 %; 0 jugadas aceptadas con silencio o ruido. Web Speech con 400 ms los cumplió en el spike (87,2 %, Edge 156, una voz); la validación los vuelve a medir con frases nuevas |
 | Rendimiento (voz) | Soltar el botón → propuesta: p50 ≤ 1,5 s, p95 ≤ 3 s para Web Speech. Whisper `small` no los cumple (p50 2,91 s, p95 3,06 s solo de inferencia): se declara |
-| Reproducibilidad | Un clon nuevo en la segunda laptop instala y abre la aplicación siguiendo solo el README |
-| Parser | Las cifras del spike son de la versión `spike-parser-freeze`; el parser solo se modifica registrando la versión y re-midiendo en la validación del 17 de noviembre |
+| Reproducibilidad | Un clon nuevo en una máquina limpia instala y abre la aplicación siguiendo solo el README |
+| Parser | Las cifras del spike son de la versión `spike-parser-freeze`; el lote de mejoras queda fuera del plan y el parser no se modifica |
 | Disponibilidad | Reconexión sin perder jugadas (objetivo: 0 perdidas) |
 | Seguridad | Identidad decidida siempre por el servidor; rate limiting en auth; secretos solo en `.env`; sin audio almacenado |
 | Modificabilidad | Añadir un reconocedor nuevo toca solo un adaptador |
 | Privacidad | Web Speech envía audio a la nube del navegador (Google en Chrome, Microsoft en Edge; aceptado por el profesor); Whisper local no sale de la máquina |
 
-Las cifras reales se registran en `docs/quality.md` tras la sesión de evaluación (17 de noviembre). No se inventan.
+Las cifras reales se registran en `docs/quality.md` tras la sesión de evaluación. No se inventan.
 
 ## 6. Criterios de aceptación (la demo en vivo)
 1. Dos jugadores, en dos navegadores o equipos, juegan una partida completa **por voz** con Web Speech.
@@ -64,9 +64,13 @@ Las cifras reales se registran en `docs/quality.md` tras la sesión de evaluaci�
 4. Una frase ambigua o ilegible no mueve ninguna pieza.
 5. Los intentos quedan en `voice_attempts` y las jugadas en `game_moves`; las partidas en Postgres.
 6. Backend desplegado en la nube y repo público con CI en verde.
-7. Existen `docs/quality.md` con cifras medidas (con el hash del parser usado), los ADRs y un README que permite instalar y abrir el proyecto sin ayuda, comprobado con un clon nuevo en la segunda laptop.
+7. Existen `docs/quality.md` con cifras medidas (con el hash del parser usado), los ADRs y un README que permite instalar y abrir el proyecto sin ayuda, comprobado con un clon nuevo en una máquina limpia.
 
 ## 7. Supuestos y pendientes
-- **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con **demo en vivo** (se supone ese mismo día).
+- **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Con **demo en vivo** (se supone ese mismo día).
+- **Sin definir:** hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
 - Ya no se le puede preguntar al profesor. Los detalles de la demo, el despliegue, el dominio y Live Server son **supuestos**, listados en [docs/proximos-pasos.md](docs/proximos-pasos.md).
 - Decidido por el spike: idioma `es-CO`; reconocedor por defecto Web Speech con retardo de 400 ms (ADR 5). La demo se hace en Edge; Chrome sigue sin medirse.
+- **Consecuencias, si se llegara a recortar:**
+  - **Si se recorta el pool de `move-workers`:** el balanceo queda solo en Whisper, riesgo asumido. Si el balanceo es obligatorio, el pool no es recortable.
+  - **Si se recorta el adaptador de Whisper:** queda sin cumplir el criterio 2 de `SPEC.md`, se pone en duda R2 y suma 1,0 día neto frente a recortar el pool (estimación).

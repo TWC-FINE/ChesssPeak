@@ -1,6 +1,6 @@
 # Próximos pasos
 
-Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026. Las fechas y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente y los supuestos.
+Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026. La fecha, el orden de trabajo y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente y los supuestos.
 
 ## Cómo retomar
 ```bash
@@ -8,12 +8,12 @@ git fetch origin
 git switch docs/delivery-nov-19   # esta replanificación; aún sin PR
 pnpm install
 ```
-- **Para programar:** crear una rama por tema desde `origin/feat/game-room`, que tiene el contrato y `GameRoom`. `main` aún no los tiene.
+- **Para programar:** crear una rama por tema desde `main`, una vez fusionada la cadena.
 - **Fuera de git:** `.env` (`pnpm env:init`), Whisper y sus modelos (`pnpm --filter @chessspeak/spike-whisper-local download`) y los WAV del spike.
 
 ## Decisiones ya tomadas
-- **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con **demo en vivo**.
-- **Documentación de arquitectura:** el profesor pide **C4**. Los niveles y el formato son un supuesto.
+- **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Con **demo en vivo**.
+- **Documentación de arquitectura:** el profesor pide **C4**. Niveles 1 y 2; el formato es un supuesto.
 - **Dominio:** obtenido con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain), como pidió el profesor. **En espera del profesor.** Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **Despliegue:** supuesto Render, Neon y Atlas. Ya no se espera una sugerencia del profesor. Crear las cuentas y las credenciales queda en manos del equipo.
 
@@ -25,7 +25,7 @@ pnpm install
   - **Otros datos:** un control sobre `90ab665` pasó a la misma hora, y el mismo error ya apareció en `main` (`2d287ea`).
   - **Si vuelve a fallar:** el registro de CI muestra ahora el estado del navegador y su salida de error.
 - **El resultado global de CI puede decir verde aunque `smoke` falle,** porque `ci.yml` lo marca con `continue-on-error`. Ocurrió en `fa5c168`: la ejecución figuró como `success`. **Hay que mirar siempre cada trabajo por separado,** con `gh pr checks <número>`.
-- **La fecha de entrega sigue sin confirmar:** margen interno del equipo 19 de noviembre; tentativa 27 de noviembre. El calendario trabaja con el 19, pero no debe presentarse como fecha confirmada.
+- **Sin definir:** hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
 
 ## Dominio
 - **Prioridad:** en espera del profesor, que lo agregará en el hosting. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
@@ -74,8 +74,8 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 - **Confirmación:** se propone una revisión al final en lugar de confirmar cada jugada. Cambia SPEC.md y requiere un añadido al ADR 5.
 - **Límites del agente:** hoy, con 15 s de espera y una cola de 12, fallarían peticiones.
 - **Workers:** el modo necesita su propia configuración (por ejemplo, `LB_WORKERS=3`), porque con varios workers una sola petición es más lenta. Cada worker usa unos 580–700 MB de RAM.
-- **Dónde vive:** dentro de `<mf-voice-input>` o como cuarto microfrontend. Si necesita tipos nuevos en `shared/`, requiere la aprobación de los dos.
-- **Calendario:** la versión mínima se estima en 2 o 3 días. Iría después del hito del vie 13, en el fin de semana 14–15 y el lun 16. Si el núcleo se retrasa, se recorta y queda la carga de prueba.
+- **Dónde vive:** dentro de `<mf-voice-input>` o como cuarto microfrontend. Si necesita tipos nuevos en `shared/`, van en un PR que aprueba el responsable del repo.
+- **Esfuerzo:** la versión mínima se estima en 2 o 3 días. Si el núcleo se retrasa, se recorta y queda la carga de prueba.
 
 **Qué esperar.** Con las tasas medidas el 4 de noviembre (0,37 y 0,45 respuestas por segundo), balancear no crea CPU: el total para 80 medias jugadas pasaría de unos 216 s a unos 178 s. Es una estimación, porque el dictado real aún no se ha medido. El argumento más fuerte es la tolerancia a fallos: si un worker cae a mitad del dictado, los demás siguen. Esta estimación usa las tasas del 4 de noviembre, anteriores a las repeticiones del 5, y no se recalculó.
 
@@ -86,15 +86,15 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 
 | Tema | Supuesto | Riesgo o pendiente |
 |---|---|---|
-| Entrega | Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre | No se presenta como confirmada. Se supone que la demo es ese mismo día |
+| Entrega | Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor) | Se supone que la demo es ese mismo día. Sin definir: hora y duración de la demo |
 | Despliegue | Render, Neon y Atlas, como en `render.yaml` y `docs/deploy.md`. `MOVE_WORKERS=0` en Render hasta medir la memoria | El profesor iba a sugerir dónde y cómo. Hay que crear las cuentas |
 | Dominio | En espera del profesor. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app` | Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas. No se sabe qué permite alojar ese hosting |
 | Microfrontends y Live Server | 3 custom elements sin Module Federation ni despliegues independientes (ADR 2). `web/dist` va en el commit de entrega, solo al congelar el código, y abre en `http://127.0.0.1:5500/web/dist/index.html` | Ensayar exactamente ese modo. La demo sigue usando `serve:web` |
-| Chrome | Sigue como recorte. Si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre | La medición es con voz real |
+| Chrome | Sigue como recorte. Si la entrega la abre otra persona puede ser en Chrome | La medición es con voz real |
 | Rúbrica | No se conocen pesos: se cubren todos los requisitos de SPEC.md por igual | Podría pesar más algo que tratamos como secundario |
-| Demo | Nuestras dos laptops, datos del celular y video de respaldo. Guion de unos 10 minutos (cifra de trabajo), con versión corta | No se conocen hora, duración ni la red de la sala |
-| Quién abre el proyecto | Basta la demo y el repo; el README se prueba con un clon nuevo | Si lo abre él mismo, Whisper y las cuentas pesan más |
-| C4 | Niveles 1 a 3 (contexto, contenedores y componentes del servidor) en Mermaid, más los ADR y los escenarios de calidad | Puede esperar otro formato |
+| Demo | Dos laptops (la segunda, sin definir), datos del celular y video de respaldo. Guion de unos 10 minutos (cifra de trabajo), con versión corta | Sin definir: hora y duración. Tampoco se conoce la red de la sala |
+| Quién abre el proyecto | Basta la demo y el repo; el README se prueba con un clon nuevo en una máquina limpia | Sin definir si lo abre él mismo. Si lo abre, Whisper y las cuentas pesan más |
+| C4 | Niveles 1 y 2 (contexto y contenedores) en Mermaid, más los ADR y los escenarios de calidad | Puede esperar otro formato |
 | Balanceo | Ver el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md) y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Procesos en la misma máquina: no se da por resuelto, y hay que decirlo al presentar |
 
 ## Lista de tareas
@@ -122,26 +122,24 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 **Documentos**
 - [ ] 14. ADR 9 (licencia), y ADR 7 y 8 al terminar las tareas 3 y 6. ADR 8 en el PR #11 y ADR 7 en el PR #13; falta el ADR 9.
 - [ ] 15. 20 frases de validación, en un archivo nuevo, sin editar el corpus v0.
-- [ ] 16. Documentación de arquitectura con C4 (supuesto: niveles 1 a 3 en Mermaid).
+- [ ] 16. Documentación de arquitectura con C4 (niveles 1 y 2 en Mermaid).
 
 **Según los supuestos**
 - [ ] 17. Dominio: cuando el profesor lo agregue y deje de rechazar consultas, conectarlo según lo que permita el hosting.
-- [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Es de la Fase 0, necesita crear las cuentas y hay que hacerlo antes del ensayo del mar 17.
+- [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Es de la Fase 0, necesita crear las cuentas y es el paso 2 del orden de trabajo.
 
 **Balanceo (ADR 11)**
-- [x] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. Es lo único de este bloque antes del mié 11. (PR #13)
-- [ ] 20. Pool y `move-workers`, del jue 12 al dom 15. Se pausa si el hito del mié 11 se atrasa, y entonces queda solo el balanceo de Whisper.
+- [x] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. (PR #13)
+- [ ] 20. Pool y `move-workers`, con OK explícito del responsable del repo antes de empezar (paso 5 del orden de trabajo).
 - [ ] 21. Pruebas del ADR 11, con el criterio de éxito: matar un worker a mitad de partida sin perder ninguna jugada.
-- [ ] 22. Medir los dos equipos el mismo día para saber cuál es el más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Instrucciones: [docs/kit-equipo-debil/LEEME.txt](kit-equipo-debil/LEEME.txt). Si se puede, antes del lun 9.
+- [ ] 22. Medir los dos equipos el mismo día para saber cuál es el más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Instrucciones: [docs/kit-equipo-debil/LEEME.txt](kit-equipo-debil/LEEME.txt).
 - [ ] 23. Arrancar la demo de Whisper con `LB_WORKERS=3`.
 
-**Meta para el mié 11:** dos pestañas de Edge jugando por texto contra el servidor; en local mientras no haya despliegue (tareas 3 a 6 y 10 a 12).
-
 ## Qué no tocar por ahora
-- **`shared/`:** el contrato exige la aprobación de los dos. Si falta algo, se anota.
-- **PR #3 y #10:** nadie aprueba su propio PR. Se trabaja encima de esas ramas sin fusionarlas. Nada se fusiona a `main` sin aprobación expresa.
-- **Parser y spike:** `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` y los resultados siguen congelados hasta el lote previo a la validación.
+- **`shared/`:** el contrato lo aprueba el responsable del repo; cualquier cambio va en un PR y sube la versión. Si falta algo, se anota.
+- **PR #3 y #10 a #14:** los aprueba el responsable del repo. Se fusionan en orden, antes del despliegue. Nada se fusiona a `main` sin su aprobación expresa.
+- **Parser y spike:** `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` y los resultados siguen congelados; el lote de mejoras queda fuera del plan.
 - **Balanceo:** solo lo que fija el ADR 11. `GameRoom` y la validación no se tocan.
 - **`web/dist`:** solo en el commit de entrega, al congelar el código (supuesto).
 
-**Espera a la otra persona:** la validación con otra voz, los ensayos con dos laptops y la firma del contrato.
+**Sin definir:** quién aporta la otra voz para la validación (sin otra voz, con la del responsable del repo, declarado en `docs/quality.md`), la segunda laptop de los ensayos y la máquina limpia del README.

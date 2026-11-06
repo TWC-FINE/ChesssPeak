@@ -116,7 +116,7 @@ Sale del código actual. **Los tiempos todavía no se han medido.**
 
 ## Alternativas
 
-- **Réplicas de NestJS con Redis (descartada):** es lo más parecido a lo que describió el profesor, porque A y B podrían entrar por instancias distintas. Pero exige sacar `GameRoom` de la memoria o compartirla, un adaptador Redis para Socket.IO y sesiones pegajosas. Eso rompe los ADR 1 y 7 y pone en riesgo el hito del 11 de noviembre.
+- **Réplicas de NestJS con Redis (descartada):** es lo más parecido a lo que describió el profesor, porque A y B podrían entrar por instancias distintas. Pero exige sacar `GameRoom` de la memoria o compartirla, un adaptador Redis para Socket.IO y sesiones pegajosas. Eso rompe los ADR 1 y 7 y pone en riesgo el resto del trabajo.
 - **Modo de dictado (no se construye):** las peticiones son pesadas, pero todo ocurre en un solo equipo, que es justo lo que el profesor cuestionó. Además obligaría a cambiar la confirmación explícita (RF8) y costaría 2 o 3 días.
 - **Whisper central por red local (no se construye):** cumple gateway y peso, pero depende de la red de la sala y cambia el módulo local. Además, los turnos alternan y el reconocedor por defecto es Web Speech.
 
@@ -131,8 +131,12 @@ Sale del código actual. **Los tiempos todavía no se han medido.**
 - (−) Hay más procesos que arrancar, vigilar y documentar, y código duplicado respecto a `local-agent`. No se ha comprobado que quepan en el hosting.
 - (−) Toda carga de la prueba comparativa será **sintética** (muchas partidas simuladas), porque una partida real genera muy pocas escrituras.
 
-## Alcance y calendario
+## Alcance y orden
 
-- **Antes del 11 de noviembre:** solo el puerto `MovePersistence` con escritura directa.
-- **Del 12 al 15 de noviembre:** pool y worker. La congelación de funcionalidades es el lunes 16.
-- **Si el hito del 11 se atrasa:** esta tarea se pausa y queda solo el balanceo de Whisper.
+- **Ya hecho:** el puerto `MovePersistence` con escritura directa, en el PR #13.
+- **Pool y worker:** paso 5 del orden de trabajo de [PLAN.md](../../PLAN.md), con OK explícito del responsable del repo antes de empezar.
+
+**Consecuencias, si se llegara a recortar:**
+
+- **Si se recorta el pool de `move-workers`:** el balanceo queda solo en Whisper, riesgo asumido. Si el balanceo es obligatorio, el pool no es recortable.
+- **Si se recorta el adaptador de Whisper:** queda sin cumplir el criterio 2 de `SPEC.md`, se pone en duda R2 y suma 1,0 día neto frente a recortar el pool (estimación).
