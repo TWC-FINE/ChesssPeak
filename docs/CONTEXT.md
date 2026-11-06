@@ -62,6 +62,7 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [spike-criteria.md](spike-criteria.md) | Umbrales y reglas, fijados antes de medir (no cambian) |
 | [spike-results.md](spike-results.md) · [spike-run-b.md](spike-run-b.md) | Resultados y decisión · corrida B, Whisper y reglas de lectura |
 | [spike-chrome.md](spike-chrome.md) | Comprobación declarada en Chrome (pendiente de medir) |
+| [protocol.md](protocol.md) · [contract-versioning.md](contract-versioning.md) | Contrato v1 (socket, REST, eventos cs:*, contextos) · cómo se versiona |
 | [spike-notes.md](spike-notes.md) | Notas, equipo de referencia y **tareas pendientes por área** |
 | [deploy.md](deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [load-balancing.md](load-balancing.md) · [analysis-gate.md](analysis-gate.md) | Prueba de carga de Whisper · prueba del análisis con Stockfish |

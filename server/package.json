@@ -4,16 +4,17 @@
   "private": true,
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "prisma generate && tsc -p tsconfig.build.json",
+    "build": "pnpm --filter @chessspeak/shared build && prisma generate && tsc -p tsconfig.build.json",
     "start": "node --env-file-if-exists=../.env dist/main.js",
     "start:dev": "nest start --watch",
-    "test": "prisma generate && jest",
-    "typecheck": "prisma generate && tsc --noEmit",
+    "test": "pnpm --filter @chessspeak/shared build && prisma generate && jest",
+    "typecheck": "pnpm --filter @chessspeak/shared build && prisma generate && tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "test:integration": "node ../scripts/integration.mjs"
   },
   "dependencies": {
+    "@chessspeak/shared": "workspace:*",
     "@nestjs/common": "^11.2.8",
     "@nestjs/core": "^11.2.8",
     "@nestjs/mongoose": "^11.0.4",

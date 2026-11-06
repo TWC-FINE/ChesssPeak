@@ -190,6 +190,9 @@ importers:
 
   server:
     dependencies:
+      '@chessspeak/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@nestjs/common':
         specifier: ^11.2.8
         version: 11.2.8(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)

@@ -13,7 +13,7 @@ describe('<mf-game>', () => {
   it('receives its context through the context property and renders in light DOM', async () => {
     const element = document.createElement('mf-game') as HTMLElement & { context?: GameContext; updateComplete: Promise<boolean> };
     document.body.append(element);
-    element.context = { v: 1, gameId: 'abc', orientation: 'black' };
+    element.context = { v: 1, gameId: 'abc', orientation: 'black', socket: null };
     await element.updateComplete;
     expect(element.shadowRoot).toBeNull();
     expect(element.textContent).toContain('abc');

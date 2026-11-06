@@ -20,9 +20,10 @@ describe('parseRoute', () => {
 
 describe('simulated contexts and config', () => {
   it('gives each microfrontend a versioned context', () => {
-    expect(mockContext('mf-game', 'x')).toMatchObject({ v: 1, gameId: 'x' });
-    expect(mockContext('mf-voice-input', null)).toMatchObject({ v: 1, releaseDelayMs: 400 });
-    expect(mockContext('mf-history', null)).toMatchObject({ v: 1, moves: [] });
+    expect(mockContext('mf-game', 'x')).toEqual({ v: 1, gameId: 'x', orientation: 'white', socket: null });
+    // no releaseDelayMs: <mf-voice-input> takes DEFAULT_RELEASE_DELAY_MS from shared
+    expect(mockContext('mf-voice-input', null, 'http://127.0.0.1:8765')).toEqual({ v: 1, gameId: null, lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'http://127.0.0.1:8765' });
+    expect(mockContext('mf-history', 'x')).toEqual({ v: 1, gameId: 'x' });
     expect(mockContext('other', null)).toBeUndefined();
   });
 

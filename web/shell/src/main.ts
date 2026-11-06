@@ -19,7 +19,7 @@ function render(): void {
   if (routeLabel !== null) routeLabel.textContent = describeRoute(route);
   const gameId = gameIdOf(route);
   for (const [tag, element] of mounted) {
-    (element as HTMLElement & { context?: unknown }).context = mockContext(tag, gameId);
+    (element as HTMLElement & { context?: unknown }).context = mockContext(tag, gameId, config.PUBLIC_AGENT_URL || null);
   }
 }
 

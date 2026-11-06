@@ -10,10 +10,16 @@ El backend gestiona identidad, partidas en tiempo real (Socket.IO) y telemetría
 ## Decisión
 
 1. **NestJS en TypeScript estricto, como monolito modular** (no microservicios): módulos `auth`, `games`, `voice-metrics` y `health`. Una sola instancia en Render.
-2. **Los contratos viven en `shared/`** (`@chessspeak/shared`): tipos y esquemas **zod** para los eventos del socket, los eventos `cs:*` y el contexto de los microfrontends. El servidor y el front validan contra los mismos esquemas. El contrato v0 se firma el lun 9 de noviembre; `shared/` ya contiene el tipo `Identity` y un esquema de ejemplo.
+2. **Los contratos viven en `shared/`** (`@chessspeak/shared`): tipos y esquemas **zod** para el socket, el REST, los eventos `cs:*` y el contexto de los microfrontends (contrato v1, ver [docs/protocol.md](../protocol.md) y [docs/contract-versioning.md](../contract-versioning.md)). El servidor y el front validan contra los mismos esquemas. Se firma el lun 9 de noviembre.
 3. **Pruebas:** Jest en `server`; Vitest en `shared`, `voice-parser` y `web`. `pnpm verify` ejecuta el typecheck y los tests de todos los paquetes.
 4. **Versiones del servidor:** NestJS 11 (CommonJS) con su propio `typescript` 5.9. El resto del repositorio usa TypeScript 7, pero `ts-jest` solo admite versiones menores que 7, y NestJS 12 es solo ESM, lo que complica Jest. Se revisa cuando el ecosistema lo permita.
 5. **Builds de pnpm:** `pnpm install` terminaba con `ERR_PNPM_IGNORED_BUILDS` porque pnpm 12 no ejecuta por defecto los scripts de instalación. Se **deniegan explícitamente** (`allowBuilds` en `pnpm-workspace.yaml`, con `pnpm approve-builds`) los de `esbuild` y `@parcel/watcher`: ambos funcionan con sus binarios precompilados y sin su script. Así `pnpm install` termina con código 0 y el CI puede mirarlo. Si un paquete nuevo necesita su script, se decide en un commit aparte.
+6. **Cómo consume Nest el paquete `shared` (nota del 2 de noviembre de 2026):** `shared` se escribe como TypeScript ESM y se **compila solo a CommonJS** (`pnpm --filter @chessspeak/shared build`: `dist/cjs` + declaraciones en `dist/types`, con un `package.json` `"type": "commonjs"` dentro de `dist/cjs`). Sus `exports` tienen cuatro condiciones, en este orden:
+   - `source` → `src/index.ts`: condición propia que usan la web (`customConditions` en sus `tsconfig`, `resolve.conditions` en Vite y Vitest, `conditions` en esbuild), así que la web no necesita compilar `shared`.
+   - `types` → `dist/types/index.d.ts` y `require` → `dist/cjs/index.js`: los usa el servidor. Con `moduleResolution: node10`, TypeScript 5.9 lee el campo `types` y Node/Jest el `main`/`require`.
+   - `default` → `src/index.ts`.
+   `server` compila `shared` antes de `typecheck`, `test` y `build` (`nest build`). Verificado: typecheck con TS 5.9, Jest (test de importación que comprueba que `require` resuelve a `dist/cjs`), `nest build` respetando su `rootDir` y el proceso arrancado respondiendo `/health` con `protocolVersion: 1`.
+   Se probó también que `types` apuntando a `src/index.ts` compila (TS 5.9 y `nest build` sin errores), pero se descartó: así el servidor comprueba los tipos de lo mismo que ejecuta (la salida compilada) y no compila el código de `shared`, pensado para TypeScript 7, con otra versión. No se publica salida ESM: ningún consumidor la necesita.
 
 ## Alternativas
 
@@ -25,5 +31,5 @@ El backend gestiona identidad, partidas en tiempo real (Socket.IO) y telemetría
 
 - (+) Un contrato tipado y validado en los dos lados; el módulo de cada área se puede asignar por separado.
 - (+) `GameRoom` y el parser se prueban sin Nest.
-- (−) `shared/` está escrito como TypeScript ESM y `server` compila a CommonJS: cómo lo consume Nest (compilar `shared` o transformarlo en Jest) se decide en la parte 0c, cuando haya contrato.
+- (−) El servidor depende de compilar `shared` antes (lo hacen sus scripts); si alguien ejecuta `tsc` o `jest` directamente sin compilar `shared`, falla con «no se encuentra el módulo».
 - (−) Dos versiones de TypeScript en el repositorio hasta que `ts-jest` admita la 7.

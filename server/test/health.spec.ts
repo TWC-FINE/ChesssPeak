@@ -23,7 +23,7 @@ describe('GET /health (unit, fake probes: no database needed)', () => {
   it('is ok when both databases answer', async () => {
     const app = await appWith({ postgres: up, mongo: up });
     const response = await request(app.getHttpServer()).get('/health').expect(200);
-    expect(response.body).toMatchObject({ status: 'ok', databases: { postgres: 'up', mongo: 'up' } });
+    expect(response.body).toMatchObject({ status: 'ok', databases: { postgres: 'up', mongo: 'up' }, protocolVersion: 1 });
     expect(typeof response.body.uptimeSeconds).toBe('number');
     await app.close();
   });
