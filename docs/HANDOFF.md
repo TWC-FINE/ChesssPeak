@@ -1,6 +1,6 @@
 # ChessSpeak: estado para el relevo
 
-**Estado a 2026-11-06, 05:14 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
+**Estado a 2026-11-06, 05:22 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
 
 **En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Casi todo eso está en 6 PR apilados sin revisar, así que `main` todavía no lo tiene. Faltan la voz en el producto, el despliegue, la validación y los ensayos. La entrega sigue sin fecha confirmada.
 
@@ -16,7 +16,7 @@
 | `feat/game-gateway` | `90ab665` | `90ab665` | PR #13; incluye el puerto `MovePersistence` |
 | `feat/web-game` | `cbe8abb` | `cbe8abb` | PR #14 |
 | `feat/move-persistence` | `813b8a3` | No existe | Solo local; sus commits ya están dentro de #13 |
-| `docs/delivery-nov-19` | `d30d5d6` más el commit de este archivo | `d728be5` antes de subir | **Contiene supuestos por revisar (ADR 11) y se sube como trabajo en curso, sin PR** |
+| `docs/delivery-nov-19` | `f5e03ee` más el commit de esta nota | `f5e03ee` antes de subir esta nota | **Contiene supuestos por revisar (ADR 11) y se sube como trabajo en curso, sin PR** |
 
 Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene revisión.
 
@@ -87,6 +87,8 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 
 **Antes de cualquier medición, hay que apagar Docker y registrar su estado.** Claude no empieza una medición sin avisar. **Al actualizar este documento, Docker no respondía y parecía apagado: hay que comprobarlo antes de medir.**
 
+**Regla de PARA:** ante cualquier fallo, incluidos los errores del propio script de Claude, se para, se muestra la salida y se espera la decisión del responsable del repo. No se reintenta ni se corrige por cuenta propia.
+
 ## 4. Avance estimado
 
 **Es una estimación, no una medida.** El plan no trae días-persona por bloque: trae un calendario de 18 días-persona entre el 5 y el 18 de noviembre. El reparto dentro de cada fila es una suposición de este documento.
@@ -147,6 +149,8 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Abierto.** `main` no tiene protección: que nadie fusione sin aprobación depende solo de la convención |
 | **Documentos desactualizados** | **Abierto.** La lista de tareas de `proximos-pasos.md` no refleja lo hecho |
+| **Nombre del anexo en la historia pública** | **Abierto; quitarlo exigiría `--force`.** El nombre del archivo del anexo de la transcripción aparece en un enlace antiguo de 4 commits de `docs/delivery-nov-19`: `8246b8c`, `c703ae7`, `e6cd3c7` y `c62712f`. El archivo nunca se subió y la punta de la rama no lo nombra |
+| **Reflog pendiente de limpiar** | **Abierto; espera el OK del responsable del repo.** El anexo y la historia anterior a parafrasear las citas siguen en el `.git` local de este equipo, fuera de cualquier rama. Esa carpeta `.git` no debe copiarse a otro equipo antes de limpiarlo |
 
 ## 6. Qué no se pudo verificar
 
