@@ -1,6 +1,6 @@
 # Balanceo de carga de la transcripción de voz en ChessSpeak
 
-> **Origen de las cifras:** una corrida por configuración el 4 de noviembre de 2026 y dos más el 5 de noviembre, todas en el equipo de desarrollo y con los mismos ajustes. Las del 5 se hicieron por la noche, hora local (UTC−5), así que sus archivos llevan la fecha UTC del 6. Ninguna cifra está estimada ni redondeada a favor de una configuración. **Las secciones 6.1 a 6.4 describen solo el 4 de noviembre; la 6.5 añade las repeticiones y corrige la conclusión.**
+> **Origen de las cifras:** una corrida por configuración el 4 de noviembre de 2026 y dos más el 5 de noviembre, todas en el equipo de desarrollo y con los mismos ajustes. Las del 5 se hicieron por la noche, hora local (UTC−5), así que sus archivos llevan la fecha UTC del 6. Los archivos están en [docs/evidence/load-balancing/](evidence/load-balancing/). Ninguna cifra está estimada ni redondeada a favor de una configuración. **Las secciones 6.1 a 6.4 describen solo el 4 de noviembre; la 6.5 añade las repeticiones y corrige la conclusión.**
 
 ## Resumen
 
@@ -104,7 +104,7 @@ $env:LB_WORKERS=3; $env:LB_QUEUE_MAX=12; pnpm --filter @chessspeak/local-agent s
 pnpm --filter @chessspeak/local-agent load --label balanceado
 ```
 
-Cada corrida deja su reporte en `local-agent/results/load-<fecha>-<etiqueta>.json`. Esa carpeta no está en git.
+Cada corrida deja su reporte en `local-agent/results/load-<fecha>-<etiqueta>.json`. Esa carpeta no está en git. Las corridas citadas aquí se copiaron a `docs/evidence/load-balancing/`.
 
 ## 6. Resultados
 
@@ -206,7 +206,7 @@ Dos repeticiones nuevas por configuración, con el mismo equipo, los mismos ajus
 - **p50 y p95** son de las respuestas 200. En el escalón de 8 hay pocas, porque las demás fallaron.
 - **El escalón de 16** no se ejecutó en ninguna corrida: cada una se detiene en el primer escalón caído.
 
-**Archivos de origen:**
+**Archivos de origen**, en [docs/evidence/load-balancing/](evidence/load-balancing/), con su hash SHA-256 en `SHA256SUMS`:
 
 - **4 nov:** `load-2026-11-04T18-43-34-563Z-monolito.json` y `load-2026-11-04T18-47-15-289Z-balanceado.json`
 - **5 nov (rep. 2):** `load-2026-11-06T03-00-18-944Z-rep2-monolito.json` y `load-2026-11-06T03-03-06-605Z-rep2-balanceado.json`
