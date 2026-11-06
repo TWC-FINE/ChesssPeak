@@ -49,7 +49,7 @@ pnpm install
 - **Dónde vive:** dentro de `<mf-voice-input>` o como cuarto microfrontend. Si necesita tipos nuevos en `shared/`, requiere la aprobación de los dos.
 - **Calendario:** la versión mínima se estima en 2 o 3 días. Iría después del hito del vie 13, en el fin de semana 14–15 y el lun 16. Si el núcleo se retrasa, se recorta y queda la carga de prueba.
 
-**Qué esperar.** Con las tasas medidas el 4 de noviembre (0,37 y 0,45 respuestas por segundo), balancear no crea CPU: el total para 80 medias jugadas pasaría de unos 216 s a unos 178 s. Es una estimación, porque el dictado real aún no se ha medido. El argumento más fuerte es la tolerancia a fallos: si un worker cae a mitad del dictado, los demás siguen.
+**Qué esperar.** Con las tasas medidas el 4 de noviembre (0,37 y 0,45 respuestas por segundo), balancear no crea CPU: el total para 80 medias jugadas pasaría de unos 216 s a unos 178 s. Es una estimación, porque el dictado real aún no se ha medido. El argumento más fuerte es la tolerancia a fallos: si un worker cae a mitad del dictado, los demás siguen. Esta estimación usa las tasas del 4 de noviembre, anteriores a las repeticiones del 5, y no se recalculó.
 
 **Descartadas:** modo club con varios tableros (el micrófono no funciona por HTTP en la red local), Whisper central en la nube (sin CPU en el plan gratuito y se pierde el módulo local), balancear NestJS (exige Redis y sesiones pegajosas) y Stockfish (no pasó su prueba).
 

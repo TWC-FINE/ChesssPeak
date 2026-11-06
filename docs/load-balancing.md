@@ -1,6 +1,6 @@
 # Balanceo de carga de la transcripción de voz en ChessSpeak
 
-> **Origen de las cifras:** dos corridas únicas del 4 de noviembre de 2026 (`load-2026-11-04T18-43-34-563Z-monolito.json` y `load-2026-11-04T18-47-15-289Z-balanceado.json`, en `local-agent/results/`, carpeta que no está en git), ejecutadas en el equipo de desarrollo. Ninguna cifra está estimada ni redondeada a favor de una configuración. Con una sola corrida por configuración no hay medida de la variación entre repeticiones: las diferencias pequeñas deben leerse con cautela.
+> **Origen de las cifras:** una corrida por configuración el 4 de noviembre de 2026 y dos más el 5 de noviembre, todas en el equipo de desarrollo y con los mismos ajustes. Las del 5 se hicieron por la noche, hora local (UTC−5), así que sus archivos llevan la fecha UTC del 6. Ninguna cifra está estimada ni redondeada a favor de una configuración. **Las secciones 6.1 a 6.4 describen solo el 4 de noviembre; la 6.5 añade las repeticiones y corrige la conclusión.**
 
 ## Resumen
 
@@ -15,12 +15,14 @@ Comparamos dos configuraciones con los mismos 12 hilos de CPU y la misma cola:
 
 Las subimos de carga por escalones hasta su punto de quiebre (más de un 5 % de respuestas fallidas).
 
-**Qué encontramos** (detalle en la sección 6):
+**Qué encontramos** (detalle en la sección 6.5):
 
-- Las dos configuraciones **se quiebran en el mismo escalón**: aguantan 4 peticiones simultáneas y fallan con 8. El límite lo pone el tiempo máximo de espera de 15 s y el ritmo al que la CPU produce transcripciones, no la forma del agente.
-- Balancear **no multiplica el rendimiento**: con la misma CPU, el balanceado llegó a 0,45 respuestas correctas por segundo frente a 0,37 del monolito (≈ 24 % más), no a tres veces más.
-- La latencia mejora con concurrencia moderada (mediana 38 % menor con 4 simultáneas), pero **empeora con una sola petición** (52 % mayor) y el p95 con 4 simultáneas fue 15 % peor.
-- La tolerancia a fallos no se mide en estas corridas: se probó aparte y funciona (sección 7).
+- **El balanceo es un requisito del curso, no una mejora demostrada. No se demostró mejora de rendimiento.** Con 4 simultáneas, el balanceado rindió un 4–5 % más el 5 de noviembre. El ≈ 24 % medido el 4 de noviembre no se repitió, y la diferencia entre esos dos días, en el mismo equipo, es mayor que ese efecto.
+- **El beneficio medido es la tolerancia a fallos** (sección 7): si cae un worker, el servicio sigue. La velocidad no lo es.
+- **Con 4 simultáneas**, la mediana mejora un 27–28 %, pero el p95 empeora un 40–42 %.
+- **Con 1 petición**, que es el caso real de una partida, el balanceado es un 57–60 % más lento.
+- **Con 2 simultáneas** ya no mejora la mediana: el 4 de noviembre fue un 12 % mejor y el 5 de noviembre un 5–6 % peor.
+- **Ambas configuraciones fallan con 8 simultáneas** por tiempo de espera (504) en las tres corridas. Lo que limita es el tiempo máximo de 15 s y el ritmo de la CPU, no la forma del agente.
 
 ## 1. Qué se balancea y por qué
 
@@ -106,7 +108,7 @@ Cada corrida deja su reporte en `local-agent/results/load-<fecha>-<etiqueta>.jso
 
 ## 6. Resultados
 
-Datos del bloque `steps` de cada JSON, con 20 peticiones por escalón.
+Las secciones 6.1 a 6.4 son del **4 de noviembre**: se conservan como registro, y su conclusión está corregida en la 6.5. Datos del bloque `steps` de cada JSON, con 20 peticiones por escalón.
 
 - **200/s:** respuestas correctas por segundo de pared del escalón. **Resp./s:** todas las respuestas, correctas o no.
 - **p50 y p95** son de las respuestas 200: las que fallan por tiempo esperan 15 s y no dicen cuánto tarda una transcripción.
@@ -169,7 +171,7 @@ Un porcentaje negativo en latencia es mejor para el balanceado; en 200/s, positi
 **Rendimiento: no se multiplica, y la CPU es el límite.**
 
 - En el monolito el rendimiento es plano desde la primera petición: 0,36, 0,37 y 0,37 respuestas por segundo con 1, 2 y 4 simultáneas. Un solo `whisper-server` con 12 hilos ya ocupa la CPU, así que más concurrencia solo alarga la espera. El p50 con 2 simultáneas es el doble que con 1 (5,46 s frente a 2,76 s) y con 4 es casi cuatro veces mayor: las peticiones se atienden una tras otra.
-- El balanceado llega a 0,45 respuestas correctas por segundo con 4 simultáneas. Es ≈ 24 % más que el monolito, **muy lejos de multiplicarse por tres**. Los tres workers comparten los mismos 12 hilos.
+- El 4 de noviembre, el balanceado llegó a 0,45 respuestas correctas por segundo con 4 simultáneas, ≈ 24 % más que el monolito. **Esa diferencia no se repitió: ver la sección 6.5.** Los tres workers comparten los mismos 12 hilos.
 - Hay un indicio de por qué mejora algo. Una petición sola tarda 2,76 s con 12 hilos y 4,20 s con 4 hilos: triplicar los hilos acelera una transcripción solo 1,5 veces. Esa escala sublineal sugiere que repartir los hilos entre varios procesos se aprovecha algo mejor que dárselos todos a uno. Es una explicación plausible; no se probó de forma aislada.
 
 **Latencia bajo concurrencia: mejora la mediana, no la cola.**
@@ -179,11 +181,50 @@ Un porcentaje negativo en latencia es mejor para el balanceado; en 200/s, positi
 - Con **4 simultáneas** el p95 es 15 % peor (12,98 s frente a 11,27 s). Hay 4 peticiones para 3 workers, así que una espera a que termine otra y luego se atiende ella: el tiempo de espera más un servicio completo. La media mejora, pero la petición con mala suerte tarda más.
 - El reparto es casi uniforme con 4 simultáneas (6 / 7 / 7). Con 2 fue desigual (10 / 1 / 9): sobra siempre un worker, de modo que no afectó a la latencia; no se investigó por qué w2 quedó al margen.
 
-**Conclusión.**
+**Conclusión.** La que había aquí, basada en una sola corrida, sostenía ≈ 24 % más de rendimiento y ya no vale. La vigente está en la sección 6.5.
 
-1. En capacidad bruta no hay ganancia relevante: mismo punto de quiebre y ≈ 24 % más de rendimiento, a costa de unos 2 GB de RAM adicionales y de una latencia mayor con poca carga.
-2. La mejora de latencia es real pero parcial: la mediana baja con concurrencia moderada, el p95 no.
-3. La ventaja principal del balanceado es la **tolerancia a fallos**: si el único worker del monolito muere, el servicio se detiene hasta que se relance; con varios, el servicio continúa. Eso no lo miden estas corridas, que no provocan caídas, sino las pruebas de la sección 7.
+### 6.5 Repeticiones del 5 de noviembre y conclusión vigente
+
+Dos repeticiones nuevas por configuración, con el mismo equipo, los mismos ajustes y el mismo clip que el 4 de noviembre. El monolito y el balanceado se comparan dentro de cada fila.
+
+| Fecha | Simultáneas | p50 monolito | p50 balanceado | p95 monolito | p95 balanceado | Correctas/s monolito | Correctas/s balanceado |
+|---|---|---|---|---|---|---|---|
+| 4 nov | 1 | 2,76 s | 4,20 s | 2,86 s | 4,93 s | 0,36 | 0,24 |
+| 4 nov | 2 | 5,46 s | 4,78 s | 5,62 s | 4,94 s | 0,37 | 0,42 |
+| 4 nov | 4 | 10,90 s | 6,75 s | 11,27 s | 12,98 s | 0,37 | 0,45 |
+| 4 nov | 8 | 7,94 s | 12,99 s | 13,33 s | 13,42 s | 0,12 (5 de 20) | 0,19 (8 de 20) |
+| 5 nov (rep. 2) | 1 | 1,96 s | 3,08 s | 2,10 s | 3,14 s | 0,50 | 0,32 |
+| 5 nov (rep. 2) | 2 | 3,88 s | 4,08 s | 4,21 s | 4,17 s | 0,50 | 0,49 |
+| 5 nov (rep. 2) | 4 | 7,84 s | 5,76 s | 8,07 s | 11,48 s | 0,51 | 0,53 |
+| 5 nov (rep. 2) | 8 | 7,74 s | 12,34 s | 13,56 s | 14,29 s | 0,19 (7 de 20) | 0,26 (10 de 20) |
+| 5 nov (rep. 3) | 1 | 1,95 s | 3,12 s | 1,99 s | 3,27 s | 0,51 | 0,32 |
+| 5 nov (rep. 3) | 2 | 3,87 s | 4,11 s | 3,90 s | 4,35 s | 0,52 | 0,48 |
+| 5 nov (rep. 3) | 4 | 7,74 s | 5,54 s | 7,77 s | 10,89 s | 0,52 | 0,54 |
+| 5 nov (rep. 3) | 8 | 7,75 s | 11,07 s | 13,56 s | 14,65 s | 0,19 (7 de 20) | 0,30 (11 de 20) |
+
+- **Correctas/s** son las respuestas 200 entre la duración del escalón.
+- **p50 y p95** son de las respuestas 200. En el escalón de 8 hay pocas, porque las demás fallaron.
+- **El escalón de 16** no se ejecutó en ninguna corrida: cada una se detiene en el primer escalón caído.
+
+**Archivos de origen:**
+
+- **4 nov:** `load-2026-11-04T18-43-34-563Z-monolito.json` y `load-2026-11-04T18-47-15-289Z-balanceado.json`
+- **5 nov (rep. 2):** `load-2026-11-06T03-00-18-944Z-rep2-monolito.json` y `load-2026-11-06T03-03-06-605Z-rep2-balanceado.json`
+- **5 nov (rep. 3):** `load-2026-11-06T03-06-18-722Z-rep3-monolito.json` y `load-2026-11-06T03-09-03-404Z-rep3-balanceado.json`
+
+**RAM libre al empezar**, según esos archivos (monolito y balanceado), con el agente ya cargado: 4 nov: 4188 y 3367 MB · 5 nov (rep. 2): 4587 y 6676 MB · 5 nov (rep. 3): 7799 y 6699 MB.
+
+**Conclusión vigente.**
+
+1. **No se demostró mejora de rendimiento.** Con 4 simultáneas, el balanceado rindió un 4–5 % más el 5 de noviembre, no el ≈ 24 % del 4 de noviembre. Entre esos dos días, en el mismo equipo y con la misma configuración, las correctas por segundo subieron un 39–41 % en el monolito y un 16–19 % en el balanceado. Esa diferencia es mayor que el efecto que se quería medir.
+2. **Lo que se observó, en conjunto:**
+   - Con 4 simultáneas, la mediana mejora un 27–28 %, pero el p95 empeora un 40–42 %.
+   - Con 1 petición, el balanceado es un 57–60 % más lento. **Ese es el caso real de una partida.**
+   - Con 2 simultáneas ya no mejora la mediana: el 4 de noviembre fue un 12 % mejor y el 5 de noviembre un 5–6 % peor.
+   - Ambas configuraciones fallan con 8 simultáneas por tiempo de espera (504) y aguantan con 4, en las tres corridas.
+3. **El balanceo se presenta como un requisito del curso.** Su beneficio medido es la tolerancia a fallos (sección 7), no la velocidad. A cambio ocupa unos 2 GB más de RAM y es más lento con una sola petición, y por eso `LB_WORKERS` vale 1 por defecto.
+
+Las limitaciones de estas cifras están en la sección 8.
 
 ## 7. Tolerancia a fallos
 
@@ -208,7 +249,9 @@ Pruebas funcionales en el mismo equipo de la sección 3, en sesiones aparte de l
 ## 8. Limitaciones
 
 - **El equipo no es necesariamente el de menores prestaciones.** El profesor pidió hacer la prueba en el peor equipo del grupo. Estas corridas se hicieron en el equipo de desarrollo (i5-12400F), y no se comparó con el del otro integrante. Si hay uno más débil, conviene repetirlas allí con los comandos de la sección 5: en una CPU con menos hilos el monolito se satura antes y la comparación puede cambiar.
-- **Una sola corrida por configuración.** No hay repeticiones, así que no se conoce la variación entre ellas. Las diferencias de unos pocos puntos porcentuales no son concluyentes; la de 24 % en rendimiento y la de 38 % en la mediana con 4 simultáneas conviene confirmarlas repitiendo.
+- **Pocas repeticiones.** Son 3 corridas por configuración, 2 de ellas nuevas, y en días distintos no dieron lo mismo. No alcanzan para estimar la variación real.
+- **Una sola máquina.** Todas las corridas son del mismo equipo.
+- **Causa de la diferencia entre días, sin investigar.** La RAM libre era mayor el 5 de noviembre, pero eso no prueba que sea la causa.
 - **Rejilla de escalones gruesa** (1, 2, 4, 8): el punto de quiebre exacto está entre 4 y 8 y no se pudo distinguir entre las dos configuraciones. El escalón de 16 no se ejecutó.
 - Todas las instancias comparten la misma CPU y la misma RAM. Es un balanceo entre procesos de una máquina, no entre máquinas.
 - Se mide un solo clip repetido. La latencia real varía con la duración de cada frase.
