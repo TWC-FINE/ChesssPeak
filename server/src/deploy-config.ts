@@ -2,6 +2,7 @@ type Env = Record<string, string | undefined>;
 
 const LOCAL_ORIGINS = ['http://127.0.0.1:5500', 'http://localhost:5500'];
 const DEFAULT_CONNECT_TIMEOUT_MS = 1000;
+const DEFAULT_GUEST_AUTH_LIMIT = 10;
 
 /** Origins allowed by CORS. A browser sends the origin without a trailing slash, so one pasted with it would never match. */
 export function corsOrigins(env: Env = process.env): string[] {
@@ -19,4 +20,10 @@ export function corsOrigins(env: Env = process.env): string[] {
 export function dbConnectTimeoutMs(env: Env = process.env): number {
   const value = Number(env.DB_CONNECT_TIMEOUT_MS);
   return Number.isFinite(value) && value > 0 ? value : DEFAULT_CONNECT_TIMEOUT_MS;
+}
+
+/** Requests per minute per IP allowed on POST /auth/guest. Anything but a whole number above 0 keeps the default. */
+export function guestAuthLimitPerMinute(env: Env = process.env): number {
+  const value = Number(env.GUEST_AUTH_LIMIT_PER_MINUTE);
+  return Number.isInteger(value) && value > 0 ? value : DEFAULT_GUEST_AUTH_LIMIT;
 }

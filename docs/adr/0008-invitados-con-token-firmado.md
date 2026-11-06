@@ -12,8 +12,8 @@ Quien juega entra sin registrarse (RF1), y el servidor debe decidir siempre la i
 1. **`POST /auth/guest` entrega un JWT firmado** con HS256 y una validez de 24 horas. Lleva `kind`, `name` y, en `sub`, un `guestId` generado por el servidor. No hay fila en `users`: el token es la identidad.
 2. **El cuerpo se valida con el esquema estricto de `shared/`,** el mismo que usan los clientes, así que un cliente no puede enviar su propia identidad.
 3. **`GuestTokenService.verify` solo acepta HS256 y una identidad de invitado válida.** Es lo que usarán el handshake del socket y `POST /games`.
-4. **El secreto no tiene valor de respaldo.** Debe tener al menos 32 caracteres y no contener el marcador de `.env.example`. Si no cumple, el servidor arranca igual, porque `/health` debe responder, registra un error y `/auth/guest` responde 503. Nunca firma con un secreto débil.
-5. **Límite de 10 peticiones por minuto y por IP** en `/auth/guest`, con `@nestjs/throttler` y solo en esa ruta. Las peticiones inválidas también cuentan.
+4. **El secreto no tiene valor por defecto.** `.env.example` solo lleva el nombre, vacío, y `pnpm env:init` genera uno aleatorio. Debe tener al menos 32 caracteres y no contener el antiguo marcador `change-me`. Si no cumple, el servidor arranca igual, porque `/health` debe responder, registra un error y `/auth/guest` responde 503. Nunca firma con un secreto débil.
+5. **Límite de peticiones por minuto y por IP** en `/auth/guest`, con `@nestjs/throttler` y solo en esa ruta. Se configura con `GUEST_AUTH_LIMIT_PER_MINUTE`, y vale 10 por defecto y ante cualquier valor inválido. Las peticiones inválidas también cuentan.
 6. **`trust proxy` vale 1,** para que el límite vea la IP real detrás del proxy de Render.
 
 ## Alternativas
@@ -30,4 +30,4 @@ Quien juega entra sin registrarse (RF1), y el servidor debe decidir siempre la i
 - (−) Un token no se puede revocar antes de que caduque. Solo se invalidan todos a la vez, cambiando el secreto.
 - (−) Quien pierde su token, por ejemplo al borrar los datos del navegador, pierde su asiento: entra como otro invitado.
 - (−) Una sesión que dure más de 24 horas necesita un token nuevo.
-- (−) **Sin verificar:** que `trust proxy = 1` sea el valor correcto en Render, porque aún no hay despliegue. Si no lo es, varios clientes podrían compartir el mismo límite. Hay que comprobarlo al desplegar.
+- (−) **Sin verificar:** que `trust proxy = 1` sea el valor correcto en Render. **Se prueba en cuanto haya despliegue en Render,** con el paso descrito en [docs/deploy.md](../deploy.md). Si no es correcto, varios clientes podrían compartir el mismo límite.

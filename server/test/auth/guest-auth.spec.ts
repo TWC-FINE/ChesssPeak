@@ -1,18 +1,22 @@
 import 'reflect-metadata';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { guestAuthResponseSchema, type GuestAuthResponse } from '@chessspeak/shared';
 import request from 'supertest';
-import { GUEST_AUTH_LIMIT } from '../../src/auth/auth.controller';
 import { AuthModule } from '../../src/auth/auth.module';
 import { GuestTokenService, guestTokenSecret } from '../../src/auth/guest-token.service';
 import { configureHttp } from '../../src/configure-http';
+import { guestAuthLimitPerMinute } from '../../src/deploy-config';
 
 const SECRET = 'a'.repeat(64);
 const jwt = new JwtService({});
 const originalSecret = process.env.GUEST_TOKEN_SECRET;
+const originalLimit = process.env.GUEST_AUTH_LIMIT_PER_MINUTE;
+const DEFAULT_LIMIT = 10;
 const apps: NestExpressApplication[] = [];
 
 async function appWith(secret: string | undefined): Promise<{ app: NestExpressApplication; tokens: GuestTokenService }> {
@@ -33,6 +37,8 @@ afterEach(async () => {
   await Promise.all(apps.splice(0).map((app) => app.close()));
   if (originalSecret === undefined) delete process.env.GUEST_TOKEN_SECRET;
   else process.env.GUEST_TOKEN_SECRET = originalSecret;
+  if (originalLimit === undefined) delete process.env.GUEST_AUTH_LIMIT_PER_MINUTE;
+  else process.env.GUEST_AUTH_LIMIT_PER_MINUTE = originalLimit;
   jest.restoreAllMocks();
 });
 
@@ -78,18 +84,36 @@ describe('POST /auth/guest', () => {
 });
 
 describe('throttling', () => {
-  it('answers 429 past the limit, and invalid bodies count too', async () => {
+  beforeEach(() => delete process.env.GUEST_AUTH_LIMIT_PER_MINUTE);
+
+  it('answers 429 past the default of 10, and invalid bodies count too', async () => {
     const { app } = await appWith(SECRET);
-    for (let i = 0; i < GUEST_AUTH_LIMIT.limit - 1; i++) await signIn(app).expect(201);
+    for (let i = 0; i < DEFAULT_LIMIT - 1; i++) await signIn(app).expect(201);
     await signIn(app, {}).expect(400);
     await signIn(app).expect(429);
   });
 
   it('counts each client behind the proxy separately', async () => {
     const { app } = await appWith(SECRET);
-    for (let i = 0; i < GUEST_AUTH_LIMIT.limit; i++) await signIn(app).expect(201);
+    for (let i = 0; i < DEFAULT_LIMIT; i++) await signIn(app).expect(201);
     await signIn(app).expect(429);
     await signIn(app, { displayName: 'Bea' }, '203.0.113.2').expect(201);
+  });
+
+  it('takes the limit from GUEST_AUTH_LIMIT_PER_MINUTE', async () => {
+    process.env.GUEST_AUTH_LIMIT_PER_MINUTE = '2';
+    const { app } = await appWith(SECRET);
+    await signIn(app).expect(201);
+    await signIn(app).expect(201);
+    await signIn(app).expect(429);
+  });
+
+  it.each([[undefined], [''], ['0'], ['-1'], ['1.5'], ['many']])('keeps the default of 10 for %p', (value) => {
+    expect(guestAuthLimitPerMinute({ GUEST_AUTH_LIMIT_PER_MINUTE: value })).toBe(DEFAULT_LIMIT);
+  });
+
+  it('reads a whole number above 0', () => {
+    expect(guestAuthLimitPerMinute({ GUEST_AUTH_LIMIT_PER_MINUTE: '25' })).toBe(25);
   });
 });
 
@@ -139,11 +163,16 @@ describe('verify', () => {
 });
 
 describe('the signing secret', () => {
+  it('has no value in .env.example', () => {
+    const example = readFileSync(join(__dirname, '../../../.env.example'), 'utf8');
+    expect(example).toMatch(/^GUEST_TOKEN_SECRET=$/m);
+  });
+
   it.each([
     ['missing', undefined],
     ['empty', ''],
     ['too short', 'x'.repeat(31)],
-    ['the placeholder of .env.example', 'change-me-secret'],
+    ['the old placeholder', 'change-me-secret'],
     ['a long value with the placeholder', `change-me-${'x'.repeat(40)}`],
   ])('is refused when it is %s', (_case, value) => {
     expect(guestTokenSecret({ GUEST_TOKEN_SECRET: value })).toBeUndefined();
