@@ -4,6 +4,7 @@ import { parseUci } from 'chessops/util';
 
 /**
  * The FEN after each move, from the start. game:state does not carry them, and cs:move-applied needs one per move.
+ * This exists only because of that gap in the contract, so it may go away when the contract is reviewed.
  * Stops at a move that cannot be played: the server already validated them, so that would mean damaged data.
  */
 export function fensAfter(moves: ReadonlyArray<{ uci: string }>): string[] {

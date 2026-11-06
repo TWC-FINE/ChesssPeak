@@ -190,6 +190,8 @@ export class MfGame extends LitElement {
     this.state = state;
     this.lastUci = state.moves.at(-1)?.uci;
     this.error = '';
+    // CONTRACT: the FEN of each move is recalculated here because game:state does not carry it, and cs:move-applied
+    // needs it. This may change with the contract review: if game:state starts carrying it, drop fensAfter.
     const fens = fensAfter(state.moves);
     state.moves.forEach((move, index) => {
       const fen = fens[index];
