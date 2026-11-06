@@ -80,9 +80,9 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pnpm build:web`; para integración, `pnpm env:init`, `docker compose up -d` y `pnpm test:integration`; para el smoke, `pnpm smoke:web` (con `CHROME_PATH` si hace falta).
 
 ## Qué sigue
-Calendario completo en [PLAN.md](../PLAN.md), sección 9. No tiene colchón.
-- **Hasta el vie 6, cierre de la Fase 0:** crear las cuentas y desplegar ([deploy.md](deploy.md)), y auth de invitados. Hecho: monorepo, esqueletos, CI, copia de los WAV, borrador del contrato (PR #3) y `GameRoom` (PR #10). Resolver con el profesor los detalles de la demo y el alcance del balanceo.
+Calendario completo en [PLAN.md](../PLAN.md), sección 9. No tiene colchón. **Tareas, preguntas para el profesor, dominio y propuesta para el balanceo: [proximos-pasos.md](proximos-pasos.md).**
+- **Hasta el vie 6:** auth de invitados. El despliegue espera a lo que sugiera el profesor. Hecho: monorepo, esqueletos, CI, copia de los WAV, borrador del contrato (PR #3) y `GameRoom` (PR #10). Resolver con el profesor los detalles de la demo y el alcance del balanceo.
 - **Lun 9:** puesta al día, **firma del contrato v0** y fusión de los PR #3 y #10, y se deciden **los roles A (servidor) y B (shell y microfrontends)** según la comodidad de cada quien con NestJS o con el front y Lit, y el **responsable del lote del parser**.
-- **Mié 11, hito:** dos invitados juegan escribiendo, con el backend en la nube. **Vie 13, hito:** partida completa por voz con Web Speech y reconexión. Juntos: 40 frases de validación (20 cada uno).
+- **Mié 11, hito:** dos invitados juegan escribiendo, con el backend desplegado o, si aún no hay despliegue, en local. **Vie 13, hito:** partida completa por voz con Web Speech y reconexión. Juntos: 40 frases de validación (20 cada uno).
 - **Lun 16:** Whisper desde el navegador y **congelación de funcionalidades**. **Mar 17:** validación con otra voz, frases nuevas y la otra laptop, y primer ensayo. **Mié 18:** segundo ensayo, video de respaldo y tag `v1.0`. **Jue 19: entrega y demo.**
 - Tareas del spike por área (agente local, producto, CI y entrega): [spike-notes.md](spike-notes.md), sección 7.

@@ -233,9 +233,9 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 | Fecha | Tareas |
 |---|---|
 | Jue 5 | ✅ `GameRoom` (PR #10) y borrador del contrato (PR #3), abiertos y con CI en verde. Replanificación con la fecha nueva |
-| Vie 6 | **Crear cuentas y desplegar** Neon, Atlas y Render ([docs/deploy.md](docs/deploy.md)); Vercel solo si no quita tiempo. **Auth de invitados + throttler**, sobre `feat/game-room`. ADR 9 (licencia) |
+| Vie 6 | **Auth de invitados + throttler**, sobre `feat/game-room`, con las bases locales. ADR 9 (licencia). **El despliegue queda en espera** de lo que sugiera el profesor; los proveedores de este plan son provisionales (ver [docs/proximos-pasos.md](docs/proximos-pasos.md)) |
 
-**Hito vie 6:** `health` responde desde Render con las dos bases en `up`; auth de invitados en un PR abierto.
+**Hito vie 6:** auth de invitados en un PR abierto. El despliegue tiene que hacerse antes del ensayo del mar 17.
 
 ### 9.4 Desde el lun 9 nov · Dos personas
 **Roles A y B: se deciden el lun 9**, con el compañero, según su comodidad con NestJS o con el front y Lit. Hasta entonces se llaman así:
@@ -255,7 +255,7 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 | Jue 12 – Vie 13 | Fin de partida (mate, ahogado, tablas, abandono), reconexión y rehidratación, `voice-metrics` (ingesta de `voice_attempts` con `player` puesto por el servidor) | `<mf-voice-input>` (pulsar para hablar) con Web Speech y retardo de 400 ms, confirmación explícita con flecha y sí/no/cancelar, `<mf-history>`, eventos `cs:` de punta a punta, telemetría vía shell |
 | Toda la semana | 20 frases de validación | 20 frases de validación |
 
-**Hito mié 11:** dos invitados juegan escribiendo jugadas, con el backend en Render. **Es el punto de control más importante del plan** (ver 11.1).
+**Hito mié 11:** dos invitados juegan escribiendo jugadas, con el backend desplegado o, si aún no hay despliegue, en local. **Es el punto de control más importante del plan** (ver 11.1).
 
 **Hito vie 13:** partida completa por voz con Web Speech; la reconexión funciona; 40 frases de validación escritas.
 
@@ -328,10 +328,10 @@ El proyecto se presenta en vivo, con nosotros delante, el jue 19. Los riesgos pr
 - ✅ **Fecha de entrega: jueves 19 de noviembre de 2026.**
 - ✅ **La demo es en vivo.**
 
-**Pendientes para el profesor:**
-1. **Detalles de la demo:** ¿es el mismo jueves 19?, ¿a qué hora y cuánto dura?, ¿usamos nuestras laptops?, ¿hay internet fiable en la sala?, ¿querrá probarlo él mismo o solo verlo?
-2. **Balanceo:** ¿basta con integrarlo en Whisper con carga de prueba, o exige carga natural de usuarios reales? ¿Acepta procesos en la misma máquina como instancias? ¿Debe poder ejecutarlo él mismo, o bastan el dashboard y las mediciones?
-3. ¿Hay que poder abrir el proyecto con Live Server sin compilar? (Menos urgente: `web/dist` se commitea en la entrega, y con eso ya funciona.)
+- ✅ **La documentación de arquitectura se hace con C4.**
+- ✅ **El dominio se obtiene con DigitalPlat FreeDomain.**
+
+**Pendientes para el profesor:** la lista completa, con la propuesta del modo de dictado para el balanceo (sin aprobar), está en [docs/proximos-pasos.md](docs/proximos-pasos.md).
 
 **Para el equipo (se deciden el lun 9):**
 - Roles A y B: según la comodidad de cada persona con NestJS o con el front y Lit.
