@@ -296,4 +296,5 @@ El proyecto se presenta en vivo, en la fecha de entrega. Los riesgos principales
 **Sin definir:**
 - Hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
 - Quién aporta la otra voz para la validación. Sin otra voz, se valida con la del responsable del repo y se declara en `docs/quality.md`.
-- De dónde sale la segunda laptop de los ensayos y cuál es la máquina limpia para probar el README.
+- De dónde sale la segunda laptop, para medir la latencia de Whisper y para los ensayos.
+- Cuál es la máquina limpia para probar el README. Windows Sandbox es una opción sin probar; sus límites están en `docs/HANDOFF.md`.

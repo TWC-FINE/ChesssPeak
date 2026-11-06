@@ -18,7 +18,7 @@
 | `feat/game-gateway` | `90ab665` | `90ab665` | PR #13; incluye el puerto `MovePersistence` |
 | `feat/web-game` | `cbe8abb` | `cbe8abb` | PR #14 |
 | `feat/move-persistence` | `813b8a3` | No existe | Solo local; sus commits ya están dentro de #13 |
-| `docs/delivery-nov-19` | `3402985` más el commit de esta nota | `3402985` antes de subir esta nota | **Contiene supuestos por revisar (ADR 11) y se sube como trabajo en curso, sin PR** |
+| `docs/delivery-nov-19` | `2aba28e` más el commit de esta nota | `2aba28e` antes de subir esta nota | **Contiene supuestos por revisar (ADR 11) y se sube como trabajo en curso, sin PR** |
 
 Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene revisión.
 
@@ -131,7 +131,14 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 - **Si se recorta el pool de `move-workers`:** el balanceo queda solo en Whisper, riesgo asumido. Si el balanceo es obligatorio, el pool no es recortable.
 - **Si se recorta el adaptador de Whisper:** queda sin cumplir el criterio 2 de `SPEC.md`, se pone en duda R2 y suma 1,0 día neto frente a recortar el pool (estimación).
 
-**Sin definir:** quién aporta la otra voz, la segunda laptop de los ensayos, la máquina limpia del README (Windows Sandbox es una opción sin probar), hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
+**Sin definir:** quién aporta la otra voz, de dónde sale la segunda laptop, cuál es la máquina limpia del README, hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
+
+**Windows Sandbox para la máquina limpia: opción sin probar, sin ejecutar.** Límites previstos, todavía sin comprobar:
+- Docker probablemente no corre dentro, así que la sección de bases locales del README quedaría sin probar y la prueba iría contra el backend desplegado.
+- Comparte el hardware del equipo que lo ejecuta: valida la instalación, pero no sirve para medir latencia.
+- Al cerrarlo se borra todo: lo que falle se anota fuera, y Whisper habría que descargarlo en cada intento.
+
+**La segunda laptop y la máquina limpia son cosas distintas.** La máquina limpia prueba el README. La segunda laptop sigue pendiente aparte, para medir la latencia de Whisper y para los ensayos.
 
 ### Plan de despliegue aprobado (Paso C), sin implementar
 **Es solo un plan: nada de esto está hecho.** Se hace después de fusionar la cadena, con ramas desde `main`, un PR por tema y *squash*. Las cuentas y credenciales las pone el responsable del repo en cada panel, nunca en el repo.
@@ -201,6 +208,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
+| **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo lleva como autor `24d4321` (el *squash* de #15) y los 33 commits de la cadena lo llevarán al fusionarse. Quitarlo exigiría `--force`. Los commits nuevos usan la dirección `noreply` de GitHub, y las fusiones, `--author-email` |
 | **Documentos desactualizados** | **Abierto.** `README.md`, `ARCHITECTURE.md` y `docs/CONTEXT.md` siguen describiendo el estado del 5 de noviembre |
 | **Nombre del anexo en la historia pública** | **Abierto; quitarlo exigiría `--force`.** El nombre del archivo del anexo de la transcripción aparece en un enlace antiguo de 4 commits de `docs/delivery-nov-19`: `8246b8c`, `c703ae7`, `e6cd3c7` y `c62712f`. El archivo nunca se subió y la punta de la rama no lo nombra |
 | **Reflog pendiente de limpiar** | **Abierto; espera el OK del responsable del repo.** El anexo y la historia anterior a parafrasear las citas siguen en el `.git` local de este equipo, fuera de cualquier rama. Esa carpeta `.git` no debe copiarse a otro equipo antes de limpiarlo |
