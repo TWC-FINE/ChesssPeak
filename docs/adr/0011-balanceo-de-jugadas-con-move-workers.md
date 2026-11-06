@@ -1,6 +1,6 @@
 # ADR 11 — Balanceo del guardado de jugadas con un pool de `move-workers`
 
-- **Estado:** Aceptado (5 de noviembre de 2026), **sobre dos supuestos débiles sin confirmar** (a continuación). Aún no hay código.
+- **Estado:** Aceptado (5 de noviembre de 2026), **sobre dos supuestos débiles sin confirmar** (a continuación). El puerto `MovePersistence` existe en el PR #13; el pool de `move-workers` no existe todavía.
 - **Relacionado:** [ADR 1](0001-nestjs-typescript-contratos-en-shared.md) · [ADR 3](0003-postgres-y-mongodb.md) · [ADR 10](0010-balanceo-de-carga-en-local-agent.md) · [ARCHITECTURE.md](../../ARCHITECTURE.md) §2.1
 
 ## Supuestos débiles: leer primero
@@ -128,7 +128,7 @@ Sale del código actual. **Los tiempos todavía no se han medido.**
 - (−) **El pool no hace el sistema más fiable que escribir directo.** La tolerancia a fallos que se demuestra es ante la caída de sus propios workers, que la escritura directa no necesita. Mongo y NestJS siguen siendo puntos únicos de fallo. Este diseño existe para cumplir el requisito del curso, y debe presentarse así.
 - (−) No cumple por sí solo «un poquito pesadas». Se presenta junto con Whisper y diciendo esto expresamente.
 - (−) Si NestJS se reinicia, se pierden las escrituras pendientes, igual que con el write-behind actual.
-- (−) Hay más procesos que arrancar, vigilar y documentar, y código duplicado respecto a `local-agent`. No se ha comprobado que quepan en el hosting, que sigue pendiente de la sugerencia del profesor.
+- (−) Hay más procesos que arrancar, vigilar y documentar, y código duplicado respecto a `local-agent`. No se ha comprobado que quepan en el hosting.
 - (−) Toda carga de la prueba comparativa será **sintética** (muchas partidas simuladas), porque una partida real genera muy pocas escrituras.
 
 ## Alcance y calendario

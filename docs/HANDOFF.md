@@ -1,6 +1,6 @@
 # ChessSpeak: estado para el relevo
 
-**Estado a 2026-11-06, 00:20 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
+**Estado a 2026-11-06, 05:14 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
 
 **En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Casi todo eso está en 6 PR apilados sin revisar, así que `main` todavía no lo tiene. Faltan la voz en el producto, el despliegue, la validación y los ensayos. La entrega sigue sin fecha confirmada.
 
@@ -16,7 +16,7 @@
 | `feat/game-gateway` | `90ab665` | `90ab665` | PR #13; incluye el puerto `MovePersistence` |
 | `feat/web-game` | `cbe8abb` | `cbe8abb` | PR #14 |
 | `feat/move-persistence` | `813b8a3` | No existe | Solo local; sus commits ya están dentro de #13 |
-| `docs/delivery-nov-19` | `3b51a11` más los commits de este archivo | `d728be5` | **No se sube todavía:** tiene historia reescrita y supuestos por revisar |
+| `docs/delivery-nov-19` | `d30d5d6` más el commit de este archivo | `d728be5` antes de subir | **Contiene supuestos por revisar (ADR 11) y se sube como trabajo en curso, sin PR** |
 
 Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene revisión.
 
@@ -31,7 +31,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | **Sockets** | **Hecho y verificado, solo en PR** | #13 y #14: integración con bases reales (`game-flow.int-spec.ts`) y `pnpm e2e:web`, 22 de 22 en Edge. Solo en local, sin nube |
 | **Micrófono** | **No empezado en el producto** | Solo existe el arnés del spike (`spike/web-speech`). La rama `feat/web-game` no usa `SpeechRecognition`, `getUserMedia` ni `MediaRecorder` |
 | **Dos bases de datos** | **Parcial.** Partidas y jugadas: hecho y verificado, solo en PR y en local. `voice_attempts`: no empezado | Esquemas en `main` (#4). Escrituras en #12 y #13, con integración real. El módulo `voice-metrics` está vacío. Neon y Atlas: no existen |
-| **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: la API de GitHub no detecta la licencia, el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
+| **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
 | **Microfrontends** | **Parcial.** Los 3 existen. `<mf-game>` y la caja de texto: hecho y verificado, solo en PR. `<mf-history>`: marcador de posición | Base en `main` (#2). Real en #14. `smoke:web` y `e2e:web` |
 | **Balanceo** | **Whisper: hecho y verificado, cumplimiento sin confirmar. `move-workers`: no empezado** | Pool y dashboard en `main` (#6). La evidencia de carga y el ensayo con un worker muerto están solo en `docs/delivery-nov-19`. ADR 10 revisado y ADR 11 solo en esa rama. Del pool solo existe el puerto |
 | **Dominio** | **No empezado.** Riesgo asumido | `chessspeak.dpdns.org` no resolvió con `nslookup` (`Server failed`). El mínimo acordado es la web en Vercel, que tampoco está publicada |
@@ -85,7 +85,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | 20 | Registrar el dominio, si sobra tiempo | Responsable del repo |
 | 21 | Borrar las 2 partidas de prueba de la base local (comandos en `proximos-pasos.md`) | Responsable del repo |
 
-**Antes de cualquier medición, hay que apagar Docker y registrar su estado.** Claude no empieza una medición sin avisar. **Ahora mismo Docker está encendido.**
+**Antes de cualquier medición, hay que apagar Docker y registrar su estado.** Claude no empieza una medición sin avisar. **Al actualizar este documento, Docker no respondía y parecía apagado: hay que comprobarlo antes de medir.**
 
 ## 4. Avance estimado
 
@@ -146,7 +146,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Abierto.** `main` no tiene protección: que nadie fusione sin aprobación depende solo de la convención |
-| **Documentos desactualizados** | **Abierto.** La lista de tareas de `proximos-pasos.md` no refleja lo hecho, y el ADR 11 dice «aún no hay código» y que el hosting espera una sugerencia del profesor |
+| **Documentos desactualizados** | **Abierto.** La lista de tareas de `proximos-pasos.md` no refleja lo hecho |
 
 ## 6. Qué no se pudo verificar
 
@@ -164,4 +164,4 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 - **Pasos manuales de `web/README.md`** tal como están escritos.
 - **Equipo más débil:** no se sabe cuál es, ni la situación de la otra laptop.
 - **Disponibilidad del compañero** y si el profesor aceptará los supuestos.
-- **Copia de respaldo de `docs/delivery-nov-19`:** no se comprobó, y una copia anterior no incluiría los últimos commits.
+- **Copia de respaldo de `docs/delivery-nov-19`:** hay un *bundle* local, fuera del repo, con el estado anterior a parafrasear las citas. Solo se comprobó con `git bundle verify`.
