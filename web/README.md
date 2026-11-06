@@ -41,7 +41,9 @@ Para ser dos jugadores, abre dos pestañas: cada una tiene su propia sesión.
 
 ## Reglas que conviene no romper
 
-- **Confirmación explícita (RF8):** una jugada se propone con `cs:move-candidate` y solo se envía tras `cs:move-confirmed`. La voz debe usar este mismo flujo.
+- **Confirmación obligatoria con texto y con voz (RF8):** una jugada se propone con `cs:move-candidate` y solo se envía tras `cs:move-confirmed`.
+  - **Texto:** escribir, ver la flecha, confirmar.
+  - **Voz:** hablar, ver la flecha, confirmar.
 - **Mínimo privilegio:** solo `<mf-game>` recibe el socket. Los demás hablan con eventos `cs:*`.
 - **Importa `shared/` en el shell solo como tipos.** Un valor en tiempo de ejecución arrastra todo `zod`: `shell.js` pasó de 48 KB a 502 KB.
 - **El socket llega en el contexto solo cuando está conectado.** Cada objeto de contexto nuevo hace que `<mf-game>` pida el estado, y así se recupera una reconexión.
