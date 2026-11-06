@@ -12,6 +12,7 @@ Archivos originales de las corridas citadas en [docs/load-balancing.md](../../lo
 
 - **Fechas:** los nombres usan UTC. Las corridas con fecha 6 de noviembre en el nombre se hicieron la noche del 5, hora local (UTC−5).
 - **RAM libre:** el log la mide antes de arrancar el agente, y los JSON con el agente ya cargado. Por eso no coinciden.
+- **Único cambio en el log:** un final de línea CRLF pasó a LF, porque así lo guarda git en este repositorio.
 - **Sin evidencia aquí:** las pruebas de la primera tabla de la sección 7 no guardaron archivos.
 
 Para comprobar los archivos, desde esta carpeta: `sha256sum -c SHA256SUMS`.
