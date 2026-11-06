@@ -1,7 +1,7 @@
 # ChessSpeak — Plan del proyecto
 
 > Última actualización: jueves 5 de noviembre de 2026.
-> **Entrega y demo en vivo: jueves 19 de noviembre de 2026** (antes se suponía el vie 27 sin demo). Calendario en la sección 9.
+> **Entrega y demo en vivo: 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno).** Antes se suponía el vie 27 sin demo. Calendario en la sección 9.
 > Equipo: una persona sola hasta que se incorpore el compañero (hacia el **lun 9 de noviembre**). Desde entonces, dos personas con los roles A (servidor) y B (shell y microfrontends), que **se asignan el lun 9** según la comodidad de cada una con NestJS o con el front y Lit; el `local-agent` y la integración de voz, entre las dos. Hasta el 9, una sola persona cubre A y B.
 
 ## 1. Estado a 5 de noviembre de 2026
@@ -23,7 +23,7 @@ Proyecto final de Arquitectura de Software: web de ajedrez donde las jugadas se 
 Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/señalización), análisis con Stockfish, inglés.
 
 ## 3. Cómo se entrega: demo en vivo
-**La demo es en vivo** (5 de noviembre; reemplaza a la decisión anterior de “no hay demo en vivo”). Se supone que es el mismo **jueves 19** y que la presentamos los dos con nuestras laptops; ambos supuestos están por confirmar (ver 12). Ya no hay que preparar el proyecto para alguien que lo abra solo: hay que preparar **una presentación que no falle**.
+**La demo es en vivo** (5 de noviembre; reemplaza a la decisión anterior de “no hay demo en vivo”). Se supone que es el mismo día de la entrega y que la presentamos los dos con nuestras laptops; son supuestos (ver 12). Ya no hay que preparar el proyecto para alguien que lo abra solo: hay que preparar **una presentación que no falle**.
 
 - **Montaje de la demo:** dos laptops con **Edge** (el navegador medido en el spike), diademas y la web en local con `pnpm serve:web` (`127.0.0.1:5500`), conectada al backend en Render. Servir en local evita el permiso de red local que puede bloquear a Whisper desde una página pública.
 - **Vercel deja de ser núcleo.** La demo no lo necesita. `vercel.json` ya existe, así que se despliega si no quita tiempo, y es lo primero que se recorta.
@@ -64,7 +64,7 @@ ChessSpeak/
   web/mf-game/            proyecto Vite (Lit, light DOM)
   web/mf-voice-input/     proyecto Vite
   web/mf-history/         proyecto Vite
-  web/dist/               salida única de `pnpm build:web` (se commitea solo en la entrega)
+  web/dist/               salida única de `pnpm build:web` (supuesto: se commitea en el commit de entrega, solo al congelar el código)
   local-agent/            @chessspeak/local-agent: Node + TS (parte de spike/whisper-local)
   scripts/                serve:web (servidor estático de Node, sin dependencias)
   spike/                  arnés del spike y benchmark de Whisper (existe)
@@ -211,7 +211,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 
 ## 9. Calendario (recalculado el jue 5 de nov para entregar el jue 19)
 
-La entrega se adelantó del vie 27 al **jue 19 de noviembre**: de hoy hasta el último día de trabajo pasamos de 16 a **10 días**. El plan se sostiene por tres cosas: el `local-agent` y `GameRoom` ya están escritos, la validación se reduce a medio día y los opcionales salen del plan.
+**Este calendario toma como entrega el 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno).** La entrega se adelantó del vie 27 al **jue 19 de noviembre**: de hoy hasta el último día de trabajo pasamos de 16 a **10 días**. El plan se sostiene por tres cosas: el `local-agent` y `GameRoom` ya están escritos, la validación se reduce a medio día y los opcionales salen del plan.
 
 ### 9.1 Fases
 | Fase | Qué incluye | Cuándo |
@@ -235,7 +235,7 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 | Fecha | Tareas |
 |---|---|
 | Jue 5 | ✅ `GameRoom` (PR #10) y borrador del contrato (PR #3), abiertos y con CI en verde. Replanificación con la fecha nueva |
-| Vie 6 | **Auth de invitados + throttler**, sobre `feat/game-room`, con las bases locales. ADR 9 (licencia). **El despliegue queda en espera** de lo que sugiera el profesor; los proveedores de este plan son provisionales (ver [docs/proximos-pasos.md](docs/proximos-pasos.md)) |
+| Vie 6 | **Auth de invitados + throttler**, sobre `feat/game-room`, con las bases locales. ADR 9 (licencia). **Despliegue (Fase 0):** supuesto Render, Neon y Atlas; necesita que se creen las cuentas (ver [docs/proximos-pasos.md](docs/proximos-pasos.md)) |
 
 **Hito vie 6:** auth de invitados en un PR abierto. El despliegue tiene que hacerse antes del ensayo del mar 17.
 
@@ -292,7 +292,7 @@ Regla: los fines de semana o se planifican con tareas concretas (9.6) o no cuent
 
 **Si aun así hay retraso, se recorta en este orden, sin discutir:**
 1. Vercel (la demo usa `serve:web`)
-2. Medición en Chrome (la demo usa Edge; el README recomienda Edge y dice que Chrome no se midió)
+2. Medición en Chrome (la demo usa Edge; el README recomienda Edge y dice que Chrome no se midió). **Nota: si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre.**
 3. dependency-cruiser
 4. Lote del parser (se queda `spike-parser-freeze`, cuyas cifras siguen siendo válidas)
 5. Aviso en navegadores sin Web Speech
@@ -324,21 +324,26 @@ El proyecto se presenta en vivo, con nosotros delante, el jue 19. Los riesgos pr
 2. **Pedir la revisión de los PR #3 y #10 antes del lun 9, si el compañero puede.** Son la base de todo lo demás y nadie aprueba su propio PR.
 3. **El lote del parser es lo más prescindible del núcleo.** Mejora frases concretas, pero obliga a volver a medir y añade riesgo a tres días de la demo. Si el lun 16 hay cualquier duda, no se toca.
 4. **La validación se reduce a 40 frases y medio día.** Antes eran 80 frases y dos días. Con menos frases el intervalo de confianza es más ancho, y `quality.md` debe decirlo. El mar 17 por la mañana se protege: sin esas cifras no se cumple un requisito que no se recorta.
-5. **Pedir detalles de la demo al profesor esta semana** (ver 12): lo que responda cambia el guion y el montaje.
+5. **Los detalles de la demo son supuestos** (ver 12): ya no se le puede preguntar al profesor, así que se prepara también una versión corta del guion.
 6. **Repositorio:** se llama `TWC-FINE/ChesssPeak` en GitHub. Renombrarlo a `chessspeak` queda como decisión del equipo. La carpeta local anidada se deja por ahora.
 7. **No adoptar el N-best:** el spike lo midió y no mejora nada (+0,0 puntos). **Tampoco hay autoconfirmación.**
 
-## 12. Preguntas abiertas
+## 12. Preguntas abiertas y supuestos
 **Resueltas:**
 - ✅ El agente Whisper en localhost **cuenta como módulo local**.
 - ✅ Es aceptable que Web Speech use la nube de Google.
-- ✅ **Fecha de entrega: jueves 19 de noviembre de 2026.**
 - ✅ **La demo es en vivo.**
 
 - ✅ **La documentación de arquitectura se hace con C4.**
 - ✅ **El dominio se obtiene con DigitalPlat FreeDomain.**
 
-**Pendientes para el profesor:** la lista completa está en [docs/proximos-pasos.md](docs/proximos-pasos.md). El balanceo ya no se pregunta: ver el ADR 11.
+**Supuestos:** ya no se le puede preguntar nada más al profesor, así que lo que seguía abierto se decide con supuestos. La lista completa está en [docs/proximos-pasos.md](docs/proximos-pasos.md).
+
+- **Entrega:** 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno).
+- **Despliegue:** Render, Neon y Atlas.
+- **Dominio:** si sobra tiempo; si se hace, solo la web en Vercel.
+- **`web/dist`:** en el commit de entrega, solo al congelar el código.
+- **Chrome:** sigue como recorte (ver 9.7).
 
 **Para el equipo (se deciden el lun 9):**
 - Roles A y B: según la comodidad de cada persona con NestJS o con el front y Lit.

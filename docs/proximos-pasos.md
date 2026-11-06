@@ -1,6 +1,6 @@
 # Próximos pasos
 
-Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026. Las fechas y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente, las ideas por aprobar y las preguntas para el profesor.
+Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026. Las fechas y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente y los supuestos.
 
 ## Cómo retomar
 ```bash
@@ -12,16 +12,17 @@ pnpm install
 - **Fuera de git:** `.env` (`pnpm env:init`), Whisper y sus modelos (`pnpm --filter @chessspeak/spike-whisper-local download`) y los WAV del spike.
 
 ## Decisiones ya tomadas
-- **Entrega:** jueves 19 de noviembre de 2026, con **demo en vivo**.
-- **Documentación de arquitectura:** el profesor pide **C4**. Faltan los niveles y el formato.
-- **Dominio:** el profesor pide obtenerlo con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain).
-- **Despliegue:** en espera. El profesor va a sugerir dónde y cómo, así que **no crear cuentas ni editar** `render.yaml`, `vercel.json` o `docs/deploy.md` hasta entonces. Los proveedores de PLAN.md son provisionales.
+- **Entrega:** 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno), con **demo en vivo**.
+- **Documentación de arquitectura:** el profesor pide **C4**. Los niveles y el formato son un supuesto.
+- **Dominio:** el profesor pide obtenerlo con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain). Supuesto: si sobra tiempo.
+- **Despliegue:** supuesto Render, Neon y Atlas. Ya no se espera una sugerencia del profesor. Crear las cuentas y las credenciales queda en manos del equipo.
 
 ## Dominio
+- **Prioridad:** si sobra tiempo. Si se hace, solo la web en Vercel.
 - **Elegido:** `chessspeak.dpdns.org`, estaba disponible al comprobarlo. Comprobar en el panel si el registro ya se completó.
 - **Opciones del formulario:** **DigitalPlat DNS** y **cupo gratuito**. El cupo gratuito exige verificar la cuenta.
 - **Límites:** hay un cupo gratuito por cuenta y el dominio tiene fecha de vencimiento.
-- **Después:** los registros DNS se crean al definir el hosting. Habrá que añadir el dominio a `CORS_ORIGINS` y a `docs/deploy.md`.
+- **Después:** los registros DNS apuntan a la web en Vercel. Habrá que añadir el dominio a `CORS_ORIGINS` y a `docs/deploy.md`.
 - **Riesgo:** si la demo se abre desde el dominio, el navegador puede bloquear la llamada de la web a `127.0.0.1` (Whisper). Hay que ensayarlo en Edge.
 
 ## Balanceo: pool de `move-workers` (ADR 11)
@@ -53,37 +54,24 @@ pnpm install
 
 **Descartadas:** modo club con varios tableros (el micrófono no funciona por HTTP en la red local), Whisper central en la nube (sin CPU en el plan gratuito y se pierde el módulo local), balancear NestJS (exige Redis y sesiones pegajosas) y Stockfish (no pasó su prueba).
 
-## Preguntas para el profesor
-Si hay poco tiempo, priorizar la 7 y la 8.
+## Supuestos
+**Ya no se le puede preguntar nada más al profesor. Ninguno de estos puntos está confirmado por él.** Si alguno cambia, se corrige aquí.
 
-**Balanceo (1 a 5): cerradas sin respuesta.** El profesor no puede responder más sobre esto; lo decidido está en el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md). Se conserva la numeración para no romper las referencias.
-
-**Microfrontends y Live Server**
-
-6. ¿Cumplimos con 3 custom elements, cada uno en su propio proyecto y con su página independiente, que conviven en un mismo `index`, sin despliegues independientes ni Module Federation?
-7. Cada microfrontend se compila y lo entregamos ya compilado en `web/dist`, para abrirlo con Live Server sin instalar nada. ¿Eso cumple lo que pide?
-
-**Despliegue y dominio**
-
-8. ¿Dónde y cómo sugiere desplegar? (Si no lo dijo ya en clase.)
-9. ¿El dominio debe apuntar a la web, al backend o a ambos?
-10. ¿La demo tiene que abrirse desde el dominio, o basta con que exista y funcione?
-
-**Evaluación y demo**
-
-11. ¿Hay rúbrica o criterios con peso?
-12. ¿La demo es el mismo jueves 19, a qué hora y cuánto dura?
-13. ¿Usamos nuestras laptops y hay internet fiable en la sala?
-14. ¿Va a abrir el proyecto él mismo, o le basta la demo y el repo?
-
-**Documentación**
-
-15. ¿Qué niveles de C4 pide y en qué formato? ¿Espera también ADR o escenarios de calidad?
-
-**Procesos en la misma máquina:** ya no se da por resuelto. El ADR 10 registra que lo aceptó, pero una conversación posterior lo puso en duda. Queda como supuesto en el ADR 11 y hay que decirlo al presentar.
+| Tema | Supuesto | Riesgo o pendiente |
+|---|---|---|
+| Entrega | 19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno) | No se presenta como confirmada. Se supone que la demo es ese mismo día |
+| Despliegue | Render, Neon y Atlas, como en `render.yaml` y `docs/deploy.md`. `MOVE_WORKERS=0` en Render hasta medir la memoria | El profesor iba a sugerir dónde y cómo. Hay que crear las cuentas |
+| Dominio | Si sobra tiempo. Si se hace, solo la web en Vercel | Sin comprobar si el registro se completó |
+| Microfrontends y Live Server | 3 custom elements sin Module Federation ni despliegues independientes (ADR 2). `web/dist` va en el commit de entrega, solo al congelar el código, y abre en `http://127.0.0.1:5500/web/dist/index.html` | Ensayar exactamente ese modo. La demo sigue usando `serve:web` |
+| Chrome | Sigue como recorte. Si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre | La medición es con voz real |
+| Rúbrica | No se conocen pesos: se cubren todos los requisitos de SPEC.md por igual | Podría pesar más algo que tratamos como secundario |
+| Demo | Nuestras dos laptops, datos del celular y video de respaldo. Guion de unos 10 minutos (cifra de trabajo), con versión corta | No se conocen hora, duración ni la red de la sala |
+| Quién abre el proyecto | Basta la demo y el repo; el README se prueba con un clon nuevo | Si lo abre él mismo, Whisper y las cuentas pesan más |
+| C4 | Niveles 1 a 3 (contexto, contenedores y componentes del servidor) en Mermaid, más los ADR y los escenarios de calidad | Puede esperar otro formato |
+| Balanceo | Ver el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md) y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Procesos en la misma máquina: no se da por resuelto, y hay que decirlo al presentar |
 
 ## Lista de tareas
-Ninguna de estas tareas depende de las respuestas del profesor, salvo las que lo indican.
+Las tareas que dependen de un supuesto lo indican.
 
 **Preparación**
 - [ ] 1. Abrir el PR de `docs/delivery-nov-19`.
@@ -107,11 +95,11 @@ Ninguna de estas tareas depende de las respuestas del profesor, salvo las que lo
 **Documentos**
 - [ ] 14. ADR 9 (licencia), y ADR 7 y 8 al terminar las tareas 3 y 6.
 - [ ] 15. 20 frases de validación, en un archivo nuevo, sin editar el corpus v0.
-- [ ] 16. Documentación de arquitectura con C4 (según la pregunta 15).
+- [ ] 16. Documentación de arquitectura con C4 (supuesto: niveles 1 a 3 en Mermaid).
 
-**Según las respuestas del profesor**
-- [ ] 17. Terminar el registro del dominio y crear sus registros DNS (preguntas 8 a 10).
-- [ ] 18. Desplegar el backend y las bases (pregunta 8). Hay que hacerlo antes del ensayo del mar 17.
+**Según los supuestos**
+- [ ] 17. Si sobra tiempo: terminar el registro del dominio y apuntarlo a la web en Vercel.
+- [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas. Es de la Fase 0, necesita crear las cuentas y hay que hacerlo antes del ensayo del mar 17.
 
 **Balanceo (ADR 11)**
 - [ ] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. Es lo único de este bloque antes del mié 11.
@@ -127,6 +115,6 @@ Ninguna de estas tareas depende de las respuestas del profesor, salvo las que lo
 - **PR #3 y #10:** nadie aprueba su propio PR. Se trabaja encima de esas ramas sin fusionarlas. Nada se fusiona a `main` sin aprobación expresa.
 - **Parser y spike:** `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` y los resultados siguen congelados hasta el lote previo a la validación.
 - **Balanceo:** solo lo que fija el ADR 11. `GameRoom` y la validación no se tocan.
-- **`web/dist`:** solo en el commit de entrega.
+- **`web/dist`:** solo en el commit de entrega, al congelar el código (supuesto).
 
 **Espera a la otra persona:** la validación con otra voz, los ensayos con dos laptops y la firma del contrato.

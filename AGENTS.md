@@ -3,7 +3,7 @@
 Léelo completo antes de tocar código. Si algo contradice a [PLAN.md](PLAN.md), manda PLAN.md; el alcance lo define [SPEC.md](SPEC.md) y la estructura [ARCHITECTURE.md](ARCHITECTURE.md). Para ponerte al día en una página: [docs/CONTEXT.md](docs/CONTEXT.md).
 
 ## Proyecto
-**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, equipo de 2 personas, entrega el **jueves 19 de noviembre de 2026**.
+**ChessSpeak**: ajedrez web donde las jugadas se dicen en voz alta en español (notación algebraica). Proyecto final de Arquitectura de Software, equipo de 2 personas, entrega el **19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno)**.
 
 Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “ChesssPeak” son errores; no los propagues. **Única excepción:** el repositorio de GitHub se llama hoy `TWC-FINE/ChesssPeak`, y la carpeta local anidada `ChesssPeak/ChesssPeak` se deja por ahora.
 

@@ -8,7 +8,7 @@ Proyecto final de Arquitectura de Software (equipo de 2 personas).
 
 > **Estado (5 de noviembre de 2026):** Todavía **no se puede jugar**. Existen el parser de voz, el agente local con su pool de Whisper, el esqueleto del servidor (`/health` y las dos bases), el shell con 3 microfrontends de marcador de posición y el CI. Faltan la partida en tiempo real, la voz en la interfaz y el despliegue (ver [PLAN.md](PLAN.md)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
 
-El proyecto se entrega el **jueves 19 de noviembre de 2026** y se presenta en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
+La entrega se prevé para el **19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno)** y se presenta en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
 ## Cómo funciona
 

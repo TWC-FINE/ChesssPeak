@@ -42,7 +42,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.
 - Web pública en Vercel.
 
-**Fuera de alcance:** login/registro, pestaña “Precisión”, alfabeto OTAN, `speechSynthesis` (los cuatro, recortados por la entrega del 19 de noviembre); chat de voz entre jugadores (WebRTC/TURN), análisis con Stockfish, inglés, ranking/ELO, partidas contra computador. No hay autoconfirmación ni N-best (descartados por el spike).
+**Fuera de alcance:** login/registro, pestaña “Precisión”, alfabeto OTAN, `speechSynthesis` (los cuatro, recortados por la fecha de entrega); chat de voz entre jugadores (WebRTC/TURN), análisis con Stockfish, inglés, ranking/ELO, partidas contra computador. No hay autoconfirmación ni N-best (descartados por el spike).
 
 ## 5. Requisitos no funcionales
 | Atributo | Requisito |
@@ -68,6 +68,6 @@ Las cifras reales se registran en `docs/quality.md` tras la sesión de evaluaci�
 7. Existen `docs/quality.md` con cifras medidas (con el hash del parser usado), los ADRs y un README que permite instalar y abrir el proyecto sin ayuda, comprobado con un clon nuevo en la segunda laptop.
 
 ## 7. Supuestos y pendientes
-- Entrega: **jueves 19 de noviembre de 2026**, con **demo en vivo** (se supone ese mismo día).
-- Pendiente con el profesor: detalles de la demo y si hay que abrir el proyecto con Live Server sin compilar (PLAN.md, sección 12).
+- Entrega: **19 de noviembre (confirmar: yo te digo si es fecha dada o margen interno)**, con **demo en vivo** (se supone ese mismo día).
+- Ya no se le puede preguntar al profesor. Los detalles de la demo, el despliegue, el dominio y Live Server son **supuestos**, listados en [docs/proximos-pasos.md](docs/proximos-pasos.md).
 - Decidido por el spike: idioma `es-CO`; reconocedor por defecto Web Speech con retardo de 400 ms (ADR 5). La demo se hace en Edge; Chrome sigue sin medirse.
