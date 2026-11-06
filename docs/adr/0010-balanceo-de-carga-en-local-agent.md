@@ -1,11 +1,11 @@
 # ADR 10 — Balanceo de carga de la transcripción con Whisper en el `local-agent`
 
-- **Estado:** Aceptado (4 de noviembre de 2026).
-- **Relacionado:** [ARCHITECTURE.md](../../ARCHITECTURE.md) §2.1 y §4 · ADR 1 · ADR 5 · [docs/load-balancing.md](../load-balancing.md)
+- **Estado:** Aceptado (4 de noviembre de 2026). **Revisado el 5 de noviembre: no está confirmado que cumpla por sí solo el requisito; ver [la revisión](#revisión-del-5-de-noviembre).**
+- **Relacionado:** [ARCHITECTURE.md](../../ARCHITECTURE.md) §2.1 y §4 · ADR 1 · ADR 5 · [ADR 11](0011-balanceo-de-jugadas-con-move-workers.md) · [docs/load-balancing.md](../load-balancing.md)
 
 ## Contexto
 
-El profesor añadió un requisito al proyecto: **un balanceador de carga sobre un proceso crítico**, con el algoritmo justificado, un **monitoreo real** que muestre cómo se reparten las peticiones y cómo se aísla una instancia caída, y una **prueba de carga** que compare la versión monolítica con la balanceada en el equipo de menores prestaciones del grupo. Aclaró que las instancias pueden ser procesos de la misma máquina y que la transcripción con Whisper vale como proceso crítico.
+El profesor añadió un requisito al proyecto: **un balanceador de carga sobre un proceso crítico**, con el algoritmo justificado, un **monitoreo real** que muestre cómo se reparten las peticiones y cómo se aísla una instancia caída, y una **prueba de carga** que compare la versión monolítica con la balanceada en el equipo de menores prestaciones del grupo. Aclaró que las instancias pueden ser procesos de la misma máquina y que la transcripción con Whisper vale como proceso crítico. **Una conversación posterior pone esto en duda; ver [la revisión](#revisión-del-5-de-noviembre).**
 
 ChessSpeak tiene dos candidatos:
 
@@ -50,3 +50,23 @@ ChessSpeak tiene dos candidatos:
 - (−) El reconocedor por defecto es Web Speech (ADR 5). El proceso balanceado es el de la alternativa Whisper, que exige instalar el agente.
 - (−) **En una partida real, este balanceador ve una petición a la vez:** los turnos alternan y cada jugador tiene su propio agente. Con una sola petición, el balanceado es más lento, así que **`LB_WORKERS` vale 1 por defecto**. Varios workers aportan con concurrencia (reintentos, lotes de transcripción) y aíslan fallos, y no aceleran el uso normal. Se evaluó un análisis post-partida con Stockfish como caso con carga natural, y su prueba de viabilidad no pasó ([analysis-gate.md](../analysis-gate.md)).
 - (−) El binario de Whisper del proyecto es de Windows x64. En otro sistema hay que descargar otro.
+
+## Revisión del 5 de noviembre
+
+**Qué cambió.** Este ADR da por hecho que el profesor aceptó dos cosas: procesos de la misma máquina y Whisper como proceso crítico. No cita sus palabras. Más tarde, al preguntarle por un modo de dictado local, la transcripción automática de la conversación recoge la idea de que, si todo son procesos locales dentro del procesamiento, no habría balanceo real. También recoge que las peticiones entren por un gateway que las distribuya y que sean «un poquito pesadas». La transcripción tiene errores y no se publica completa. El detalle, en paráfrasis salvo citas breves, está en el [ADR 11](0011-balanceo-de-jugadas-con-move-workers.md#qué-dijo-según-la-transcripción).
+
+**Cómo queda este ADR frente a eso:**
+
+| Lo que pidió | Este balanceador | Estado |
+|---|---|---|
+| Peticiones que entran por un gateway que las distribuye | Sí: el agente en `127.0.0.1:8765` reparte entre los workers | Cumple en lo técnico |
+| Peticiones «un poquito pesadas» | Sí: cada transcripción tarda segundos de CPU | Cumple |
+| Que no sea un proceso local sin balanceo real | Todo ocurre en un solo equipo, para una sola persona, con una petición a la vez en una partida | **En duda** |
+
+**Lo que hay que dejar de afirmar:** que este balanceador cumple por sí solo el requisito, o que el profesor ya resolvió la cuestión de los procesos locales. Tampoco sabemos si aquella frase se refería a este pool, porque en la transcripción no queda claro. Ya no podemos preguntárselo, así que la duda queda abierta y hay que decirlo en la evaluación.
+
+**Lo que sigue siendo válido:** la implementación, las mediciones de [load-balancing.md](../load-balancing.md) y el rechazo de las réplicas de NestJS. Whisper sigue siendo el único proceso realmente pesado del proyecto, y este pool se conserva.
+
+**Qué se hace al respecto:** el [ADR 11](0011-balanceo-de-jugadas-con-move-workers.md) añade un balanceo en el flujo real de la partida. Tampoco está confirmado que el profesor lo acepte.
+
+**Un error del guion, no de este ADR:** con el valor por defecto `LB_WORKERS=1`, el dashboard de la demo muestra un solo worker y no se ve balanceo. La demo debe arrancar con `LB_WORKERS=3`.

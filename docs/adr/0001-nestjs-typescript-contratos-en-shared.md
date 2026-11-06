@@ -1,7 +1,7 @@
 # ADR 1 — Backend NestJS en TypeScript, con los contratos en `shared/`
 
 - **Estado:** Aceptado (2 de noviembre de 2026).
-- **Relacionado:** [PLAN.md](../../PLAN.md) §5.1, §5.2 y §5.6 · [ARCHITECTURE.md](../../ARCHITECTURE.md) · ADR 4 y 5
+- **Relacionado:** [PLAN.md](../../PLAN.md) §5.1, §5.2 y §5.6 · [ARCHITECTURE.md](../../ARCHITECTURE.md) · ADR 4 y 5 · [ADR 11](0011-balanceo-de-jugadas-con-move-workers.md)
 
 ## Contexto
 
@@ -27,3 +27,4 @@ El backend gestiona identidad, partidas en tiempo real (Socket.IO) y telemetría
 - (+) `GameRoom` y el parser se prueban sin Nest.
 - (−) `shared/` está escrito como TypeScript ESM y `server` compila a CommonJS: cómo lo consume Nest (compilar `shared` o transformarlo en Jest) se decide en la parte 0c, cuando haya contrato.
 - (−) Dos versiones de TypeScript en el repositorio hasta que `ts-jest` admita la 7.
+- (−) **Revisión del 5 de noviembre:** el [ADR 11](0011-balanceo-de-jugadas-con-move-workers.md) prevé procesos auxiliares que solo guardan jugadas, activados con `MOVE_WORKERS` (0 por defecto). La lógica sigue en el monolito y en una sola instancia.
