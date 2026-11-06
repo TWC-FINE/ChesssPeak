@@ -237,6 +237,20 @@ Pruebas funcionales en el mismo equipo de la sección 3, en sesiones aparte de l
 | 20 peticiones simultáneas contra 3 workers con cola de 12 | 5 × 503 inmediatos (20 − 3 en curso − 12 en cola), 6 × 200 y 9 × 504 a los 15 s |
 | Matar a la fuerza solo el proceso Node del agente | A los 3 s no queda ningún `whisper-server` ni proceso Node, y los puertos 8765 y 8801–8803 están libres |
 
+**Ensayo de la demo con `LB_WORKERS=3` (5 de noviembre).** Una sola corrida en el mismo equipo: 15 peticiones, 3 simultáneas, matando w2 con `POST /lb/workers/w2/kill` mientras corría la carga. Archivos: `load-2026-11-06T03-12-14-706Z-demo-kill-w2.json` y `comparacion-y-ensayo-2026-11-05.txt`, en [docs/evidence/load-balancing/](evidence/load-balancing/).
+
+| Observado | Resultado |
+|---|---|
+| Respuestas con un worker muerto | **15 de 15 correctas**, sin ningún 502, 503 ni 504 |
+| Reparto | 5 / 5 / 5 |
+| w2 | Volvió solo con otro PID (20388 → 29020), `restarts: 1` |
+| Contadores de w2 | `served 6`, `failed 1` |
+
+- **El `failed 1` de w2 es la petición en vuelo, reintentada en otro worker.** Se deduce del código y de los contadores; el agente no registra los reintentos uno por uno, así que no hay un registro directo de esa petición. `failed` solo aumenta cuando falla el envío a un worker (`local-agent/src/pool.ts:350`). Un error que no sea `TypeError` acaba en 502, y hubo 0. Tampoco hubo 504. Queda el caso `TypeError`, en el que el pool saca al worker y reintenta la petición una vez en otro (`pool.ts:352-358`), un comportamiento que cubre `local-agent/test/pool.test.ts:124`.
+- **Coste:** con esta configuración, cada jugada con Whisper tarda unos 3,1 s en lugar de 1,95 s (p50 con 1 petición, sección 6.5).
+- **Uso:** `LB_WORKERS=3` es solo para la demo del dashboard y de matar un worker. **El valor por defecto sigue siendo 1.**
+- **Sin verificar:** del dashboard solo se comprobó que responde HTTP 200. No se comprobó cómo se ve, ni se usó su botón: el worker se mató con la llamada directa.
+
 **El guardián IPC contra procesos huérfanos.**
 
 - **El problema:** en la primera versión, detener el agente a la fuerza dejaba vivo el `whisper-server` ocupando su puerto. Ningún manejador de `exit` o `SIGTERM` se ejecuta cuando el sistema mata un proceso de golpe.
