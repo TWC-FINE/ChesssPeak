@@ -16,7 +16,7 @@
 | `feat/game-gateway` | `90ab665` | `90ab665` | PR #13; incluye el puerto `MovePersistence` |
 | `feat/web-game` | `cbe8abb` | `cbe8abb` | PR #14 |
 | `feat/move-persistence` | `813b8a3` | No existe | Solo local; sus commits ya están dentro de #13 |
-| `docs/delivery-nov-19` | `3b51a11` más el commit de este archivo | `d728be5` | **No se sube todavía:** tiene historia reescrita y supuestos por revisar |
+| `docs/delivery-nov-19` | `3b51a11` más los commits de este archivo | `d728be5` | **No se sube todavía:** tiene historia reescrita y supuestos por revisar |
 
 Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene revisión.
 
@@ -63,27 +63,27 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 
 | # | Tarea | Responsable |
 |---|---|---|
-| 1 | Confirmar la fecha de entrega | Tú |
-| 2 | Firmar #3 y revisar #10 a #14, incluidos los códigos de error provisionales | Tú y tu compañero |
-| 3 | Acordar la excepción de commits de fusión en `CONTRIBUTING.md` | Tú y tu compañero |
-| 4 | Fusionar la cadena en orden; autorizar cada fusión | Tú y tu compañero |
-| 5 | Crear las cuentas de Neon, Atlas, Render y Vercel, y desplegar con esas credenciales. Después, probar `trust proxy` | Tú |
-| 6 | Asignar roles A y B y el responsable del parser; decidir si se trabaja el 14–15 y el 16 | Tú y tu compañero |
-| 7 | Decidir cuándo sigue la voz, porque ahora no se abren ramas nuevas sin OK | Tú |
-| 8 | Web Speech, pulsar para hablar y confirmación por voz | Claude o rol B, tras tu OK |
-| 9 | `voice-metrics` y telemetría | Claude o rol A, tras tu OK |
-| 10 | Adaptador Whisper en el navegador, probado en Edge | Claude o rol B, tras tu OK |
-| 11 | `<mf-history>` real | Claude o rol B, tras tu OK |
-| 12 | Pool de `move-workers`: no antes del jueves 12 y con OK explícito | Claude, tras tu OK |
-| 13 | ADR 9, ADR 6, C4 y poner al día los documentos | Claude, tras tu OK |
-| 14 | 40 frases de validación (20 cada persona) | Tú y tu compañero |
-| 15 | Medir los dos equipos con el kit y repetir la carga de Whisper en el más débil | Tú o tu compañero |
-| 16 | Medir en Chrome antes del 16 de noviembre, si aplica | Tú (voz real) |
-| 17 | Validación con otra voz y `quality.md` | Tú y tu compañero |
-| 18 | Ensayos con dos laptops, clon nuevo y video de respaldo | Tú y tu compañero |
-| 19 | Commit de entrega con `web/dist`, tag `v1.0` y publicación de `docs/delivery-nov-19` | Tú decides; Claude lo prepara |
-| 20 | Registrar el dominio, si sobra tiempo | Tú |
-| 21 | Borrar las 2 partidas de prueba de la base local (comandos en `proximos-pasos.md`) | Tú |
+| 1 | Confirmar la fecha de entrega | Responsable del repo |
+| 2 | Firmar #3 y revisar #10 a #14, incluidos los códigos de error provisionales | Responsable del repo y compañero |
+| 3 | Acordar la excepción de commits de fusión en `CONTRIBUTING.md` | Responsable del repo y compañero |
+| 4 | Fusionar la cadena en orden; cada fusión necesita aprobación expresa | Responsable del repo y compañero |
+| 5 | Crear las cuentas de Neon, Atlas, Render y Vercel, y desplegar con esas credenciales. Después, probar `trust proxy` | Responsable del repo |
+| 6 | Asignar roles A y B y el responsable del parser; decidir si se trabaja el 14–15 y el 16 | Responsable del repo y compañero |
+| 7 | Decidir cuándo sigue la voz, porque ahora no se abren ramas nuevas sin OK del responsable | Responsable del repo |
+| 8 | Web Speech, pulsar para hablar y confirmación por voz | Claude o rol B, tras el OK del responsable |
+| 9 | `voice-metrics` y telemetría | Claude o rol A, tras el OK del responsable |
+| 10 | Adaptador Whisper en el navegador, probado en Edge | Claude o rol B, tras el OK del responsable |
+| 11 | `<mf-history>` real | Claude o rol B, tras el OK del responsable |
+| 12 | Pool de `move-workers`: no antes del jueves 12 y con OK explícito | Claude, tras el OK del responsable |
+| 13 | ADR 9, ADR 6, C4 y poner al día los documentos | Claude, tras el OK del responsable |
+| 14 | 40 frases de validación (20 cada persona) | Responsable del repo y compañero |
+| 15 | Medir los dos equipos con el kit y repetir la carga de Whisper en el más débil | Responsable del repo o compañero |
+| 16 | Medir en Chrome antes del 16 de noviembre, si aplica | Responsable del repo (voz real) |
+| 17 | Validación con otra voz y `quality.md` | Responsable del repo y compañero |
+| 18 | Ensayos con dos laptops, clon nuevo y video de respaldo | Responsable del repo y compañero |
+| 19 | Commit de entrega con `web/dist`, tag `v1.0` y publicación de `docs/delivery-nov-19` | Responsable del repo decide; Claude lo prepara |
+| 20 | Registrar el dominio, si sobra tiempo | Responsable del repo |
+| 21 | Borrar las 2 partidas de prueba de la base local (comandos en `proximos-pasos.md`) | Responsable del repo |
 
 **Antes de cualquier medición, hay que apagar Docker y registrar su estado.** Claude no empieza una medición sin avisar. **Ahora mismo Docker está encendido.**
 
