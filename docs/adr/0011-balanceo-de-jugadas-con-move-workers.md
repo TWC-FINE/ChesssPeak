@@ -48,7 +48,7 @@ Lecturas nuestras, no confirmadas: «uvas» sería «jugadas» o «peticiones».
    ```
 
 2. **`GameRoom` sigue siendo la única fuente de verdad y la única que valida.** El worker no revalida: solo guarda.
-3. **Puerto `MovePersistence` con dos implementaciones:** directa y por pool. **`MOVE_WORKERS=0` es el valor por defecto** y escribe directo, sin procesos extra. Mientras no exista el pool, un valor mayor que 0 aborta el arranque, en lugar de aparentar un pool escribiendo directo. **Este aborto es temporal, hasta la tarea 7** (pool y `move-workers`; tarea 20 de `proximos-pasos.md`).
+3. **Puerto `MovePersistence` con dos implementaciones:** directa y por pool. **`MOVE_WORKERS=0` es el valor por defecto** y escribe directo, sin procesos extra. Mientras no exista el pool, un valor mayor que 0 aborta el arranque, en lugar de aparentar un pool escribiendo directo. **Este aborto es temporal, hasta el pool de `move-workers`** (tarea 20 de `proximos-pasos.md`).
 4. **Si el pool falla, la partida sigue:** el adaptador escribe directo con el mismo repositorio, y los reintentos no duplican la jugada.
 5. **Orden por partida:** la jugada `n+1` se envía solo cuando la `n` quedó guardada. La cola está en `server/src/games/per-game-queue.ts`, porque también ordena las escrituras de Postgres; el pool la usa, no la reemplaza. Las jugadas alternas pueden ir a workers distintos, pero nunca se adelantan. `appendMove` ya es idempotente, así que los reintentos son seguros y un hueco se detecta en lugar de ocultarse.
 6. **El cambio se queda dentro de los límites** de la sección siguiente.

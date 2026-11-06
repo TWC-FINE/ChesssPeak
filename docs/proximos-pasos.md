@@ -14,7 +14,7 @@ pnpm install
 ## Decisiones ya tomadas
 - **Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre.** Con **demo en vivo**.
 - **Documentación de arquitectura:** el profesor pide **C4**. Los niveles y el formato son un supuesto.
-- **Dominio:** el profesor pide obtenerlo con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain). Supuesto: si sobra tiempo; es un riesgo asumido (ADR 11). Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
+- **Dominio:** obtenido con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain), como pidió el profesor. **En espera del profesor.** Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
 - **Despliegue:** supuesto Render, Neon y Atlas. Ya no se espera una sugerencia del profesor. Crear las cuentas y las credenciales queda en manos del equipo.
 
 ## Puntos abiertos
@@ -28,12 +28,13 @@ pnpm install
 - **La fecha de entrega sigue sin confirmar:** margen interno del equipo 19 de noviembre; tentativa 27 de noviembre. El calendario trabaja con el 19, pero no debe presentarse como fecha confirmada.
 
 ## Dominio
-- **Prioridad:** si sobra tiempo. Si se hace, solo la web en Vercel. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
-- **Elegido:** `chessspeak.dpdns.org`, estaba disponible al comprobarlo. Comprobar en el panel si el registro ya se completó.
-- **Opciones del formulario:** **DigitalPlat DNS** y **cupo gratuito**. El cupo gratuito exige verificar la cuenta.
-- **Límites:** hay un cupo gratuito por cuenta y el dominio tiene fecha de vencimiento.
-- **Después:** los registros DNS apuntan a la web en Vercel. Habrá que añadir el dominio a `CORS_ORIGINS` y a `docs/deploy.md`.
-- **Riesgo:** si la demo se abre desde el dominio, el navegador puede bloquear la llamada de la web a `127.0.0.1` (Whisper). Hay que ensayarlo en Edge.
+- **Prioridad:** en espera del profesor, que lo agregará en el hosting. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
+- **Estado (comprobado el 6 de noviembre):** `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, y esos servidores rechazan las consultas (*lame delegation*, `REFUSED`). Por eso el nombre todavía no resuelve. No es un problema de propagación.
+- **No usa DigitalPlat DNS:** usa nameservers externos. **No registrar otro dominio ni cambiar los nameservers.** Hay un cupo gratuito por cuenta y el dominio tiene fecha de vencimiento.
+- **Cómo saber que ya funciona:** `nslookup -type=NS chessspeak.dpdns.org` deja de responder `Server failed`. También se puede revisar `whatsmydns.net`.
+- **Sin saber todavía:** qué hosting es, qué permite alojar, si tiene HTTPS y si habrá acceso a un panel.
+- **Después:** los registros DNS se administran en ese hosting, no en DigitalPlat. Habrá que añadir el dominio a `CORS_ORIGINS` y a `docs/deploy.md`.
+- **Riesgos:** el micrófono exige HTTPS. Además, si la demo se abre desde el dominio, el navegador puede bloquear la llamada de la web a `127.0.0.1` (Whisper). Hay que ensayarlo en Edge.
 
 ## Antes de cualquier medición
 Vale para la medición en Chrome, la laptop más débil y cualquier prueba de carga.
@@ -87,7 +88,7 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 |---|---|---|
 | Entrega | Fecha de entrega por confirmar: margen interno del equipo 19 de noviembre; tentativa 27 de noviembre | No se presenta como confirmada. Se supone que la demo es ese mismo día |
 | Despliegue | Render, Neon y Atlas, como en `render.yaml` y `docs/deploy.md`. `MOVE_WORKERS=0` en Render hasta medir la memoria | El profesor iba a sugerir dónde y cómo. Hay que crear las cuentas |
-| Dominio | Si sobra tiempo. Si se hace, solo la web en Vercel. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app` | Riesgo asumido: el profesor pidió el dominio (ADR 11). Sin comprobar si el registro se completó |
+| Dominio | En espera del profesor. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app` | Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas. No se sabe qué permite alojar ese hosting |
 | Microfrontends y Live Server | 3 custom elements sin Module Federation ni despliegues independientes (ADR 2). `web/dist` va en el commit de entrega, solo al congelar el código, y abre en `http://127.0.0.1:5500/web/dist/index.html` | Ensayar exactamente ese modo. La demo sigue usando `serve:web` |
 | Chrome | Sigue como recorte. Si la entrega la abre otra persona puede ser en Chrome; medir antes del 16 de noviembre | La medición es con voz real |
 | Rúbrica | No se conocen pesos: se cubren todos los requisitos de SPEC.md por igual | Podría pesar más algo que tratamos como secundario |
@@ -124,7 +125,7 @@ Las tareas que dependen de un supuesto lo indican.
 - [ ] 16. Documentación de arquitectura con C4 (supuesto: niveles 1 a 3 en Mermaid).
 
 **Según los supuestos**
-- [ ] 17. Si sobra tiempo: terminar el registro del dominio y apuntarlo a la web en Vercel.
+- [ ] 17. Dominio: cuando el profesor lo agregue y deje de rechazar consultas, conectarlo según lo que permita el hosting.
 - [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Es de la Fase 0, necesita crear las cuentas y hay que hacerlo antes del ensayo del mar 17.
 
 **Balanceo (ADR 11)**

@@ -34,7 +34,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
 | **Microfrontends** | **Parcial.** Los 3 existen. `<mf-game>` y la caja de texto: hecho y verificado, solo en PR. `<mf-history>`: marcador de posición | Base en `main` (#2). Real en #14. `smoke:web` y `e2e:web` |
 | **Balanceo** | **Whisper: hecho y verificado, cumplimiento sin confirmar. `move-workers`: no empezado** | Pool y dashboard en `main` (#6). La evidencia de carga y el ensayo con un worker muerto están solo en `docs/delivery-nov-19`. ADR 10 revisado y ADR 11 solo en esa rama. Del pool solo existe el puerto |
-| **Dominio** | **No empezado.** Riesgo asumido | `chessspeak.dpdns.org` no resolvió con `nslookup` (`Server failed`). El mínimo acordado es la web en Vercel, que tampoco está publicada |
+| **Dominio** | **Registrado y delegado; aún no funciona. En espera del profesor** | `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*, `REFUSED`, comprobado el 6 de noviembre). Mínimo garantizado: la URL `vercel.app`, que tampoco está publicada |
 
 **Criterios de aceptación de `SPEC.md` §6:**
 
@@ -81,8 +81,8 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | 16 | Medir en Chrome antes del 16 de noviembre, si aplica | Responsable del repo (voz real) |
 | 17 | Validación con otra voz y `quality.md` | Responsable del repo y compañero |
 | 18 | Ensayos con dos laptops, clon nuevo y video de respaldo | Responsable del repo y compañero |
-| 19 | Commit de entrega con `web/dist`, tag `v1.0` y publicación de `docs/delivery-nov-19` | Responsable del repo decide; Claude lo prepara |
-| 20 | Registrar el dominio, si sobra tiempo | Responsable del repo |
+| 19 | Commit de entrega con `web/dist` y tag `v1.0`. Antes, llevar `docs/delivery-nov-19` a `main` con un PR: la rama ya está subida como trabajo en curso, sin PR | Responsable del repo decide; Claude lo prepara |
+| 20 | Dominio: esperar a que el profesor lo agregue en el hosting y, cuando deje de rechazar consultas, conectarlo. No registrar otro ni cambiar los nameservers | Responsable del repo |
 | 21 | Borrar las 2 partidas de prueba de la base local (comandos en `proximos-pasos.md`) | Responsable del repo |
 
 **Antes de cualquier medición, hay que apagar Docker y registrar su estado.** Claude no empieza una medición sin avisar. **Al actualizar este documento, Docker no respondía y parecía apagado: hay que comprobarlo antes de medir.**
@@ -92,6 +92,15 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 **Carpetas privadas:** `evidencia-web/` y `privado/` viven **fuera del repo**, porque git no las ignora y el repo es público. **Nunca usar `git add .` ni `git add -A`: los archivos se añaden por nombre.** `E2E_OUT` debe apuntar fuera del repo.
 
 **Clon limpio sin probar:** el equipo donde se retomó el trabajo el 6 de noviembre reutiliza su `.env` y su `node_modules`, así que lo que corra ahí no demuestra que el proyecto funcione en un clon limpio.
+
+**Instalación y pruebas:** se harán en el equipo de escritorio. En ese otro equipo no se llegó a instalar: `pnpm verify`, Docker y los demás comandos siguen sin ejecutarse allí.
+
+### Notas para el README (hallazgos del 6 de noviembre)
+- **Espacio en disco:** `pnpm install --frozen-lockfile` falló con `Espacio en disco insuficiente` (`os error 112`) al escribir en la caché de pnpm, `D:\.pnpm-store`. El lockfile era correcto. El README debe avisar del espacio necesario, que aún no se ha medido. Tras un fallo así, `node_modules` puede quedar incompleto y no sirve para probar nada.
+- **Orden en un equipo con `node_modules` viejo:** primero `pnpm install` y luego `pnpm env:init`. Si no, pnpm intenta instalar antes de ejecutar el script y puede avisar de que `node_modules` no coincide con el lockfile.
+- **`.env.example` es distinto entre ramas:** por ejemplo, `feat/web-game` trae `GUEST_AUTH_LIMIT_PER_MINUTE` y `ABANDON_TIMEOUT_MS`, y `docs/delivery-nov-19` trae `MOVE_WORKERS_KILL_SECRET`. El `.env` hay que generarlo en la rama que se va a ejecutar, y unificarlo al fusionar.
+- **Un `.env` viejo no se actualiza solo:** `pnpm env:init` no lo sobrescribe y sale con código 1. Hay que respaldarlo en una ruta externa al repo, regenerarlo y restaurar a mano las variables de Whisper.
+- **`pnpm test:integration` puede engañar:** sin `DATABASE_URL_TEST` ni `MONGO_URI_TEST` dice «omitido» y, fuera de CI, sale con código 0. Hay que comprobar que los tests corrieron.
 
 ## 4. Avance estimado
 
@@ -144,7 +153,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 |---|---|
 | **`smoke` inestable en CI** | **Abierto, sin causa conocida.** Falló 3 de 3 en `fa5c168` y pasó 3 de 3 en `cbe8abb`. Mismo error antes en `main` (`2d287ea`). Con `continue-on-error`, el resultado global puede decir verde aunque falle |
 | **Fecha de entrega sin confirmar** | **Abierto.** Margen interno del equipo 19 de noviembre; tentativa 27 de noviembre. El calendario usa el 19 |
-| **Dominio** | **Riesgo asumido.** El plan registra que el profesor lo pidió. Si sobra tiempo, solo la web en Vercel. Registro sin completar, hasta donde se pudo comprobar |
+| **Dominio** | **En espera del profesor; mínimo garantizado: la URL `vercel.app`.** Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*). No se sabe qué hosting es, qué permite alojar ni si tiene HTTPS, que es obligatorio para el micrófono |
 | **Cadena de 6 PR sin fusionar** | **Abierto y creciendo en importancia.** Nada del núcleo está en `main`, y `render.yaml` despliega desde `main`. El *squash* rompe la cadena según una simulación local; los commits de fusión funcionaron, pero falta acordar la excepción y probarlo en GitHub |
 | **Pérdida de jugadas si el servidor muere** | **Aceptado y documentado (ADR 7), sin prueba.** Las jugadas pendientes de guardar se pierden. Los jugadores pueden haberlas visto |
 | **Fase 0 sin desplegar** | **Abierto y vencido hoy según el plan.** Depende de crear las cuentas. `trust proxy`, CORS y la memoria en Render siguen sin probar |
@@ -161,7 +170,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 **Desde este estado no se ejecutó ninguna prueba:** todo sale de lecturas de git, GitHub y documentos, y de una consulta DNS.
 
 - **Cuentas y despliegue:** no se tiene acceso a Neon, Atlas, Render, Vercel ni DigitalPlat. Se sabe que el repo no tiene URL reales, no si ya existen cuentas.
-- **Dominio:** solo hay un `nslookup` fallido; no se vio el panel de registro.
+- **Dominio:** solo hay consultas DNS públicas; no se vio el panel de registro ni el hosting.
 - **`pnpm e2e:web` sobre el último commit:** los 22 de 22 son de la noche del 5 de noviembre, antes de `227c729`. Después solo cambiaron comentarios, el README y `smoke-web.mjs`. Las capturas están fuera del repo.
 - **Edge con ventana visible:** corrió sin interfaz, con pestañas en un solo equipo. Tampoco se probó con dos laptops, red real, móvil ni Live Server.
 - **Voz real en el producto:** no existe. Las cifras de voz son del spike, con una sola voz.
