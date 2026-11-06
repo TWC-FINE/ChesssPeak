@@ -45,7 +45,8 @@ El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de
 ### 2.1 Backend (monolito modular NestJS)
 Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`. `analysis` opcional; sin `signaling`.
 
-- **`GameRoom`:** clase pura, sin Nest. Es la fuente de verdad en memoria de una partida; se actualiza **de forma síncrona antes de cualquier `await`**.
+- **`GameRoom`** (`server/src/games/game-room.ts`): clase pura, sin Nest. Es la fuente de verdad en memoria de una partida; se actualiza **de forma síncrona antes de cualquier `await`**. No tiene temporizadores ni E/S: el plazo de abandono, el sorteo de color, la autenticación, la persistencia y el reenvío son de quien la llama.
+- **chessops en el servidor:** su build CommonJS no carga en Node porque el paquete declara `type: module`. `patches/chessops@0.15.1.patch` lo corrige con `pnpm patch`, sin tocar su código. **Al actualizar chessops hay que revisar ese parche.** Un test lo comprueba con Node real, porque Jest no detecta el fallo.
 - **Persistencia write-behind:** cada jugada se guarda en Mongo de forma idempotente con `updateOne({gameId, plyCount: ply-1}, {$push, $inc: {plyCount: 1}})`.
 - **Rehidratación:** al reconectar se reconstruye la sala desde Mongo.
 - **Una sola instancia** en Render; no hace falta sticky session.

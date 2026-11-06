@@ -126,7 +126,7 @@ sequenceDiagram
     J->>MV: «sí»
     MV-->>MG: cs:move-confirmed { ply: 5, uci: g1f3 }
     MG->>S: game:move { gameId, uci: g1f3, ply: 5 }
-    Note over S: identidad por token · turno · ply · legalidad
+    Note over S: identidad por token · estado · ply · turno · legalidad
     alt jugada válida
         S-->>MG: game:moved { ply: 5, uci, san, fen }
         S-->>RV: game:moved { ply: 5, uci, san, fen }
@@ -155,3 +155,6 @@ Respuestas provisionales a las dudas de revisión del contrato v1. Quedan **marc
 | Asientos | La regla de la sección 2 (color reservado para quien crea la partida; el resto, primer asiento libre) es **correcta** |
 | `game:error.message` | **Solo para depurar**. La interfaz decide el texto a partir de `code` y no muestra `message` |
 | `abandonment` | **Propuesta:** un jugador que lleva **más de 60 s desconectado** pierde la partida por `abandonment`; el plazo es **configurable** en el servidor. **Pendiente de que la segunda persona la valide** |
+| Orden de validación de `game:move` | Identidad, estado, **`ply` y después turno**, legalidad. Se comprueba `ply` antes del turno porque un envío repetido debe dar `stale_ply`: tras tu propia jugada ya no es tu turno, y al revés daría `not_your_turn` |
+| Jugar o rendirse fuera de una partida activa | `game:error { code: 'unauthorized' }`, en `waiting`, `finished` y `aborted`. No se añade un código nuevo porque un valor de enum no reservado exigiría `v: 2` |
+| Enroque en UCI | Solo el estándar (`e1g1`, `e1c1`). `e1h1`, la forma interna de chessops, responde `illegal` |
