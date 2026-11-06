@@ -14,7 +14,7 @@ Versión corta y paso a paso de [spike/README.md](README.md). Los criterios est�
 Terminal en la carpeta del repo (la que tiene `.git` y `pnpm-workspace.yaml`):
 
 ```powershell
-cd C:\Users\Coco\Desktop\ChesssPeak\ChesssPeak
+cd <ruta-del-repo>
 pnpm install
 pnpm spike:build
 mkdir spike\recordings
@@ -22,7 +22,7 @@ mkdir spike\recordings
 
 (`mkdir` solo hace falta si la carpeta `spike\recordings` no existe. `pnpm install` puede terminar con un aviso de `esbuild`: es inofensivo, está anotado en `docs/spike-notes.md`.)
 
-1. En VS Code: **Archivo → Abrir carpeta…** y elige `C:\Users\Coco\Desktop\ChesssPeak\ChesssPeak` (la interna). Ese tiene que ser el raíz, o la URL de abajo no funciona.
+1. En VS Code: **Archivo → Abrir carpeta…** y elige `<ruta-del-repo>` (la interna). Ese tiene que ser el raíz, o la URL de abajo no funciona.
 2. En el panel de archivos, clic derecho sobre `spike/web-speech/index.html` → **Open with Live Server**. El puerto ya está fijado en **5500** (`.vscode/settings.json`).
 3. Abre **Chrome** (no Edge, no Firefox) en esta dirección exacta:
 
