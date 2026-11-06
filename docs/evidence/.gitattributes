@@ -1,0 +1,4 @@
+# Evidence files are hashed in SHA256SUMS: git must store and check them out byte for byte.
+load-balancing/*.json -text
+load-balancing/*.txt -text
+load-balancing/SHA256SUMS -text
