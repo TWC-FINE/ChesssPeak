@@ -215,7 +215,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** La prioridad es este orden de trabajo, no un calendario por días.
 
 ### 9.1 Orden
-1. **Fusionar la cadena** #3 y #10 a #14 ✅ y, después, el PR de `docs/delivery-nov-19`, antes del despliegue.
+1. **Fusionar la cadena** #3 y #10 a #14 y el PR de `docs/delivery-nov-19` ✅, antes del despliegue.
 2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
 3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
 4. **Adaptador de Whisper local.**

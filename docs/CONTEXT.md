@@ -35,7 +35,7 @@ Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; e
 - `local-agent/` — pool de `whisper-server` con cola, salud, dashboard (`/lb/dashboard`) y generador de carga ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)).
 - `server/` — esqueleto NestJS: `/health`, Prisma y Mongoose, `appendMove`. `GameRoom` está hecha (reglas de la partida en memoria), pero nada la usa todavía. **Sin Socket.IO ni autenticación.**
 - `web/` — shell y 3 microfrontends de marcador de posición; `pnpm build:web`, `serve:web` y `smoke:web`.
-- `shared/` — borrador; el contrato v1 está en el PR #3, sin fusionar.
+- `shared/` — contrato v1, ya en `main`.
 - `spike/analysis-gate/` — prueba de viabilidad del análisis con Stockfish: **no pasó** ([analysis-gate.md](analysis-gate.md)).
 - `docs/` — `spike-*.md`, `adr/`, `deploy.md`, este archivo. Raíz: `PLAN.md`, `SPEC.md`, `ARCHITECTURE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`.
 - Ignorados por git: `.env`, `whisper/`, `models/`, `stockfish/`, `spike/recordings/`, `local-agent/results/`. Repo en GitHub: `TWC-FINE/ChesssPeak` (la carpeta local anidada se deja por ahora).
@@ -82,7 +82,7 @@ Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pn
 
 ## Qué sigue
 Orden de trabajo y recortes en [PLAN.md](../PLAN.md), sección 9. **Tareas, supuestos, dominio y balanceo: [proximos-pasos.md](proximos-pasos.md).**
-1. **Fusionar la cadena** #3 y #10 a #14 ✅ y, después, el PR de `docs/delivery-nov-19`, antes del despliegue.
+1. **Fusionar la cadena** #3 y #10 a #14 y el PR de `docs/delivery-nov-19` ✅, antes del despliegue.
 2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
 3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
 4. **Adaptador de Whisper local.**

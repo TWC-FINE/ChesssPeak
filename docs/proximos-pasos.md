@@ -5,7 +5,7 @@ Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de novie
 ## Cómo retomar
 ```bash
 git fetch origin
-git switch docs/delivery-nov-19   # esta replanificación; aún sin PR
+git switch main
 pnpm install
 ```
 - **Para programar:** crear una rama por tema desde `main`.
@@ -101,7 +101,7 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:** `[x]` significa hecho; esos PR ya están fusionados en `main`.
 
 **Preparación**
-- [ ] 1. Abrir el PR de `docs/delivery-nov-19`.
+- [x] 1. Abrir el PR de `docs/delivery-nov-19`. (PR #16)
 - [ ] 2. Levantar el entorno local: `pnpm env:init` y `docker compose up -d`.
 
 **Servidor**
