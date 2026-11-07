@@ -82,7 +82,11 @@ async function documentsUpTo(gameId: string, tryIndex: number) {
 }
 
 describe('voice:attempt (real MongoDB and a real socket)', () => {
-  beforeEach(start);
+  beforeEach(async () => {
+    // CI has no .env: the secret that signs guest tokens comes from the test, and afterEach restores the original
+    process.env.GUEST_TOKEN_SECRET = 'a'.repeat(64);
+    await start();
+  });
 
   afterEach(async () => {
     await stop();
