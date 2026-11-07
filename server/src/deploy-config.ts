@@ -2,6 +2,7 @@ type Env = Record<string, string | undefined>;
 
 const LOCAL_ORIGINS = ['http://127.0.0.1:5500', 'http://localhost:5500'];
 const DEFAULT_CONNECT_TIMEOUT_MS = 1000;
+const DEFAULT_HEALTH_PROBE_TIMEOUT_MS = 1000;
 const DEFAULT_GUEST_AUTH_LIMIT = 10;
 const DEFAULT_ABANDON_TIMEOUT_MS = 60_000;
 
@@ -21,6 +22,12 @@ export function corsOrigins(env: Env = process.env): string[] {
 export function dbConnectTimeoutMs(env: Env = process.env): number {
   const value = Number(env.DB_CONNECT_TIMEOUT_MS);
   return Number.isFinite(value) && value > 0 ? value : DEFAULT_CONNECT_TIMEOUT_MS;
+}
+
+/** How long GET /health waits for each database before reporting it as down. A managed one that is waking up needs more than the default. */
+export function healthProbeTimeoutMs(env: Env = process.env): number {
+  const value = Number(env.HEALTH_PROBE_TIMEOUT_MS);
+  return Number.isFinite(value) && value > 0 ? value : DEFAULT_HEALTH_PROBE_TIMEOUT_MS;
 }
 
 /** Requests per minute per IP allowed on POST /auth/guest. Anything but a whole number above 0 keeps the default. */

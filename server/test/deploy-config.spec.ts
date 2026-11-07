@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { corsOrigins, dbConnectTimeoutMs } from '../src/deploy-config';
+import { corsOrigins, dbConnectTimeoutMs, healthProbeTimeoutMs } from '../src/deploy-config';
 import { HealthController } from '../src/health/health.controller';
 import { HEALTH_PROBES, HealthService } from '../src/health/health.service';
 
@@ -23,6 +23,15 @@ describe('dbConnectTimeoutMs', () => {
     expect(dbConnectTimeoutMs({})).toBe(1000);
     expect(dbConnectTimeoutMs({ DB_CONNECT_TIMEOUT_MS: 'nope' })).toBe(1000);
     expect(dbConnectTimeoutMs({ DB_CONNECT_TIMEOUT_MS: '0' })).toBe(1000);
+  });
+});
+
+describe('healthProbeTimeoutMs', () => {
+  it('reads the variable and keeps the short default otherwise', () => {
+    expect(healthProbeTimeoutMs({ HEALTH_PROBE_TIMEOUT_MS: '5000' })).toBe(5000);
+    expect(healthProbeTimeoutMs({})).toBe(1000);
+    expect(healthProbeTimeoutMs({ HEALTH_PROBE_TIMEOUT_MS: 'nope' })).toBe(1000);
+    expect(healthProbeTimeoutMs({ HEALTH_PROBE_TIMEOUT_MS: '0' })).toBe(1000);
   });
 });
 

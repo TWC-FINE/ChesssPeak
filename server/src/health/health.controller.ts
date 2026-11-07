@@ -11,4 +11,10 @@ export class HealthController {
   async check(): Promise<HealthReport & { protocolVersion: number }> {
     return { ...(await this.health.check()), protocolVersion: PROTOCOL_VERSION };
   }
+
+  /** For the hosting platform's health check: answers without touching the databases, so a slow one cannot get the instance restarted. */
+  @Get('live')
+  live(): { status: 'live' } {
+    return { status: 'live' };
+  }
 }
