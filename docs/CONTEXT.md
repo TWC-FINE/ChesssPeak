@@ -66,7 +66,7 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [spike-notes.md](spike-notes.md) | Notas, equipo de referencia y **tareas pendientes por área** |
 | [deploy.md](deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [load-balancing.md](load-balancing.md) · [analysis-gate.md](analysis-gate.md) | Prueba de carga de Whisper · prueba del análisis con Stockfish |
-| [adr/](adr/) | ADR 1 a 5, 10 y 11 aceptados; los demás se escriben al decidir |
+| [adr/](adr/) | ADR 1 a 8, 10 y 11 aceptados; falta el ADR 9 |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) | Ramas, commits, PR · reglas para asistentes de IA |
 
 ## CI (GitHub Actions)

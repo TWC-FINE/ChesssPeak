@@ -110,14 +110,14 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 - [x] 5. Gateway Socket.IO: `game:join`, `game:move` y `game:resign` sobre `GameRoom`. (PR #13)
 - [x] 6. Guardado de jugadas en Mongo con `appendMove`, y rehidratación desde ahí. (PR #13)
 - [x] 7. Reconexión y abandono, con plazo configurable (60 s por defecto, provisional). (PR #13)
-- [ ] 8. Telemetría de voz: ingesta de `voice:attempt`; `player` lo pone el servidor.
+- [x] 8. Telemetría de voz: ingesta de `voice:attempt`; `player` lo pone el servidor. (PR #25)
 
 **Web**
-- [ ] 9. `<mf-history>`: lista de jugadas a partir de `cs:move-applied`. Hoy es un marcador de posición que muestra las jugadas en UCI.
+- [x] 9. `<mf-history>`: lista de jugadas a partir de `cs:move-applied`. (PR #28)
 - [x] 10. Shell real: sesión y socket único, en lugar de `web/shell/src/mocks.ts`. (PR #14)
 - [x] 11. `<mf-game>`: tablero real, `game:state`, `game:moved` y flecha de confirmación. (PR #14)
 - [x] 12. `<mf-voice-input>`: caja de texto → `resolve()` del parser → `cs:move-candidate`. (PR #14)
-- [ ] 13. Reconocedores: Web Speech con 400 ms, Whisper contra `/transcribe` y uno falso para tests.
+- [x] 13. Reconocedores: Web Speech con 400 ms, Whisper contra `/transcribe` y uno falso para tests. (PR #26, #27 y #29) **Falta la prueba con voz real y con el Whisper real.**
 
 **Documentos**
 - [ ] 14. ADR 9 (licencia), y ADR 7 y 8 al terminar las tareas 3 y 6. ADR 8 en el PR #11 y ADR 7 en el PR #13; falta el ADR 9.
