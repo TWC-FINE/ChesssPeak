@@ -8,3 +8,8 @@ a { color: var(--cs-accent); }
 .cs-slot { min-width: 0; }
 .cs-unavailable { margin: 0; padding: var(--cs-gap); border: 1px dashed var(--cs-warn); border-radius: var(--cs-radius); color: var(--cs-warn); }
 @media (max-width: 900px) { .cs-layout { grid-template-columns: 1fr; } }
+.cs-session { padding: var(--cs-gap) 16px 0; }
+.cs-session p, .cs-form { margin: 0 0 6px; }
+.cs-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cs-invite code { word-break: break-all; }
+.cs-message { color: var(--cs-warn); }

@@ -109,8 +109,17 @@ const server = spawn(process.execPath, [join(root, 'scripts', 'serve-web.mjs')],
 const browser = spawn(
   browserPath,
   [`--headless=new`, `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--window-size=1280,900', 'about:blank'],
-  { stdio: 'ignore' },
+  { stdio: ['ignore', 'ignore', 'pipe'] },
 );
+// kept to explain a browser that does not start; the last lines are enough
+let browserOutput = '';
+let browserExit = null;
+browser.stderr.on('data', (chunk) => {
+  browserOutput = `${browserOutput}${chunk}`.slice(-4000);
+});
+browser.on('exit', (code, signal) => {
+  browserExit = `código ${code}, señal ${signal}`;
+});
 
 let page;
 try {
@@ -198,12 +207,20 @@ try {
   check('no hubo excepciones en la página', consoleErrors.length === 0, consoleErrors.join(' | '));
 } catch (error) {
   check('la prueba terminó sin errores', false, error.message);
+  console.log(`estado del navegador: ${browserExit ?? 'sigue en marcha'}
+salida de error del navegador:
+${browserOutput || '(vacía)'}`);
 } finally {
   page?.close();
   kill(browser);
   kill(server);
-  await sleep(300);
-  rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  await sleep(1000);
+  // Windows can keep the browser profile locked for a moment: a leftover temp folder must not change the result
+  try {
+    rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+  } catch (error) {
+    console.log(`aviso: no se pudo borrar ${profile} (${error.code})`);
+  }
 }
 
 const failed = results.filter((r) => !r.ok);

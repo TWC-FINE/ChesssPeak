@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@chessspeak/shared": "workspace:*",
+    "@chessspeak/voice-parser": "workspace:*",
     "chessground": "^9.2.1",
     "lit": "^3.3.3"
   },
