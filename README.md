@@ -6,9 +6,9 @@ Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebr
 
 Proyecto final de Arquitectura de Software.
 
-> **Estado (5 de noviembre de 2026):** Todavía **no se puede jugar**. Existen el parser de voz, el agente local con su pool de Whisper, el esqueleto del servidor (`/health` y las dos bases), el shell con 3 microfrontends de marcador de posición y el CI. Faltan la partida en tiempo real, la voz en la interfaz y el despliegue (ver [PLAN.md](PLAN.md)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
+> **Estado (6 de noviembre de 2026):** En local, dos invitados juegan una partida en tiempo real, por escrito o por voz. La voz solo se ha probado con un reconocedor falso: **falta probarla con voz real y desplegar** (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
 
-**Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** El proyecto se presenta en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
+**Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Está previsto presentarlo en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
 ## Cómo funciona
 
@@ -22,12 +22,12 @@ Proyecto final de Arquitectura de Software.
 
 | Pieza | Qué es |
 |---|---|
-| `web/` | Shell estático + 3 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`); URL pública en Vercel, o en local con `pnpm serve:web` o Live Server. Hoy son marcadores de posición |
-| `server/` | NestJS (monolito modular): auth, partidas, métricas de voz, health. Hoy funcionan `/health` y las dos bases |
+| `web/` | Shell estático + 3 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`); en local con `pnpm serve:web` o Live Server, y prevista en Vercel |
+| `server/` | NestJS (monolito modular): auth, partidas, métricas de voz, health |
 | `packages/voice-parser/` | Parser de frases habladas a jugadas, TypeScript puro |
 | `local-agent/` | Módulo local en `127.0.0.1:8765`: pool de `whisper-server` (whisper.cpp) con cola, salud, dashboard y prueba de carga ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)) |
 | `spike/` | Código de medición: Web Speech, Whisper y la prueba de viabilidad del análisis |
-| `shared/` | Contrato compartido: eventos del socket, eventos `cs:*`, schemas zod. El contrato v1 está en revisión (PR #3) |
+| `shared/` | Contrato compartido: eventos del socket, eventos `cs:*`, schemas zod |
 
 Detalle en [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -37,28 +37,44 @@ Detalle en [ARCHITECTURE.md](ARCHITECTURE.md).
 - Edge o Chrome (Web Speech API; el reconocedor por defecto se midió en Edge, Chrome está pendiente de comprobar)
 - Para servir la web en local: `pnpm serve:web` (no necesita VS Code) o VS Code con la extensión Live Server (puerto fijo `5500`)
 - Cuentas gratuitas para la nube: Neon (Postgres), MongoDB Atlas (M0), Render y Vercel ([docs/deploy.md](docs/deploy.md))
-- Para Whisper local (alternativa al reconocedor por defecto): binario de whisper.cpp para Windows y el modelo `small` con el prompt de ajedrez, **fuera del repo** (rutas en `.env`); un script lo instalará en un solo comando. Desde una web pública el navegador puede bloquear la llamada al agente local (acceso a red local).
+- Para Whisper local (alternativa al reconocedor por defecto): binario de whisper.cpp para Windows y el modelo `small` con el prompt de ajedrez, **fuera del repo** (rutas en `.env`). Desde una web pública el navegador puede bloquear la llamada al agente local (acceso a red local).
 
 ## Puesta en marcha
 
-**Hoy (existe):**
+**En local, con dos pestañas de Edge.** Comprobado en el equipo de desarrollo; **aún sin probar en una máquina limpia.**
+
 ```bash
 pnpm install
-pnpm verify                 # typecheck y tests de todos los paquetes
-pnpm build:web              # compila la web a web/dist
-pnpm serve:web              # la sirve en http://127.0.0.1:5500
-pnpm --filter @chessspeak/local-agent start   # agente local; necesita Whisper (pnpm --filter @chessspeak/spike-whisper-local download)
+pnpm env:init                # crea .env con contraseñas aleatorias (no sobrescribe uno existente)
+docker compose up -d         # postgres:17 y mongo:8
+pnpm --filter @chessspeak/server prisma:migrate
+pnpm --filter @chessspeak/server build
+pnpm --filter @chessspeak/server start      # API en http://127.0.0.1:3000; déjalo en marcha
 ```
 
-**Objetivo (se habilita por fases; verifica que exista antes de usarlo):**
+En otra terminal, copia `web/shell/.env.example` a `web/shell/.env`, pon en ella `PUBLIC_API_URL=http://127.0.0.1:3000`, y después:
+
 ```bash
-cp .env.example .env        # rellena tus propios secretos; nunca los subas
-pnpm --filter server start:dev   # API en local
-pnpm build:web                   # compila los microfrontends a web/dist
-pnpm serve:web                   # sirve web/dist en http://127.0.0.1:5500 (servidor estático de Node)
+pnpm build:web               # compila la web a web/dist
+pnpm serve:web               # la sirve en http://127.0.0.1:5500
 ```
+
+Abre esa dirección, entra con un nombre y crea una partida. El otro jugador entra con el enlace de invitación, en otra pestaña.
+
+**Whisper local (opcional):**
+
+```bash
+pnpm --filter @chessspeak/spike-whisper-local download   # binario y modelos, fuera del repo
+pnpm --filter @chessspeak/local-agent start              # agente en http://127.0.0.1:8765
+```
+
+Después elígelo en el selector de reconocedor de la web. **Este camino aún no se ha probado con el Whisper real ni con voz real.**
+
+**Pruebas:** `pnpm verify` no necesita Docker. `pnpm smoke:web` comprueba que los microfrontends cargan. `pnpm e2e:web` juega partidas completas en Edge o Chrome, con un reconocedor y un agente falsos: demuestra el flujo, no el reconocimiento.
 
 Cada microfrontend tiene además su página standalone con contexto simulado, para trabajar en uno sin levantar los demás.
+
+**Despliegue:** los pasos están en [docs/deploy.md](docs/deploy.md). **Aún no se ha desplegado.**
 
 ### Bases de datos locales (Docker)
 
@@ -78,20 +94,38 @@ pnpm test:integration        # pruebas contra las bases locales (se omiten con u
 - `GET /health/live` responde sin consultar las bases: es la ruta para el sondeo de la plataforma.
 - La telemetría de voz (`voice:attempt`) se guarda en `voice_attempts`, sin audio, con los límites `VOICE_ATTEMPT_MAX_BYTES` y `VOICE_ATTEMPT_LIMIT_PER_MINUTE` por conexión. Nunca interrumpe la partida ([docs/protocol.md](docs/protocol.md)).
 
+## Qué está probado y qué no
+
+| Parte | Estado |
+|---|---|
+| Partida entre dos invitados, reconexión y fin de partida | Probado en local, con pruebas de integración y `pnpm e2e:web` |
+| Flujo de voz, confirmación, telemetría e historial | Probado con un reconocedor falso |
+| Reconocimiento con voz real en el producto | **Sin probar.** Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
+| Whisper real desde el navegador | **Sin probar;** solo con un agente falso |
+| Render, Neon, Atlas y Vercel | **Sin desplegar** |
+| README en una máquina limpia | **Sin probar** |
+| Chrome | **Sin medir** |
+
+## Privacidad
+
+- **Nunca se guarda audio.** En `voice_attempts` se guarda el texto reconocido, con los datos del intento.
+- **Web Speech envía el audio a la nube del navegador.**
+- **Whisper local no saca el audio de tu equipo.**
+
 ## Documentación
 
 | Archivo | Para qué |
 |---|---|
 | [docs/CONTEXT.md](docs/CONTEXT.md) | Una página para ponerse al día |
 | [SPEC.md](SPEC.md) | Qué construimos y cuándo algo está “terminado” |
-| [PLAN.md](PLAN.md) | Estado, calendario, reparto y riesgos |
+| [PLAN.md](PLAN.md) | Estado, orden de trabajo y riesgos |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Componentes, datos, comunicación y decisiones |
 | [docs/deploy.md](docs/deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, commits y pull requests |
 | [AGENTS.md](AGENTS.md) | Reglas para asistentes de IA |
-| `docs/adr/` | Decisiones de arquitectura (media página cada una; el 4 y el 5 están aceptados) |
+| `docs/adr/` | Decisiones de arquitectura, de media página cada una |
 | `docs/spike-*.md` | Criterios, resultados, decisión y notas del spike de voz |
-| `docs/quality.md` | Escenarios de calidad con cifras medidas |
+| `docs/quality.md` | Escenarios de calidad con cifras medidas. **Aún no existe:** sale de la validación |
 
 ## Licencia
 

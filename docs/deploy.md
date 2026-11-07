@@ -54,7 +54,7 @@ Las crea el responsable del repo. Con GitHub basta para entrar en Render y en Ve
 1. Importa el repositorio. **Root Directory:** déjalo en la raíz. Vercel lee `vercel.json`.
 2. En **Environment Variables**:
    - Añade `PUBLIC_API_URL` con la URL de Render, sin barra final.
-   - Si no quieres ofrecer Whisper local, añade `PUBLIC_AGENT_URL` vacía. Sin ella se usa `http://127.0.0.1:8765`, y el selector aparece.
+   - El selector de Whisper local queda visible en Vercel a propósito: sin `PUBLIC_AGENT_URL` se usa `http://127.0.0.1:8765`. **Supuesto sin probar:** que definirla vacía lo oculte; no está comprobado que Vercel admita un valor vacío.
    - Comprueba que está marcada **Enable access to System Environment Variables**. Sin ella no existe `VERCEL=1`, y la compilación no detectaría que falta `PUBLIC_API_URL`.
 3. **Deploy** y copia la URL, parecida a `https://chessspeak.vercel.app`.
 

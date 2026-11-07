@@ -2,7 +2,7 @@
 
 **Estado a 2026-11-06, 05:22 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
 
-**En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Eso ya está en `main`, tras fusionar la cadena de PR. Faltan la voz en el producto, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
+**En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Eso ya está en `main`, tras fusionar la cadena de PR. La voz también funciona, pero **solo se ha probado con un reconocedor y un agente falsos**. Faltan la prueba con voz real, el Whisper real, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
 
 **Equipo (decisión del 6 de noviembre):** el responsable del repo trabaja solo, sin revisión del compañero, y es el único que aprueba. Por eso ya no se espera ninguna firma para el contrato (#3) ni para la cadena de PR.
 
@@ -10,7 +10,7 @@
 
 | Rama | Local | Remoto | Situación |
 |---|---|---|---|
-| `main` | `76c4e04` | `76c4e04` | Contiene la cadena, `docs/delivery-nov-19` y #18 a #23. La protección de rama la activa el responsable del repo en Settings |
+| `main` | `ea21e65` | `ea21e65` | Antes de este PR. Contiene la cadena, `docs/delivery-nov-19` y #18 a #29. La protección de rama la activa el responsable del repo en Settings |
 | `feat/contract-v0` | `75c82f9` | `75c82f9` | PR #3, fusionado en `9a566aa` |
 | `feat/game-room` | `9cf9cad` | `9cf9cad` | PR #10, fusionado en `8f32cfc` |
 | `feat/guest-auth` | `05d9b73` | `05d9b73` | PR #11, fusionado en `05fd7a6` |
@@ -26,10 +26,16 @@
 | `fix/build-web-requires-api-url` | `f165ebc` | `f165ebc` | PR #21, fusionado con *squash* en `579e14e` |
 | `chore/render-exact-node` | `77c29fa` | `77c29fa` | PR #22, fusionado con *squash* en `86044bc` |
 | `docs/deploy-checklist` | `a3f9daf` | `a3f9daf` | PR #23, fusionado con *squash* en `76c4e04` |
+| `docs/handoff-deploy-prs` | `dfb400e` | `dfb400e` | PR #24, fusionado con *squash* en `12d39a1` |
+| `feat/voice-metrics` | `6afb43f` | `6afb43f` | PR #25, fusionado con *squash* en `ad1b178` |
+| `feat/push-to-talk` | `37885f2` | `37885f2` | PR #26, fusionado con *squash* en `7471bf3` |
+| `feat/web-speech` | `f6fef93` | `f6fef93` | PR #27, fusionado con *squash* en `5ed174b` |
+| `feat/mf-history` | `66984ca` | `66984ca` | PR #28, fusionado con *squash* en `c91e51b` |
+| `feat/whisper-adapter` | `d9f6e22` | `d9f6e22` | PR #29, fusionado con *squash* en `ea21e65` |
 
 Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con commit de fusión #3 (`9a566aa`), #10 (`8f32cfc`), #11 (`05fd7a6`), #12 (`9d1bb44`), #13 (`de79815`) y #14 (`311c0fa`). El diff de cada PR de la cadena fue igual a su línea base, y su CI se revisó por trabajo con la base en `main`.
 
-**Ramas remotas borradas el 6 de noviembre**, tras comprobar con `git branch -r --merged origin/main` que `main` contiene sus puntas: `feat/contract-v0` (`75c82f9`), `feat/game-room` (`9cf9cad`), `feat/guest-auth` (`05d9b73`), `feat/create-game` (`3c3367f`), `feat/game-gateway` (`90ab665`) y `feat/web-game` (`cbe8abb`). También `docs/contributing-solo` (`f68bb97`): se fusionó con *squash*, así que no aparece en esa comprobación, y se borró tras verificar que `main` conserva la excepción de `CONTRIBUTING.md`. Tras anotar aquí sus hashes, se borran también `docs/delivery-nov-19` (`2a34557`) y `docs/handoff-merged-chain` (`2559af5`), cuyos árboles coinciden con sus *squash* (`af163bd` y `76b0dfe`). Al fusionar este cambio se borran las ramas de #18 a #23 listadas en la tabla, tras comprobar que el cambio de cada una coincide con su *squash*.
+**Ramas remotas borradas el 6 de noviembre**, tras comprobar con `git branch -r --merged origin/main` que `main` contiene sus puntas: `feat/contract-v0` (`75c82f9`), `feat/game-room` (`9cf9cad`), `feat/guest-auth` (`05d9b73`), `feat/create-game` (`3c3367f`), `feat/game-gateway` (`90ab665`) y `feat/web-game` (`cbe8abb`). También `docs/contributing-solo` (`f68bb97`): se fusionó con *squash*, así que no aparece en esa comprobación, y se borró tras verificar que `main` conserva la excepción de `CONTRIBUTING.md`. Tras anotar aquí sus hashes, se borran también `docs/delivery-nov-19` (`2a34557`) y `docs/handoff-merged-chain` (`2559af5`), cuyos árboles coinciden con sus *squash* (`af163bd` y `76b0dfe`). También se borraron las ramas de #18 a #29 listadas en la tabla, tras comprobar que el cambio de cada una coincide con su *squash*.
 
 **CI por trabajo:** `verify`, `integration`, `secrets` y `smoke` están en verde en la última ejecución de `main` y de los 6 PR. En #14 (`cbe8abb`): servidor 198 tests, integración 33, `local-agent` 46, `voice-parser` 84, web 66 y `smoke` 13 comprobaciones. **Hay que mirar cada trabajo por separado:** ver el riesgo de `smoke`.
 
@@ -40,12 +46,12 @@ Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con c
 | Requisito | Estado | Evidencia |
 |---|---|---|
 | **Nube** | **No empezado.** Solo está preparado | `render.yaml`, `vercel.json` y `docs/deploy.md` en `main` (#8). No hay ninguna URL real en el repo |
-| **Módulo local** | **Agente: hecho y verificado. Desde el navegador: no empezado** | `local-agent` en `main` (#6), con CI y corridas de carga. El adaptador del navegador no existe |
+| **Módulo local** | **Agente: hecho y verificado. Desde el navegador: hecho, sin probar con el Whisper real** | `local-agent` en `main` (#6). Adaptador y selector en #29, probados con un agente falso. ADR 6 |
 | **Sockets** | **Hecho y verificado, solo en PR** | #13 y #14: integración con bases reales (`game-flow.int-spec.ts`) y `pnpm e2e:web`, 22 de 22 en Edge. Solo en local, sin nube |
-| **Micrófono** | **No empezado en el producto** | Solo existe el arnés del spike (`spike/web-speech`). La rama `feat/web-game` no usa `SpeechRecognition`, `getUserMedia` ni `MediaRecorder` |
-| **Dos bases de datos** | **Parcial.** Partidas y jugadas: hecho y verificado, solo en PR y en local. `voice_attempts`: no empezado | Esquemas en `main` (#4). Escrituras en #12 y #13, con integración real. El módulo `voice-metrics` está vacío. Neon y Atlas: no existen |
+| **Micrófono** | **Hecho, sin probar con voz real** | Web Speech en #27 y captura de audio en #29. El e2e usa un `SpeechRecognition` falso y el micrófono falso del navegador |
+| **Dos bases de datos** | **Hecho en local.** Neon y Atlas: no existen | Partidas y jugadas en #12 y #13. `voice_attempts` en #25, con integración contra Mongo real |
 | **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
-| **Microfrontends** | **Parcial.** Los 3 existen. `<mf-game>` y la caja de texto: hecho y verificado, solo en PR. `<mf-history>`: marcador de posición | Base en `main` (#2). Real en #14. `smoke:web` y `e2e:web` |
+| **Microfrontends** | **Hecho en local** | Los 3 son reales: `<mf-game>` (#14), `<mf-voice-input>` (#26, #27 y #29) y `<mf-history>` (#28). `smoke:web` y `e2e:web` |
 | **Balanceo** | **Whisper: hecho y verificado, cumplimiento sin confirmar. `move-workers`: no empezado** | Pool y dashboard en `main` (#6). La evidencia de carga y el ensayo con un worker muerto están solo en `docs/delivery-nov-19`. ADR 10 revisado y ADR 11 solo en esa rama. Del pool solo existe el puerto |
 | **Dominio** | **Registrado y delegado; aún no funciona. En espera del profesor** | `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*, `REFUSED`, comprobado el 6 de noviembre). Mínimo garantizado: la URL `vercel.app`, que tampoco está publicada |
 
@@ -53,11 +59,11 @@ Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con c
 
 | # | Criterio | Estado |
 |---|---|---|
-| 1 | Partida completa por voz con Web Speech | No empezado; existe por texto |
-| 2 | Una jugada por voz con Whisper desde el navegador | No empezado |
+| 1 | Partida completa por voz con Web Speech | Verificado con un `SpeechRecognition` falso; **falta con voz real** |
+| 2 | Una jugada por voz con Whisper desde el navegador | Verificado con un agente falso; **falta con el Whisper real** |
 | 3 | Desconexión y reconexión | Verificado en PR, en local |
-| 4 | Una frase ambigua o ilegible no mueve piezas | Verificado por texto, sin voz |
-| 5 | `voice_attempts`, `game_moves` y Postgres | `game_moves` y Postgres verificados en PR; `voice_attempts`, no |
+| 4 | Una frase ambigua o ilegible no mueve piezas | Verificado por texto y con reconocedor falso; **falta con voz real** |
+| 5 | `voice_attempts`, `game_moves` y Postgres | Verificado en local, con bases reales |
 | 6 | Backend en la nube, repo público y CI en verde | Falta el backend en la nube |
 | 7 | `quality.md`, ADR y README probado con un clon nuevo | No empezado; hay ADR parciales |
 
@@ -67,7 +73,7 @@ Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con c
 |---|---|---|---|---|
 | **0. Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos, `serve:web`, CI, esquemas, `/health`, archivos de despliegue | Contrato (#3), sin fusionar | Nada | Despliegue en Neon, Atlas, Render y Vercel; ADR 9 |
 | **1. Partida entre invitados** | `local-agent` | `GameRoom` (#10), auth y ADR 8 (#11), `POST /games` (#12), gateway, guardado y ADR 7 (#13), shell, `<mf-game>` y caja de texto (#14) | Nada | Despliegue |
-| **2. Voz de punta a punta** | Parser y corpus v0 | Fin de partida y reconexión (#13); confirmación con flecha, por texto (#14) | Nada | Web Speech en el producto, adaptador Whisper, `voice-metrics`, telemetría, `<mf-history>` real, aviso sin Web Speech, latencia declarada, ADR 6 |
+| **2. Voz de punta a punta** | Parser, fin de partida, reconexión, Web Speech, adaptador Whisper, `voice-metrics`, telemetría, `<mf-history>` real, aviso sin Web Speech, latencia declarada y ADR 6 | Nada | Nada | Prueba con voz real |
 | **3. Validación y entrega** | Nada | Nada | Kit para la otra laptop (sin resultados) | `docs/quality.md`, 40 frases, validación, ensayos, clon nuevo, video, `web/dist` en la entrega, tag `v1.0` |
 
 **Llegó a `main` con #16:** ADR 11, revisión del ADR 10 y ADR 1, supuestos, evidencia de carga, kit y este archivo. **Pool de `move-workers`:** no existe.
@@ -83,12 +89,12 @@ Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con c
 | 5 | Crear las cuentas de Neon, Atlas, Render y Vercel, y desplegar con esas credenciales. Después, probar `trust proxy` | Responsable del repo |
 | 6 | Lote del parser: fuera del plan, se queda `spike-parser-freeze` | Responsable del repo |
 | 7 | Dar el OK explícito antes de empezar el pool de `move-workers` | Responsable del repo |
-| 8 | Web Speech, pulsar para hablar y confirmación por voz | Claude, tras el OK del responsable |
-| 9 | `voice-metrics` y telemetría | Claude, tras el OK del responsable |
-| 10 | Adaptador Whisper en el navegador, probado en Edge | Claude, tras el OK del responsable |
-| 11 | `<mf-history>` real | Claude, tras el OK del responsable |
+| 8 | Hecho: Web Speech, pulsar para hablar y confirmación por voz (#26 y #27). **Falta la prueba con voz real** | Responsable del repo (voz real) |
+| 9 | Hecho: `voice-metrics` y telemetría (#25 y #26) | Claude |
+| 10 | Hecho: adaptador Whisper y selector (#29). **Falta la prueba con el Whisper real** | Responsable del repo (voz real) y Claude |
+| 11 | Hecho: `<mf-history>` real (#28) | Claude |
 | 12 | Pool de `move-workers`, tras el OK explícito | Claude, tras el OK del responsable |
-| 13 | ADR 9, ADR 6, C4 y poner al día los documentos | Claude, tras el OK del responsable |
+| 13 | ADR 9, C4 y poner al día `ARCHITECTURE.md` y `docs/CONTEXT.md`. El ADR 6 ya está | Claude, tras el OK del responsable |
 | 14 | 40 frases de validación | Responsable del repo |
 | 15 | Medir los dos equipos con el kit y repetir la carga de Whisper en el más débil | Responsable del repo |
 | 16 | Medir en Chrome, si no se recorta | Responsable del repo (voz real) |
@@ -209,7 +215,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 
 | Riesgo | Estado |
 |---|---|
-| **`smoke` inestable en CI** | **Abierto, sin causa conocida.** Falló 3 de 3 en `fa5c168` y pasó 3 de 3 en `cbe8abb`. Mismo error antes en `main` (`2d287ea`). También falló en #13 (`90ab665`, con la base en `main`, ejecución 42315165037), con el texto `✗ la prueba terminó sin errores — tiempo agotado esperando: el navegador`; con un único relanzamiento pasó y la fusión siguió. Igual en #16 (`2a34557`, ejecución 42318700978): mismo texto y, con un único relanzamiento, pasó. Ese registro añade `estado del navegador: sigue en marcha` y errores de `dbus` en la salida del navegador, que no se dan por causa. Son 2 fallos en las 15 primeras ejecuciones del 6 de noviembre anteriores a fusionar #16. La causa sigue sin determinar. Hipótesis sin confirmar: un arranque lento del navegador, porque en el registro de #16 no aparecen ni `DevTools listening` ni un error de puerto. `scripts/smoke-web.mjs` espera ahora hasta 30 s (antes, 10 s) y registra cuánto tarda el navegador; en un fallo, también si anunció su puerto. Tiempo de arranque del navegador en CI, que `scripts/smoke-web.mjs` registra en cada ejecución: 8755, 10 960, 977, 9347, 700, 6010, 827 y 935 ms, frente a 885 y 1112 ms en local. Una de esas ejecuciones superó el antiguo límite de 10 s. Sigue siendo una hipótesis, y el riesgo sigue abierto. Una espera mayor podría ocultar el problema sin demostrar la causa: no se da por arreglado sin varias ejecuciones seguidas en verde, y no bloquea el despliegue. Con `continue-on-error`, el resultado global puede decir verde aunque falle |
+| **`smoke` inestable en CI** | **Abierto, sin causa conocida.** Falló 3 de 3 en `fa5c168` y pasó 3 de 3 en `cbe8abb`. Mismo error antes en `main` (`2d287ea`). También falló en #13 (`90ab665`, con la base en `main`, ejecución 42315165037), con el texto `✗ la prueba terminó sin errores — tiempo agotado esperando: el navegador`; con un único relanzamiento pasó y la fusión siguió. Igual en #16 (`2a34557`, ejecución 42318700978): mismo texto y, con un único relanzamiento, pasó. Ese registro añade `estado del navegador: sigue en marcha` y errores de `dbus` en la salida del navegador, que no se dan por causa. Son 2 fallos en las 15 primeras ejecuciones del 6 de noviembre anteriores a fusionar #16. La causa sigue sin determinar. Hipótesis sin confirmar: un arranque lento del navegador, porque en el registro de #16 no aparecen ni `DevTools listening` ni un error de puerto. `scripts/smoke-web.mjs` espera ahora hasta 30 s (antes, 10 s) y registra cuánto tarda el navegador; en un fallo, también si anunció su puerto. Tiempo de arranque del navegador en CI, que `scripts/smoke-web.mjs` registra en cada ejecución: 8755, 10 960, 977, 9347, 700, 6010, 827, 935, 661, 982, 11 448, 6138, 8899, 7611, 11 487 y 6612 ms, frente a unos 900 a 1200 ms en local. Tres de esas ejecuciones superaron el antiguo límite de 10 s, y pasaron por la espera de 30 s. Parece haber dos grupos, de menos de 1 s y de 6 a 11 s. Sigue siendo una hipótesis, y el riesgo sigue abierto. Una espera mayor podría ocultar el problema sin demostrar la causa: no se da por arreglado sin varias ejecuciones seguidas en verde, y no bloquea el despliegue. Con `continue-on-error`, el resultado global puede decir verde aunque falle |
 | **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor)** | **Sin definir:** hora y duración de la demo, y si el profesor abrirá el proyecto él mismo. |
 | **Dominio** | **En espera del profesor; mínimo garantizado: la URL `vercel.app`.** Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*). No se sabe qué hosting es, qué permite alojar ni si tiene HTTPS, que es obligatorio para el micrófono |
 | **Cadena de 6 PR** | **Cerrado.** Fusionada en orden con commits de fusión; los hashes están en «Ramas y hashes» |
@@ -219,8 +225,10 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
-| **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15), las 6 fusiones de la cadena (`9a566aa`, `8f32cfc`, `05fd7a6`, `9d1bb44`, `de79815` y `311c0fa`), los *squash* de #16 (`af163bd`) #17 (`76b0dfe`), #18 (`9db85f6`), #19 (`23e4bcc`), #20 (`cd68b5a`), #21 (`579e14e`), #22 (`86044bc`) y #23 (`76c4e04`), y los 33 commits de la cadena. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta. Se aceptó así para las 5 fusiones restantes, y los *squash* hechos con `gh` también lo llevan |
-| **Documentos desactualizados** | **Abierto.** `README.md`, `ARCHITECTURE.md` y `docs/CONTEXT.md` siguen describiendo el estado del 5 de noviembre |
+| **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15), las 6 fusiones de la cadena (`9a566aa`, `8f32cfc`, `05fd7a6`, `9d1bb44`, `de79815` y `311c0fa`), los *squash* de #16 (`af163bd`), #17 (`76b0dfe`), #18 (`9db85f6`), #19 (`23e4bcc`), #20 (`cd68b5a`), #21 (`579e14e`), #22 (`86044bc`), #23 (`76c4e04`), #24 (`12d39a1`), #25 (`ad1b178`), #26 (`7471bf3`), #27 (`5ed174b`), #28 (`c91e51b`) y #29 (`ea21e65`), y los 33 commits de la cadena. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta. Se aceptó así para las 5 fusiones restantes, y los *squash* hechos con `gh` también lo llevan |
+| **Documentos desactualizados** | **Abierto.** `ARCHITECTURE.md` y `docs/CONTEXT.md` siguen describiendo en parte el estado del 5 de noviembre |
+| **Voz real sin probar** | **Abierto.** Web Speech y Whisper solo se han probado con un reconocedor, un agente y un micrófono falsos (`pnpm e2e:web`, 57 de 57 en Edge 156). Las cifras del spike no son cifras del producto |
+| **Entrada bloqueada tras terminar una partida** | **Corregido en #27 (`5ed174b`).** `<mf-voice-input>` nunca reiniciaba `ended`, así que la partida siguiente en la misma pestaña quedaba bloqueada hasta recargar, también en la caja de texto. Ya estaba en `main`. Se encontró leyendo el código para el e2e, no por un fallo |
 | **Nombre del anexo en la historia pública** | **Abierto; quitarlo exigiría `--force`.** El nombre del archivo del anexo de la transcripción aparece en un enlace antiguo de 4 commits de `docs/delivery-nov-19`: `8246b8c`, `c703ae7`, `e6cd3c7` y `c62712f`. El archivo nunca se subió y la punta de la rama no lo nombra |
 | **Reflog pendiente de limpiar** | **Abierto; espera el OK del responsable del repo.** El anexo y la historia anterior a parafrasear las citas siguen en el `.git` local de este equipo, fuera de cualquier rama. Esa carpeta `.git` no debe copiarse a otro equipo antes de limpiarlo |
 
@@ -230,9 +238,9 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 
 - **Cuentas y despliegue:** no se tiene acceso a Neon, Atlas, Render, Vercel ni DigitalPlat. Se sabe que el repo no tiene URL reales, no si ya existen cuentas.
 - **Dominio:** solo hay consultas DNS públicas; no se vio el panel de registro ni el hosting.
-- **`pnpm e2e:web` sobre el último commit:** los 22 de 22 son de la noche del 5 de noviembre, antes de `227c729`. Después solo cambiaron comentarios, el README y `smoke-web.mjs`. Las capturas están fuera del repo.
+- **`pnpm e2e:web`:** 57 de 57 en Edge 156 sobre #29. No corre en CI, y usa un reconocedor, un agente y un micrófono falsos.
 - **Edge con ventana visible:** corrió sin interfaz, con pestañas en un solo equipo. Tampoco se probó con dos laptops, red real, móvil ni Live Server.
-- **Voz real en el producto:** no existe. Las cifras de voz son del spike, con una sola voz.
+- **Voz real en el producto:** existe, sin probar con un micrófono real. Las cifras de voz son del spike, con una sola voz.
 - **Causa del fallo de `smoke`.**
 - **Pérdida de jugadas con escrituras pendientes,** porque ninguna prueba cubre ese caso.
 - **Estrategia de fusión en GitHub:** solo se simuló con git local, sobre una versión anterior de `feat/web-game`.

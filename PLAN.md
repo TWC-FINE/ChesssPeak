@@ -189,7 +189,7 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 | 3 | Dos bases: Postgres (partidas) y Mongo (jugadas append-only y telemetría) | **Aceptado** (3 nov) |
 | 4 | Resolución de voz contra jugadas legales + criterios del spike | **Aceptado** (2 nov) |
 | 5 | `SpeechRecognizer` como Strategy; reconocedor por defecto (Web Speech en Edge con retardo de 400 ms; Whisper `small` alternativo) | **Aceptado** (2 nov) |
-| 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | Sin escribir |
+| 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | **Aceptado** (6 nov); falta la prueba con el Whisper real |
 | 7 | Estado en memoria + write-behind idempotente | En el PR #13 |
 | 8 | Invitados con token firmado; login fuera del plan | En el PR #11 |
 | 9 | Licencia GPL-3.0 (por chessground) | **Sin escribir** |
