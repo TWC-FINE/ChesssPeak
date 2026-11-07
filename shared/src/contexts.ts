@@ -1,29 +1,36 @@
 import { z } from 'zod';
+import { recognizerSchema } from './protocol/client.js';
+import { colorSchema, gameIdSchema } from './protocol/common.js';
+import type { GameSocket } from './protocol/socket.js';
 
-/** DRAFT of the contexts the shell injects through `el.context`. Not the v0 contract (part 0c). */
+/**
+ * Contexts the shell injects through `el.context`, contract v1.
+ * Least privilege: only <mf-game> receives the socket; mf-voice-input and mf-history use cs:* events.
+ */
+
 export const gameContextSchema = z.object({
   v: z.literal(1),
-  gameId: z.string().min(1).nullable(),
-  /** Position shown by `<mf-game>`; the standard starting position when absent. */
-  fen: z.string().min(1).optional(),
-  orientation: z.enum(['white', 'black']),
+  gameId: gameIdSchema.nullable(),
+  orientation: colorSchema,
 });
-export type GameContext = z.infer<typeof gameContextSchema>;
+/** The socket is not serializable, so it is typed but not part of the schema. `null` before connecting. */
+export type GameContext = z.infer<typeof gameContextSchema> & { socket: GameSocket | null };
 
 export const voiceInputContextSchema = z.object({
   v: z.literal(1),
-  lang: z.string().min(1),
-  recognizer: z.enum(['webspeech', 'whisper', 'text', 'fake']),
-  releaseDelayMs: z.number().int().nonnegative(),
+  gameId: gameIdSchema.nullable(),
+  lang: z.string().min(2).max(16),
+  recognizer: recognizerSchema,
+  /** Overrides DEFAULT_RELEASE_DELAY_MS (voice.ts) when present. */
+  releaseDelayMs: z.number().int().nonnegative().optional(),
+  /** Local Whisper agent, e.g. http://127.0.0.1:8765; null when not available. */
+  agentUrl: z.string().url().nullable(),
 });
 export type VoiceInputContext = z.infer<typeof voiceInputContextSchema>;
 
 export const historyContextSchema = z.object({
   v: z.literal(1),
-  gameId: z.string().min(1).nullable(),
-  moves: z.array(z.string()),
+  gameId: gameIdSchema.nullable(),
 });
+/** The moves arrive through cs:move-applied, not through the context. */
 export type HistoryContext = z.infer<typeof historyContextSchema>;
-
-/** Standard starting position. */
-export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';

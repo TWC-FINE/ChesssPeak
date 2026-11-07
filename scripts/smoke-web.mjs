@@ -109,8 +109,17 @@ const server = spawn(process.execPath, [join(root, 'scripts', 'serve-web.mjs')],
 const browser = spawn(
   browserPath,
   [`--headless=new`, `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--window-size=1280,900', 'about:blank'],
-  { stdio: 'ignore' },
+  { stdio: ['ignore', 'ignore', 'pipe'] },
 );
+// kept to explain a browser that does not start; the last lines are enough
+let browserOutput = '';
+let browserExit = null;
+browser.stderr.on('data', (chunk) => {
+  browserOutput = `${browserOutput}${chunk}`.slice(-4000);
+});
+browser.on('exit', (code, signal) => {
+  browserExit = `código ${code}, señal ${signal}`;
+});
 
 let page;
 try {
@@ -160,7 +169,7 @@ try {
   check('el tablero está en modo viewOnly (no manipulable) y sin Shadow DOM', board?.wrap === true && board?.manipulable === false && board?.shadow === false);
   check('las piezas vienen embebidas (data URI), no de un archivo externo', board?.art === true);
   const injected = await evaluate(`({ game: document.querySelector('mf-game').context?.gameId, voice: document.querySelector('mf-voice-input').textContent, history: document.querySelector('mf-history').textContent })`);
-  check('el shell inyecta el contexto simulado por el.context', injected.game === 'demo' && injected.voice.includes('es-CO') && injected.history.includes('e2e4'));
+  check('el shell inyecta el contexto simulado por el.context', injected.game === 'demo' && injected.voice.includes('es-CO') && injected.voice.includes('400 ms') && injected.history.includes('demo'));
   await evaluate(`location.hash = '#/'`);
   await waitFor(() => evaluate(`document.querySelector('mf-game').textContent.includes('sin partida')`), 'el cambio de ruta');
   check('el router por hash actualiza el contexto (#/ sin partida)', true);
@@ -198,12 +207,20 @@ try {
   check('no hubo excepciones en la página', consoleErrors.length === 0, consoleErrors.join(' | '));
 } catch (error) {
   check('la prueba terminó sin errores', false, error.message);
+  console.log(`estado del navegador: ${browserExit ?? 'sigue en marcha'}
+salida de error del navegador:
+${browserOutput || '(vacía)'}`);
 } finally {
   page?.close();
   kill(browser);
   kill(server);
-  await sleep(300);
-  rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  await sleep(1000);
+  // Windows can keep the browser profile locked for a moment: a leftover temp folder must not change the result
+  try {
+    rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+  } catch (error) {
+    console.log(`aviso: no se pudo borrar ${profile} (${error.code})`);
+  }
 }
 
 const failed = results.filter((r) => !r.ok);

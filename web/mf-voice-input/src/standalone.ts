@@ -7,7 +7,7 @@ document.addEventListener('cs:mf-ready', (event) => {
   if (log !== null) log.textContent += `${event.type} ${JSON.stringify((event as CustomEvent).detail)}\n`;
 });
 if (element !== null) {
-  const context: VoiceInputContext = { v: 1, lang: 'es-CO', recognizer: 'webspeech', releaseDelayMs: 400 };
+  const context: VoiceInputContext = { v: 1, gameId: 'demo', lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'http://127.0.0.1:8765' };
   (element as HTMLElement & { context: VoiceInputContext }).context = context;
 }
 

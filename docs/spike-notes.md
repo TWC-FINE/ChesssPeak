@@ -90,7 +90,7 @@ Agrupadas por **área**, no por fase: [PLAN.md](../PLAN.md) (sección 9) fija el
 - **Lote único de mejoras del parser: fuera del plan.** Se queda la versión `spike-parser-freeze`; la validación usa frases nuevas y **registra el hash del parser usado**.
 
 ### CI y entrega
-- [ ] **`protocolVersion` en `GET /health`** cuando se fusione el contrato v0 (PR #3). La rama de la capa de datos no lo incluye a propósito: ese campo se añadió en el contrato y hay que reincorporarlo al fusionar. Al fusionar también hay que **alinear** los valores de `result` y `termination` del CHECK de `games` (migración `*_games_checks`, ADR 3) con los del contrato si cambiaron en la revisión.
+- [x] **`protocolVersion` en `GET /health`** cuando se fusione el contrato v0 (PR #3). La rama de la capa de datos no lo incluye a propósito: ese campo se añadió en el contrato y hay que reincorporarlo al fusionar. Al fusionar también hay que **alinear** los valores de `result` y `termination` del CHECK de `games` (migración `*_games_checks`, ADR 3) con los del contrato si cambiaron en la revisión.
 - [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5), y explicarlo en el README.
 - [x] **Actualizar PLAN.md** con el spike cerrado, la decisión y que no hay demo en vivo (hecho el 2 de noviembre de 2026).
 - [ ] **`pnpm serve:web`:** servidor estático de Node, sin dependencias, en `127.0.0.1:5500`, para equipos sin VS Code (Fase 0 o Fase 3).

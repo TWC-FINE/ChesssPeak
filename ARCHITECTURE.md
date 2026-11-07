@@ -45,7 +45,8 @@ El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de
 ### 2.1 Backend (monolito modular NestJS)
 Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`. `analysis` opcional; sin `signaling`.
 
-- **`GameRoom`:** clase pura, sin Nest. Es la fuente de verdad en memoria de una partida; se actualiza **de forma síncrona antes de cualquier `await`**.
+- **`GameRoom`** (`server/src/games/game-room.ts`): clase pura, sin Nest. Es la fuente de verdad en memoria de una partida; se actualiza **de forma síncrona antes de cualquier `await`**. No tiene temporizadores ni E/S: el plazo de abandono, el sorteo de color, la autenticación, la persistencia y el reenvío son de quien la llama.
+- **chessops en el servidor:** su build CommonJS no carga en Node porque el paquete declara `type: module`. `patches/chessops@0.15.1.patch` lo corrige con `pnpm patch`, sin tocar su código. **Al actualizar chessops hay que revisar ese parche.** Un test lo comprueba con Node real, porque Jest no detecta el fallo.
 - **Persistencia write-behind:** cada jugada se guarda en Mongo de forma idempotente con `updateOne({gameId, plyCount: ply-1}, {$push, $inc: {plyCount: 1}})`.
 - **Rehidratación:** al reconectar se reconstruye la sala desde Mongo.
 - **Una sola instancia** en Render; no hace falta sticky session.
@@ -61,16 +62,20 @@ Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`
 ## 3. Flujo de una jugada por voz
 
 ```
+mf-game: cs:position (FEN, plyCount, turno) ──► document
 mf-voice-input: botón pulsado → SpeechRecognizer.recognize()
    → (Web Speech: 400 ms de espera tras soltar, antes de stop())
    → texto + alternativas
    → voice-parser.resolve(texto, FEN)   → move | ambiguous | nomatch | command
-   → mostrar flecha y pedir confirmación (obligatoria)
-   → cs:voice-move-confirmed   ──►  shell  ──►  mf-game
-   → game:move (UCI) por socket ──►  server valida y actualiza GameRoom
-   → game:state a ambos jugadores ◄── server
-   → telemetría (voice_attempts) vía shell ──► server (jugador lo pone el servidor)
+   → cs:move-candidate ──► mf-game dibuja la flecha; se pide confirmación (obligatoria)
+   → cs:move-confirmed ──► mf-game   (o cs:move-cancelled)
+   → game:move (UCI, ply) por socket ──►  server valida y actualiza GameRoom
+   → game:moved a ambos jugadores ◄── server   (o game:error)
+   → mf-game: cs:move-applied y cs:position ──► mf-history, mf-voice-input
+   → cs:voice-attempt ──► shell ──► voice:attempt ──► server (player y createdAt los pone el servidor)
 ```
+
+Detalle de cada evento y diagrama de secuencia: [docs/protocol.md](docs/protocol.md).
 
 ## 4. Reconocimiento de voz (patrón Strategy)
 

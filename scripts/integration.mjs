@@ -88,7 +88,10 @@ const env = { ...process.env, DATABASE_URL: pg.raw, MONGO_URI: mongo.raw, NODE_O
 const run = (command) => spawnSync(command, { cwd: server, env, stdio: 'inherit', shell: true });
 
 console.log(`test:integration: Postgres ${pg.host}:${pg.port}/${pg.database} · Mongo ${mongo.host}:${mongo.port}/${mongo.database}`);
-let result = run('pnpm exec prisma migrate deploy');
+// the server imports the compiled build of shared, which a clean checkout does not have yet
+let result = run('pnpm --filter @chessspeak/shared build');
+if (result.status !== 0) process.exit(result.status ?? 1);
+result = run('pnpm exec prisma migrate deploy');
 if (result.status !== 0) process.exit(result.status ?? 1);
 result = run('pnpm exec jest -c jest.integration.config.js --runInBand');
 process.exit(result.status ?? 1);

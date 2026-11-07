@@ -1,6 +1,6 @@
 # Contribuir a ChessSpeak
 
-Reglas de trabajo del equipo (A y B). Corto a propósito: se cumple o se discute en un PR.
+Reglas de trabajo del proyecto, en solitario: el responsable del repo es el único que aprueba. Corto a propósito: se cumple o se discute en un PR.
 
 ## Idioma
 - Código, comentarios, nombres de ramas y mensajes de commit: **inglés**.
@@ -32,16 +32,16 @@ Commits pequeños, uno por cambio lógico. Nunca se commitean secretos, `.env`, 
 
 ## Pull requests
 1. Abre el PR contra `main` con una descripción corta: qué cambia, por qué y cómo probarlo.
-2. **Lo revisa la otra persona** antes de fusionar. Nadie aprueba su propio PR.
-3. CI en verde (lint y gitleaks al inicio; tests y dependency-cruiser cuando existan).
+2. **Lo revisa y lo aprueba el responsable del repo** antes de fusionar. No hay revisión de otra persona.
+3. CI en verde, revisando cada trabajo por separado (`verify`, `integration`, `secrets` y `smoke`): `smoke` es `continue-on-error`, así que el resultado global puede decir verde aunque falle.
 4. Se fusiona con *squash* y se borra la rama.
-5. **Cambios en `shared/` (contrato)** requieren la aprobación de los dos, siempre.
+5. **Cambios en `shared/` (contrato)** van siempre en un PR propio, lo aprueba el responsable del repo y suben la versión.
 6. Si el PR cambia una decisión de arquitectura, incluye o actualiza el ADR correspondiente en `docs/adr/`.
 
+**Excepción a la regla 4:** la cadena #3, #10, #11, #12, #13 y #14 se fusiona con **commit de fusión**, en ese orden, con cada trabajo de CI en verde revisado por separado y con la base en `main` antes de fusionar. Ninguna de sus ramas se borra hasta que el PR siguiente apunte a `main`. Un *squash* rompería la cadena, porque cada PR se apoya en los commits del anterior.
+
 ## Revisiones
-- Se responde a un PR en menos de un día hábil, aunque sea para decir “lo veo mañana”.
 - Se revisa lo importante: corrección, contrato, seguridad, tests. El estilo lo resuelven lint y formato.
-- Comentarios claros y accionables; lo opcional se marca como *nit*.
 
 ## Convenciones de código
 - TypeScript estricto. Sin `any` salvo justificación en un comentario.
@@ -61,7 +61,6 @@ Commits pequeños, uno por cambio lógico. Nunca se commitean secretos, `.env`, 
 - No se guarda audio en ningún lado.
 - Instalar dependencias nuevas solo con motivo claro; se anotan en el PR.
 
-## Trabajo en equipo
-- Reparto base: **A** = servidor + `voice-parser`; **B** = shell, microfrontends y adaptadores de reconocimiento; `local-agent` y la integración de voz, juntos.
+## Organización
 - El avance se marca en [PLAN.md](PLAN.md). Si algo se atrasa, se aplica el orden de recorte del plan sin discutirlo de nuevo.
 - Las dudas de alcance se resuelven en [SPEC.md](SPEC.md).

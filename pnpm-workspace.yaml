@@ -10,3 +10,5 @@ allowBuilds:
   '@prisma/engines': true
   esbuild: false
   prisma: true
+patchedDependencies:
+  chessops@0.15.1: patches/chessops@0.15.1.patch

@@ -4,3 +4,8 @@ mf-voice-input { display: block; font-family: var(--cs-font); color: var(--cs-te
 .csv-root { display: flex; flex-direction: column; gap: var(--cs-gap); padding: var(--cs-gap); background: var(--cs-surface); border: 1px solid var(--cs-border); border-radius: var(--cs-radius); }
 .csv-title { margin: 0; font-size: 1rem; }
 .csv-info { margin: 0; font-size: 0.9rem; color: var(--cs-muted); }
+.csv-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.csv-label { display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; }
+.csv-input { font: inherit; padding: 6px 8px; }
+.csv-candidate, .csv-message { margin: 0; }
+.csv-candidate button { margin-left: 6px; }

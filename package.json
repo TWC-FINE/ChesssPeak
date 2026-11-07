@@ -16,6 +16,7 @@
     "build:web": "node scripts/build-web.mjs",
     "serve:web": "node scripts/serve-web.mjs",
     "smoke:web": "node scripts/smoke-web.mjs",
+    "e2e:web": "node scripts/e2e-web.mjs",
     "env:init": "node scripts/env-init.mjs",
     "test:integration": "node scripts/integration.mjs"
   },

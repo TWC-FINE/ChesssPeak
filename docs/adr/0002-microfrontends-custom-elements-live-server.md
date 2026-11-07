@@ -27,5 +27,5 @@ El curso exige microfrontends. La aclaración del profesor, **transmitida oralme
 - (+) Cada pieza se desarrolla y se prueba sola; un fallo de una no tumba las otras.
 - (+) `pnpm smoke:web` (Chrome o Edge sin interfaz) comprueba que las etiquetas se registran, que el tablero se pinta con sus piezas embebidas y que cada standalone funciona.
 - (−) Con light DOM los estilos son globales: el prefijo por microfrontend es una disciplina, no una garantía.
-- (−) `chessground` pesa: `mf-game.js` ronda los 190 kB (51 kB comprimido) con CSS y piezas incluidos.
+- (−) `chessground` pesa: `mf-game.js` ronda los 76 kB (23 kB comprimido) con CSS y piezas incluidos, desde que los bundles no arrastran zod (contrato v1).
 - (−) Si el profesor exige abrir el proyecto con Live Server sin compilar, `web/dist` tendrá que estar en el repositorio desde la entrega.
