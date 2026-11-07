@@ -29,10 +29,11 @@ export class VoiceAttempt {
   @Prop({ type: [{ _id: false, transcript: String, confidence: Number }], default: [] })
   alternatives!: { transcript: string; confidence?: number }[];
 
-  @Prop({ type: String, required: true })
+  /** Empty after a silence, which is still an attempt; `required` would reject it. The contract already requires the field. */
+  @Prop({ type: String, default: '' })
   transcript!: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, default: '' })
   normalized!: string;
 
   @Prop({ type: [{ _id: false, uci: String, score: Number }], default: [] })

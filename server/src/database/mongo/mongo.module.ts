@@ -4,6 +4,7 @@ import { MONGO_CONNECT_OPTIONS, mongoUri } from './mongo.config';
 import { GameMovesRepository } from './game-moves.repository';
 import { GameMoves, GameMovesSchema } from './game-moves.schema';
 import { VoiceAttempt, VoiceAttemptSchema } from './voice-attempt.schema';
+import { VoiceAttemptsRepository } from './voice-attempts.repository';
 
 /**
  * MongoDB. The connection is lazy and has short timeouts: the server starts even when Mongo is down
@@ -28,7 +29,7 @@ import { VoiceAttempt, VoiceAttemptSchema } from './voice-attempt.schema';
       { name: VoiceAttempt.name, schema: VoiceAttemptSchema },
     ]),
   ],
-  providers: [GameMovesRepository],
-  exports: [MongooseModule, GameMovesRepository],
+  providers: [GameMovesRepository, VoiceAttemptsRepository],
+  exports: [MongooseModule, GameMovesRepository, VoiceAttemptsRepository],
 })
 export class MongoModule {}

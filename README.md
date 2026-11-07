@@ -76,6 +76,7 @@ pnpm test:integration        # pruebas contra las bases locales (se omiten con u
 - `pnpm test:integration` solo se ejecuta contra `localhost` o `127.0.0.1` y contra bases cuyo nombre termina en `_test` (`DATABASE_URL_TEST` y `MONGO_URI_TEST`); en cualquier otro caso se niega. `pnpm verify` no necesita Docker.
 - `GET /health` responde siempre 200: `status` vale `degraded` si una base está caída. Cada base tiene un límite de `HEALTH_PROBE_TIMEOUT_MS` (1 s por defecto).
 - `GET /health/live` responde sin consultar las bases: es la ruta para el sondeo de la plataforma.
+- La telemetría de voz (`voice:attempt`) se guarda en `voice_attempts`, sin audio, con los límites `VOICE_ATTEMPT_MAX_BYTES` y `VOICE_ATTEMPT_LIMIT_PER_MINUTE` por conexión. Nunca interrumpe la partida ([docs/protocol.md](docs/protocol.md)).
 
 ## Documentación
 

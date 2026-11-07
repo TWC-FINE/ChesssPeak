@@ -143,6 +143,16 @@ sequenceDiagram
 
 Si el jugador dice «no» o «cancelar», `<mf-voice-input>` emite `cs:move-cancelled { reason: user }` en lugar de `cs:move-confirmed`, y la telemetría sale con `accepted: false`.
 
+### Telemetría de voz
+
+La telemetría es una medición, así que **nunca interrumpe la partida**. El servidor no responde a `voice:attempt`: si un mensaje no cumple el esquema, supera un límite o es de una partida a la que ese socket no se unió, o si no se puede guardar, lo registra en el log sin su contenido y lo descarta.
+
+- **Límites, por conexión:** `VOICE_ATTEMPT_MAX_BYTES` (8192 bytes de JSON por mensaje) y `VOICE_ATTEMPT_LIMIT_PER_MINUTE` (30 mensajes por minuto).
+- **Intentos que no se confirman:** también se envían, con `accepted: false`, para no medir solo los que salieron bien. Eso incluye cancelar, una jugada ignorada, un cambio de turno y un silencio, que llega con `transcript` vacío.
+- **Lo escrito en la caja de texto no se registra:** la colección mide la voz.
+- **Se puede perder un intento** si se cierra la página antes de confirmar o cancelar, o si no hay conexión, porque no se guarda para enviarlo después.
+- **Límite conocido: no distingue jugador de espectador.** Solo exige que el socket se haya unido a la partida, así que un espectador también puede enviar telemetría. Queda acotada por los límites de tamaño y frecuencia.
+
 ## 7. Decisiones provisionales (pendientes de validar por el responsable del repo)
 
 Respuestas provisionales a las dudas de revisión del contrato v1. Quedan **marcadas como provisionales** hasta que las valide el responsable del repo; si alguna cambia, es un cambio de contrato (ver [contract-versioning.md](contract-versioning.md)).
@@ -155,7 +165,7 @@ Respuestas provisionales a las dudas de revisión del contrato v1. Quedan **marc
 | Asientos | La regla de la sección 2 (color reservado para quien crea la partida; el resto, primer asiento libre) es **correcta** |
 | `game:error.message` | **Solo para depurar**. La interfaz decide el texto a partir de `code` y no muestra `message` |
 | `abandonment` | **Propuesta:** un jugador que lleva **más de 60 s desconectado** pierde la partida por `abandonment`; el plazo es **configurable** en el servidor (`ABANDON_TIMEOUT_MS`). **Pendiente de que la valide el responsable del repo** |
-| Payload inválido en el socket | `game:error { code: 'unauthorized' }`, también con un campo de más o una UCI mal formada. No se añade un código nuevo porque exigiría `v: 2`. **A revisar por el responsable del repo antes de que `mf-game` dependa de ellos.** |
+| Payload inválido en el socket | `game:error { code: 'unauthorized' }`, también con un campo de más o una UCI mal formada. **Excepción:** `voice:attempt` nunca responde con `game:error` (ver «Telemetría de voz»). No se añade un código nuevo porque exigiría `v: 2`. **A revisar por el responsable del repo antes de que `mf-game` dependa de ellos.** |
 | La partida no se puede cargar (una base caída) | `game:error { code: 'not_found' }`, con el detalle en `message` y en el log del servidor. El siguiente `game:join` lo vuelve a intentar. **A revisar por el responsable del repo antes de que `mf-game` dependa de ellos.** |
 | Volver a una partida terminada | `game:state` no lleva el resultado, así que tras él llega `game:end` a quien entra |
 | Orden de validación de `game:move` | Identidad, estado, **`ply` y después turno**, legalidad. Se comprueba `ply` antes del turno porque un envío repetido debe dar `stale_ply`: tras tu propia jugada ya no es tu turno, y al revés daría `not_your_turn`. **A revisar por el responsable del repo antes de que `mf-game` dependa de ellos.** |

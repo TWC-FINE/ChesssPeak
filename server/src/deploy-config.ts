@@ -5,6 +5,8 @@ const DEFAULT_CONNECT_TIMEOUT_MS = 1000;
 const DEFAULT_HEALTH_PROBE_TIMEOUT_MS = 1000;
 const DEFAULT_GUEST_AUTH_LIMIT = 10;
 const DEFAULT_ABANDON_TIMEOUT_MS = 60_000;
+const DEFAULT_VOICE_ATTEMPT_MAX_BYTES = 8192;
+const DEFAULT_VOICE_ATTEMPT_LIMIT = 30;
 
 /** Origins allowed by CORS. A browser sends the origin without a trailing slash, so one pasted with it would never match. */
 export function corsOrigins(env: Env = process.env): string[] {
@@ -34,6 +36,18 @@ export function healthProbeTimeoutMs(env: Env = process.env): number {
 export function guestAuthLimitPerMinute(env: Env = process.env): number {
   const value = Number(env.GUEST_AUTH_LIMIT_PER_MINUTE);
   return Number.isInteger(value) && value > 0 ? value : DEFAULT_GUEST_AUTH_LIMIT;
+}
+
+/** Largest voice:attempt kept, in bytes of its JSON. A normal one is far smaller; the contract does not limit the length of a transcript. */
+export function voiceAttemptMaxBytes(env: Env = process.env): number {
+  const value = Number(env.VOICE_ATTEMPT_MAX_BYTES);
+  return Number.isInteger(value) && value > 0 ? value : DEFAULT_VOICE_ATTEMPT_MAX_BYTES;
+}
+
+/** voice:attempt messages kept per connection and minute. Above what a person can say, and low enough to protect a small database. */
+export function voiceAttemptLimitPerMinute(env: Env = process.env): number {
+  const value = Number(env.VOICE_ATTEMPT_LIMIT_PER_MINUTE);
+  return Number.isInteger(value) && value > 0 ? value : DEFAULT_VOICE_ATTEMPT_LIMIT;
 }
 
 /** How long a player may stay disconnected from an active game before losing by abandonment (docs/protocol.md §7). */

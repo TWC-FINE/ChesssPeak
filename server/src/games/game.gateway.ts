@@ -27,10 +27,10 @@ interface SocketData {
   /** The games this socket joined, so that closing it counts once in each. */
   games: Set<string>;
 }
-type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
+export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
 type GameServer = Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
 
-const playerOf = (identity: Identity): RoomPlayer => ({ id: identity.kind === 'guest' ? identity.guestId : identity.userId, displayName: identity.displayName });
+export const playerOf = (identity: Identity): RoomPlayer => ({ id: identity.kind === 'guest' ? identity.guestId : identity.userId, displayName: identity.displayName });
 
 /**
  * Socket events of a game. The identity comes from the token of the handshake. GameRoom changes synchronously and
