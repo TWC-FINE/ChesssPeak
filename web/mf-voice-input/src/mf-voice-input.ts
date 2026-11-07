@@ -2,8 +2,9 @@ import { LitElement, html, type PropertyValues } from 'lit';
 import { resolve, type Resolution } from '@chessspeak/voice-parser';
 import { CS_EVENT_INIT, releaseDelayOf, type CsEventDetail, type CsEventName, type VoiceAttemptPayload, type VoiceInputContext } from '@chessspeak/shared';
 import { buildAttempt } from './attempt.js';
-import { createRecognizer } from './recognizers/create.js';
-import type { Listening, RecognitionFailure, RecognitionOutcome, SpeechRecognizer } from './recognizers/recognizer.js';
+import { createRecognizer, type RecognizerChoice } from './recognizers/create.js';
+import type { Listening, RecognitionOutcome, SpeechRecognizer } from './recognizers/recognizer.js';
+import { agentAnswers } from './recognizers/whisper.js';
 import ownCss from './styles.css?inline';
 
 // Light DOM means the styles are global: inject them once.
@@ -25,12 +26,30 @@ interface Candidate {
 
 const SILENCE: Resolution = { kind: 'nomatch', candidates: [] };
 
-const FAILURE_MESSAGES: Record<Exclude<RecognitionFailure, 'no-speech' | 'aborted'>, string> = {
-  'not-allowed': 'El navegador no deja usar el micrófono. Permítelo o usa la caja de texto.',
-  network: 'No hay conexión con el reconocedor. Usa la caja de texto.',
-  unavailable: 'El reconocedor no está disponible. Usa la caja de texto.',
-  other: 'No se pudo reconocer. Inténtalo de nuevo o usa la caja de texto.',
-};
+/** ADR 5: measured in the spike, on an i5-12400F, without recording or transport. */
+const WHISPER_LATENCY = 'Whisper local es más lento: p50 de 2,91 s y p95 de 3,06 s solo de inferencia, en un i5-12400F; en tu equipo será distinto. El audio no sale de tu equipo.';
+
+function failureMessage(outcome: RecognitionOutcome): string {
+  switch (outcome.failure) {
+    case 'not-allowed':
+      return 'El navegador no deja usar el micrófono. Permítelo o usa la caja de texto.';
+    case 'network':
+      return 'No hay conexión con el reconocedor. Usa la caja de texto.';
+    case 'unavailable':
+      return 'El reconocedor no está disponible. Usa la caja de texto.';
+    case 'busy':
+      return `El agente local está ocupado. Inténtalo de nuevo${outcome.retryAfterSeconds === undefined ? ' en unos segundos' : ` en ${outcome.retryAfterSeconds} s`} o usa la caja de texto.`;
+    case 'agent-unreachable':
+      return 'No se pudo contactar con el agente local. Comprueba que está en marcha y que permite este origen; desde una web pública, el navegador también puede bloquearlo. Usa otro reconocedor o la caja de texto.';
+    default:
+      return 'No se pudo reconocer. Inténtalo de nuevo o usa la caja de texto.';
+  }
+}
+
+const GATE_MESSAGES = {
+  'too-short': 'La frase fue muy corta. Mantén pulsado mientras hablas.',
+  'too-quiet': 'Se oyó muy bajo. Habla más cerca del micrófono.',
+} as const;
 
 /**
  * Voice and text box: phrase → parser → candidate → explicit confirmation (RF8). Nothing is ever played without it.
@@ -43,6 +62,9 @@ export class MfVoiceInput extends LitElement {
   declare speech: SpeechRecognizer | undefined;
 
   private fromContext: { key: string; recognizer: SpeechRecognizer | undefined } = { key: '', recognizer: undefined };
+  private choice: RecognizerChoice | undefined;
+  private selectorOpen = false;
+  private agentState: 'checking' | 'up' | 'down' = 'checking';
   private position: Position | undefined;
   private candidate: Candidate | undefined;
   /** The telemetry of the spoken candidate: `accepted` is only known when it is confirmed or dropped. */
@@ -69,6 +91,7 @@ export class MfVoiceInput extends LitElement {
     document.removeEventListener('cs:position', this.onPosition);
     document.removeEventListener('cs:game-ended', this.onEnded);
     this.abortTalk();
+    this.fromContext.recognizer?.dispose?.();
     super.disconnectedCallback();
   }
 
@@ -88,9 +111,10 @@ export class MfVoiceInput extends LitElement {
   /** The shell sends a new context on every change, and a recognizer is only replaced when it would be different. */
   private chooseRecognizer(): void {
     const context = this.context;
-    const key = `${context?.recognizer}|${context?.lang}|${releaseDelayOf(context)}`;
+    const key = `${context?.recognizer}|${context?.lang}|${releaseDelayOf(context)}|${context?.agentUrl}|${this.choice}`;
     if (key === this.fromContext.key) return;
-    this.fromContext = { key, recognizer: createRecognizer(context) };
+    this.fromContext.recognizer?.dispose?.();
+    this.fromContext = { key, recognizer: createRecognizer(context, this.choice) };
     if (this.noVoiceInBrowser()) this.setStatus('unavailable');
   }
 
@@ -108,6 +132,7 @@ export class MfVoiceInput extends LitElement {
     const context = this.context;
     return html`<div class="csv-root">
       <h2 class="csv-title">Tu jugada</h2>
+      ${this.renderSelector()}
       ${this.recognizer?.isAvailable() === true ? this.renderTalkButton() : ''}
       ${this.noVoiceInBrowser() ? html`<p class="csv-notice" data-voice-unavailable>Este navegador no tiene reconocimiento de voz. Usa la caja de texto, o abre la página en Edge.</p>` : ''}
       <form class="csv-form" @submit=${this.onSubmit}>
@@ -124,9 +149,54 @@ export class MfVoiceInput extends LitElement {
             <button type="button" data-action="cancel" @click=${this.cancelByUser}>Cancelar</button>
           </p>`}
       ${this.message === '' ? '' : html`<p class="csv-message" role="status">${this.message}</p>`}
-      <p class="csv-info">idioma: ${context?.lang ?? '—'} · reconocedor: ${context?.recognizer ?? '—'} · retardo al soltar: ${context === undefined ? '—' : `${releaseDelayOf(context)} ms`}</p>
+      <p class="csv-info">idioma: ${context?.lang ?? '—'} · reconocedor: ${this.recognizer?.name ?? context?.recognizer ?? '—'} · retardo al soltar: ${context === undefined ? '—' : `${releaseDelayOf(context)} ms`}</p>
     </div>`;
   }
+
+  /** Only when the shell knows an agent. The agent is asked only here, on opening: from a public page that can trigger a browser prompt. */
+  private renderSelector() {
+    const agentUrl = this.context?.agentUrl;
+    if (agentUrl == null || this.context?.recognizer === 'text' || this.speech !== undefined) return '';
+    const active = this.fromContext.recognizer?.name;
+    const busy = this.talk !== undefined || this.processing;
+    return html`<div class="csv-selector">
+      <button type="button" data-action="choose-recognizer" aria-expanded=${this.selectorOpen} ?disabled=${busy} @click=${this.toggleSelector}>
+        Reconocedor: ${active === 'whisper' ? 'Whisper local' : 'Web Speech'}
+      </button>
+      ${this.selectorOpen
+        ? html`<fieldset class="csv-options">
+            <legend>Elige el reconocedor</legend>
+            <label><input type="radio" name="recognizer" value="webspeech" .checked=${active !== 'whisper'} ?disabled=${busy} @change=${this.onChoose} /> Web Speech (por defecto)</label>
+            <label>
+              <input type="radio" name="recognizer" value="whisper" .checked=${active === 'whisper'} ?disabled=${busy || this.agentState !== 'up'} @change=${this.onChoose} />
+              Whisper local
+              <span data-agent-state=${this.agentState}>${this.agentState === 'checking' ? '(comprobando…)' : this.agentState === 'up' ? '(disponible)' : '(no responde)'}</span>
+            </label>
+            ${this.agentState === 'down' ? html`<p class="csv-notice" data-agent-down>No responde el agente local en ${agentUrl}. Arráncalo, o el navegador puede estar bloqueándolo desde una web pública.</p>` : ''}
+            <p class="csv-info" data-whisper-latency>${WHISPER_LATENCY}</p>
+          </fieldset>`
+        : ''}
+    </div>`;
+  }
+
+  private readonly toggleSelector = (): void => {
+    this.selectorOpen = !this.selectorOpen;
+    this.requestUpdate();
+    const agentUrl = this.context?.agentUrl;
+    if (!this.selectorOpen || agentUrl == null) return;
+    this.agentState = 'checking';
+    void agentAnswers(agentUrl).then((up) => {
+      this.agentState = up ? 'up' : 'down';
+      this.requestUpdate();
+    });
+  };
+
+  private readonly onChoose = (event: Event): void => {
+    this.choice = (event.target as HTMLInputElement).value as RecognizerChoice;
+    this.message = '';
+    this.chooseRecognizer();
+    this.requestUpdate();
+  };
 
   private renderTalkButton() {
     const listening = this.talk !== undefined;
@@ -219,7 +289,7 @@ export class MfVoiceInput extends LitElement {
         this.setStatus(this.candidate === undefined ? 'idle' : 'awaiting-confirmation');
         return;
       }
-      this.message = FAILURE_MESSAGES[outcome.failure];
+      this.message = failureMessage(outcome);
       this.emitEvent('cs:voice-status', { v: 1, state: 'error', message: this.message });
       return;
     }
@@ -277,7 +347,7 @@ export class MfVoiceInput extends LitElement {
     } else {
       // a misheard «sí» must not lose the move waiting for confirmation (RF7: it asks to repeat)
       this.emitAttempt(attempt(false));
-      this.message = this.describeNoMove(resolution, transcript);
+      this.message = outcome.gate === undefined ? this.describeNoMove(resolution, transcript) : GATE_MESSAGES[outcome.gate];
       this.setStatus(this.candidate === undefined ? 'idle' : 'awaiting-confirmation');
     }
   }

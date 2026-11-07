@@ -54,6 +54,7 @@ Las crea el responsable del repo. Con GitHub basta para entrar en Render y en Ve
 1. Importa el repositorio. **Root Directory:** déjalo en la raíz. Vercel lee `vercel.json`.
 2. En **Environment Variables**:
    - Añade `PUBLIC_API_URL` con la URL de Render, sin barra final.
+   - Si no quieres ofrecer Whisper local, añade `PUBLIC_AGENT_URL` vacía. Sin ella se usa `http://127.0.0.1:8765`, y el selector aparece.
    - Comprueba que está marcada **Enable access to System Environment Variables**. Sin ella no existe `VERCEL=1`, y la compilación no detectaría que falta `PUBLIC_API_URL`.
 3. **Deploy** y copia la URL, parecida a `https://chessspeak.vercel.app`.
 
@@ -115,7 +116,7 @@ Una página publicada puede no tener permiso para llamar al agente local. **Chro
 | Edge pide permiso | Depende de lo que responda quien abra la web | Permitirlo, y avisar de ello en la interfaz y en el README |
 | `Failed to fetch` | Bloqueado, por el navegador o por CORS | Leer el mensaje de la consola y revisar `AGENT_ALLOWED_ORIGINS`. Si sigue bloqueado, Whisper se usa con la web en local (`pnpm serve:web`) |
 
-La demo sirve la web en local por este motivo. El reconocedor por defecto, Web Speech, no depende del agente.
+La web solo consulta al agente al abrir el selector de reconocedor, para no provocar ese permiso a quien no va a usar Whisper. La demo sirve la web en local por este motivo. El reconocedor por defecto, Web Speech, no depende del agente.
 
 ### `0.0.0.0/0` en Atlas: riesgo aceptado
 
