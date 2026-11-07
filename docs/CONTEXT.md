@@ -81,7 +81,7 @@ Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pn
 
 ## Qué sigue
 Orden de trabajo y recortes en [PLAN.md](../PLAN.md), sección 9. **Tareas, supuestos, dominio y balanceo: [proximos-pasos.md](proximos-pasos.md).**
-1. **Fusionar la cadena** #3 y #10 a #14, y después el PR de `docs/delivery-nov-19`, antes del despliegue.
+1. **Fusionar la cadena** #3 y #10 a #14 ✅ y, después, el PR de `docs/delivery-nov-19`, antes del despliegue.
 2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
 3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
 4. **Adaptador de Whisper local.**

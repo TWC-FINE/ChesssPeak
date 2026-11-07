@@ -2,7 +2,7 @@
 
 **Estado a 2026-11-06, 05:22 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
 
-**En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Casi todo eso está en 6 PR apilados sin revisar, así que `main` todavía no lo tiene. Faltan la voz en el producto, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
+**En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Eso ya está en `main`, tras fusionar la cadena de PR. Faltan la voz en el producto, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
 
 **Equipo (decisión del 6 de noviembre):** el responsable del repo trabaja solo, sin revisión del compañero, y es el único que aprueba. Por eso ya no se espera ninguna firma para el contrato (#3) ni para la cadena de PR.
 
@@ -10,21 +10,23 @@
 
 | Rama | Local | Remoto | Situación |
 |---|---|---|---|
-| `main` | `cfe954a` | `cfe954a` | Sin protección de rama |
-| `feat/contract-v0` | `75c82f9` | `75c82f9` | PR #3, borrador |
-| `feat/game-room` | `9cf9cad` | `9cf9cad` | PR #10 |
-| `feat/guest-auth` | `05d9b73` | `05d9b73` | PR #11 |
-| `feat/create-game` | `3c3367f` | `3c3367f` | PR #12 |
-| `feat/game-gateway` | `90ab665` | `90ab665` | PR #13; incluye el puerto `MovePersistence` |
-| `feat/web-game` | `cbe8abb` | `cbe8abb` | PR #14 |
+| `main` | `311c0fa` | `311c0fa` | Contiene la cadena. Sin protección de rama |
+| `feat/contract-v0` | `75c82f9` | `75c82f9` | PR #3, fusionado en `9a566aa` |
+| `feat/game-room` | `9cf9cad` | `9cf9cad` | PR #10, fusionado en `8f32cfc` |
+| `feat/guest-auth` | `05d9b73` | `05d9b73` | PR #11, fusionado en `05fd7a6` |
+| `feat/create-game` | `3c3367f` | `3c3367f` | PR #12, fusionado en `9d1bb44` |
+| `feat/game-gateway` | `90ab665` | `90ab665` | PR #13, fusionado en `de79815`; incluye el puerto `MovePersistence` |
+| `feat/web-game` | `cbe8abb` | `cbe8abb` | PR #14, fusionado en `311c0fa` |
 | `feat/move-persistence` | `813b8a3` | No existe | Solo local; sus commits ya están dentro de #13 |
-| `docs/delivery-nov-19` | `2aba28e` más el commit de esta nota | `2aba28e` antes de subir esta nota | **Contiene supuestos por revisar (ADR 11) y se sube como trabajo en curso, sin PR** |
+| `docs/delivery-nov-19` | `827fde7` más el commit de esta nota | `827fde7` antes de subir esta nota | **Contiene supuestos por revisar (ADR 11); su PR va después de la cadena** |
 
-Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene revisión.
+Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con commit de fusión #3 (`9a566aa`), #10 (`8f32cfc`), #11 (`05fd7a6`), #12 (`9d1bb44`), #13 (`de79815`) y #14 (`311c0fa`). El diff de cada PR de la cadena fue igual a su línea base, y su CI se revisó por trabajo con la base en `main`.
 
 **CI por trabajo:** `verify`, `integration`, `secrets` y `smoke` están en verde en la última ejecución de `main` y de los 6 PR. En #14 (`cbe8abb`): servidor 198 tests, integración 33, `local-agent` 46, `voice-parser` 84, web 66 y `smoke` 13 comprobaciones. **Hay que mirar cada trabajo por separado:** ver el riesgo de `smoke`.
 
 ## 1. Estado por requisito del profesor
+
+**Nota:** donde las tablas de las secciones 1 y 2 dicen «solo en PR» o «en PR», ese trabajo ya está en `main`.
 
 | Requisito | Estado | Evidencia |
 |---|---|---|
@@ -66,9 +68,9 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 | # | Tarea | Responsable |
 |---|---|---|
 | 1 | Sin definir: hora y duración de la demo, y si el profesor abrirá el proyecto él mismo | Responsable del repo |
-| 2 | Revisar #3 y #10 a #14, incluidos los códigos de error provisionales | Responsable del repo |
-| 3 | Añadir la excepción de commits de fusión a `CONTRIBUTING.md` | Responsable del repo |
-| 4 | Fusionar la cadena en orden; cada fusión necesita aprobación expresa | Responsable del repo |
+| 2 | Revisar lo fusionado de #3 y #10 a #14, incluidos los códigos de error provisionales | Responsable del repo |
+| 3 | Hecho: excepción de commits de fusión en `CONTRIBUTING.md` (#15) | Responsable del repo |
+| 4 | Hecho: cadena fusionada en orden | Responsable del repo |
 | 5 | Crear las cuentas de Neon, Atlas, Render y Vercel, y desplegar con esas credenciales. Después, probar `trust proxy` | Responsable del repo |
 | 6 | Lote del parser: fuera del plan, se queda `spike-parser-freeze` | Responsable del repo |
 | 7 | Dar el OK explícito antes de empezar el pool de `move-workers` | Responsable del repo |
@@ -113,7 +115,7 @@ Cadena: `main` ← #3 ← #10 ← #11 ← #12 ← #13 ← #14. Ningún PR tiene 
 ### Orden de trabajo
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** La prioridad es este orden, no un calendario por días.
 
-1. **Fusionar la cadena** #3 y #10 a #14, y después el PR de `docs/delivery-nov-19`, antes del despliegue.
+1. **Fusionar la cadena** #3 y #10 a #14 ✅ y, después, el PR de `docs/delivery-nov-19`, antes del despliegue.
 2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
 3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
 4. **Adaptador de Whisper local.**
@@ -198,17 +200,17 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 
 | Riesgo | Estado |
 |---|---|
-| **`smoke` inestable en CI** | **Abierto, sin causa conocida.** Falló 3 de 3 en `fa5c168` y pasó 3 de 3 en `cbe8abb`. Mismo error antes en `main` (`2d287ea`). Con `continue-on-error`, el resultado global puede decir verde aunque falle |
+| **`smoke` inestable en CI** | **Abierto, sin causa conocida.** Falló 3 de 3 en `fa5c168` y pasó 3 de 3 en `cbe8abb`. Mismo error antes en `main` (`2d287ea`). También falló en #13 (`90ab665`, con la base en `main`, ejecución 42315165037), con el texto `✗ la prueba terminó sin errores — tiempo agotado esperando: el navegador`; con un único relanzamiento pasó y la fusión siguió. La causa sigue sin determinar. Con `continue-on-error`, el resultado global puede decir verde aunque falle |
 | **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor)** | **Sin definir:** hora y duración de la demo, y si el profesor abrirá el proyecto él mismo. |
 | **Dominio** | **En espera del profesor; mínimo garantizado: la URL `vercel.app`.** Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*). No se sabe qué hosting es, qué permite alojar ni si tiene HTTPS, que es obligatorio para el micrófono |
-| **Cadena de 6 PR sin fusionar** | **Abierto y creciendo en importancia.** Nada del núcleo está en `main`, y `render.yaml` despliega desde `main`. El *squash* rompe la cadena según una simulación local; los commits de fusión funcionaron, pero falta añadir la excepción y probarlo en GitHub |
+| **Cadena de 6 PR** | **Cerrado.** Fusionada en orden con commits de fusión; los hashes están en «Ramas y hashes» |
 | **Pérdida de jugadas si el servidor muere** | **Aceptado y documentado (ADR 7), sin prueba.** Las jugadas pendientes de guardar se pierden. Los jugadores pueden haberlas visto |
 | **Fase 0 sin desplegar** | **Abierto.** Es el paso 2 del orden de trabajo. Depende de crear las cuentas. `trust proxy`, CORS y la memoria en Render siguen sin probar |
 | **Chrome sin medir** | **Abierto, recortable.** Si la entrega la abre otra persona, puede ser en Chrome |
 | **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
-| **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15) y `9a566aa` (la fusión de #3), y los 33 commits de la cadena lo llevarán al fusionarse. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta |
+| **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15), las 6 fusiones de la cadena (`9a566aa`, `8f32cfc`, `05fd7a6`, `9d1bb44`, `de79815` y `311c0fa`) y los 33 commits de la cadena. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta. Se aceptó así para las 5 fusiones restantes |
 | **Documentos desactualizados** | **Abierto.** `README.md`, `ARCHITECTURE.md` y `docs/CONTEXT.md` siguen describiendo el estado del 5 de noviembre |
 | **Nombre del anexo en la historia pública** | **Abierto; quitarlo exigiría `--force`.** El nombre del archivo del anexo de la transcripción aparece en un enlace antiguo de 4 commits de `docs/delivery-nov-19`: `8246b8c`, `c703ae7`, `e6cd3c7` y `c62712f`. El archivo nunca se subió y la punta de la rama no lo nombra |
 | **Reflog pendiente de limpiar** | **Abierto; espera el OK del responsable del repo.** El anexo y la historia anterior a parafrasear las citas siguen en el `.git` local de este equipo, fuera de cualquier rama. Esa carpeta `.git` no debe copiarse a otro equipo antes de limpiarlo |

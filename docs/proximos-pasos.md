@@ -8,7 +8,7 @@ git fetch origin
 git switch docs/delivery-nov-19   # esta replanificación; aún sin PR
 pnpm install
 ```
-- **Para programar:** crear una rama por tema desde `main`, una vez fusionada la cadena.
+- **Para programar:** crear una rama por tema desde `main`.
 - **Fuera de git:** `.env` (`pnpm env:init`), Whisper y sus modelos (`pnpm --filter @chessspeak/spike-whisper-local download`) y los WAV del spike.
 
 ## Decisiones ya tomadas
@@ -98,7 +98,7 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 | Balanceo | Ver el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md) y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Procesos en la misma máquina: no se da por resuelto, y hay que decirlo al presentar |
 
 ## Lista de tareas
-Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:** `[x]` significa hecho en un PR abierto, todavía sin fusionar en `main`.
+Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:** `[x]` significa hecho; esos PR ya están fusionados en `main`.
 
 **Preparación**
 - [ ] 1. Abrir el PR de `docs/delivery-nov-19`.
@@ -138,7 +138,7 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 
 ## Qué no tocar por ahora
 - **`shared/`:** el contrato lo aprueba el responsable del repo; cualquier cambio va en un PR y sube la versión. Si falta algo, se anota.
-- **PR #3 y #10 a #14:** los aprueba el responsable del repo. Se fusionan en orden, antes del despliegue. Nada se fusiona a `main` sin su aprobación expresa.
+- **PR #3 y #10 a #14:** ya fusionados en `main`. Nada se fusiona a `main` sin aprobación expresa del responsable del repo.
 - **Parser y spike:** `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` y los resultados siguen congelados; el lote de mejoras queda fuera del plan.
 - **Balanceo:** solo lo que fija el ADR 11. `GameRoom` y la validación no se tocan.
 - **`web/dist`:** solo en el commit de entrega, al congelar el código (supuesto).

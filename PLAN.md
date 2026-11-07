@@ -215,7 +215,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** La prioridad es este orden de trabajo, no un calendario por días.
 
 ### 9.1 Orden
-1. **Fusionar la cadena** #3 y #10 a #14, y después el PR de `docs/delivery-nov-19`, antes del despliegue.
+1. **Fusionar la cadena** #3 y #10 a #14 ✅ y, después, el PR de `docs/delivery-nov-19`, antes del despliegue.
 2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
 3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
 4. **Adaptador de Whisper local.**
@@ -242,9 +242,9 @@ Después: dependency-cruiser y el aviso en navegadores sin Web Speech.
 | Fase | Qué incluye | Estado |
 |---|---|---|
 | **Spike** | Web Speech + chessops, Whisper, decisión y ADR 4 y 5 | ✅ Cerrado |
-| **Fase 0 — Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos Vite, `serve:web` y CI ✅. **Falta:** desplegar Neon, Atlas, Render y Vercel, y fusionar el contrato | En curso |
-| **Fase 1 — Partida entre invitados** | Auth de invitados, Socket.IO, `games` y write-behind, shell con sesión, `<mf-game>`, caja de texto → parser → jugada. `local-agent` ✅ en `main` | Escrita en los PR #3 y #10 a #14; falta fusionar y desplegar |
-| **Fase 2 — Voz de punta a punta** | Reconexión y fin de partida, `voice-metrics`, `<mf-voice-input>` (Web Speech con 400 ms, Whisper), confirmación explícita, `<mf-history>` | Reconexión, fin de partida y confirmación por texto en los PR; falta la voz |
+| **Fase 0 — Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos Vite, `serve:web` y CI ✅. **Falta:** desplegar Neon, Atlas, Render y Vercel | En curso |
+| **Fase 1 — Partida entre invitados** | Auth de invitados, Socket.IO, `games` y write-behind, shell con sesión, `<mf-game>`, caja de texto → parser → jugada. `local-agent` ✅ en `main` | En `main`; falta desplegar |
+| **Fase 2 — Voz de punta a punta** | Reconexión y fin de partida, `voice-metrics`, `<mf-voice-input>` (Web Speech con 400 ms, Whisper), confirmación explícita, `<mf-history>` | Reconexión, fin de partida y confirmación por texto en `main`; falta la voz |
 | **Fase 3 — Validación, ensayo y entrega** | Validación (con el hash del parser), `quality.md`, ensayo, video de respaldo, README, tag | Sin empezar |
 
 ## 10. Riesgos
@@ -265,7 +265,6 @@ El proyecto se presenta en vivo, en la fecha de entrega. Los riesgos principales
 | Cambiar el parser invalida las cifras del spike | El parser queda en `spike-parser-freeze`, sin lote de mejoras; se registra el hash usado |
 | Divergencia entre servidor y frontend | Contrato v0 de `shared/` versionado (`v: 1`); cambios solo por PR aprobado por el responsable del repo |
 | El profesor no acepta procesos en la misma instancia como servicios distintos (ADR 11), o descarta el pool de Whisper por ser local (revisión del ADR 10) | Decirlo al presentar y mostrar lo medido. **No hay alternativa construida** |
-| Trabajo sobre PR sin fusionar | La cadena se fusiona en orden antes de seguir con la voz y el despliegue; si algo cambia, se ajusta en ese momento |
 
 ## 11. Recomendaciones y objeciones
 1. **Manda el orden de trabajo de 9.1.** Si un paso se atrasa, se recorta según 9.2 en ese momento, no al final.
