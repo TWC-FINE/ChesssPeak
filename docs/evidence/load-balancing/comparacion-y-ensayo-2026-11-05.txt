@@ -1,0 +1,99 @@
+=================== repeticion 2: monolito
+free RAM MB 5525
+agent up: 1 workers
+$ tsx scripts/load.ts --label rep2-monolito
+Carga contra http://127.0.0.1:8765/transcribe · rep2-monolito
+Agente: 1 worker(s), 12 hilo(s) cada uno, estrategia least-connections
+Equipo: 12th Gen Intel(R) Core(TM) i5-12400F, 12 hilos, 16222 MB de RAM
+WAV: spike/recordings/p05-01_quiet_r1_runB.wav (78124 bytes) · 20 peticiones por escalón · quiebre si error > 5 %
+Calentamiento: 1 petición(es) que no cuentan…
+
+conc   rps  ok/s   p50 ms   p95 ms    200  503  504 otro  red  error  reparto
+   1   0.5   0.5     1960     2095     20    0    0    0    0  0.0 %  w1:20
+   2   0.5   0.5     3882     4212     20    0    0    0    0  0.0 %  w1:20
+   4  0.51  0.51     7843     8068     20    0    0    0    0  0.0 %  w1:20
+   8  0.53  0.19     7743    13561      7    0   13    0    0 65.0 %  w1:7  ← CAÍDO
+
+Punto de quiebre: 8 simultáneas · máximo estable: 4.
+Reporte: local-agent\results\load-2026-11-06T03-00-18-944Z-rep2-monolito.json
+after stop: 8765=[] whisper-server processes=0
+=================== repeticion 2: balanceado
+free RAM MB 9033
+agent up: 3 workers
+$ tsx scripts/load.ts --label rep2-balanceado
+Carga contra http://127.0.0.1:8765/transcribe · rep2-balanceado
+Agente: 3 worker(s), 4 hilo(s) cada uno, estrategia least-connections
+Equipo: 12th Gen Intel(R) Core(TM) i5-12400F, 12 hilos, 16222 MB de RAM
+WAV: spike/recordings/p05-01_quiet_r1_runB.wav (78124 bytes) · 20 peticiones por escalón · quiebre si error > 5 %
+Calentamiento: 3 petición(es) que no cuentan…
+
+conc   rps  ok/s   p50 ms   p95 ms    200  503  504 otro  red  error  reparto
+   1  0.32  0.32     3077     3142     20    0    0    0    0  0.0 %  w1:7 w2:7 w3:6
+   2  0.49  0.49     4084     4165     20    0    0    0    0  0.0 %  w1:10 w3:10
+   4  0.53  0.53     5761    11480     20    0    0    0    0  0.0 %  w1:7 w2:7 w3:6
+   8  0.51  0.26    12343    14289     10    0   10    0    0 50.0 %  w1:2 w2:2 w3:6  ← CAÍDO
+
+Punto de quiebre: 8 simultáneas · máximo estable: 4.
+Reporte: local-agent\results\load-2026-11-06T03-03-06-605Z-rep2-balanceado.json
+after stop: 8765=[] whisper-server processes=0
+=================== repeticion 3: monolito
+free RAM MB 8950
+agent up: 1 workers
+$ tsx scripts/load.ts --label rep3-monolito
+Carga contra http://127.0.0.1:8765/transcribe · rep3-monolito
+Agente: 1 worker(s), 12 hilo(s) cada uno, estrategia least-connections
+Equipo: 12th Gen Intel(R) Core(TM) i5-12400F, 12 hilos, 16222 MB de RAM
+WAV: spike/recordings/p05-01_quiet_r1_runB.wav (78124 bytes) · 20 peticiones por escalón · quiebre si error > 5 %
+Calentamiento: 1 petición(es) que no cuentan…
+
+conc   rps  ok/s   p50 ms   p95 ms    200  503  504 otro  red  error  reparto
+   1  0.51  0.51     1949     1985     20    0    0    0    0  0.0 %  w1:20
+   2  0.52  0.52     3866     3898     20    0    0    0    0  0.0 %  w1:20
+   4  0.52  0.52     7740     7771     20    0    0    0    0  0.0 %  w1:20
+   8  0.53  0.19     7745    13558      7    0   13    0    0 65.0 %  w1:7  ← CAÍDO
+
+Punto de quiebre: 8 simultáneas · máximo estable: 4.
+Reporte: local-agent\results\load-2026-11-06T03-06-18-722Z-rep3-monolito.json
+after stop: 8765=[] whisper-server processes=0
+=================== repeticion 3: balanceado
+free RAM MB 9074
+agent up: 3 workers
+$ tsx scripts/load.ts --label rep3-balanceado
+Carga contra http://127.0.0.1:8765/transcribe · rep3-balanceado
+Agente: 3 worker(s), 4 hilo(s) cada uno, estrategia least-connections
+Equipo: 12th Gen Intel(R) Core(TM) i5-12400F, 12 hilos, 16222 MB de RAM
+WAV: spike/recordings/p05-01_quiet_r1_runB.wav (78124 bytes) · 20 peticiones por escalón · quiebre si error > 5 %
+Calentamiento: 3 petición(es) que no cuentan…
+
+conc   rps  ok/s   p50 ms   p95 ms    200  503  504 otro  red  error  reparto
+   1  0.32  0.32     3116     3271     20    0    0    0    0  0.0 %  w1:7 w2:7 w3:6
+   2  0.48  0.48     4106     4348     20    0    0    0    0  0.0 %  w1:10 w2:1 w3:9
+   4  0.54  0.54     5536    10895     20    0    0    0    0  0.0 %  w1:7 w2:7 w3:6
+   8  0.55   0.3    11075    14654     11    0    9    0    0 45.0 %  w1:3 w2:6 w3:2  ← CAÍDO
+
+Punto de quiebre: 8 simultáneas · máximo estable: 4.
+Reporte: local-agent\results\load-2026-11-06T03-09-03-404Z-rep3-balanceado.json
+after stop: 8765=[] whisper-server processes=0
+=================== ensayo de la demo: LB_WORKERS=3, matar w2 con carga
+agent up: 3 workers
+strategy least-connections workers w1:up:pid7908 w2:up:pid20388 w3:up:pid15844
+$ tsx scripts/load.ts --steps 3 --requests 15 --max-error-rate 1 --label demo-kill-w2
+Carga contra http://127.0.0.1:8765/transcribe · demo-kill-w2
+Agente: 3 worker(s), 4 hilo(s) cada uno, estrategia least-connections
+Equipo: 12th Gen Intel(R) Core(TM) i5-12400F, 12 hilos, 16222 MB de RAM
+WAV: spike/recordings/p05-01_quiet_r1_runB.wav (78124 bytes) · 15 peticiones por escalón · quiebre si error > 100 %
+Calentamiento: 3 petición(es) que no cuentan…
+
+conc   rps  ok/s   p50 ms   p95 ms    200  503  504 otro  red  error  reparto
+kill w2 -> {"killed":"w2","pid":20388}
+   3  0.52  0.52     5486     7793     15    0    0    0    0  0.0 %  w1:5 w2:5 w3:5
+
+Aguantó todos los escalones (máximo estable: 3 simultáneas).
+Reporte: local-agent\results\load-2026-11-06T03-12-14-706Z-demo-kill-w2.json
+totals {"200":18,"502":0,"503":0,"504":0}
+w1 up pid 7908 served 6 failed 0 restarts 0
+w2 up pid 29020 served 6 failed 1 restarts 1
+w3 up pid 15844 served 6 failed 0 restarts 0
+dashboard HTTP 200
+after stop: 8765=[] whisper-server processes=0
+=================== fin

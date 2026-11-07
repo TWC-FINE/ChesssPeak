@@ -1,0 +1,182 @@
+{
+  "label": "monolito",
+  "startedAt": "2026-11-04T18:43:34.563Z",
+  "finishedAt": "2026-11-04T18:47:02.874Z",
+  "environment": {
+    "platform": "win32",
+    "release": "10.0.19045",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "logicalCores": 12,
+    "totalMemoryMB": 16222,
+    "freeMemoryMBAtStart": 4188,
+    "node": "v24.20.0"
+  },
+  "agent": {
+    "url": "http://127.0.0.1:8765/transcribe",
+    "strategy": "least-connections",
+    "workers": 1,
+    "threadsPerWorker": 12,
+    "workerConcurrency": 1,
+    "queueMax": 12,
+    "timeoutMs": 15000,
+    "model": "small"
+  },
+  "config": {
+    "wav": "spike/recordings/p05-01_quiet_r1_runB.wav",
+    "wavBytes": 78124,
+    "steps": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "requestsPerStep": 20,
+    "maxErrorRate": 0.05,
+    "requestTimeoutMs": 60000,
+    "warmup": 1
+  },
+  "result": {
+    "breakingPoint": 8,
+    "maxStableConcurrency": 4
+  },
+  "steps": [
+    {
+      "concurrency": 1,
+      "requests": 20,
+      "durationMs": 55402,
+      "rps": 0.36,
+      "okRps": 0.36,
+      "counts": {
+        "200": 20,
+        "503": 0,
+        "504": 0,
+        "other": 0,
+        "error": 0
+      },
+      "errorRate": 0,
+      "latencyMs": {
+        "p50": 2759,
+        "p95": 2864,
+        "max": 2906,
+        "mean": 2770
+      },
+      "allLatencyMs": {
+        "p50": 2759,
+        "p95": 2864
+      },
+      "workers": {
+        "w1": 20
+      },
+      "broken": false
+    },
+    {
+      "concurrency": 2,
+      "requests": 20,
+      "durationMs": 54526,
+      "rps": 0.37,
+      "okRps": 0.37,
+      "counts": {
+        "200": 20,
+        "503": 0,
+        "504": 0,
+        "other": 0,
+        "error": 0
+      },
+      "errorRate": 0,
+      "latencyMs": {
+        "p50": 5462,
+        "p95": 5618,
+        "max": 5669,
+        "mean": 5317
+      },
+      "allLatencyMs": {
+        "p50": 5462,
+        "p95": 5618
+      },
+      "workers": {
+        "w1": 20
+      },
+      "broken": false
+    },
+    {
+      "concurrency": 4,
+      "requests": 20,
+      "durationMs": 54709,
+      "rps": 0.37,
+      "okRps": 0.37,
+      "counts": {
+        "200": 20,
+        "503": 0,
+        "504": 0,
+        "other": 0,
+        "error": 0
+      },
+      "errorRate": 0,
+      "latencyMs": {
+        "p50": 10902,
+        "p95": 11268,
+        "max": 11270,
+        "mean": 10128
+      },
+      "allLatencyMs": {
+        "p50": 10902,
+        "p95": 11268
+      },
+      "workers": {
+        "w1": 20
+      },
+      "broken": false
+    },
+    {
+      "concurrency": 8,
+      "requests": 20,
+      "durationMs": 40729,
+      "rps": 0.49,
+      "okRps": 0.12,
+      "counts": {
+        "200": 5,
+        "503": 0,
+        "504": 15,
+        "other": 0,
+        "error": 0
+      },
+      "errorRate": 0.75,
+      "latencyMs": {
+        "p50": 7940,
+        "p95": 13330,
+        "max": 13330,
+        "mean": 7970
+      },
+      "allLatencyMs": {
+        "p50": 15019,
+        "p95": 15048
+      },
+      "workers": {
+        "w1": 5
+      },
+      "broken": true
+    }
+  ],
+  "agentTotals": {
+    "before": {
+      "200": 0,
+      "502": 0,
+      "503": 0,
+      "504": 0
+    },
+    "after": {
+      "200": 66,
+      "502": 0,
+      "503": 0,
+      "504": 15
+    }
+  },
+  "workerRestarts": [
+    {
+      "id": "w1",
+      "restarts": 0
+    }
+  ]
+}

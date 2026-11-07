@@ -71,7 +71,7 @@ Hechas con **clips sintéticos** (voz de Windows y ruido generado, archivos `*.f
 
 ## 7. Tareas que deja el spike
 
-Agrupadas por **área**, no por fase: [PLAN.md](../PLAN.md) (sección 9) decide en qué fase y semana se hace cada una. Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-run-b.md) y los ADR [4](adr/0004-resolucion-contra-jugadas-legales.md) y [5](adr/0005-strategy-y-reconocedor-por-defecto.md).
+Agrupadas por **área**, no por fase: [PLAN.md](../PLAN.md) (sección 9) fija el orden de trabajo. Decisión y datos: [spike-results.md](spike-results.md), [spike-run-b.md](spike-run-b.md) y los ADR [4](adr/0004-resolucion-contra-jugadas-legales.md) y [5](adr/0005-strategy-y-reconocedor-por-defecto.md).
 
 ### Agente local (`local-agent`)
 - [ ] **Prompt de ajedrez.** Arrancar `whisper-server` con el prompt de `spike/whisper-local/src/prompt.ts` (`--prompt`): sin él, `small` baja de 89,7 % a 61,5 %. Modelo `small` por defecto.
@@ -84,18 +84,18 @@ Agrupadas por **área**, no por fase: [PLAN.md](../PLAN.md) (sección 9) decide 
 - [ ] **Confirmación explícita obligatoria** con cualquier reconocedor.
 - [ ] **Declarar la latencia de Whisper** en la interfaz y en la documentación: p50 2,91 s y p95 3,06 s solo de inferencia, en el equipo de la sección 8.
 - [ ] **Avisar en navegadores sin Web Speech (Firefox).** Detectar que `SpeechRecognition` no existe y mostrar un aviso claro, ofreciendo Whisper local (si el agente responde) o la caja de texto de respaldo. Lo mismo, con aviso de «recomendado Edge», si la comprobación de [spike-chrome.md](spike-chrome.md) no cumple en Chrome.
-- [ ] **Validación con otra voz, frases nuevas y otro equipo** en la sesión de evaluación de la semana 4, sin tocar los umbrales de `spike-criteria.md`.
-- [ ] **Prueba en Chrome**, según [spike-chrome.md](spike-chrome.md) (pendiente; todo se midió en Edge 156). Se hace el mar 3 por la mañana, **después de subir todo y respaldar los WAV**.
-- [ ] **Posible corrida nueva declarada** con un modelo `small` cuantizado para bajar la latencia de Whisper: se declara antes de medir, con su propia regla de lectura.
-- [ ] **Lote único de mejoras del parser** (alias para «toma» fundido con la letra, «alfil» partido en dos palabras, «peone»; sección 3), antes de la validación de la semana 4. Las cifras del spike son de la versión `spike-parser-freeze`; la validación usa frases nuevas y **registra el hash del parser usado**. El responsable se asigna el lun 9.
+- [ ] **Validación con otra voz, frases nuevas y otro equipo** en la sesión de evaluación, sin tocar los umbrales de `spike-criteria.md`.
+- [ ] **Prueba en Chrome**, según [spike-chrome.md](spike-chrome.md) (pendiente; todo se midió en Edge 156). Ya no bloquea: la demo se hace en Edge. Es de lo primero que se recorta (PLAN.md, 9.2).
+- [ ] **Posible corrida nueva declarada** con un modelo `small` cuantizado para bajar la latencia de Whisper: se declara antes de medir, con su propia regla de lectura. Fuera del plan por la fecha del 19 de noviembre.
+- **Lote único de mejoras del parser: fuera del plan.** Se queda la versión `spike-parser-freeze`; la validación usa frases nuevas y **registra el hash del parser usado**.
 
 ### CI y entrega
 - [x] **`protocolVersion` en `GET /health`** cuando se fusione el contrato v0 (PR #3). La rama de la capa de datos no lo incluye a propósito: ese campo se añadió en el contrato y hay que reincorporarlo al fusionar. Al fusionar también hay que **alinear** los valores de `result` y `termination` del CHECK de `games` (migración `*_games_checks`, ADR 3) con los del contrato si cambiaron en la revisión.
 - [ ] **`pnpm approve-builds` / `ERR_PNPM_IGNORED_BUILDS`.** Decidir qué builds se permiten en `pnpm-workspace.yaml` (hoy, `esbuild@0.28.2`) para que `pnpm install` termine con código 0 antes de montar el CI (ver sección 5), y explicarlo en el README.
 - [x] **Actualizar PLAN.md** con el spike cerrado, la decisión y que no hay demo en vivo (hecho el 2 de noviembre de 2026).
-- [ ] **`pnpm serve:web`:** servidor estático de Node, sin dependencias, en `127.0.0.1:5500`, para equipos sin VS Code (Fase 0 o Fase 3; el plan lo pone el mié 4).
-- [ ] **Web pública en Vercel** (núcleo, no opcional): es la forma más portable de presentar. Desde una página pública, Whisper local puede bloquearse por el acceso a red local del navegador y además requiere instalar el agente; ensayarlo en Edge y en Chrome y documentarlo en el README.
-- [ ] **Probar el README en una máquina limpia antes de entregar:** clonar, `pnpm install`, `.env`, instalación de Whisper y arranque, abriendo la app en Edge y en Chrome, siguiendo solo lo que dice el README. No hay demo en vivo: el README es lo que usa quien evalúa.
+- [ ] **`pnpm serve:web`:** servidor estático de Node, sin dependencias, en `127.0.0.1:5500`, para equipos sin VS Code (Fase 0 o Fase 3).
+- [ ] **Web pública en Vercel** (mínimo garantizado, con su URL `vercel.app`; la demo en vivo sirve la web en local). Desde una página pública, Whisper local puede bloquearse por el acceso a red local del navegador y además requiere instalar el agente.
+- [ ] **Probar el README con un clon nuevo en una máquina limpia antes de entregar:** clonar, `pnpm install`, `.env`, instalación de Whisper y arranque, abriendo la app en Edge, siguiendo solo lo que dice el README.
 - [ ] Copia de seguridad fuera del repo de `spike/recordings/` (116 WAV, 10 774 256 bytes) y de `spike/results/`.
 
 ## 8. Equipo de referencia de la latencia de Whisper

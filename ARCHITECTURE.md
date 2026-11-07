@@ -5,7 +5,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 ## 1. Vista general
 
 ```
- Navegador (Edge/Chrome; URL pública en Vercel, `pnpm serve:web` o Live Server :5500)
+ Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; publicada también en Vercel)
  ┌──────────────────────────────────────────────────────┐
  │ shell (TS vanilla): router, sesión, ÚNICO socket     │
  │  ├─ <mf-game>        tablero + jugadas (recibe socket)│
@@ -50,6 +50,7 @@ Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`
 - **Persistencia write-behind:** cada jugada se guarda en Mongo de forma idempotente con `updateOne({gameId, plyCount: ply-1}, {$push, $inc: {plyCount: 1}})`.
 - **Rehidratación:** al reconectar se reconstruye la sala desde Mongo.
 - **Una sola instancia** en Render; no hace falta sticky session.
+- **Guardado por pool (previsto, aún sin código; ADR 11):** con `MOVE_WORKERS` mayor que 0, el gateway reparte `appendMove` entre procesos `move-worker`. `GameRoom` sigue siendo la única que valida. Con `MOVE_WORKERS=0`, el valor por defecto, se escribe directo.
 
 ### 2.2 Microfrontends
 - Custom elements con Lit en light DOM, un proyecto Vite por microfrontend, salida única `web/dist/`.
@@ -91,7 +92,7 @@ Interfaz `SpeechRecognizer` con adaptadores intercambiables:
 
 **Whisper:** umbral mínimo de volumen y duración antes de transcribir. Modelo `small` con el prompt de ajedrez (sin prompt el acierto baja de 89,7 % a 61,5 %); latencia declarada: p50 2,91 s y p95 3,06 s solo de inferencia. El binario y el modelo viven fuera del repo (rutas en `.env`) y un script los instala en un solo comando. El navegador llama al agente con CORS y cabecera de acceso a red privada; desde una web pública puede bloquearse por el acceso a red local.
 
-**Parser:** las cifras del spike son de la versión `spike-parser-freeze`. Solo se modifica en un lote antes de la validación de la semana 4, registrando el hash usado.
+**Parser:** las cifras del spike son de la versión `spike-parser-freeze`. Sigue congelado: el lote de mejoras queda fuera del plan. La validación registra el hash usado.
 
 ## 5. Datos
 
@@ -118,7 +119,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 ## 6. Comunicación y contrato
 - **HTTP (REST):** `/auth/guest` (y `/auth/login` si se hace), `/health`.
 - **Socket.IO:** eventos de partida validados con zod en `shared/`. Un solo socket por cliente, abierto por el shell.
-- **Contrato v0 de `shared/`:** borrador mínimo y versionado (`v: 1`) en un PR abierto el jue 5 de noviembre; lo firman A y B el lun 9. Cambios posteriores solo por PR revisado por los dos.
+- **Contrato v0 de `shared/`:** borrador mínimo y versionado (`v: 1`) en el PR #3. Lo aprueba el responsable del repo. Cambios posteriores solo por PR aprobado por el responsable del repo.
 - **CORS** (HTTP y Socket.IO): `http://127.0.0.1:5500`, `http://localhost:5500` y el dominio de Vercel.
 
 ## 7. Seguridad
@@ -127,7 +128,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 - Atlas abierto a `0.0.0.0/0`, mitigado con usuario de mínimos privilegios y contraseña fuerte.
 - Secretos solo en `.env` (con `.env.example` en el repo); gitleaks en CI.
 
-## 8. Reglas de dependencia (dependency-cruiser, semana 4)
+## 8. Reglas de dependencia (dependency-cruiser, Fase 3, solo si hay tiempo)
 1. Los `web/mf-*` no se importan entre sí (solo `shared`).
 2. `voice-parser` no importa DOM, Nest ni `web`.
 3. `GameRoom` no importa `@nestjs/*`.
@@ -137,7 +138,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 |---|---|
 | Backend | Render (una instancia; despertarla antes de evaluar) |
 | Postgres / Mongo | Neon / Atlas M0 |
-| Web | Vercel (URL pública, núcleo); en local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`) o Live Server sobre `web/dist` |
+| Web | En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist`; publicada también en Vercel (URL `vercel.app`) |
 | `local-agent` | En la máquina de quien usa Whisper |
 
 ## 10. Decisiones (ADRs)
