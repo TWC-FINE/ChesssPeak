@@ -11,13 +11,21 @@ services:
     buildCommand: npx -y pnpm@12.16.1 install --frozen-lockfile --prod=false && npx -y pnpm@12.16.1 --filter @chessspeak/server build
     # the free plan has no pre-deploy step, so the migrations run at start; they are idempotent
     startCommand: cd server && ./node_modules/.bin/prisma migrate deploy && node dist/main.js
-    healthCheckPath: /health
+    # does not touch the databases; Render expects an answer within 5 s (docs/deploy.md)
+    healthCheckPath: /health/live
     autoDeploy: true
     envVars:
+      # the exact version that Render documents as its current default, so a release of Node cannot change the deploy
       - key: NODE_VERSION
-        value: "24"
+        value: "24.22.1"
       - key: DB_CONNECT_TIMEOUT_MS
         value: "10000"
+      # how long GET /health waits for each database; a working value, not measured against Neon or Atlas
+      - key: HEALTH_PROBE_TIMEOUT_MS
+        value: "5000"
+      # direct writes: the pool does not exist yet, and any other value stops the server at start (ADR 11)
+      - key: MOVE_WORKERS
+        value: "0"
       - key: GUEST_TOKEN_SECRET
         generateValue: true
       - key: DATABASE_URL
