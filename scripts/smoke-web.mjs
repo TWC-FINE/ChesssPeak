@@ -106,6 +106,9 @@ const server = spawn(process.execPath, [join(root, 'scripts', 'serve-web.mjs')],
   env: { ...process.env, SERVE_WEB_PORT: String(servePort) },
   stdio: 'ignore',
 });
+// How long the browser may take to open its debugging port (the wait that failed intermittently on CI at 10 s).
+const browserTimeout = Number(process.env.SMOKE_BROWSER_TIMEOUT_MS) || 30000;
+const browserStart = Date.now();
 const browser = spawn(
   browserPath,
   [`--headless=new`, `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--window-size=1280,900', 'about:blank'],
@@ -114,8 +117,10 @@ const browser = spawn(
 // kept to explain a browser that does not start; the last lines are enough
 let browserOutput = '';
 let browserExit = null;
+let debugPortAnnounced = false;
 browser.stderr.on('data', (chunk) => {
   browserOutput = `${browserOutput}${chunk}`.slice(-4000);
+  if (browserOutput.includes('DevTools listening')) debugPortAnnounced = true;
 });
 browser.on('exit', (code, signal) => {
   browserExit = `código ${code}, señal ${signal}`;
@@ -125,8 +130,8 @@ let page;
 try {
   console.log(`smoke:web con ${browserPath}\nservidor ${base}`);
   await waitFor(() => fetch(`${base}/index.html`).then((r) => r.ok), 'el servidor estático');
-  const version = await waitFor(() => fetch(`http://127.0.0.1:${debugPort}/json/version`).then((r) => r.json()), 'el navegador');
-  console.log(`navegador: ${version.Browser}`);
+  const version = await waitFor(() => fetch(`http://127.0.0.1:${debugPort}/json/version`).then((r) => r.json()), 'el navegador', browserTimeout);
+  console.log(`navegador: ${version.Browser} (listo en ${Date.now() - browserStart} ms)`);
   const targets = await waitFor(() => fetch(`http://127.0.0.1:${debugPort}/json/list`).then((r) => r.json()).then((list) => list.filter((t) => t.type === 'page')), 'una pestaña');
   page = await connect(targets[0].webSocketDebuggerUrl);
   await page.send('Page.enable');
@@ -208,6 +213,8 @@ try {
 } catch (error) {
   check('la prueba terminó sin errores', false, error.message);
   console.log(`estado del navegador: ${browserExit ?? 'sigue en marcha'}
+tiempo desde que arrancó: ${Date.now() - browserStart} ms (límite ${browserTimeout} ms)
+puerto de depuración ${debugPort}, anunciado por el navegador: ${debugPortAnnounced ? 'sí' : 'no'}
 salida de error del navegador:
 ${browserOutput || '(vacía)'}`);
 } finally {
