@@ -149,6 +149,8 @@ La telemetría es una medición, así que **nunca interrumpe la partida**. El se
 
 - **Límites, por conexión:** `VOICE_ATTEMPT_MAX_BYTES` (8192 bytes de JSON por mensaje) y `VOICE_ATTEMPT_LIMIT_PER_MINUTE` (30 mensajes por minuto).
 - **Intentos que no se confirman:** también se envían, con `accepted: false`, para no medir solo los que salieron bien. Eso incluye cancelar, una jugada ignorada, un cambio de turno y un silencio, que llega con `transcript` vacío.
+- **Qué significa `accepted`:** en una jugada, que se confirmó; se envía al confirmarla o descartarla, porque antes no se sabe. En un comando, que un «sí» confirmó una jugada. En lo demás vale `false`.
+- **Si no se entiende una frase mientras hay una jugada por confirmar, la jugada se mantiene,** para que un «sí» mal oído no la pierda. El intento se registra igual.
 - **Lo escrito en la caja de texto no se registra:** la colección mide la voz.
 - **Se puede perder un intento** si se cierra la página antes de confirmar o cancelar, o si no hay conexión, porque no se guarda para enviarlo después.
 - **Límite conocido: no distingue jugador de espectador.** Solo exige que el socket se haya unido a la partida, así que un espectador también puede enviar telemetría. Queda acotada por los límites de tamaño y frecuencia.
