@@ -6,6 +6,7 @@ import { loadMicrofrontend } from './loader.js';
 import { gameIdOf, parseRoute, type Route } from './router.js';
 import { renderSessionBar } from './session-bar.js';
 import { clearSession, loadSession, saveSession } from './session.js';
+import { forwardVoiceAttempts } from './telemetry.js';
 
 const TAGS = ['mf-game', 'mf-voice-input', 'mf-history'] as const;
 const config = readConfig();
@@ -141,6 +142,7 @@ async function mount(tag: (typeof TAGS)[number]): Promise<void> {
 }
 
 window.addEventListener('hashchange', render);
+forwardVoiceAttempts(document, () => connection);
 render();
 // Each microfrontend loads on its own: one failing never blocks the others.
 void Promise.all(TAGS.map(mount)).then(() => {
