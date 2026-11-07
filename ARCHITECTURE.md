@@ -117,7 +117,7 @@ Interfaz `SpeechRecognizer` con adaptadores intercambiables:
 Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 
 ## 6. Comunicación y contrato
-- **HTTP (REST):** `/auth/guest` (y `/auth/login` si se hace), `/health`.
+- **HTTP (REST):** `/auth/guest` (y `/auth/login` si se hace), `/health` (con el estado de las bases) y `/health/live` (sin consultarlas, para el sondeo de la plataforma).
 - **Socket.IO:** eventos de partida validados con zod en `shared/`. Un solo socket por cliente, abierto por el shell.
 - **Contrato v0 de `shared/`:** borrador mínimo y versionado (`v: 1`) en el PR #3. Lo aprueba el responsable del repo. Cambios posteriores solo por PR aprobado por el responsable del repo.
 - **CORS** (HTTP y Socket.IO): `http://127.0.0.1:5500`, `http://localhost:5500` y el dominio de Vercel.

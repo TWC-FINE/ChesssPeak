@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { healthProbeTimeoutMs } from '../deploy-config';
 
 export const HEALTH_PROBES = Symbol('HEALTH_PROBES');
-export const PROBE_TIMEOUT_MS = 1000;
 
 /** Each probe resolves when the database answers and rejects when it does not. */
 export interface HealthProbes {
@@ -37,7 +37,7 @@ export class HealthService {
   constructor(@Inject(HEALTH_PROBES) private readonly probes: HealthProbes) {}
 
   /** Never throws: a database that is down makes the report `degraded`, not the request fail. */
-  async check(timeoutMs = PROBE_TIMEOUT_MS): Promise<HealthReport> {
+  async check(timeoutMs = healthProbeTimeoutMs()): Promise<HealthReport> {
     const [postgres, mongo] = await Promise.all([
       stateOf(() => this.probes.postgres(), timeoutMs),
       stateOf(() => this.probes.mongo(), timeoutMs),

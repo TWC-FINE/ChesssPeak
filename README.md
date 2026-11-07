@@ -74,7 +74,8 @@ pnpm test:integration        # pruebas contra las bases locales (se omiten con u
 - **Postgres usa el puerto 55432** del equipo (no el 5432), para no chocar con un Postgres ya instalado como servicio de Windows, que no hace falta parar. Se cambia con `PG_PORT` en `.env`; MongoDB usa el 27017 (`MONGO_PORT`).
 - Los puertos se publican solo en `127.0.0.1`. Las credenciales salen de `.env`, que está en `.gitignore`: nunca se suben.
 - `pnpm test:integration` solo se ejecuta contra `localhost` o `127.0.0.1` y contra bases cuyo nombre termina en `_test` (`DATABASE_URL_TEST` y `MONGO_URI_TEST`); en cualquier otro caso se niega. `pnpm verify` no necesita Docker.
-- `GET /health` responde siempre 200: `status` vale `degraded` si una base está caída.
+- `GET /health` responde siempre 200: `status` vale `degraded` si una base está caída. Cada base tiene un límite de `HEALTH_PROBE_TIMEOUT_MS` (1 s por defecto).
+- `GET /health/live` responde sin consultar las bases: es la ruta para el sondeo de la plataforma.
 
 ## Documentación
 
