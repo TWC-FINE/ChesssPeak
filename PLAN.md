@@ -219,7 +219,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
 3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
 4. **Adaptador de Whisper local.**
-5. **Pool de `move-workers`** (ADR 11), con OK explícito del responsable del repo antes de empezar.
+5. **Pool de `move-workers`** (ADR 11), con OK explícito del responsable del repo antes de empezar. Se decide tras las pruebas de voz y el despliegue. **Hasta entonces se considera no recortable.**
 6. **Cierre:** validación con otra voz (sin otra voz, con la del responsable del repo, declarado en `docs/quality.md`), C4 niveles 1 y 2, README probado en máquina limpia, ensayo y tag.
 
 ### 9.2 Recortes
