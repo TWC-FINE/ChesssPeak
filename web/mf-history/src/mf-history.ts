@@ -11,16 +11,23 @@ if (!document.getElementById(STYLE_ID)) {
   document.head.append(style);
 }
 
-/** Placeholder: shows its context and the moves it hears through cs:move-applied (idempotent by ply). */
+type AppliedMove = CsEventDetail<'cs:move-applied'>;
+
+/**
+ * The moves of the game, numbered and in SAN. It only hears cs:move-applied: <mf-game> announces each move as it is
+ * played and all of them again after a (re)join, so a move is kept once per ply.
+ */
 export class MfHistory extends LitElement {
   static override properties = { context: { attribute: false } };
   declare context: HistoryContext | undefined;
 
-  private moves = new Map<number, CsEventDetail<'cs:move-applied'>>();
+  private moves = new Map<number, AppliedMove>();
+  private shownGame: string | null | undefined;
+
   private readonly onMoveApplied = (event: Event): void => {
-    const detail = (event as CustomEvent<CsEventDetail<'cs:move-applied'>>).detail;
-    const gameId = this.context?.gameId;
-    if (gameId !== undefined && gameId !== null && detail.gameId !== gameId) return;
+    const detail = (event as CustomEvent<AppliedMove>).detail;
+    if (detail.gameId !== this.context?.gameId) return;
+    this.forgetAnotherGame();
     this.moves.set(detail.ply, detail);
     this.requestUpdate();
   };
@@ -41,11 +48,47 @@ export class MfHistory extends LitElement {
     super.disconnectedCallback();
   }
 
+  protected override willUpdate(): void {
+    this.forgetAnotherGame();
+  }
+
+  protected override updated(): void {
+    // the last move stays in sight in a long game
+    const list = this.querySelector('.csh-moves');
+    if (list !== null) list.scrollTop = list.scrollHeight;
+  }
+
+  private forgetAnotherGame(): void {
+    const gameId = this.context?.gameId;
+    if (gameId === this.shownGame) return;
+    this.shownGame = gameId;
+    this.moves.clear();
+  }
+
+  private renderMove(ply: number, lastPly: number) {
+    const move = this.moves.get(ply);
+    if (move === undefined) return html`<span class="csh-san">…</span>`;
+    return html`<span class="csh-san" data-ply=${ply} ?data-last=${ply === lastPly}>${move.san}</span>`;
+  }
+
   protected override render() {
-    const context = this.context;
+    const lastPly = Math.max(0, ...this.moves.keys());
+    const rows = Array.from({ length: Math.ceil(lastPly / 2) }, (_, index) => index + 1);
     return html`<div class="csh-root">
-      <h2 class="csh-title">mf-history</h2>
-      <p class="csh-info">partida: ${context?.gameId ?? "sin partida"} · jugadas: ${[...this.moves.values()].sort((a, b) => a.ply - b.ply).map((m) => m.uci).join(" ") || "—"}</p>
+      <h2 class="csh-title">Jugadas</h2>
+      ${lastPly === 0
+        ? html`<p class="csh-info">${this.context?.gameId == null ? 'Sin partida.' : 'Aún no hay jugadas.'}</p>`
+        : html`<ol class="csh-moves" aria-label="Jugadas de la partida">
+            ${rows.map((number) => {
+              const whitePly = number * 2 - 1;
+              const blackPly = number * 2;
+              return html`<li class="csh-row">
+                <span class="csh-number">${number}.</span>
+                ${this.renderMove(whitePly, lastPly)}
+                ${blackPly <= lastPly ? this.renderMove(blackPly, lastPly) : ''}
+              </li>`;
+            })}
+          </ol>`}
     </div>`;
   }
 }

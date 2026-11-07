@@ -173,8 +173,8 @@ try {
   check('<mf-game> pinta un tablero chessground con 32 piezas', board?.pieces === 32, `piezas: ${board?.pieces}`);
   check('el tablero está en modo viewOnly (no manipulable) y sin Shadow DOM', board?.wrap === true && board?.manipulable === false && board?.shadow === false);
   check('las piezas vienen embebidas (data URI), no de un archivo externo', board?.art === true);
-  const injected = await evaluate(`({ game: document.querySelector('mf-game').context?.gameId, voice: document.querySelector('mf-voice-input').textContent, history: document.querySelector('mf-history').textContent })`);
-  check('el shell inyecta el contexto simulado por el.context', injected.game === 'demo' && injected.voice.includes('es-CO') && injected.voice.includes('400 ms') && injected.history.includes('demo'));
+  const injected = await evaluate(`({ game: document.querySelector('mf-game').context?.gameId, voice: document.querySelector('mf-voice-input').textContent, history: document.querySelector('mf-history').context?.gameId })`);
+  check('el shell inyecta el contexto simulado por el.context', injected.game === 'demo' && injected.voice.includes('es-CO') && injected.voice.includes('400 ms') && injected.history === 'demo');
   await evaluate(`location.hash = '#/'`);
   await waitFor(() => evaluate(`document.querySelector('mf-game').textContent.includes('sin partida')`), 'el cambio de ruta');
   check('el router por hash actualiza el contexto (#/ sin partida)', true);
@@ -183,7 +183,7 @@ try {
   const standalone = [
     ['mf-game', async () => (await evaluate(boardOf('mf-game')))?.pieces === 32],
     ['mf-voice-input', async () => evaluate(`document.querySelector('mf-voice-input').textContent.includes('es-CO')`)],
-    ['mf-history', async () => evaluate(`document.querySelector('mf-history').textContent.includes('e2e4')`)],
+    ['mf-history', async () => evaluate(`document.querySelector('mf-history').textContent.replace(/\\s+/g, ' ').includes('1. e4 e5')`)],
   ];
   for (const [tag, ready] of standalone) {
     await open(`${base}/standalone/${tag}/index.html`);
