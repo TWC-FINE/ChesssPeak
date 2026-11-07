@@ -12,6 +12,11 @@ export class FakeRecognizer implements SpeechRecognizer {
     this.outcomes.push(transcript === '' ? { alternatives: [], recognitionMs, failure: 'no-speech' } : { alternatives: [{ transcript, confidence: 0.9 }], recognitionMs });
   }
 
+  /** The next utterance gives exactly this. */
+  answer(outcome: RecognitionOutcome): void {
+    this.outcomes.push(outcome);
+  }
+
   /** The next utterance fails. */
   fail(failure: NonNullable<RecognitionOutcome['failure']>): void {
     this.outcomes.push({ alternatives: [], recognitionMs: 0, failure });

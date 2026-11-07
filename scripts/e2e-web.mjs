@@ -4,6 +4,7 @@
 // Uses only the local _test databases, and refuses anything else. Set BROWSER_PATH to pick a browser, and
 // E2E_OUT for the screenshots. It leaves web/dist built against a temporary port: run pnpm build:web afterwards.
 import { spawn, spawnSync } from 'node:child_process';
+import { createServer } from 'node:http';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
@@ -102,6 +103,7 @@ function check(name, ok, detail = '') {
 const debugPort = randomPort();
 const webPort = randomPort();
 const apiPort = randomPort();
+const agentPort = randomPort();
 const web = `http://127.0.0.1:${webPort}`;
 const api = `http://127.0.0.1:${apiPort}`;
 const out = process.env.E2E_OUT ?? mkdtempSync(join(tmpdir(), 'chessspeak-e2e-'));
@@ -146,6 +148,35 @@ const FAKE_SPEECH = `
   };
 `;
 const NO_SPEECH = 'window.SpeechRecognition = undefined; window.webkitSpeechRecognition = undefined;';
+
+/** Answers like local-agent, without Whisper: each /transcribe takes the next answer of the queue. */
+const fakeAgent = { health: 0, clips: [], answers: [], down: false };
+const fakeAgentServer = createServer((req, res) => {
+  const cors = { 'access-control-allow-origin': req.headers.origin ?? '*', 'access-control-expose-headers': 'Retry-After' };
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, { ...cors, 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'content-type', 'access-control-allow-private-network': 'true' });
+    res.end();
+    return;
+  }
+  if (req.url === '/health') {
+    fakeAgent.health += 1;
+    res.writeHead(200, { ...cors, 'content-type': 'application/json' });
+    res.end('{"ok":true}');
+    return;
+  }
+  const chunks = [];
+  req.on('data', (chunk) => chunks.push(chunk));
+  req.on('end', () => {
+    fakeAgent.clips.push({ type: req.headers['content-type'], origin: req.headers.origin, wav: Buffer.concat(chunks) });
+    if (fakeAgent.down) {
+      req.socket.destroy();
+      return;
+    }
+    const answer = fakeAgent.answers.shift() ?? { body: { text: '', gated: false } };
+    res.writeHead(answer.status ?? 200, { ...cors, 'content-type': 'application/json', ...(answer.headers ?? {}) });
+    res.end(JSON.stringify(answer.body ?? {}));
+  });
+});
 
 async function voiceAttempts(gameId) {
   const mongoose = createRequire(join(root, 'server', 'package.json'))('mongoose');
@@ -216,6 +247,14 @@ async function openTab(label, { speech = true } = {}) {
     talkEnabled: () => evaluate(`!(document.querySelector('mf-voice-input [data-action=talk]')?.disabled ?? true)`),
     stopDelays: () => evaluate('window.__speech.stopDelays'),
     history: async () => (await text('mf-history')).replace(/\s+/g, ' '),
+    /** Holds the talk button with the fake microphone of the browser, and waits for the agent. */
+    sayToAgent: async () => {
+      const box = await waitFor(() => evaluate(`(() => { const el = document.querySelector('mf-voice-input [data-action=talk]'); if (!el || el.disabled) return null; const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`), `${label}: el botón para hablar`);
+      await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+      await sleep(600);
+      await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+      await waitFor(() => evaluate(`document.querySelector('mf-voice-input [data-action=talk]')?.dataset.state === 'idle'`), `${label}: terminar de reconocer`);
+    },
     /** Holds the talk button, says the phrase ('' is a silence, { error } a failure) and waits for the recognizer. */
     say: async (phrase) => {
       await evaluate(`window.__speech.queue.push(${JSON.stringify(phrase)})`);
@@ -256,13 +295,14 @@ try {
 
   run('pnpm --filter @chessspeak/server build', root, process.env);
   run('pnpm exec prisma migrate deploy', join(root, 'server'), serverEnv);
-  run('pnpm build:web', root, { ...process.env, PUBLIC_API_URL: api });
+  run('pnpm build:web', root, { ...process.env, PUBLIC_API_URL: api, PUBLIC_AGENT_URL: `http://127.0.0.1:${agentPort}` });
+  await new Promise((resolve) => fakeAgentServer.listen(agentPort, '127.0.0.1', resolve));
 
   server = startServer();
   await waitFor(apiUp, 'el servidor');
   staticServer = spawn(process.execPath, [join(root, 'scripts', 'serve-web.mjs')], { env: { ...process.env, SERVE_WEB_PORT: String(webPort) }, stdio: 'ignore' });
   await waitFor(() => fetch(`${web}/index.html`).then((r) => r.ok), 'el servidor estático');
-  browser = spawn(browserPath, ['--headless=new', `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', 'about:blank'], { stdio: 'ignore' });
+  browser = spawn(browserPath, ['--headless=new', `--remote-debugging-port=${debugPort}`, `--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream', 'about:blank'], { stdio: 'ignore' });
   const version = await waitFor(() => fetch(`http://127.0.0.1:${debugPort}/json/version`).then((r) => r.json()), 'el navegador');
   console.log(`navegador: ${version.Browser} (sin interfaz)\ncapturas en: ${out}\n`);
   browserApi = await cdp(version.webSocketDebuggerUrl);
@@ -472,6 +512,60 @@ try {
   await noVoice.until('mf-voice-input [data-voice-unavailable]', 'no tiene reconocimiento de voz');
   check('Sin Web Speech lo avisa, sin botón, y queda la caja de texto', (await noVoice.evaluate(`document.querySelector('mf-voice-input [data-action=talk]') === null && document.querySelector('mf-voice-input input') !== null`)));
 
+  // 15. Whisper through a fake local agent, with the fake microphone of the browser
+  check('Nadie consultó al agente antes de abrir el selector', fakeAgent.health === 0, `${fakeAgent.health} consultas`);
+  await white.open(`${web}/index.html#/`);
+  await white.click('[data-action=create-white]');
+  await white.until(STATUS, 'Esperando al otro jugador');
+  const whisperInvite = await white.text('[data-invite]');
+  const whisperGameId = whisperInvite.split('/').pop();
+  await black.open(whisperInvite);
+  await black.until(STATUS, 'Juegas con negras');
+  await white.until(STATUS, 'Te toca');
+  await white.click('mf-voice-input [data-action=choose-recognizer]');
+  await waitFor(() => white.evaluate(`document.querySelector('mf-voice-input [data-agent-state]')?.dataset.agentState === 'up'`), 'el agente disponible');
+  check('Abrir el selector consulta al agente una vez', fakeAgent.health === 1, `${fakeAgent.health} consultas`);
+  check('La latencia de Whisper está declarada en la interfaz', (await white.text('mf-voice-input [data-whisper-latency]')).includes('2,91 s'));
+  await white.shot('12-selector-whisper');
+  await white.click('mf-voice-input input[value=whisper]');
+  await white.until('mf-voice-input [data-action=choose-recognizer]', 'Whisper local');
+
+  const whisperStart = await white.fen();
+  fakeAgent.answers.push({ body: { text: '', gated: true, reason: 'too-quiet' } });
+  await white.sayToAgent();
+  await white.until('mf-voice-input [role=status]', 'muy bajo');
+  fakeAgent.answers.push({ body: { text: '', gated: true, reason: 'too-short' } });
+  await white.sayToAgent();
+  await white.until('mf-voice-input [role=status]', 'muy corta');
+  check('Avisa de una frase muy baja o muy corta', (await white.fen()) === whisperStart);
+  fakeAgent.answers.push({ status: 503, headers: { 'retry-after': '7' }, body: { error: 'ocupado' } });
+  await white.sayToAgent();
+  await white.until('mf-voice-input [role=status]', 'en 7 s');
+  check('Con un 503 dice cuánto esperar, leyendo Retry-After', (await white.fen()) === whisperStart);
+  // down for the whole utterance: the browser may retry a POST after a reset
+  fakeAgent.down = true;
+  await white.sayToAgent();
+  await white.until('mf-voice-input [role=status]', 'No se pudo contactar');
+  fakeAgent.down = false;
+  check('Si el agente no responde lo dice, y no se mueve nada', (await white.fen()) === whisperStart);
+
+  fakeAgent.answers.push({ body: { text: 'peón efe tres', gated: false, ms: 2900 } });
+  await white.sayToAgent();
+  await white.until('mf-voice-input [data-candidate]', 'f3');
+  check('Una frase de Whisper se propone y no se juega sola', (await white.fen()) === whisperStart);
+  fakeAgent.answers.push({ body: { text: 'sí', gated: false, ms: 2900 } });
+  await white.sayToAgent();
+  await waitFor(async () => (await white.fen()) === afterF3 && (await black.fen()) === afterF3, 'f3 con Whisper en los dos tableros');
+  check('Decir «sí» por Whisper juega la jugada', true);
+
+  const clip = fakeAgent.clips.at(-1);
+  check('El agente recibe un WAV de 16 kHz con audio, desde el origen de la web', clip.type === 'audio/wav' && clip.origin === web && clip.wav.toString('latin1', 0, 4) === 'RIFF' && clip.wav.readUInt32LE(24) === 16000 && clip.wav.length > 44, `${clip.wav.length} bytes`);
+  const whisperDocuments = await waitFor(async () => {
+    const found = await voiceAttempts(whisperGameId);
+    return found.length >= 4 ? found : null;
+  }, 'los intentos de Whisper en voice_attempts');
+  check('La telemetría dice whisper, sin los fallos del agente y sin audio', whisperDocuments.length === 4 && whisperDocuments.every((document) => document.recognizer === 'whisper' && !('audio' in document)) && whisperDocuments.filter((document) => document.accepted).length === 2, `${whisperDocuments.length} documentos`);
+
   const exceptions = [white, black, third, noVoice].flatMap((tab) => tab.exceptions.map((text) => `${tab.label}: ${text}`));
   check('No hubo excepciones en ninguna página', exceptions.length === 0, exceptions.join(' | '));
   console.log(`\npartida=${gameId}`);
@@ -483,6 +577,8 @@ try {
   kill(browser);
   kill(staticServer);
   kill(server);
+  fakeAgentServer.close();
+  fakeAgentServer.closeAllConnections();
   await sleep(1000);
   // Windows can keep the browser profile locked for a moment: a leftover temp folder must not change the result
   try {
