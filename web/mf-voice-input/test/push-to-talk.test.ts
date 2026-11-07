@@ -207,12 +207,17 @@ describe('confirmation is mandatory (RF8)', () => {
     expect(element.querySelector('[role=status]')!.textContent).toContain('No te oí');
   });
 
-  it('an ambiguous phrase proposes nothing', async () => {
+  it('an ambiguous phrase proposes nothing, says which moves it could be, and is measured', async () => {
     const candidates = listen('cs:move-candidate');
-    const { fake, element } = await ready();
-    await says(element, fake, 'caballo');
+    const seen = attempts();
+    const fake = new FakeRecognizer();
+    const element = await mount(fake);
+    await position(element, { fen: '6k1/8/8/8/8/8/8/R4RK1 w - - 0 1' });
+    await says(element, fake, 'torre de uno');
     expect(candidates).toEqual([]);
-    expect(element.querySelector('[role=status]')).not.toBeNull();
+    expect(element.querySelector('[role=status]')!.textContent).toContain('Puede ser');
+    expect(seen()[0]).toMatchObject({ outcome: 'ambiguous', resolvedUci: null, accepted: false });
+    expect(seen()[0]!.candidates.length).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -359,6 +364,82 @@ describe('the telemetry', () => {
     const { fake, element } = await ready();
     await says(element, fake, 'hola');
     expect(Object.keys(seen()[0]!).sort()).toEqual(['accepted', 'alternatives', 'candidates', 'fen', 'gameId', 'lang', 'latency', 'normalized', 'outcome', 'ply', 'recognizer', 'resolvedUci', 'session', 'transcript', 'tryIndex']);
+  });
+});
+
+describe('the recognizer of the context', () => {
+  const speechWindow = window as unknown as { SpeechRecognition?: unknown };
+
+  class SilentRecognition {
+    start(): void {}
+    stop(): void {}
+    abort(): void {}
+  }
+
+  afterEach(() => {
+    delete speechWindow.SpeechRecognition;
+  });
+
+  async function mountWith(recognizer: VoiceInputContext['recognizer']): Promise<VoiceElement> {
+    const element = document.createElement('mf-voice-input') as VoiceElement;
+    element.context = { v: 1, gameId: 'g1', lang: 'es-CO', recognizer, agentUrl: null };
+    document.body.append(element);
+    elements.push(element);
+    await element.updateComplete;
+    return element;
+  }
+
+  it('shows the button for Web Speech when the browser has it', async () => {
+    speechWindow.SpeechRecognition = SilentRecognition;
+    const element = await mountWith('webspeech');
+    expect(button(element)).not.toBeNull();
+    expect(element.querySelector('[data-voice-unavailable]')).toBeNull();
+  });
+
+  it('warns when the browser does not have it, with the text box still there (RF13)', async () => {
+    const statuses = listen('cs:voice-status');
+    const element = await mountWith('webspeech');
+    expect(button(element)).toBeNull();
+    expect(element.querySelector('[data-voice-unavailable]')!.textContent).toContain('caja de texto');
+    expect(element.querySelector('input')).not.toBeNull();
+    expect(statuses).toEqual([{ v: 1, state: 'unavailable' }]);
+  });
+
+  it('says nothing about voice when the context only asks for the text box', async () => {
+    const element = await mountWith('text');
+    expect(button(element)).toBeNull();
+    expect(element.querySelector('[data-voice-unavailable]')).toBeNull();
+  });
+
+  it('keeps its recognizer when the shell sends an equal context', async () => {
+    speechWindow.SpeechRecognition = SilentRecognition;
+    const statuses = listen('cs:voice-status');
+    const element = await mountWith('webspeech');
+    await position(element);
+    press(element);
+    element.context = { v: 1, gameId: 'g1', lang: 'es-CO', recognizer: 'webspeech', agentUrl: null };
+    await element.updateComplete;
+    expect(button(element)!.dataset.state).toBe('listening');
+    expect(statuses.map((status) => status.state)).toEqual(['listening']);
+  });
+});
+
+describe('a game after another one', () => {
+  it('can be played in the same page, with the voice and the box available again', async () => {
+    const { fake, element } = await ready();
+    document.dispatchEvent(new CustomEvent('cs:game-ended', { detail: { v: 1, gameId: 'g1', result: '1-0', termination: 'resignation' } }));
+    await element.updateComplete;
+    expect(button(element)!.disabled).toBe(true);
+
+    element.context = { v: 1, gameId: 'g2', lang: 'es-CO', recognizer: 'fake', agentUrl: null };
+    await element.updateComplete;
+    await position(element, { gameId: 'g2' });
+    expect(button(element)!.disabled).toBe(false);
+    expect(element.querySelector('input')!.disabled).toBe(false);
+
+    const candidates = listen('cs:move-candidate');
+    await says(element, fake, 'peón e cuatro');
+    expect(candidates).toEqual([{ v: 1, gameId: 'g2', ply: 1, uci: 'e2e4', san: 'e4', source: 'voice' }]);
   });
 });
 

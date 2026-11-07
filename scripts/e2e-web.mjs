@@ -1,10 +1,11 @@
 // End-to-end test of a game between two guests, in a real Edge or Chrome driven over CDP (no dependencies).
-// It clicks and types like a person, and saves screenshots.
+// It clicks, types and holds the talk button like a person, and saves screenshots. The speech recognizer is fake.
 //   docker compose up -d && pnpm e2e:web         (not part of pnpm verify; not a measurement: it times nothing)
 // Uses only the local _test databases, and refuses anything else. Set BROWSER_PATH to pick a browser, and
 // E2E_OUT for the screenshots. It leaves web/dist built against a temporary port: run pnpm build:web afterwards.
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -122,13 +123,48 @@ let browser;
 let staticServer;
 let exitCode = 1;
 
+
+/**
+ * Replaces SpeechRecognition before the page loads: a headless browser cannot listen. Each stop() answers with the next
+ * phrase of the queue, or with its error. It also keeps the time from the release to stop(), for the 400 ms of ADR 5.
+ */
+const FAKE_SPEECH = `
+  window.__speech = { queue: [], started: 0, stopDelays: [], releasedAt: 0 };
+  document.addEventListener('pointerup', () => { window.__speech.releasedAt = performance.now(); }, true);
+  window.SpeechRecognition = class {
+    start() { window.__speech.started += 1; }
+    stop() {
+      window.__speech.stopDelays.push(performance.now() - window.__speech.releasedAt);
+      const next = window.__speech.queue.shift() ?? '';
+      setTimeout(() => {
+        if (typeof next === 'string' && next !== '') this.onresult?.({ results: [[{ transcript: next, confidence: 0.9 }]] });
+        else this.onerror?.({ error: next.error ?? 'no-speech' });
+        this.onend?.();
+      }, 20);
+    }
+    abort() { this.onerror?.({ error: 'aborted' }); this.onend?.(); }
+  };
+`;
+const NO_SPEECH = 'window.SpeechRecognition = undefined; window.webkitSpeechRecognition = undefined;';
+
+async function voiceAttempts(gameId) {
+  const mongoose = createRequire(join(root, 'server', 'package.json'))('mongoose');
+  const connection = await mongoose.createConnection(localTestUrl('MONGO_URI_TEST')).asPromise();
+  try {
+    return await connection.collection('voice_attempts').find({ gameId }).toArray();
+  } finally {
+    await connection.close();
+  }
+}
+
 /** One tab: its own sessionStorage, so its own guest. */
-async function openTab(label) {
+async function openTab(label, { speech = true } = {}) {
   const { targetId } = await browserApi.send('Target.createTarget', { url: 'about:blank' });
   const targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then((r) => r.json());
   const page = await cdp(targets.find((t) => t.id === targetId).webSocketDebuggerUrl);
   await page.send('Page.enable');
   await page.send('Runtime.enable');
+  await page.send('Page.addScriptToEvaluateOnNewDocument', { source: speech ? FAKE_SPEECH : NO_SPEECH });
   await page.send('Emulation.setDeviceMetricsOverride', { width: 1180, height: 900, deviceScaleFactor: 1, mobile: false });
   await page.send('Emulation.setFocusEmulationEnabled', { enabled: true });
   const exceptions = [];
@@ -177,6 +213,18 @@ async function openTab(label) {
     },
     orientedBlack: () => evaluate(`document.querySelector('mf-game .cg-wrap')?.classList.contains('orientation-black') ?? false`),
     inputEnabled: () => evaluate(`!(document.querySelector('mf-voice-input input')?.disabled ?? true)`),
+    talkEnabled: () => evaluate(`!(document.querySelector('mf-voice-input [data-action=talk]')?.disabled ?? true)`),
+    stopDelays: () => evaluate('window.__speech.stopDelays'),
+    /** Holds the talk button, says the phrase ('' is a silence, { error } a failure) and waits for the recognizer. */
+    say: async (phrase) => {
+      await evaluate(`window.__speech.queue.push(${JSON.stringify(phrase)})`);
+      const started = await evaluate('window.__speech.started');
+      const box = await waitFor(() => evaluate(`(() => { const el = document.querySelector('mf-voice-input [data-action=talk]'); if (!el || el.disabled) return null; const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`), `${label}: el botón para hablar`);
+      await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+      await waitFor(async () => (await evaluate('window.__speech.started')) > started, `${label}: empezar a escuchar`);
+      await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+      await waitFor(() => evaluate(`document.querySelector('mf-voice-input [data-action=talk]')?.dataset.state === 'idle'`), `${label}: terminar de reconocer`);
+    },
     shot: async (name) => {
       await page.send('Page.bringToFront');
       await sleep(250);
@@ -326,7 +374,99 @@ try {
   await white.until(STATUS, '0-1 (jaque mate)');
   check('Tras recargar, el resultado sigue ahí', true);
 
-  const exceptions = [white, black, third].flatMap((tab) => tab.exceptions.map((text) => `${tab.label}: ${text}`));
+  // 12. a whole game by voice, with a fake SpeechRecognition: this shows the flow, not the recognition
+  await white.open(`${web}/index.html#/`);
+  await white.click('[data-action=create-white]');
+  await white.until(STATUS, 'Esperando al otro jugador');
+  const voiceInvite = await white.text('[data-invite]');
+  const voiceGameId = voiceInvite.split('/').pop();
+  await black.open(voiceInvite);
+  await black.until(STATUS, 'Juegas con negras');
+  await white.until(STATUS, 'Te toca');
+  check('Tras terminar una partida se puede jugar otra en la misma pestaña', (await white.inputEnabled()) === true);
+  check('Hay botón para hablar, y sigue la caja de texto', (await white.talkEnabled()) === true && (await white.evaluate(`document.querySelector('mf-voice-input input') !== null`)));
+  check('Luis no puede hablar: no es su turno', (await black.talkEnabled()) === false);
+
+  const voiceStart = await white.fen();
+  await white.say({ error: 'not-allowed' });
+  await white.until('mf-voice-input [role=status]', 'micrófono');
+  check('Sin permiso de micrófono lo dice, y no se mueve nada', (await white.fen()) === voiceStart);
+  await white.say('');
+  await white.until('mf-voice-input [role=status]', 'No te oí');
+  await white.say('hola qué tal');
+  await white.until('mf-voice-input [role=status]', 'No entendí');
+  await white.say('caballo');
+  await white.until('mf-voice-input [role=status]', 'No entendí');
+  await white.say('sí');
+  await white.until('mf-voice-input [role=status]', 'ninguna jugada');
+  check('Un silencio, dos frases sin jugada clara y un «sí» de más no mueven nada', (await white.fen()) === voiceStart && (await black.fen()) === voiceStart);
+
+  await white.say('peón efe tres');
+  await white.until('mf-voice-input [data-candidate]', 'f3');
+  await waitFor(async () => (await white.arrows()) > 0, 'la flecha de la jugada dicha');
+  check('Una jugada dicha dibuja la flecha y no se juega sola', (await white.fen()) === voiceStart && (await black.fen()) === voiceStart);
+  await white.shot('10-voz-por-confirmar');
+  await white.say('no');
+  await waitFor(async () => (await white.arrows()) === 0, 'que se borre la flecha tras «no»');
+  check('Decir «no» no juega nada', (await white.fen()) === voiceStart);
+  await white.say('peón efe tres');
+  await white.until('mf-voice-input [data-candidate]', 'f3');
+  await white.say('cancelar');
+  await waitFor(async () => (await white.arrows()) === 0, 'que se borre la flecha tras «cancelar»');
+  check('Decir «cancelar» no juega nada', (await white.fen()) === voiceStart);
+
+  await white.say('peón efe tres');
+  await white.until('mf-voice-input [data-candidate]', 'f3');
+  await white.say('hola');
+  await white.until('mf-voice-input [role=status]', 'No entendí');
+  check('Una frase mal oída mantiene la jugada por confirmar', (await white.evaluate(`document.querySelector('mf-voice-input [data-candidate]') !== null`)) && (await white.fen()) === voiceStart);
+  await white.say('sí');
+  await waitFor(async () => (await white.fen()) === afterF3 && (await black.fen()) === afterF3, 'f3 dicha en los dos tableros');
+  check('Decir «sí» juega la jugada en los dos tableros', true);
+
+  await black.say('peón e cinco');
+  await black.until('mf-voice-input [data-candidate]', 'e5');
+  await black.click('mf-voice-input [data-action=confirm]');
+  const afterE5 = 'rnbqkbnr/pppp1ppp/8/4p3/8/5P2/PPPPP1PP/RNBQKBNR w KQkq - 0 2';
+  await waitFor(async () => (await white.fen()) === afterE5 && (await black.fen()) === afterE5, 'e5 dicha en los dos tableros');
+  check('Una jugada dicha también se confirma con el botón', true);
+
+  await white.say('peón ge cuatro');
+  await white.until('mf-voice-input [data-candidate]', 'g4');
+  await white.say('sí');
+  await waitFor(async () => (await white.fen()) === afterG4 && (await black.fen()) === afterG4, 'g4 dicha en los dos tableros');
+  await black.say('dama hache cuatro');
+  await black.until('mf-voice-input [data-candidate]', 'Qh4');
+  await black.say('sí');
+  await white.until(STATUS, '0-1 (jaque mate)');
+  await black.until(STATUS, '0-1 (jaque mate)');
+  check('Partida completa por voz, hasta el jaque mate', true);
+  check('Con la partida terminada ya no se puede hablar', (await white.talkEnabled()) === false && (await black.talkEnabled()) === false);
+  await white.shot('11-voz-final');
+
+  const delays = [...(await white.stopDelays()), ...(await black.stopDelays())];
+  check('stop() nunca se llama antes de 400 ms tras soltar', delays.length > 0 && delays.every((delay) => delay >= 399), `${delays.length} frases`);
+
+  // 13. the telemetry reached MongoDB
+  const documents = await waitFor(async () => {
+    const found = await voiceAttempts(voiceGameId);
+    return found.length >= 16 ? found : null;
+  }, 'los 16 intentos en voice_attempts');
+  check('Llegan los 16 intentos a voice_attempts; el fallo de micrófono no cuenta', documents.length === 16, `${documents.length} documentos`);
+  const accepted = documents.filter((document) => document.accepted);
+  check('accepted: las 4 jugadas jugadas y los 3 «sí» que confirmaron', accepted.filter((document) => document.outcome === 'move').length === 4 && accepted.filter((document) => document.outcome === 'command').length === 3 && accepted.length === 7);
+  check('Lo cancelado y lo mal oído también se registra, con accepted: false', documents.filter((document) => !document.accepted && document.outcome === 'move').length === 2 && documents.some((document) => document.transcript === '' && document.outcome === 'nomatch'));
+  check('player lo pone el servidor: los dos invitados', new Set(documents.map((document) => document.player)).size === 2);
+  check('Sin audio, en es-CO y con Web Speech', documents.every((document) => !('audio' in document) && document.lang === 'es-CO' && document.recognizer === 'webspeech' && document.session === 'play'));
+  check('La latencia incluye los 400 ms', documents.filter((document) => document.transcript !== '').every((document) => document.latency.recognitionMs >= 399));
+
+  // 14. a browser without Web Speech
+  const noVoice = await openTab('Sin voz', { speech: false });
+  await noVoice.open(`${web}/index.html#/`);
+  await noVoice.until('mf-voice-input [data-voice-unavailable]', 'no tiene reconocimiento de voz');
+  check('Sin Web Speech lo avisa, sin botón, y queda la caja de texto', (await noVoice.evaluate(`document.querySelector('mf-voice-input [data-action=talk]') === null && document.querySelector('mf-voice-input input') !== null`)));
+
+  const exceptions = [white, black, third, noVoice].flatMap((tab) => tab.exceptions.map((text) => `${tab.label}: ${text}`));
   check('No hubo excepciones en ninguna página', exceptions.length === 0, exceptions.join(' | '));
   console.log(`\npartida=${gameId}`);
   exitCode = results.every((r) => r.ok) ? 0 : 1;
