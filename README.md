@@ -6,7 +6,7 @@ Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebr
 
 Proyecto final de Arquitectura de Software.
 
-> **Estado (6 de noviembre de 2026):** En local, dos invitados juegan una partida en tiempo real, por escrito o por voz. La voz solo se ha probado con un reconocedor falso: **falta probarla con voz real y desplegar** (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
+> **Estado (7 de noviembre de 2026):** En local, dos invitados juegan una partida en tiempo real, por escrito o por voz. Con Web Speech en Edge se jugó a mano una partida completa por voz, sin fallos, **con una sola voz**, así que eso no sustituye la validación con otra persona. **Falta probar el Whisper real y desplegar** (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
 
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Está previsto presentarlo en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
@@ -89,6 +89,7 @@ pnpm test:integration        # pruebas contra las bases locales (se omiten con u
 
 - **Postgres usa el puerto 55432** del equipo (no el 5432), para no chocar con un Postgres ya instalado como servicio de Windows, que no hace falta parar. Se cambia con `PG_PORT` en `.env`; MongoDB usa el 27017 (`MONGO_PORT`).
 - Los puertos se publican solo en `127.0.0.1`. Las credenciales salen de `.env`, que está en `.gitignore`: nunca se suben.
+- En el `.env` local del equipo de desarrollo, Postgres usa el puerto **15432**, porque Windows reservó un rango de puertos que incluye el 55432 y Docker no pudo publicarlo (7 de noviembre).
 - `pnpm test:integration` solo se ejecuta contra `localhost` o `127.0.0.1` y contra bases cuyo nombre termina en `_test` (`DATABASE_URL_TEST` y `MONGO_URI_TEST`); en cualquier otro caso se niega. `pnpm verify` no necesita Docker.
 - `GET /health` responde siempre 200: `status` vale `degraded` si una base está caída. Cada base tiene un límite de `HEALTH_PROBE_TIMEOUT_MS` (1 s por defecto).
 - `GET /health/live` responde sin consultar las bases: es la ruta para el sondeo de la plataforma.
@@ -100,7 +101,7 @@ pnpm test:integration        # pruebas contra las bases locales (se omiten con u
 |---|---|
 | Partida entre dos invitados, reconexión y fin de partida | Probado en local, con pruebas de integración y `pnpm e2e:web` |
 | Flujo de voz, confirmación, telemetría e historial | Probado con un reconocedor falso |
-| Reconocimiento con voz real en el producto | **Sin probar.** Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
+| Web Speech con voz real en el producto | **Prueba manual el 7 de noviembre,** en Edge: una partida completa, sin fallos, con una sola voz (la del responsable del repo). No sustituye la validación con otra persona. Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
 | Whisper real desde el navegador | **Sin probar;** solo con un agente falso |
 | Render, Neon, Atlas y Vercel | **Sin desplegar** |
 | README en una máquina limpia | **Sin probar** |

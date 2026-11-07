@@ -136,6 +136,9 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 - [ ] 23. Arrancar la demo de Whisper con `LB_WORKERS=3`.
 - [ ] 24. Medir la latencia de Whisper en la segunda laptop (sin definir de dónde sale). Es aparte de la máquina limpia, que solo prueba el README.
 
+## Pulido opcional
+- Solo si sobra tiempo al final: mensajes de error de voz más claros, guías en pantalla y ejemplos de frases válidas.
+
 ## Qué no tocar por ahora
 - **`shared/`:** el contrato lo aprueba el responsable del repo; cualquier cambio va en un PR y sube la versión. Si falta algo, se anota.
 - **PR #3 y #10 a #14:** ya fusionados en `main`. Nada se fusiona a `main` sin aprobación expresa del responsable del repo.
