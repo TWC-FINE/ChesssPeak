@@ -24,7 +24,7 @@ El curso exige al menos dos bases de datos. Además hay dos tipos de datos disti
 
 **Write-behind idempotente.** El servidor responde con el estado en memoria y guarda la jugada después con `updateOne({ gameId, plyCount: ply - 1 }, { $push: { moves }, $inc: { plyCount: 1 }, $set: { updatedAt } })`. Si no coincide nada: `plyCount >= ply` es un reintento (se ignora) y `plyCount < ply - 1` es un hueco (se registra, no se escribe). Así un reintento no duplica y una escritura perdida no queda oculta.
 
-**Desarrollo local:** `docker-compose.yml` con `postgres:17` y `mongo:8`, volúmenes con nombre y puertos solo en `127.0.0.1` (Postgres en el 55432 para no chocar con una instalación del equipo). Las credenciales salen de `.env` (`pnpm env:init`).
+**Desarrollo local:** `docker-compose.yml` con `postgres:17` y `mongo:8`, volúmenes con nombre y puertos solo en `127.0.0.1` (Postgres en el 15432 para no chocar con una instalación del equipo; antes era el 55432, que Windows puede reservar porque cae en su rango dinámico). Las credenciales salen de `.env` (`pnpm env:init`).
 
 ## Alternativas
 
