@@ -28,7 +28,7 @@ Lo que no está permitido exige **v: 2**: nueva constante, handshake con `v: 2` 
 
 ## Proceso
 
-1. Cualquier cambio del contrato, por pequeño que sea, va en un **PR revisado y aprobado por las dos personas** (A y B).
+1. Cualquier cambio del contrato, por pequeño que sea, va en un **PR aprobado por el responsable del repo**.
 2. El mismo PR actualiza los esquemas y sus tests, [protocol.md](protocol.md) y el registro de abajo.
 3. Si el cambio no es aditivo, el PR sube la versión y explica la transición.
 
@@ -36,4 +36,4 @@ Lo que no está permitido exige **v: 2**: nueva constante, handshake con `v: 2` 
 
 | Versión | Fecha | Cambio |
 |---|---|---|
-| v1 | 2 de noviembre de 2026 | Primera versión (socket, REST, `cs:*`, contextos). Pendiente de firma por las dos personas (lun 9 de noviembre). |
+| v1 | 2 de noviembre de 2026 | Primera versión (socket, REST, `cs:*`, contextos). Fusionada en `main` el 6 de noviembre, con la aprobación del responsable del repo. |

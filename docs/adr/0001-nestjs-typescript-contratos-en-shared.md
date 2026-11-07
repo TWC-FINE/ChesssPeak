@@ -24,7 +24,7 @@ El backend gestiona identidad, partidas en tiempo real (Socket.IO) y telemetría
 ## Alternativas
 
 - **Express o Fastify a mano:** menos estructura; habría que inventar la modularidad y la inyección de dependencias entre dos personas.
-- **Contratos duplicados en front y back:** riesgo de divergencia; por eso un único paquete firmado por las dos.
+- **Contratos duplicados en front y back:** riesgo de divergencia; por eso un único paquete, aprobado por el responsable del repo.
 - **Microservicios:** coste de despliegue y de coordinación sin beneficio para este tamaño.
 
 ## Consecuencias
