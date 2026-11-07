@@ -1,6 +1,6 @@
 # ChessSpeak — contexto para ponerse al día
 
-Una página. Estado a **5 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
+Una página. Estado a **6 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
 
 ## Qué es
 Ajedrez en línea donde las jugadas **se dicen en voz alta** en español (“caballo efe tres”). El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide **confirmación explícita** y la aplica en tiempo real entre dos jugadores. Proyecto final de Arquitectura de Software. **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** **Con demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
@@ -23,21 +23,24 @@ Se genera la forma hablada de **cada jugada legal** y se elige la más parecida 
 Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; el lote de mejoras del parser queda **fuera del plan**, y la validación usa frases nuevas y registra el hash del parser. **Salvedades:** una voz y una corrida B; el límite inferior del IC95 de B (78 %) queda por debajo del 85 %; no se puede atribuir la mejora solo al retardo (fallos no truncados con ruido: 20 en A, 6 en B; posible efecto de práctica); todo en **Edge 156**, **Chrome no se midió**; la latencia de Whisper es solo inferencia, en un i5-12400F (6 núcleos/12 hilos; en otros equipos será distinta); y hay sesgo de selección entre las 4 configuraciones de Whisper.
 
 ## Arquitectura en 5 líneas
-1. **Shell** estático (TypeScript vanilla) abre el único socket y monta 3 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`, Lit en light DOM), servidos con Live Server en el puerto 5500.
+1. **Shell** estático (TypeScript vanilla) abre el único socket y monta 3 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`, Lit en light DOM), servidos en el puerto 5500 con `pnpm serve:web` o Live Server.
 2. Los microfrontends se hablan con eventos `cs:*` y reciben su contexto por propiedad; los tipos y el protocolo viven en `shared/`.
 3. **Servidor NestJS** (monolito modular, una instancia en Render): `auth` de invitados, `games`, `voice-metrics`, `health`; estado de partida en memoria (`GameRoom` pura).
 4. **Datos:** Postgres (`games`) y Mongo (`game_moves`, `voice_attempts`; nunca audio), con escritura diferida e idempotente.
 5. **`local-agent`** (Node) envuelve `whisper-server` en `http://127.0.0.1:8765`; el navegador lo llama con CORS y la cabecera de red privada. `voice-parser` es TypeScript puro sin DOM.
 
+## Estado
+En local, dos invitados juegan una partida en tiempo real, por escrito o por voz. **Sin probar:** voz real, Whisper real desde el navegador y el despliegue, que aún no existe. **Sin código:** el pool de `move-workers`. Detalle en [HANDOFF.md](HANDOFF.md).
+
 ## Estructura del repo (lo que existe hoy)
 - `packages/voice-parser/` — parser y corpus v0 (`corpus/`), métricas (`scripts/`). **Congelado** para el `test` v0.
 - `spike/web-speech/` — arnés de Web Speech; `spike/whisper-local/` — benchmark y agente HTTP de Whisper; `spike/results/` — JSON de las mediciones; `spike/recordings/` — WAV (fuera de git).
 - `local-agent/` — pool de `whisper-server` con cola, salud, dashboard (`/lb/dashboard`) y generador de carga ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)).
-- `server/` — esqueleto NestJS: `/health`, Prisma y Mongoose, `appendMove`. `GameRoom` está hecha (reglas de la partida en memoria), pero nada la usa todavía. **Sin Socket.IO ni autenticación.**
-- `web/` — shell y 3 microfrontends de marcador de posición; `pnpm build:web`, `serve:web` y `smoke:web`.
+- `server/` — NestJS: `/health` y `/health/live`, auth de invitados, `POST /games`, gateway Socket.IO sobre `GameRoom`, guardado en Postgres y Mongo, y telemetría de voz (`voice-metrics`). Del pool de `move-workers` solo existe el puerto.
+- `web/` — shell con sesión y socket único, y 3 microfrontends: tablero, voz con caja de texto de respaldo (Web Speech y Whisper) e historial; `pnpm build:web`, `serve:web`, `smoke:web` y `e2e:web`.
 - `shared/` — contrato v1, ya en `main`.
 - `spike/analysis-gate/` — prueba de viabilidad del análisis con Stockfish: **no pasó** ([analysis-gate.md](analysis-gate.md)).
-- `docs/` — `spike-*.md`, `adr/`, `deploy.md`, este archivo. Raíz: `PLAN.md`, `SPEC.md`, `ARCHITECTURE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`.
+- `docs/` — `spike-*.md`, `adr/`, `deploy.md`, `protocol.md`, `HANDOFF.md`, este archivo. Raíz: `PLAN.md`, `SPEC.md`, `ARCHITECTURE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`.
 - Ignorados por git: `.env`, `whisper/`, `models/`, `stockfish/`, `spike/recordings/`, `local-agent/results/`. Repo en GitHub: `TWC-FINE/ChesssPeak` (la carpeta local anidada se deja por ahora).
 
 ## Cómo correr el arnés del spike

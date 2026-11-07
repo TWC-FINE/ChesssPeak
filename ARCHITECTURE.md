@@ -5,7 +5,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 ## 1. Vista general
 
 ```
- Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; publicada también en Vercel)
+ Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; prevista también en Vercel)
  ┌──────────────────────────────────────────────────────┐
  │ shell (TS vanilla): router, sesión, ÚNICO socket     │
  │  ├─ <mf-game>        tablero + jugadas (recibe socket)│
@@ -27,7 +27,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 
 El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de quien usa la aplicación (Whisper). El servidor solo recibe jugadas en UCI y telemetría.
 
-**Estado (5 de noviembre):** existen `packages/voice-parser/`, `spike/`, `local-agent/`, el esqueleto de `server/` y `web/` con marcadores de posición. Faltan Socket.IO, `GameRoom`, la autenticación y la voz en la interfaz; el contrato de `shared/` está en revisión.
+**Estado (6 de noviembre):** en local, dos invitados juegan una partida en tiempo real, por escrito o por voz, con las dos bases, la telemetría y el historial. **Sin probar:** voz real, Whisper real desde el navegador, y el despliegue, que aún no existe. **Sin código:** el pool de `move-workers` (ADR 11). Detalle en [README.md](README.md) y [docs/HANDOFF.md](docs/HANDOFF.md).
 
 ## 2. Componentes
 
@@ -38,8 +38,8 @@ El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de
 | `server/` | Identidad, partidas, validación de jugadas, persistencia, métricas | Nada de voz |
 | `web/shell/` | Router por hash, sesión, abre el único socket, monta los microfrontends | Lógica de partida |
 | `web/mf-game/` | Tablero (chessground, `viewOnly`), estado de la partida, envía `game:move` | Reconocimiento |
-| `web/mf-voice-input/` | Botón de hablar, adaptadores de reconocimiento, confirmación | Acceso al socket |
-| `web/mf-history/` | Lista de jugadas; pestaña Precisión (opcional) | Acceso al socket |
+| `web/mf-voice-input/` | Botón de hablar, selector y adaptadores de reconocimiento, confirmación, telemetría de cada frase | Acceso al socket |
+| `web/mf-history/` | Lista de jugadas, numeradas y en SAN | Acceso al socket |
 | `local-agent/` | Servicio HTTP que transcribe un WAV con un pool de whisper-server (1 worker por defecto, ADR 10); umbral de volumen y duración; dashboard | Reglas de ajedrez |
 
 ### 2.1 Backend (monolito modular NestJS)
@@ -50,6 +50,7 @@ Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`
 - **Persistencia write-behind:** cada jugada se guarda en Mongo de forma idempotente con `updateOne({gameId, plyCount: ply-1}, {$push, $inc: {plyCount: 1}})`.
 - **Rehidratación:** al reconectar se reconstruye la sala desde Mongo.
 - **Una sola instancia** en Render; no hace falta sticky session.
+- **Telemetría de voz:** una pasarela propia en `voice-metrics` guarda `voice:attempt` en `voice_attempts`, sin audio y con el `player` del token. Nunca responde al cliente: lo inválido o lo que no se puede guardar se registra en el log y se descarta, para no interrumpir la partida ([docs/protocol.md](docs/protocol.md)).
 - **Guardado por pool (previsto, aún sin código; ADR 11):** con `MOVE_WORKERS` mayor que 0, el gateway reparte `appendMove` entre procesos `move-worker`. `GameRoom` sigue siendo la única que valida. Con `MOVE_WORKERS=0`, el valor por defecto, se escribe directo.
 
 ### 2.2 Microfrontends
@@ -119,7 +120,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 ## 6. Comunicación y contrato
 - **HTTP (REST):** `/auth/guest` (y `/auth/login` si se hace), `/health` (con el estado de las bases) y `/health/live` (sin consultarlas, para el sondeo de la plataforma).
 - **Socket.IO:** eventos de partida validados con zod en `shared/`. Un solo socket por cliente, abierto por el shell.
-- **Contrato v0 de `shared/`:** borrador mínimo y versionado (`v: 1`) en el PR #3. Lo aprueba el responsable del repo. Cambios posteriores solo por PR aprobado por el responsable del repo.
+- **Contrato v0 de `shared/`:** versionado (`v: 1`). Lo aprueba el responsable del repo. Cambios posteriores solo por PR aprobado por el responsable del repo.
 - **CORS** (HTTP y Socket.IO): `http://127.0.0.1:5500`, `http://localhost:5500` y el dominio de Vercel.
 
 ## 7. Seguridad
@@ -138,7 +139,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 |---|---|
 | Backend | Render (una instancia; despertarla antes de evaluar) |
 | Postgres / Mongo | Neon / Atlas M0 |
-| Web | En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist`; publicada también en Vercel (URL `vercel.app`) |
+| Web | En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist`; prevista también en Vercel (URL `vercel.app`), aún sin desplegar |
 | `local-agent` | En la máquina de quien usa Whisper |
 
 ## 10. Decisiones (ADRs)
