@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 import type { GuestAuthResponse } from '@chessspeak/shared';
 import request from 'supertest';
 import { GuestTokenService } from '../../src/auth/guest-token.service';
+import { MongoModule } from '../../src/database/mongo/mongo.module';
 import { PrismaModule } from '../../src/database/prisma.module';
 import { PrismaService } from '../../src/database/prisma.service';
 import { GamesModule } from '../../src/games/games.module';
@@ -19,7 +20,7 @@ const createGame = (body: object, token = guest.token) => request(app.getHttpSer
 
 beforeAll(async () => {
   process.env.GUEST_TOKEN_SECRET = 'a'.repeat(64);
-  const moduleRef = await Test.createTestingModule({ imports: [PrismaModule, GamesModule] }).compile();
+  const moduleRef = await Test.createTestingModule({ imports: [PrismaModule, MongoModule, GamesModule] }).compile();
   app = moduleRef.createNestApplication<NestExpressApplication>();
   await app.init();
   prisma = app.get(PrismaService, { strict: false });
