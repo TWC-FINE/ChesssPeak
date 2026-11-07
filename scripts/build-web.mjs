@@ -46,6 +46,11 @@ for (const line of readFileSync(envFile, 'utf8').split(/\r?\n/)) {
 // a hosting service sets them in the environment, where they win over the file
 const fromEnvironment = Object.keys(process.env).filter((key) => /^PUBLIC_[A-Z0-9_]+$/.test(key));
 for (const key of fromEnvironment) config[key] = process.env[key];
+// a deployment without the API URL would publish a web that cannot sign in; locally and in CI it may stay empty
+if (process.env.VERCEL === '1' && !config.PUBLIC_API_URL?.trim()) {
+  console.error('build:web: falta PUBLIC_API_URL en el despliegue. Añádela en Vercel, en Environment Variables, con la URL de Render sin barra final (docs/deploy.md).');
+  process.exit(1);
+}
 writeFileSync(join(dist, 'config.js'), `window.CS_CONFIG = ${JSON.stringify(config, null, 2)};\n`);
 
 console.log(`build:web listo en ${dist} (config de ${envFile.replace(root, '.')}${fromEnvironment.length > 0 ? ` y del entorno: ${fromEnvironment.join(', ')}` : ''})`);
