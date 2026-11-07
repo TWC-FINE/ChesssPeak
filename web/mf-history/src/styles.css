@@ -3,4 +3,9 @@
 mf-history { display: block; font-family: var(--cs-font); color: var(--cs-text); }
 .csh-root { display: flex; flex-direction: column; gap: var(--cs-gap); padding: var(--cs-gap); background: var(--cs-surface); border: 1px solid var(--cs-border); border-radius: var(--cs-radius); }
 .csh-title { margin: 0; font-size: 1rem; }
+.csh-moves { margin: 0; padding: 0; list-style: none; max-height: 16rem; overflow-y: auto; }
+.csh-row { display: flex; gap: 8px; }
+.csh-number { min-width: 2.5ch; color: var(--cs-muted); }
+.csh-san { min-width: 6ch; }
+.csh-san[data-last] { font-weight: 700; }
 .csh-info { margin: 0; font-size: 0.9rem; color: var(--cs-muted); }

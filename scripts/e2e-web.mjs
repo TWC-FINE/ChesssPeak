@@ -215,6 +215,7 @@ async function openTab(label, { speech = true } = {}) {
     inputEnabled: () => evaluate(`!(document.querySelector('mf-voice-input input')?.disabled ?? true)`),
     talkEnabled: () => evaluate(`!(document.querySelector('mf-voice-input [data-action=talk]')?.disabled ?? true)`),
     stopDelays: () => evaluate('window.__speech.stopDelays'),
+    history: async () => (await text('mf-history')).replace(/\s+/g, ' '),
     /** Holds the talk button, says the phrase ('' is a silence, { error } a failure) and waits for the recognizer. */
     say: async (phrase) => {
       await evaluate(`window.__speech.queue.push(${JSON.stringify(phrase)})`);
@@ -373,6 +374,9 @@ try {
   await white.reload();
   await white.until(STATUS, '0-1 (jaque mate)');
   check('Tras recargar, el resultado sigue ahí', true);
+  await waitFor(async () => (await white.history()).includes('2. g4 Qh4'), 'el historial tras recargar');
+  check('Tras recargar, el historial tiene las jugadas numeradas y sin repetir', (await white.history()).includes('1. f3 e5 2. g4 Qh4') && (await white.evaluate(`document.querySelectorAll('mf-history .csh-san').length`)) === 4);
+  check('Los dos ven el mismo historial', (await black.history()).includes('1. f3 e5 2. g4 Qh4'));
 
   // 12. a whole game by voice, with a fake SpeechRecognition: this shows the flow, not the recognition
   await white.open(`${web}/index.html#/`);
@@ -384,6 +388,7 @@ try {
   await black.until(STATUS, 'Juegas con negras');
   await white.until(STATUS, 'Te toca');
   check('Tras terminar una partida se puede jugar otra en la misma pestaña', (await white.inputEnabled()) === true);
+  check('El historial se vacía al cambiar de partida', (await white.history()).includes('Aún no hay jugadas') && (await black.history()).includes('Aún no hay jugadas'));
   check('Hay botón para hablar, y sigue la caja de texto', (await white.talkEnabled()) === true && (await white.evaluate(`document.querySelector('mf-voice-input input') !== null`)));
   check('Luis no puede hablar: no es su turno', (await black.talkEnabled()) === false);
 
@@ -441,6 +446,7 @@ try {
   await white.until(STATUS, '0-1 (jaque mate)');
   await black.until(STATUS, '0-1 (jaque mate)');
   check('Partida completa por voz, hasta el jaque mate', true);
+  check('El historial recoge la partida jugada por voz', (await white.history()).includes('1. f3 e5 2. g4 Qh4') && (await black.history()).includes('1. f3 e5 2. g4 Qh4'));
   check('Con la partida terminada ya no se puede hablar', (await white.talkEnabled()) === false && (await black.talkEnabled()) === false);
   await white.shot('11-voz-final');
 
