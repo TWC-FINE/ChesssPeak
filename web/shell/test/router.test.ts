@@ -25,7 +25,7 @@ describe('contexts and config', () => {
   it('gives each microfrontend a versioned context', () => {
     expect(contextFor('mf-game', 'x', null, null)).toEqual({ v: 1, gameId: 'x', orientation: 'white', socket: null });
     // no releaseDelayMs: <mf-voice-input> takes DEFAULT_RELEASE_DELAY_MS from shared
-    expect(contextFor('mf-voice-input', null, 'http://127.0.0.1:8765', null)).toEqual({ v: 1, gameId: null, lang: 'es-CO', recognizer: 'text', agentUrl: 'http://127.0.0.1:8765' });
+    expect(contextFor('mf-voice-input', null, 'http://127.0.0.1:8765', null)).toEqual({ v: 1, gameId: null, lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'http://127.0.0.1:8765' });
     expect(contextFor('mf-history', 'x', null, null)).toEqual({ v: 1, gameId: 'x' });
     expect(contextFor('other', null, null, null)).toBeUndefined();
   });

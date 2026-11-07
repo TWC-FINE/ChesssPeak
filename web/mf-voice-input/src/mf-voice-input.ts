@@ -2,6 +2,7 @@ import { LitElement, html, type PropertyValues } from 'lit';
 import { resolve, type Resolution } from '@chessspeak/voice-parser';
 import { CS_EVENT_INIT, releaseDelayOf, type CsEventDetail, type CsEventName, type VoiceAttemptPayload, type VoiceInputContext } from '@chessspeak/shared';
 import { buildAttempt } from './attempt.js';
+import { createRecognizer } from './recognizers/create.js';
 import type { Listening, RecognitionFailure, RecognitionOutcome, SpeechRecognizer } from './recognizers/recognizer.js';
 import ownCss from './styles.css?inline';
 
@@ -38,8 +39,10 @@ const FAILURE_MESSAGES: Record<Exclude<RecognitionFailure, 'no-speech' | 'aborte
 export class MfVoiceInput extends LitElement {
   static override properties = { context: { attribute: false }, speech: { attribute: false } };
   declare context: VoiceInputContext | undefined;
+  /** Overrides the recognizer of the context, for tests. */
   declare speech: SpeechRecognizer | undefined;
 
+  private fromContext: { key: string; recognizer: SpeechRecognizer | undefined } = { key: '', recognizer: undefined };
   private position: Position | undefined;
   private candidate: Candidate | undefined;
   /** The telemetry of the spoken candidate: `accepted` is only known when it is confirmed or dropped. */
@@ -70,18 +73,43 @@ export class MfVoiceInput extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues): void {
-    // a route change: what was being said or proposed belongs to the previous game
-    if (changed.has('context') && this.position !== undefined && this.position.gameId !== this.context?.gameId) {
+    if (!changed.has('context')) return;
+    this.chooseRecognizer();
+    // a route change: what was being said or proposed belongs to the previous game, and the next one has not ended
+    if (this.position !== undefined && this.position.gameId !== this.context?.gameId) {
       this.abortTalk();
       this.dropCandidate('position-changed');
+      this.position = undefined;
+      this.ended = false;
+      this.message = '';
     }
+  }
+
+  /** The shell sends a new context on every change, and a recognizer is only replaced when it would be different. */
+  private chooseRecognizer(): void {
+    const context = this.context;
+    const key = `${context?.recognizer}|${context?.lang}|${releaseDelayOf(context)}`;
+    if (key === this.fromContext.key) return;
+    this.fromContext = { key, recognizer: createRecognizer(context) };
+    if (this.noVoiceInBrowser()) this.setStatus('unavailable');
+  }
+
+  private get recognizer(): SpeechRecognizer | undefined {
+    return this.speech ?? this.fromContext.recognizer;
+  }
+
+  /** RF13: the context asks for a recognizer that this browser does not have. */
+  private noVoiceInBrowser(): boolean {
+    const recognizer = this.recognizer;
+    return recognizer !== undefined && !recognizer.isAvailable();
   }
 
   protected override render() {
     const context = this.context;
     return html`<div class="csv-root">
       <h2 class="csv-title">Tu jugada</h2>
-      ${this.speech?.isAvailable() === true ? this.renderTalkButton() : ''}
+      ${this.recognizer?.isAvailable() === true ? this.renderTalkButton() : ''}
+      ${this.noVoiceInBrowser() ? html`<p class="csv-notice" data-voice-unavailable>Este navegador no tiene reconocimiento de voz. Usa la caja de texto, o abre la página en Edge.</p>` : ''}
       <form class="csv-form" @submit=${this.onSubmit}>
         <label class="csv-label">Escribe la jugada o un comando
           <input class="csv-input" name="move" autocomplete="off" placeholder="caballo efe tres" ?disabled=${!this.canType()} />
@@ -145,7 +173,7 @@ export class MfVoiceInput extends LitElement {
 
   private readonly press = (event: Event): void => {
     event.preventDefault();
-    const speech = this.speech;
+    const speech = this.recognizer;
     const position = this.position;
     if (speech === undefined || position === undefined || this.talk !== undefined || this.processing || !this.canType()) return;
     this.message = '';
@@ -209,7 +237,7 @@ export class MfVoiceInput extends LitElement {
         ply,
         fen: spoken.fen,
         lang: this.context?.lang ?? 'es-CO',
-        recognizer: this.speech?.name ?? 'fake',
+        recognizer: this.recognizer?.name ?? 'fake',
         alternatives: outcome.alternatives,
         transcript,
         resolution,

@@ -14,7 +14,7 @@ export function contextFor(
     case 'mf-game':
       return { v: 1, gameId, orientation: 'white', socket };
     case 'mf-voice-input':
-      return { v: 1, gameId, lang: 'es-CO', recognizer: 'text', agentUrl };
+      return { v: 1, gameId, lang: 'es-CO', recognizer: 'webspeech', agentUrl };
     case 'mf-history':
       return { v: 1, gameId };
     default:
