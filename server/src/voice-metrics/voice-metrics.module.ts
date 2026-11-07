@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { VoiceMetricsGateway } from './voice-metrics.gateway';
 
-@Module({})
+@Module({ providers: [VoiceMetricsGateway] })
 export class VoiceMetricsModule {}
