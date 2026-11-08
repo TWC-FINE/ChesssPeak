@@ -119,7 +119,14 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 | Flujo de voz, confirmación, telemetría e historial | Probado con un reconocedor falso |
 | Web Speech con voz real en el producto | **Prueba manual el 7 de noviembre,** en Edge: una partida completa, sin fallos, con una sola voz (la del responsable del repo). No sustituye la validación con otra persona. Corrió sobre `5ed174b`; después #28 y #29 cambiaron `<mf-voice-input>`, así que falta repetir una pasada corta sobre el código actual. Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
 | Whisper real desde el navegador | **Sin probar;** solo con un agente falso |
-| Render, Neon, Atlas y Vercel | **Sin desplegar** |
+| Despliegue en Render, Neon, Atlas y Vercel | **Desplegado.** Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>, las dos sobre `2c48755`. Verificado desde fuera el 8 de noviembre de 2026: `/health` con las dos bases en `up`, HTTPS válido en las dos URL, CORS solo para el origen de Vercel, y la web carga sus tres microfrontends sin pedir nada a otros hosts |
+| Partida por la API desplegada | **Probado el 8 de noviembre** con un script desde fuera: dos invitados, `POST /games` y Socket.IO por `wss`. Cuatro jugadas llegaron a los dos lados. En Edge sin interfaz, la web publicada entra como invitado y conecta por `wss`. Tras dormirse Render, al volver a entrar la partida se reconstruyó con sus jugadas (Mongo) y su resultado (Postgres) |
+| Dos navegadores reales contra la nube | **Sin probar** |
+| Límite de `/auth/guest` en Render (`trust proxy`) | **Fallido, por corregir.** Desde una misma IP, sin cabeceras, el contador alterna entre dos claves: el servidor no ve la IP del cliente. Una cabecera `X-Forwarded-For` falsa también reinició el contador |
+| Servidor gratuito dormido | La primera respuesta tras dormir tardó 52,5 s. Hay que despertarlo antes de evaluar |
+| Smoke y e2e contra la URL pública | **No es posible sin modificar el repo:** los dos scripts levantan su propio servidor en `127.0.0.1` |
+| Voz real y Whisper sobre la URL pública | **Sin probar** |
+| Dominio propio | **Sin conectar;** se usa la URL `vercel.app` |
 | README en una máquina limpia | **Sin probar** |
 | Chrome | **Sin medir** |
 
