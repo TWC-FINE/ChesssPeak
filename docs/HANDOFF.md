@@ -4,7 +4,7 @@
 
 **Añadido el 7 de noviembre:** el responsable del repo hizo a mano la prueba de voz con Web Speech `es-CO` en Edge, con el servidor local. Dictó los dos lados desde dos pestañas y jugó una partida completa sin fallos: se aplicaron las jugadas legales, se rechazaron las ilegales y se detectó el mate. Hubo una sola voz, la suya, así que **no sustituye la validación con otra persona.** La prueba corrió sobre `5ed174b`. Desde entonces #28 y #29 cambiaron `<mf-voice-input>`, así que el responsable del repo repetirá una pasada corta de Web Speech sobre el código actual, junto con la prueba de Whisper. También se cambió el puerto de Postgres en el `.env` local (ver «Notas para el README»). El resto del documento sigue con su estado del 6 de noviembre.
 
-**Añadido el 8 de noviembre:** el despliegue existe, y se verificó desde fuera ese mismo día (ver «Verificación del despliegue»). **El límite de `/auth/guest` falla en Render y está por corregir.**
+**Añadido el 8 de noviembre:** el despliegue existe, y se verificó desde fuera ese mismo día (ver «Verificación del despliegue»). **El límite de `/auth/guest` fallaba en Render;** se corrigió en #37 y se probó el mismo día (ver «Verificación del despliegue»). Falta probarlo desde otra red.
 
 **Prueba de voz del 8 de noviembre, con una sola voz (la del responsable del repo):**
 1. **Web Speech `es-CO`,** en <https://chessspeak.vercel.app> y en la web local: partida con dos pestañas, por voz y por texto, con confirmación y recarga a mitad de partida. Todo correcto.
@@ -12,7 +12,7 @@
 3. **Se nota más retraso con Whisper** que con Web Speech, como se esperaba.
 4. **Permiso de red local de Edge:** no consta si apareció el aviso.
 
-**Sigue sin probar:** la validación con otra voz, el dominio propio, Chrome, el límite por IP desde otra red y `trust proxy` (fallido, por corregir).
+**Sigue sin probar:** la validación con otra voz, el dominio propio, Chrome y el límite por IP desde otra red. `trust proxy` falló, y #37 lo corrigió (ver «Verificación del despliegue»).
 
 **En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Eso ya está en `main`, tras fusionar la cadena de PR. La voz también funciona, pero **solo se ha probado con un reconocedor y un agente falsos**. Faltan la prueba con voz real, el Whisper real, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
 
@@ -64,7 +64,8 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | Partida por la API | Script desde fuera: dos `POST /auth/guest` (201), `POST /games` (201) y dos clientes Socket.IO por `wss`. Cuatro jugadas llegaron a los dos lados con el mismo FEN |
 | Persistencia | Con Render dormido y despertado, un proceso nuevo reconstruyó la partida al volver a entrar: las jugadas, que salen de Mongo, y los asientos y el resultado por abandono, que salen de Postgres. No se consultaron las bases |
 | Web publicada | 200. Carga sus scripts y los tres microfrontends desde el mismo origen. Apunta a la API de Render. En Edge sin interfaz, sin pedir nada a otros hosts, entra como invitado y conecta por `wss`. Único error: `favicon.ico` da 404 |
-| Límite de `/auth/guest` (`trust proxy`) | **Fallido, por corregir.** Desde una misma IP, sin cabeceras, el contador fue 9, 8, 9, 7: alterna entre dos claves, así que el servidor no ve la IP del cliente. Con `X-Forwarded-For: 198.51.100.7, 1.2.3.4`, el contador también empezó de nuevo |
+| Límite de `/auth/guest` (`trust proxy`) | **Falló con `trust proxy = 1`:** desde una misma IP, sin cabeceras, el contador fue 9, 8, 9, 7, alternando entre dos claves, así que el servidor no veía la IP del cliente. Con `X-Forwarded-For: 198.51.100.7, 1.2.3.4`, el contador también empezó de nuevo |
+| Límite de `/auth/guest` tras #37 | Corregido en #37 (`e06ecbc`). Probado el 8 de noviembre a las 20:29 UTC, desde una misma IP: cuatro peticiones sin cabeceras dieron 9, 8, 7 y 6, y una con `X-Forwarded-For: 198.51.100.7, 1.2.3.4` dio 5. Una con `CF-Connecting-IP: 198.51.100.8` recibió 403 de Cloudflare (`error code: 1000`, sin cabeceras de Render): no llega al servidor. Eso no prueba que el contador ignore esa cabecera, solo que no pasa. **Sin probar desde otra red** |
 
 **Sin probar en esta verificación:** voz real y Whisper sobre la URL pública (los probó después a mano el responsable del repo; ver arriba), el dominio propio, una partida con dos navegadores reales contra la nube y el límite desde otra red. **No es posible sin modificar el repo:** `smoke:web` y `e2e:web` contra la URL pública, porque levantan su propio servidor en `127.0.0.1`.
 
@@ -117,7 +118,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 2 | Revisar lo fusionado de #3 y #10 a #14, incluidos los códigos de error provisionales | Responsable del repo |
 | 3 | Hecho: excepción de commits de fusión en `CONTRIBUTING.md` (#15) | Responsable del repo |
 | 4 | Hecho: cadena fusionada en orden | Responsable del repo |
-| 5 | Hecho: cuentas y despliegue (8 de noviembre). `trust proxy` probado: **fallido, por corregir** en un PR aparte. Pendiente: probar el límite desde otra red | Responsable del repo |
+| 5 | Hecho: cuentas y despliegue (8 de noviembre). `trust proxy` falló y se corrigió en #37 (`e06ecbc`), probado el mismo día. Pendiente: probar el límite desde otra red | Responsable del repo |
 | 6 | Lote del parser: fuera del plan, se queda `spike-parser-freeze` | Responsable del repo |
 | 7 | Decidir el pool de `move-workers` tras las pruebas de voz y el despliegue, y dar el OK explícito antes de empezar. Hasta entonces se considera no recortable | Responsable del repo |
 | 8 | Hecho: Web Speech, pulsar para hablar y confirmación por voz (#26 y #27). Pruebas manuales con voz real el 7 y el 8 de noviembre, con una sola voz | Responsable del repo (voz real) |
@@ -252,8 +253,8 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **Dominio** | **En espera del profesor; mínimo garantizado: la URL `vercel.app`.** Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*). No se sabe qué hosting es, qué permite alojar ni si tiene HTTPS, que es obligatorio para el micrófono |
 | **Cadena de 6 PR** | **Cerrado.** Fusionada en orden con commits de fusión; los hashes están en «Ramas y hashes» |
 | **Pérdida de jugadas si el servidor muere** | **Aceptado y documentado (ADR 7), sin prueba.** Las jugadas pendientes de guardar se pierden. Los jugadores pueden haberlas visto |
-| **Fase 0 sin desplegar** | **Cerrado el 8 de noviembre:** desplegado. CORS, verificado. `trust proxy`, fallido y por corregir. La memoria en Render sigue sin medir |
-| **Límite de `/auth/guest` en Render** | **Abierto, por corregir.** El servidor no ve la IP del cliente, así que el límite no se aplica por cliente y una cabecera falsa puede reiniciarlo. Ver «Verificación del despliegue» |
+| **Fase 0 sin desplegar** | **Cerrado el 8 de noviembre:** desplegado. CORS, verificado. El límite de `/auth/guest`, corregido en #37. La memoria en Render sigue sin medir |
+| **Límite de `/auth/guest` en Render** | **Corregido en #37; falta la prueba desde otra red.** Depende del supuesto de que Cloudflare siga delante de Render (ADR 8). Ver «Verificación del despliegue» |
 | **Render gratuito dormido** | **Abierto, aceptado.** La primera respuesta tras dormir tardó 52,5 s el 8 de noviembre. Hay que despertarlo antes de evaluar |
 | **Postgres 18 en Neon sin CI** | **Abierto.** Según el responsable del repo, Neon corre Postgres 18 y tiene aplicadas las dos migraciones; la CI y Docker usan `postgres:17`. La partida de prueba del 8 de noviembre funcionó contra Neon, pero ninguna prueba automática corre contra 18 |
 | **`0.0.0.0/0` en Atlas** | **Aceptado** (`docs/deploy.md`, «Riesgos»): Render gratuito no tiene IP fija |
