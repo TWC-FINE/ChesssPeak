@@ -125,7 +125,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 
 ## 7. Seguridad
 - Identidad siempre decidida por el servidor; invitados con token firmado (sin fila en `users`). Login con JWT propio + bcrypt es opcional.
-- `@nestjs/throttler` en `/auth/guest` y `/auth/login` (`trust proxy` en Render).
+- `@nestjs/throttler` en `/auth/guest` y `/auth/login`. En Render cuenta por `CF-Connecting-IP` (`CLIENT_IP_HEADER`), porque `trust proxy` no da la IP del cliente (ADR 8).
 - Atlas abierto a `0.0.0.0/0`, mitigado con usuario de mínimos privilegios y contraseña fuerte.
 - Secretos solo en `.env` (con `.env.example` en el repo); gitleaks en CI.
 

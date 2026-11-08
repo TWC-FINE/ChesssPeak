@@ -76,18 +76,21 @@ await (await fetch(`${CS_CONFIG.PUBLIC_API_URL}/health`)).json()
 
 Debe devolver `status: "ok"` sin error de CORS. La página debe mostrar los tres microfrontends.
 
-### Comprobar `trust proxy`
+### Comprobar el límite de `/auth/guest`
 
-**Se prueba en cuanto haya despliegue en Render,** porque `trust proxy = 1` aún no está verificado allí (ADR 8). Cada petición gasta una del límite, así que el contador se ve en esta cabecera:
+**El 8 de noviembre de 2026, `trust proxy = 1` falló en Render** (ADR 8): el servidor veía la IP de un proxy, no la del cliente. Desde entonces el límite usa `CF-Connecting-IP`, que `render.yaml` declara en `CLIENT_IP_HEADER`. **Supuesto:** Cloudflare sigue delante de Render y sobrescribe esa cabecera.
+
+**Se prueba tras cada cambio en esto.** Avisa antes a quien use la web desde la misma red: cada petición gasta una de las 10 entradas por minuto de esa IP. Los pasos 1 y 2 gastan 6, sin llegar al límite. El contador se ve en esta cabecera:
 
 ```bash
 curl -si -X POST https://TU-SERVICIO.onrender.com/auth/guest -H 'Content-Type: application/json' -d '{"displayName":"Prueba"}' | grep -i x-ratelimit-remaining
 ```
 
-1. **Clientes distintos:** ejecútalo varias veces desde una red y una vez desde otra, por ejemplo con los datos del celular. En la segunda red el contador debe empezar de nuevo. Si sigue bajando, todos los clientes comparten el mismo límite.
-2. **Cabecera falsa:** repítelo añadiendo `-H 'X-Forwarded-For: 203.0.113.9'`. El contador debe seguir bajando. Si empieza de nuevo, un cliente podría saltarse el límite.
+1. **Misma IP, sin cabeceras:** cuatro peticiones seguidas deben dar 9, 8, 7 y 6. Si el contador salta, el servidor no ve la IP del cliente.
+2. **Cabeceras falsas:** repítelo con `-H 'X-Forwarded-For: 198.51.100.7, 1.2.3.4'` y con `-H 'CF-Connecting-IP: 198.51.100.8'`. El contador debe seguir bajando. Si empieza de nuevo, un cliente podría saltarse el límite.
+3. **Clientes distintos:** una vez desde otra red, por ejemplo con los datos del celular. Allí el contador debe empezar de nuevo. Si sigue bajando, todos los clientes comparten el mismo límite.
 
-Si alguna falla, hay que corregir el valor en `server/src/configure-http.ts`.
+Si falla, no hay otra corrección prevista: se documenta la limitación, y el límite se ajusta con `GUEST_AUTH_LIMIT_PER_MINUTE`.
 
 ## Riesgos
 

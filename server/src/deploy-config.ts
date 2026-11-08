@@ -38,6 +38,17 @@ export function guestAuthLimitPerMinute(env: Env = process.env): number {
   return Number.isInteger(value) && value > 0 ? value : DEFAULT_GUEST_AUTH_LIMIT;
 }
 
+/**
+ * Header that carries the client IP, written by a proxy that overwrites what the client sends. Render declares
+ * cf-connecting-ip (render.yaml): Cloudflare sits in front of its web services. Unset, the limit uses req.ip, so a client
+ * cannot choose its own key by sending that header to a server with no such proxy in front. Anything that is not a
+ * header name counts as unset.
+ */
+export function clientIpHeader(env: Env = process.env): string | undefined {
+  const value = env.CLIENT_IP_HEADER?.trim().toLowerCase();
+  return value !== undefined && /^[a-z0-9-]+$/.test(value) ? value : undefined;
+}
+
 /** Largest voice:attempt kept, in bytes of its JSON. A normal one is far smaller; the contract does not limit the length of a transcript. */
 export function voiceAttemptMaxBytes(env: Env = process.env): number {
   const value = Number(env.VOICE_ATTEMPT_MAX_BYTES);
