@@ -24,6 +24,7 @@ pnpm install
   - **Qué pasó:** falló 3 de 3 en `fa5c168`, con `tiempo agotado esperando: el navegador`, y pasó 3 de 3 en `cbe8abb`. Entre ambos commits solo cambió que el script guarda la salida de error de Chrome en lugar de descartarla, y no se sabe si eso influye.
   - **Otros datos:** un control sobre `90ab665` pasó a la misma hora, y el mismo error ya apareció en `main` (`2d287ea`).
   - **Si vuelve a fallar:** el registro de CI muestra ahora el estado del navegador y su salida de error.
+  - **Arranque más lento registrado:** 14 836 ms el 7 de noviembre, en #32 (ejecución 42427125756). Pasó por la espera de 30 s; sigue abierto.
 - **El resultado global de CI puede decir verde aunque `smoke` falle,** porque `ci.yml` lo marca con `continue-on-error`. Ocurrió en `fa5c168`: la ejecución figuró como `success`. **Hay que mirar siempre cada trabajo por separado,** con `gh pr checks <número>`.
 - **Sin definir:** hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
 

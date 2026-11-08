@@ -101,7 +101,7 @@ pnpm test:integration        # pruebas contra las bases locales (se omiten con u
 |---|---|
 | Partida entre dos invitados, reconexión y fin de partida | Probado en local, con pruebas de integración y `pnpm e2e:web` |
 | Flujo de voz, confirmación, telemetría e historial | Probado con un reconocedor falso |
-| Web Speech con voz real en el producto | **Prueba manual el 7 de noviembre,** en Edge: una partida completa, sin fallos, con una sola voz (la del responsable del repo). No sustituye la validación con otra persona. Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
+| Web Speech con voz real en el producto | **Prueba manual el 7 de noviembre,** en Edge: una partida completa, sin fallos, con una sola voz (la del responsable del repo). No sustituye la validación con otra persona. Corrió sobre `5ed174b`; después #28 y #29 cambiaron `<mf-voice-input>`, así que falta repetir una pasada corta sobre el código actual. Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
 | Whisper real desde el navegador | **Sin probar;** solo con un agente falso |
 | Render, Neon, Atlas y Vercel | **Sin desplegar** |
 | README en una máquina limpia | **Sin probar** |
