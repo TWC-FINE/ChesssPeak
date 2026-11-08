@@ -1,6 +1,6 @@
 # ADR 6 — `local-agent` por HTTP en localhost
 
-- **Estado:** Aceptado (6 de noviembre de 2026). **La prueba con el Whisper real y un micrófono real sigue pendiente.**
+- **Estado:** Aceptado (6 de noviembre de 2026). **El 8 de noviembre de 2026, el responsable del repo probó el Whisper real con su micrófono,** con una sola voz.
 - **Relacionado:** [ADR 5](0005-strategy-y-reconocedor-por-defecto.md) · [ADR 10](0010-balanceo-de-carga-en-local-agent.md) · [docs/deploy.md](../deploy.md) · [SPEC.md](../../SPEC.md) R2
 
 ## Contexto
@@ -26,4 +26,4 @@ Whisper corre en la máquina de quien juega, porque es el módulo local del proy
 - (−) **Solo funciona en la máquina donde corre el agente,** y hay que instalar el binario y el modelo.
 - (−) **Desde una web pública, el navegador puede bloquear la llamada,** y la página no puede distinguir ese bloqueo de un agente apagado. Chrome pide permiso desde la versión 142; en Edge no está comprobado. La prueba está en [docs/deploy.md](../deploy.md). Por eso la demo sirve la web en local.
 - (−) Cada origen público hay que añadirlo a `AGENT_ALLOWED_ORIGINS`.
-- (−) **Sin verificar:** el flujo solo se ha probado con un agente falso y el micrófono falso del navegador (`pnpm e2e:web`). Falta la prueba contra el `local-agent` real, con voz real.
+- (−) **Probado a mano el 8 de noviembre de 2026** con el micrófono y la voz del responsable del repo, en la web local y en la pública: funciona. Antes solo se había probado con un agente falso y el micrófono falso del navegador (`pnpm e2e:web`). **Sin verificar:** otra voz, y si Edge pidió permiso de red local (no consta).

@@ -135,7 +135,7 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 ## Privacidad
 
 - **Nunca se guarda audio.** En `voice_attempts` se guarda el texto reconocido, con los datos del intento.
-- **Web Speech envía el audio a la nube del navegador.**
+- **Web Speech envía el audio a la nube del navegador:** a la de Microsoft en Edge, que es el navegador de la demo, y a la de Google en Chrome.
 - **Whisper local no saca el audio de tu equipo.**
 
 ## Documentación

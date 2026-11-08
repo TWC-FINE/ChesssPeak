@@ -22,7 +22,7 @@
 
 | Rama | Local | Remoto | Situación |
 |---|---|---|---|
-| `main` | `9567ca5` | `9567ca5` | Antes de este PR. Contiene la cadena, `docs/delivery-nov-19` y #18 a #30. La protección de rama la activa el responsable del repo en Settings |
+| `main` | `9567ca5` | `9567ca5` | Antes de este PR. Contiene la cadena, `docs/delivery-nov-19` y #18 a #30. Hoy está protegida por el ruleset `proteger-main` (ver «Sin revisión independiente», sección 5) |
 | `feat/contract-v0` | `75c82f9` | `75c82f9` | PR #3, fusionado en `9a566aa` |
 | `feat/game-room` | `9cf9cad` | `9cf9cad` | PR #10, fusionado en `8f32cfc` |
 | `feat/guest-auth` | `05d9b73` | `05d9b73` | PR #11, fusionado en `05fd7a6` |
@@ -261,7 +261,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **Chrome sin medir** | **Abierto, recortable.** Si la entrega la abre otra persona, puede ser en Chrome |
 | **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
-| **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
+| **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` está protegida por el ruleset `proteger-main`, comprobado el 8 de noviembre. Exige PR con 0 aprobaciones y bloquea borrar la rama y el push forzado. **No exige que la CI pase:** sigue habiendo que mirar cada trabajo antes de fusionar |
 | **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15), las 6 fusiones de la cadena (`9a566aa`, `8f32cfc`, `05fd7a6`, `9d1bb44`, `de79815` y `311c0fa`), los *squash* de #16 (`af163bd`), #17 (`76b0dfe`), #18 (`9db85f6`), #19 (`23e4bcc`), #20 (`cd68b5a`), #21 (`579e14e`), #22 (`86044bc`), #23 (`76c4e04`), #24 (`12d39a1`), #25 (`ad1b178`), #26 (`7471bf3`), #27 (`5ed174b`), #28 (`c91e51b`), #29 (`ea21e65`) y #30 (`9567ca5`), y los 33 commits de la cadena. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta. Se aceptó así para las 5 fusiones restantes, y los *squash* hechos con `gh` también lo llevan |
 | **Voz real con una sola voz** | **Abierto: falta la validación con otra persona.** Web Speech y Whisper se probaron a mano el 8 de noviembre, en local y en la URL pública, con la voz del responsable del repo (Web Speech también el 7). Los tiempos de Whisper de esa prueba son orientativos, con Docker encendido. Las cifras del spike no son cifras del producto |
 | **Entrada bloqueada tras terminar una partida** | **Corregido en #27 (`5ed174b`).** `<mf-voice-input>` nunca reiniciaba `ended`, así que la partida siguiente en la misma pestaña quedaba bloqueada hasta recargar, también en la caja de texto. Ya estaba en `main`. Se encontró leyendo el código para el e2e, no por un fallo |
