@@ -24,6 +24,7 @@ pnpm install
   - **Qué pasó:** falló 3 de 3 en `fa5c168`, con `tiempo agotado esperando: el navegador`, y pasó 3 de 3 en `cbe8abb`. Entre ambos commits solo cambió que el script guarda la salida de error de Chrome en lugar de descartarla, y no se sabe si eso influye.
   - **Otros datos:** un control sobre `90ab665` pasó a la misma hora, y el mismo error ya apareció en `main` (`2d287ea`).
   - **Si vuelve a fallar:** el registro de CI muestra ahora el estado del navegador y su salida de error.
+  - **Arranque más lento registrado:** 14 836 ms el 7 de noviembre, en #32 (ejecución 42427125756). Pasó por la espera de 30 s; sigue abierto.
 - **El resultado global de CI puede decir verde aunque `smoke` falle,** porque `ci.yml` lo marca con `continue-on-error`. Ocurrió en `fa5c168`: la ejecución figuró como `success`. **Hay que mirar siempre cada trabajo por separado,** con `gh pr checks <número>`.
 - **Sin definir:** hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
 
@@ -135,6 +136,9 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 - [ ] 22. Medir los dos equipos el mismo día para saber cuál es el más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Instrucciones: [docs/kit-equipo-debil/LEEME.txt](kit-equipo-debil/LEEME.txt).
 - [ ] 23. Arrancar la demo de Whisper con `LB_WORKERS=3`.
 - [ ] 24. Medir la latencia de Whisper en la segunda laptop (sin definir de dónde sale). Es aparte de la máquina limpia, que solo prueba el README.
+
+## Pulido opcional
+- Solo si sobra tiempo al final: mensajes de error de voz más claros, guías en pantalla y ejemplos de frases válidas.
 
 ## Qué no tocar por ahora
 - **`shared/`:** el contrato lo aprueba el responsable del repo; cualquier cambio va en un PR y sube la versión. Si falta algo, se anota.
