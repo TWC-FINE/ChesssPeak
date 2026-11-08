@@ -138,7 +138,11 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 - [ ] 24. Medir la latencia de Whisper en la segunda laptop (sin definir de dónde sale). Es aparte de la máquina limpia, que solo prueba el README.
 
 ## Pulido opcional
-- Solo si sobra tiempo al final: mensajes de error de voz más claros, guías en pantalla y ejemplos de frases válidas.
+Solo si sobra tiempo al final. Ninguno bloquea la entrega.
+
+- **Voz:** mensajes de error más claros, guías en pantalla y ejemplos de frases válidas.
+- **`favicon.ico`:** la web publicada no tiene, y el navegador registra un 404 al cargarla (verificación del despliegue, 8 de noviembre).
+- **Variables `PUBLIC_*` en `config.js`:** `scripts/build-web.mjs` copia cualquier variable `PUBLIC_*` del entorno. En Vercel coló `PUBLIC_VERCEL_OBSERVABILITY_CLIENT_CONFIG`, que la web no usa y no es secreta. El pulido sería copiar solo las variables que la web lee.
 
 ## Qué no tocar por ahora
 - **`shared/`:** el contrato lo aprueba el responsable del repo; cualquier cambio va en un PR y sube la versión. Si falta algo, se anota.
