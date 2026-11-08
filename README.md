@@ -6,7 +6,7 @@ Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebr
 
 Proyecto final de Arquitectura de Software.
 
-> **Estado (7 de noviembre de 2026):** En local, dos invitados juegan una partida en tiempo real, por escrito o por voz. Con Web Speech en Edge se jugó a mano una partida completa por voz, sin fallos, **con una sola voz**, así que eso no sustituye la validación con otra persona. **Falta probar el Whisper real y desplegar** (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
+> **Estado (8 de noviembre de 2026):** Desplegado en <https://chessspeak.vercel.app>. Dos invitados juegan una partida en tiempo real, por escrito o por voz. Web Speech y Whisper local se probaron a mano en la web local y en la pública, **con una sola voz**, así que eso no sustituye la validación con otra persona. **El límite de `/auth/guest` falla en Render y está por corregir** (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
 
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Está previsto presentarlo en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
@@ -117,15 +117,17 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 |---|---|
 | Partida entre dos invitados, reconexión y fin de partida | Probado en local, con pruebas de integración y `pnpm e2e:web` |
 | Flujo de voz, confirmación, telemetría e historial | Probado con un reconocedor falso |
-| Web Speech con voz real en el producto | **Prueba manual el 7 de noviembre,** en Edge: una partida completa, sin fallos, con una sola voz (la del responsable del repo). No sustituye la validación con otra persona. Corrió sobre `5ed174b`; después #28 y #29 cambiaron `<mf-voice-input>`, así que falta repetir una pasada corta sobre el código actual. Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
-| Whisper real desde el navegador | **Sin probar;** solo con un agente falso |
+| Web Speech con voz real en el producto | **Prueba manual el 8 de noviembre de 2026,** con una sola voz (la del responsable del repo), en <https://chessspeak.vercel.app> y en la web local. Partida con dos pestañas, por voz y por texto, con confirmación y recarga a mitad de partida: todo correcto. Ya había una primera prueba del 7 de noviembre sobre `5ed174b`. No sustituye la validación con otra persona. Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
+| Whisper real desde el navegador | **Prueba manual el 8 de noviembre de 2026,** con una sola voz, en la web local y en la pública. El agente corría en `127.0.0.1:8765`, con la URL de Vercel en `AGENT_ALLOWED_ORIGINS`: funciona. El dashboard mostró 24 peticiones con 200 y sin errores, por ejemplo de 1,87 a 1,97 s por transcripción en el equipo del responsable del repo. Esos tiempos son orientativos, no una medición formal, y se tomaron con Docker encendido. Se nota más retraso que con Web Speech, como se esperaba. **No consta** si Edge mostró el aviso de permiso de red local |
 | Despliegue en Render, Neon, Atlas y Vercel | **Desplegado.** Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>, las dos sobre `2c48755`. Verificado desde fuera el 8 de noviembre de 2026: `/health` con las dos bases en `up`, HTTPS válido en las dos URL, CORS solo para el origen de Vercel, y la web carga sus tres microfrontends sin pedir nada a otros hosts |
 | Partida por la API desplegada | **Probado el 8 de noviembre** con un script desde fuera: dos invitados, `POST /games` y Socket.IO por `wss`. Cuatro jugadas llegaron a los dos lados. En Edge sin interfaz, la web publicada entra como invitado y conecta por `wss`. Tras dormirse Render, al volver a entrar la partida se reconstruyó con sus jugadas (Mongo) y su resultado (Postgres) |
 | Dos navegadores reales contra la nube | **Sin probar** |
 | Límite de `/auth/guest` en Render (`trust proxy`) | **Fallido, por corregir.** Desde una misma IP, sin cabeceras, el contador alterna entre dos claves: el servidor no ve la IP del cliente. Una cabecera `X-Forwarded-For` falsa también reinició el contador |
 | Servidor gratuito dormido | La primera respuesta tras dormir tardó 52,5 s. Hay que despertarlo antes de evaluar |
 | Smoke y e2e contra la URL pública | **No es posible sin modificar el repo:** los dos scripts levantan su propio servidor en `127.0.0.1` |
-| Voz real y Whisper sobre la URL pública | **Sin probar** |
+| Voz real y Whisper sobre la URL pública | **Probados a mano el 8 de noviembre,** con una sola voz: ver las filas de Web Speech y Whisper |
+| Validación con otra voz | **Sin probar** |
+| Límite por IP desde otra red | **Sin probar** |
 | Dominio propio | **Sin conectar;** se usa la URL `vercel.app` |
 | README en una máquina limpia | **Sin probar** |
 | Chrome | **Sin medir** |

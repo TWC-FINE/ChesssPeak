@@ -6,6 +6,14 @@
 
 **Añadido el 8 de noviembre:** el despliegue existe, y se verificó desde fuera ese mismo día (ver «Verificación del despliegue»). **El límite de `/auth/guest` falla en Render y está por corregir.**
 
+**Prueba de voz del 8 de noviembre, con una sola voz (la del responsable del repo):**
+1. **Web Speech `es-CO`,** en <https://chessspeak.vercel.app> y en la web local: partida con dos pestañas, por voz y por texto, con confirmación y recarga a mitad de partida. Todo correcto.
+2. **Whisper local,** en la web local y en la pública, con el agente en `127.0.0.1:8765` y la URL de Vercel en `AGENT_ALLOWED_ORIGINS`: funciona. El dashboard mostró 24 peticiones con 200 y sin errores, por ejemplo de 1,87 a 1,97 s por transcripción en el equipo del responsable del repo. Esos tiempos son orientativos, no una medición formal, y se tomaron con Docker encendido.
+3. **Se nota más retraso con Whisper** que con Web Speech, como se esperaba.
+4. **Permiso de red local de Edge:** no consta si apareció el aviso.
+
+**Sigue sin probar:** la validación con otra voz, el dominio propio, Chrome, el límite por IP desde otra red y `trust proxy` (fallido, por corregir).
+
 **En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Eso ya está en `main`, tras fusionar la cadena de PR. La voz también funciona, pero **solo se ha probado con un reconocedor y un agente falsos**. Faltan la prueba con voz real, el Whisper real, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
 
 **Equipo (decisión del 6 de noviembre):** el responsable del repo trabaja solo, sin revisión del compañero, y es el único que aprueba. Por eso ya no se espera ninguna firma para el contrato (#3) ni para la cadena de PR.
@@ -58,7 +66,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | Web publicada | 200. Carga sus scripts y los tres microfrontends desde el mismo origen. Apunta a la API de Render. En Edge sin interfaz, sin pedir nada a otros hosts, entra como invitado y conecta por `wss`. Único error: `favicon.ico` da 404 |
 | Límite de `/auth/guest` (`trust proxy`) | **Fallido, por corregir.** Desde una misma IP, sin cabeceras, el contador fue 9, 8, 9, 7: alterna entre dos claves, así que el servidor no ve la IP del cliente. Con `X-Forwarded-For: 198.51.100.7, 1.2.3.4`, el contador también empezó de nuevo |
 
-**Sin probar:** voz real y Whisper sobre la URL pública, el dominio propio, una partida con dos navegadores reales contra la nube y el límite desde otra red. **No es posible sin modificar el repo:** `smoke:web` y `e2e:web` contra la URL pública, porque levantan su propio servidor en `127.0.0.1`.
+**Sin probar en esta verificación:** voz real y Whisper sobre la URL pública (los probó después a mano el responsable del repo; ver arriba), el dominio propio, una partida con dos navegadores reales contra la nube y el límite desde otra red. **No es posible sin modificar el repo:** `smoke:web` y `e2e:web` contra la URL pública, porque levantan su propio servidor en `127.0.0.1`.
 
 **Observación sin efecto conocido:** `config.js` publicado incluye `PUBLIC_VERCEL_OBSERVABILITY_CLIENT_CONFIG`, una variable de sistema de Vercel. Llega porque `scripts/build-web.mjs` copia toda variable `PUBLIC_*`. La web no la usa.
 
@@ -69,9 +77,9 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | Requisito | Estado | Evidencia |
 |---|---|---|
 | **Nube** | **Desplegado el 8 de noviembre y verificado desde fuera,** salvo el límite de `/auth/guest` | Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>. Ver «Verificación del despliegue» |
-| **Módulo local** | **Agente: hecho y verificado. Desde el navegador: hecho, sin probar con el Whisper real** | `local-agent` en `main` (#6). Adaptador y selector en #29, probados con un agente falso. ADR 6 |
+| **Módulo local** | **Agente: hecho y verificado. Desde el navegador: probado a mano con el Whisper real el 8 de noviembre,** en la web local y en la pública, con una sola voz | `local-agent` en `main` (#6). Adaptador y selector en #29. ADR 6 |
 | **Sockets** | **Hecho y verificado, solo en PR** | #13 y #14: integración con bases reales (`game-flow.int-spec.ts`) y `pnpm e2e:web`, 22 de 22 en Edge. Solo en local, sin nube |
-| **Micrófono** | **Hecho. Con Web Speech, probado a mano con voz real el 7 de noviembre; la captura para Whisper, sin probar con voz real** | Web Speech en #27 y captura de audio en #29. El e2e usa un `SpeechRecognition` falso y el micrófono falso del navegador |
+| **Micrófono** | **Hecho. Probado a mano con voz real, Web Speech el 7 y el 8 de noviembre y Whisper el 8,** con una sola voz | Web Speech en #27 y captura de audio en #29. El e2e usa un `SpeechRecognition` falso y el micrófono falso del navegador |
 | **Dos bases de datos** | **Hecho en local; Neon y Atlas, desplegados el 8 de noviembre** y en `up` según `/health` | Partidas y jugadas en #12 y #13. `voice_attempts` en #25, con integración contra Mongo real |
 | **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
 | **Microfrontends** | **Hecho en local** | Los 3 son reales: `<mf-game>` (#14), `<mf-voice-input>` (#26, #27 y #29) y `<mf-history>` (#28). `smoke:web` y `e2e:web` |
@@ -82,8 +90,8 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 
 | # | Criterio | Estado |
 |---|---|---|
-| 1 | Partida completa por voz con Web Speech | Verificado con un `SpeechRecognition` falso, y a mano con voz real el 7 de noviembre en Edge (una partida completa, sin fallos, una sola voz). **Falta la validación con otra persona** |
-| 2 | Una jugada por voz con Whisper desde el navegador | Verificado con un agente falso; **falta con el Whisper real** |
+| 1 | Partida completa por voz con Web Speech | Verificado con un `SpeechRecognition` falso, y a mano con voz real el 7 de noviembre (local) y el 8 (local y URL pública), con una sola voz. **Falta la validación con otra persona** |
+| 2 | Una jugada por voz con Whisper desde el navegador | Verificado con un agente falso, y a mano con el Whisper real el 8 de noviembre, en local y en la URL pública, con una sola voz |
 | 3 | Desconexión y reconexión | Verificado en PR, en local |
 | 4 | Una frase ambigua o ilegible no mueve piezas | Verificado por texto y con reconocedor falso; **falta con voz real** |
 | 5 | `voice_attempts`, `game_moves` y Postgres | Verificado en local, con bases reales |
@@ -112,9 +120,9 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 5 | Hecho: cuentas y despliegue (8 de noviembre). `trust proxy` probado: **fallido, por corregir** en un PR aparte. Pendiente: probar el límite desde otra red | Responsable del repo |
 | 6 | Lote del parser: fuera del plan, se queda `spike-parser-freeze` | Responsable del repo |
 | 7 | Decidir el pool de `move-workers` tras las pruebas de voz y el despliegue, y dar el OK explícito antes de empezar. Hasta entonces se considera no recortable | Responsable del repo |
-| 8 | Hecho: Web Speech, pulsar para hablar y confirmación por voz (#26 y #27). Prueba manual con voz real hecha el 7 de noviembre, con una sola voz | Responsable del repo (voz real) |
+| 8 | Hecho: Web Speech, pulsar para hablar y confirmación por voz (#26 y #27). Pruebas manuales con voz real el 7 y el 8 de noviembre, con una sola voz | Responsable del repo (voz real) |
 | 9 | Hecho: `voice-metrics` y telemetría (#25 y #26) | Claude |
-| 10 | Hecho: adaptador Whisper y selector (#29). **Falta la prueba con el Whisper real** | Responsable del repo (voz real) y Claude |
+| 10 | Hecho: adaptador Whisper y selector (#29). Prueba manual con el Whisper real el 8 de noviembre, con una sola voz | Responsable del repo (voz real) y Claude |
 | 11 | Hecho: `<mf-history>` real (#28) | Claude |
 | 12 | Pool de `move-workers`, tras el OK explícito | Claude, tras el OK del responsable |
 | 13 | ADR 9 y C4. El ADR 6, `ARCHITECTURE.md` y `docs/CONTEXT.md` ya están | Claude, tras el OK del responsable |
@@ -254,7 +262,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
 | **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15), las 6 fusiones de la cadena (`9a566aa`, `8f32cfc`, `05fd7a6`, `9d1bb44`, `de79815` y `311c0fa`), los *squash* de #16 (`af163bd`), #17 (`76b0dfe`), #18 (`9db85f6`), #19 (`23e4bcc`), #20 (`cd68b5a`), #21 (`579e14e`), #22 (`86044bc`), #23 (`76c4e04`), #24 (`12d39a1`), #25 (`ad1b178`), #26 (`7471bf3`), #27 (`5ed174b`), #28 (`c91e51b`), #29 (`ea21e65`) y #30 (`9567ca5`), y los 33 commits de la cadena. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta. Se aceptó así para las 5 fusiones restantes, y los *squash* hechos con `gh` también lo llevan |
-| **Voz real sin probar** | **Abierto para Whisper; a medias para Web Speech.** Web Speech: una prueba manual el 7 de noviembre en Edge, con una partida completa sin fallos y una sola voz, que no sustituye la validación con otra persona. Whisper: solo con un agente y un micrófono falsos (`pnpm e2e:web`, 57 de 57 en Edge 156). Las cifras del spike no son cifras del producto |
+| **Voz real con una sola voz** | **Abierto: falta la validación con otra persona.** Web Speech y Whisper se probaron a mano el 8 de noviembre, en local y en la URL pública, con la voz del responsable del repo (Web Speech también el 7). Los tiempos de Whisper de esa prueba son orientativos, con Docker encendido. Las cifras del spike no son cifras del producto |
 | **Entrada bloqueada tras terminar una partida** | **Corregido en #27 (`5ed174b`).** `<mf-voice-input>` nunca reiniciaba `ended`, así que la partida siguiente en la misma pestaña quedaba bloqueada hasta recargar, también en la caja de texto. Ya estaba en `main`. Se encontró leyendo el código para el e2e, no por un fallo |
 | **Nombre del anexo en la historia pública** | **Abierto; quitarlo exigiría `--force`.** El nombre del archivo del anexo de la transcripción aparece en un enlace antiguo de 4 commits de `docs/delivery-nov-19`: `8246b8c`, `c703ae7`, `e6cd3c7` y `c62712f`. El archivo nunca se subió y la punta de la rama no lo nombra |
 | **Reflog pendiente de limpiar** | **Abierto; espera el OK del responsable del repo.** El anexo y la historia anterior a parafrasear las citas siguen en el `.git` local de este equipo, fuera de cualquier rama. Esa carpeta `.git` no debe copiarse a otro equipo antes de limpiarlo |
@@ -267,7 +275,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 - **Dominio:** solo hay consultas DNS públicas; no se vio el panel de registro ni el hosting.
 - **`pnpm e2e:web`:** 57 de 57 en Edge 156 sobre #29. No corre en CI, y usa un reconocedor, un agente y un micrófono falsos.
 - **Edge con ventana visible:** corrió sin interfaz, con pestañas en un solo equipo. Tampoco se probó con dos laptops, red real, móvil ni Live Server.
-- **Voz real en el producto:** con Web Speech, una sola prueba manual (7 de noviembre, una sola voz). Con Whisper, sin probar con un micrófono real. Las cifras de voz son del spike, con una sola voz.
+- **Voz real en el producto:** pruebas manuales con una sola voz, Web Speech el 7 y el 8 de noviembre y Whisper el 8. Falta otra voz. Las cifras de voz son del spike, con una sola voz, salvo los tiempos orientativos de Whisper del 8 de noviembre.
 - **Causa del fallo de `smoke`.**
 - **Pérdida de jugadas con escrituras pendientes,** porque ninguna prueba cubre ese caso.
 - **Estrategia de fusión en GitHub:** solo se simuló con git local, sobre una versión anterior de `feat/web-game`.
