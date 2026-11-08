@@ -4,6 +4,8 @@
 
 **Añadido el 7 de noviembre:** el responsable del repo hizo a mano la prueba de voz con Web Speech `es-CO` en Edge, con el servidor local. Dictó los dos lados desde dos pestañas y jugó una partida completa sin fallos: se aplicaron las jugadas legales, se rechazaron las ilegales y se detectó el mate. Hubo una sola voz, la suya, así que **no sustituye la validación con otra persona.** La prueba corrió sobre `5ed174b`. Desde entonces #28 y #29 cambiaron `<mf-voice-input>`, así que el responsable del repo repetirá una pasada corta de Web Speech sobre el código actual, junto con la prueba de Whisper. También se cambió el puerto de Postgres en el `.env` local (ver «Notas para el README»). El resto del documento sigue con su estado del 6 de noviembre.
 
+**Añadido el 8 de noviembre:** el despliegue existe, y se verificó desde fuera ese mismo día (ver «Verificación del despliegue»). **El límite de `/auth/guest` falla en Render y está por corregir.**
+
 **En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Eso ya está en `main`, tras fusionar la cadena de PR. La voz también funciona, pero **solo se ha probado con un reconocedor y un agente falsos**. Faltan la prueba con voz real, el Whisper real, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
 
 **Equipo (decisión del 6 de noviembre):** el responsable del repo trabaja solo, sin revisión del compañero, y es el único que aprueba. Por eso ya no se espera ninguna firma para el contrato (#3) ni para la cadena de PR.
@@ -42,21 +44,39 @@ Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con c
 
 **CI por trabajo:** `verify`, `integration`, `secrets` y `smoke` están en verde en la última ejecución de `main` y de los 6 PR. En #14 (`cbe8abb`): servidor 198 tests, integración 33, `local-agent` 46, `voice-parser` 84, web 66 y `smoke` 13 comprobaciones. **Hay que mirar cada trabajo por separado:** ver el riesgo de `smoke`.
 
+## Verificación del despliegue (8 de noviembre)
+
+Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Según GitHub, Render terminó su despliegue de ese commit a las 06:40 UTC y Vercel también lo marcó como desplegado. Docker estaba apagado.
+
+| Comprobación | Resultado |
+|---|---|
+| `/health/live` y `/health` | Primera respuesta tras dormir: 52,5 s; la segunda vez, 63,7 s. `/health`: `status: ok`, `postgres: up`, `mongo: up` |
+| HTTPS | Certificados válidos en las dos URL. HTTP redirige a HTTPS, y Vercel envía `Strict-Transport-Security` |
+| CORS | El preflight de `/auth/guest` y `/games` devuelve `access-control-allow-origin` para el origen de Vercel, y no para otro origen |
+| Partida por la API | Script desde fuera: dos `POST /auth/guest` (201), `POST /games` (201) y dos clientes Socket.IO por `wss`. Cuatro jugadas llegaron a los dos lados con el mismo FEN |
+| Persistencia | Con Render dormido y despertado, un proceso nuevo reconstruyó la partida al volver a entrar: las jugadas, que salen de Mongo, y los asientos y el resultado por abandono, que salen de Postgres. No se consultaron las bases |
+| Web publicada | 200. Carga sus scripts y los tres microfrontends desde el mismo origen. Apunta a la API de Render. En Edge sin interfaz, sin pedir nada a otros hosts, entra como invitado y conecta por `wss`. Único error: `favicon.ico` da 404 |
+| Límite de `/auth/guest` (`trust proxy`) | **Fallido, por corregir.** Desde una misma IP, sin cabeceras, el contador fue 9, 8, 9, 7: alterna entre dos claves, así que el servidor no ve la IP del cliente. Con `X-Forwarded-For: 198.51.100.7, 1.2.3.4`, el contador también empezó de nuevo |
+
+**Sin probar:** voz real y Whisper sobre la URL pública, el dominio propio, una partida con dos navegadores reales contra la nube y el límite desde otra red. **No es posible sin modificar el repo:** `smoke:web` y `e2e:web` contra la URL pública, porque levantan su propio servidor en `127.0.0.1`.
+
+**Observación sin efecto conocido:** `config.js` publicado incluye `PUBLIC_VERCEL_OBSERVABILITY_CLIENT_CONFIG`, una variable de sistema de Vercel. Llega porque `scripts/build-web.mjs` copia toda variable `PUBLIC_*`. La web no la usa.
+
 ## 1. Estado por requisito del profesor
 
 **Nota:** donde las tablas de las secciones 1 y 2 dicen «solo en PR», «en PR» o «solo en `docs/delivery-nov-19`», ese trabajo ya está en `main`.
 
 | Requisito | Estado | Evidencia |
 |---|---|---|
-| **Nube** | **No empezado.** Solo está preparado | `render.yaml`, `vercel.json` y `docs/deploy.md` en `main` (#8). No hay ninguna URL real en el repo |
+| **Nube** | **Desplegado el 8 de noviembre y verificado desde fuera,** salvo el límite de `/auth/guest` | Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>. Ver «Verificación del despliegue» |
 | **Módulo local** | **Agente: hecho y verificado. Desde el navegador: hecho, sin probar con el Whisper real** | `local-agent` en `main` (#6). Adaptador y selector en #29, probados con un agente falso. ADR 6 |
 | **Sockets** | **Hecho y verificado, solo en PR** | #13 y #14: integración con bases reales (`game-flow.int-spec.ts`) y `pnpm e2e:web`, 22 de 22 en Edge. Solo en local, sin nube |
 | **Micrófono** | **Hecho. Con Web Speech, probado a mano con voz real el 7 de noviembre; la captura para Whisper, sin probar con voz real** | Web Speech en #27 y captura de audio en #29. El e2e usa un `SpeechRecognition` falso y el micrófono falso del navegador |
-| **Dos bases de datos** | **Hecho en local.** Neon y Atlas: no existen | Partidas y jugadas en #12 y #13. `voice_attempts` en #25, con integración contra Mongo real |
+| **Dos bases de datos** | **Hecho en local; Neon y Atlas, desplegados el 8 de noviembre** y en `up` según `/health` | Partidas y jugadas en #12 y #13. `voice_attempts` en #25, con integración contra Mongo real |
 | **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
 | **Microfrontends** | **Hecho en local** | Los 3 son reales: `<mf-game>` (#14), `<mf-voice-input>` (#26, #27 y #29) y `<mf-history>` (#28). `smoke:web` y `e2e:web` |
 | **Balanceo** | **Whisper: hecho y verificado, cumplimiento sin confirmar. `move-workers`: no empezado** | Pool y dashboard en `main` (#6). La evidencia de carga y el ensayo con un worker muerto están solo en `docs/delivery-nov-19`. ADR 10 revisado y ADR 11 solo en esa rama. Del pool solo existe el puerto |
-| **Dominio** | **Registrado y delegado; aún no funciona. En espera del profesor** | `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*, `REFUSED`, comprobado el 6 de noviembre). Mínimo garantizado: la URL `vercel.app`, que tampoco está publicada |
+| **Dominio** | **Registrado y delegado; aún no funciona. En espera del profesor** | `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*, `REFUSED`, comprobado el 6 de noviembre). Mínimo garantizado: la URL `vercel.app`, publicada desde el 8 de noviembre |
 
 **Criterios de aceptación de `SPEC.md` §6:**
 
@@ -67,7 +87,7 @@ Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con c
 | 3 | Desconexión y reconexión | Verificado en PR, en local |
 | 4 | Una frase ambigua o ilegible no mueve piezas | Verificado por texto y con reconocedor falso; **falta con voz real** |
 | 5 | `voice_attempts`, `game_moves` y Postgres | Verificado en local, con bases reales |
-| 6 | Backend en la nube, repo público y CI en verde | Falta el backend en la nube |
+| 6 | Backend en la nube, repo público y CI en verde | Backend en Render desde el 8 de noviembre, sobre `2c48755`, cuya CI quedó en verde por trabajo. Falta corregir el límite de `/auth/guest` |
 | 7 | `quality.md`, ADR y README probado con un clon nuevo | No empezado; hay ADR parciales |
 
 ## 2. Estado por fase del `PLAN.md`
@@ -89,7 +109,7 @@ Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con c
 | 2 | Revisar lo fusionado de #3 y #10 a #14, incluidos los códigos de error provisionales | Responsable del repo |
 | 3 | Hecho: excepción de commits de fusión en `CONTRIBUTING.md` (#15) | Responsable del repo |
 | 4 | Hecho: cadena fusionada en orden | Responsable del repo |
-| 5 | Crear las cuentas de Neon, Atlas, Render y Vercel, y desplegar con esas credenciales. Después, probar `trust proxy` | Responsable del repo |
+| 5 | Hecho: cuentas y despliegue (8 de noviembre). `trust proxy` probado: **fallido, por corregir** en un PR aparte. Pendiente: probar el límite desde otra red | Responsable del repo |
 | 6 | Lote del parser: fuera del plan, se queda `spike-parser-freeze` | Responsable del repo |
 | 7 | Decidir el pool de `move-workers` tras las pruebas de voz y el despliegue, y dar el OK explícito antes de empezar. Hasta entonces se considera no recortable | Responsable del repo |
 | 8 | Hecho: Web Speech, pulsar para hablar y confirmación por voz (#26 y #27). Prueba manual con voz real hecha el 7 de noviembre, con una sola voz | Responsable del repo (voz real) |
@@ -224,7 +244,11 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **Dominio** | **En espera del profesor; mínimo garantizado: la URL `vercel.app`.** Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*). No se sabe qué hosting es, qué permite alojar ni si tiene HTTPS, que es obligatorio para el micrófono |
 | **Cadena de 6 PR** | **Cerrado.** Fusionada en orden con commits de fusión; los hashes están en «Ramas y hashes» |
 | **Pérdida de jugadas si el servidor muere** | **Aceptado y documentado (ADR 7), sin prueba.** Las jugadas pendientes de guardar se pierden. Los jugadores pueden haberlas visto |
-| **Fase 0 sin desplegar** | **Abierto.** Es el paso 2 del orden de trabajo. Depende de crear las cuentas. `trust proxy`, CORS y la memoria en Render siguen sin probar |
+| **Fase 0 sin desplegar** | **Cerrado el 8 de noviembre:** desplegado. CORS, verificado. `trust proxy`, fallido y por corregir. La memoria en Render sigue sin medir |
+| **Límite de `/auth/guest` en Render** | **Abierto, por corregir.** El servidor no ve la IP del cliente, así que el límite no se aplica por cliente y una cabecera falsa puede reiniciarlo. Ver «Verificación del despliegue» |
+| **Render gratuito dormido** | **Abierto, aceptado.** La primera respuesta tras dormir tardó 52,5 s el 8 de noviembre. Hay que despertarlo antes de evaluar |
+| **Postgres 18 en Neon sin CI** | **Abierto.** Según el responsable del repo, Neon corre Postgres 18 y tiene aplicadas las dos migraciones; la CI y Docker usan `postgres:17`. La partida de prueba del 8 de noviembre funcionó contra Neon, pero ninguna prueba automática corre contra 18 |
+| **`0.0.0.0/0` en Atlas** | **Aceptado** (`docs/deploy.md`, «Riesgos»): Render gratuito no tiene IP fija |
 | **Chrome sin medir** | **Abierto, recortable.** Si la entrega la abre otra persona, puede ser en Chrome |
 | **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
