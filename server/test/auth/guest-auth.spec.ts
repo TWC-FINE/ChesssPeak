@@ -10,12 +10,13 @@ import request from 'supertest';
 import { AuthModule } from '../../src/auth/auth.module';
 import { GuestTokenService, guestTokenSecret } from '../../src/auth/guest-token.service';
 import { configureHttp } from '../../src/configure-http';
-import { guestAuthLimitPerMinute } from '../../src/deploy-config';
+import { clientIpHeader, guestAuthLimitPerMinute } from '../../src/deploy-config';
 
 const SECRET = 'a'.repeat(64);
 const jwt = new JwtService({});
 const originalSecret = process.env.GUEST_TOKEN_SECRET;
 const originalLimit = process.env.GUEST_AUTH_LIMIT_PER_MINUTE;
+const originalIpHeader = process.env.CLIENT_IP_HEADER;
 const DEFAULT_LIMIT = 10;
 const apps: NestExpressApplication[] = [];
 
@@ -39,6 +40,8 @@ afterEach(async () => {
   else process.env.GUEST_TOKEN_SECRET = originalSecret;
   if (originalLimit === undefined) delete process.env.GUEST_AUTH_LIMIT_PER_MINUTE;
   else process.env.GUEST_AUTH_LIMIT_PER_MINUTE = originalLimit;
+  if (originalIpHeader === undefined) delete process.env.CLIENT_IP_HEADER;
+  else process.env.CLIENT_IP_HEADER = originalIpHeader;
   jest.restoreAllMocks();
 });
 
@@ -84,7 +87,10 @@ describe('POST /auth/guest', () => {
 });
 
 describe('throttling', () => {
-  beforeEach(() => delete process.env.GUEST_AUTH_LIMIT_PER_MINUTE);
+  beforeEach(() => {
+    delete process.env.GUEST_AUTH_LIMIT_PER_MINUTE;
+    delete process.env.CLIENT_IP_HEADER;
+  });
 
   it('answers 429 past the default of 10, and invalid bodies count too', async () => {
     const { app } = await appWith(SECRET);
@@ -114,6 +120,58 @@ describe('throttling', () => {
 
   it('reads a whole number above 0', () => {
     expect(guestAuthLimitPerMinute({ GUEST_AUTH_LIMIT_PER_MINUTE: '25' })).toBe(25);
+  });
+});
+
+describe('the client IP of the limit', () => {
+  const withHeader = (app: NestExpressApplication, clientIp: string, proxyIp = '203.0.113.1', name = 'Ana') =>
+    signIn(app, { displayName: name }, proxyIp).set('CF-Connecting-IP', clientIp);
+
+  beforeEach(() => {
+    delete process.env.GUEST_AUTH_LIMIT_PER_MINUTE;
+    delete process.env.CLIENT_IP_HEADER;
+  });
+
+  describe('without CLIENT_IP_HEADER, as in local runs and tests', () => {
+    it('keys on req.ip, so a client cannot pick its own key with that header', async () => {
+      const { app } = await appWith(SECRET);
+      for (let i = 0; i < DEFAULT_LIMIT; i++) await withHeader(app, `198.51.100.${i}`).expect(201);
+      await withHeader(app, '198.51.100.99').expect(429);
+    });
+  });
+
+  describe('with CLIENT_IP_HEADER=cf-connecting-ip, as render.yaml declares', () => {
+    beforeEach(() => {
+      process.env.CLIENT_IP_HEADER = 'cf-connecting-ip';
+    });
+
+    it('shares one limit for one client while the proxy address changes, as observed on Render', async () => {
+      const { app } = await appWith(SECRET);
+      for (let i = 0; i < DEFAULT_LIMIT; i++) await withHeader(app, '198.51.100.7', `203.0.113.${i % 2}`).expect(201);
+      await withHeader(app, '198.51.100.7', '203.0.113.50').expect(429);
+    });
+
+    it('counts each client separately behind the same proxy address', async () => {
+      const { app } = await appWith(SECRET);
+      for (let i = 0; i < DEFAULT_LIMIT; i++) await withHeader(app, '198.51.100.7').expect(201);
+      await withHeader(app, '198.51.100.7').expect(429);
+      await withHeader(app, '198.51.100.8', '203.0.113.1', 'Bea').expect(201);
+    });
+
+    it('falls back to req.ip when a request comes without the header', async () => {
+      const { app } = await appWith(SECRET);
+      for (let i = 0; i < DEFAULT_LIMIT; i++) await signIn(app).expect(201);
+      await signIn(app).expect(429);
+      await signIn(app, { displayName: 'Bea' }, '203.0.113.2').expect(201);
+    });
+  });
+
+  it.each([[undefined], [''], ['   '], ['two words'], ['x-ip;']])('reads %p as unset', (value) => {
+    expect(clientIpHeader({ CLIENT_IP_HEADER: value })).toBeUndefined();
+  });
+
+  it('reads a header name, in lower case as Node keeps them', () => {
+    expect(clientIpHeader({ CLIENT_IP_HEADER: ' CF-Connecting-IP ' })).toBe('cf-connecting-ip');
   });
 });
 

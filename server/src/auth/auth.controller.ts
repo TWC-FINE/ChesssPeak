@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ThrottlerGuard } from '@nestjs/throttler';
 import { guestAuthRequestSchema, type GuestAuthResponse } from '@chessspeak/shared';
+import { ClientIpThrottlerGuard } from './client-ip-throttler.guard';
 import { GuestTokenService } from './guest-token.service';
 
 @Controller('auth')
@@ -9,7 +9,7 @@ export class AuthController {
 
   /** The body is checked with the same strict schema as the clients: a client cannot send its own identity. */
   @Post('guest')
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ClientIpThrottlerGuard)
   guest(@Body() body: unknown): GuestAuthResponse {
     const request = guestAuthRequestSchema.safeParse(body);
     if (!request.success) throw new BadRequestException('Invalid body');

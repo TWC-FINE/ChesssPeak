@@ -14,7 +14,7 @@ Quien juega entra sin registrarse (RF1), y el servidor debe decidir siempre la i
 3. **`GuestTokenService.verify` solo acepta HS256 y una identidad de invitado válida.** Es lo que usarán el handshake del socket y `POST /games`.
 4. **El secreto no tiene valor por defecto.** `.env.example` solo lleva el nombre, vacío, y `pnpm env:init` genera uno aleatorio. Debe tener al menos 32 caracteres y no contener el antiguo marcador `change-me`. Si no cumple, el servidor arranca igual, porque `/health` debe responder, registra un error y `/auth/guest` responde 503. Nunca firma con un secreto débil.
 5. **Límite de peticiones por minuto y por IP** en `/auth/guest`, con `@nestjs/throttler` y solo en esa ruta. Se configura con `GUEST_AUTH_LIMIT_PER_MINUTE`, y vale 10 por defecto y ante cualquier valor inválido. Las peticiones inválidas también cuentan.
-6. **`trust proxy` vale 1,** para que el límite vea la IP real detrás del proxy de Render.
+6. **`trust proxy` vale 1,** para que el límite vea la IP real detrás del proxy de Render. **Revisado el 8 de noviembre de 2026:** en Render no basta (ver Consecuencias). Allí el límite usa la cabecera que nombra `CLIENT_IP_HEADER`, y `render.yaml` declara `cf-connecting-ip`. Sin esa variable, como en local y en los tests, sigue usando `req.ip`.
 
 ## Alternativas
 
@@ -31,4 +31,5 @@ Quien juega entra sin registrarse (RF1), y el servidor debe decidir siempre la i
 - (−) Quien pierde su token, por ejemplo al borrar los datos del navegador, pierde su asiento: entra como otro invitado.
 - (−) Una sesión que dure más de 24 horas necesita un token nuevo.
 - (−) **Riesgo conocido: `POST /games` no tiene límite de creación.** Quien tenga un token válido puede crear partidas sin tope, y cada una es una fila en `games`. El contrato no define un 429 para esta ruta, y añadirlo es un cambio de `shared/` y de `docs/protocol.md`. El límite de `/auth/guest` frena la obtención de tokens, pero no el uso de uno ya emitido, que dura 24 horas.
-- (−) **Sin verificar:** que `trust proxy = 1` sea el valor correcto en Render. **Se prueba en cuanto haya despliegue en Render,** con el paso descrito en [docs/deploy.md](../deploy.md). Si no es correcto, varios clientes podrían compartir el mismo límite.
+- (−) **`trust proxy = 1` falló en Render el 8 de noviembre de 2026.** Desde una misma IP, sin cabeceras, el contador alternaba entre dos claves, y una cabecera `X-Forwarded-For` falsa lo reinició. Express toma la última entrada de esa cabecera, que en Render parece ser la de un nodo de Cloudflare: es una hipótesis coherente con lo observado. Render no documenta cuántos saltos hay, así que se descartó `trust proxy = 2`.
+- (−) **Supuesto:** Cloudflare sigue delante de los servicios web de Render y escribe `CF-Connecting-IP`, sobrescribiendo la que envíe el cliente. Así lo dice un artículo de Render ([Host PocketBase on Render](https://render.com/articles/host-pocketbase-on-render)), no su documentación de referencia. Si Render cambiara eso, la cabecera podría falsearse o faltar. Si falta, el límite vuelve a `req.ip`. **Sin verificar tras el despliegue:** la prueba está en [docs/deploy.md](../deploy.md).

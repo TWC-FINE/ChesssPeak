@@ -26,6 +26,10 @@ services:
       # direct writes: the pool does not exist yet, and any other value stops the server at start (ADR 11)
       - key: MOVE_WORKERS
         value: "0"
+      # the limit of /auth/guest keys on this header, which Cloudflare writes in front of every Render web service and
+      # which overwrites what the client sends. Assumption: Render keeps Cloudflare in front (docs/deploy.md)
+      - key: CLIENT_IP_HEADER
+        value: cf-connecting-ip
       - key: GUEST_TOKEN_SECRET
         generateValue: true
       - key: DATABASE_URL
