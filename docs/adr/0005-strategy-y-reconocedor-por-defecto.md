@@ -6,7 +6,7 @@
 
 ## Contexto
 
-Hay dos formas de reconocer voz: la Web Speech API del navegador (en Chrome envía el audio a la nube de Google; el profesor lo aceptó) y Whisper local, que corre en la máquina de la persona usuaria y es el **módulo local** del proyecto (el profesor confirmó que el agente en localhost cuenta). Cada una tiene distinta precisión, latencia y requisitos. Además hace falta una entrada de texto de respaldo y un reconocedor falso para pruebas.
+Hay dos formas de reconocer voz: la Web Speech API del navegador (envía el audio a la nube del fabricante: a la de Microsoft en Edge, el navegador de la demo, y a la de Google en Chrome. El profesor aceptó la de Google; que acepte igual la de Microsoft es un supuesto) y Whisper local, que corre en la máquina de la persona usuaria y es el **módulo local** del proyecto (el profesor confirmó que el agente en localhost cuenta). Cada una tiene distinta precisión, latencia y requisitos. Además hace falta una entrada de texto de respaldo y un reconocedor falso para pruebas.
 
 ## Decisión
 
