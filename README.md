@@ -6,7 +6,7 @@ Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebr
 
 Proyecto final de Arquitectura de Software.
 
-> **Estado (8 de noviembre de 2026):** Desplegado en <https://chessspeak.vercel.app>. Dos invitados juegan una partida en tiempo real, por escrito o por voz. Web Speech y Whisper local se probaron a mano en la web local y en la pública, **con una sola voz**, así que eso no sustituye la validación con otra persona. **El límite de `/auth/guest` falla en Render y está por corregir** (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
+> **Estado (8 de noviembre de 2026):** Desplegado en <https://chessspeak.vercel.app>. Dos invitados juegan una partida en tiempo real, por escrito o por voz. Web Speech y Whisper local se probaron a mano en la web local y en la pública, **con una sola voz**, así que eso no sustituye la validación con otra persona. El límite de `/auth/guest` se corrigió en #37; falta probarlo desde otra red (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
 
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Está previsto presentarlo en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
@@ -122,7 +122,7 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 | Despliegue en Render, Neon, Atlas y Vercel | **Desplegado.** Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>, las dos sobre `2c48755`. Verificado desde fuera el 8 de noviembre de 2026: `/health` con las dos bases en `up`, HTTPS válido en las dos URL, CORS solo para el origen de Vercel, y la web carga sus tres microfrontends sin pedir nada a otros hosts |
 | Partida por la API desplegada | **Probado el 8 de noviembre** con un script desde fuera: dos invitados, `POST /games` y Socket.IO por `wss`. Cuatro jugadas llegaron a los dos lados. En Edge sin interfaz, la web publicada entra como invitado y conecta por `wss`. Tras dormirse Render, al volver a entrar la partida se reconstruyó con sus jugadas (Mongo) y su resultado (Postgres) |
 | Dos navegadores reales contra la nube | **Sin probar** |
-| Límite de `/auth/guest` en Render (`trust proxy`) | **Fallido, por corregir.** Desde una misma IP, sin cabeceras, el contador alterna entre dos claves: el servidor no ve la IP del cliente. Una cabecera `X-Forwarded-For` falsa también reinició el contador |
+| Límite de `/auth/guest` en Render | Corregido en #37 (`e06ecbc`). Probado el 8 de noviembre a las 20:29 UTC, desde una misma IP: cuatro peticiones sin cabeceras dieron 9, 8, 7 y 6, y una con `X-Forwarded-For: 198.51.100.7, 1.2.3.4` dio 5. Una con `CF-Connecting-IP: 198.51.100.8` recibió 403 de Cloudflare (`error code: 1000`, sin cabeceras de Render): no llega al servidor. Eso no prueba que el contador ignore esa cabecera, solo que no pasa. **Sin probar desde otra red**. Antes de #37, con `trust proxy = 1`, el contador alternaba entre dos claves |
 | Servidor gratuito dormido | La primera respuesta tras dormir tardó 52,5 s. Hay que despertarlo antes de evaluar |
 | Smoke y e2e contra la URL pública | **No es posible sin modificar el repo:** los dos scripts levantan su propio servidor en `127.0.0.1` |
 | Voz real y Whisper sobre la URL pública | **Probados a mano el 8 de noviembre,** con una sola voz: ver las filas de Web Speech y Whisper |
