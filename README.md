@@ -87,13 +87,29 @@ pnpm --filter @chessspeak/server prisma:migrate   # aplica las migraciones a la 
 pnpm test:integration        # pruebas contra las bases locales (se omiten con un aviso si no están)
 ```
 
-- **Postgres usa el puerto 55432** del equipo (no el 5432), para no chocar con un Postgres ya instalado como servicio de Windows, que no hace falta parar. Se cambia con `PG_PORT` en `.env`; MongoDB usa el 27017 (`MONGO_PORT`).
+- **Postgres usa el puerto 15432** del equipo (no el 5432), para no chocar con un Postgres ya instalado como servicio de Windows, que no hace falta parar. Está por debajo del rango dinámico de Windows: ver [Postgres caído en Windows](#problema-conocido-postgres-caído-en-windows). Se cambia con `PG_PORT` en `.env`; MongoDB usa el 27017 (`MONGO_PORT`).
 - Los puertos se publican solo en `127.0.0.1`. Las credenciales salen de `.env`, que está en `.gitignore`: nunca se suben.
 - En el `.env` local del equipo de desarrollo, Postgres usa el puerto **15432**, porque Windows reservó un rango de puertos que incluye el 55432 y Docker no pudo publicarlo (7 de noviembre).
 - `pnpm test:integration` solo se ejecuta contra `localhost` o `127.0.0.1` y contra bases cuyo nombre termina en `_test` (`DATABASE_URL_TEST` y `MONGO_URI_TEST`); en cualquier otro caso se niega. `pnpm verify` no necesita Docker.
 - `GET /health` responde siempre 200: `status` vale `degraded` si una base está caída. Cada base tiene un límite de `HEALTH_PROBE_TIMEOUT_MS` (1 s por defecto).
 - `GET /health/live` responde sin consultar las bases: es la ruta para el sondeo de la plataforma.
 - La telemetría de voz (`voice:attempt`) se guarda en `voice_attempts`, sin audio, con los límites `VOICE_ATTEMPT_MAX_BYTES` y `VOICE_ATTEMPT_LIMIT_PER_MINUTE` por conexión. Nunca interrumpe la partida ([docs/protocol.md](docs/protocol.md)).
+
+#### Problema conocido: Postgres caído en Windows
+
+**Síntoma:** `GET /health` responde `"postgres":"down"` aunque el contenedor esté `healthy`, y `docker compose ps postgres` muestra `5432/tcp` sin `127.0.0.1:…->`.
+
+**Causa:** al arrancar, Windows puede reservar bloques enteros de puertos dentro de su rango dinámico (49152–65535). Si `PG_PORT` cae en uno de ellos, Docker arranca Postgres sin publicar el puerto. Pasó el 7 de noviembre con el antiguo valor por defecto, 55432, que quedó dentro del bloque 55400–55499.
+
+**Diagnóstico** (PowerShell, solo lectura):
+
+```powershell
+netsh interface ipv4 show excludedportrange protocol=tcp   # ¿está tu PG_PORT dentro de algún rango?
+docker compose ps postgres                                 # ¿publica 127.0.0.1:<PG_PORT>->5432/tcp?
+Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded debe ser True
+```
+
+**Arreglo:** elige un puerto fuera de esos rangos y cámbialo a la vez en `PG_PORT`, `DATABASE_URL` y `DATABASE_URL_TEST` de `.env`. Después ejecuta `docker compose up -d postgres`, que recrea solo ese contenedor y conserva el volumen con sus datos (no uses `docker compose down -v`), y reinicia el servidor. **Un `.env` anterior a este cambio sigue con el 55432,** porque `pnpm env:init` no lo sobrescribe: hay que cambiarlo a mano.
 
 ## Qué está probado y qué no
 
