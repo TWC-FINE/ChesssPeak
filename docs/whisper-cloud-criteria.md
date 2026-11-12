@@ -79,6 +79,23 @@ Configuración de cada servicio:
 - `--no-allow-unauthenticated`;
 - región `us-east4`, que es Tier 1 y está en Virginia del Norte, la misma zona que el servidor de Render.
 
+### Adenda del 12 de noviembre, antes de medir en la nube
+
+La añade el responsable del repo, que pidió conservarla dentro de la v1. No cambia A1–A4, que ya se midieron, ni ningún umbral. Solo fija cómo se mide la fase B, que tiene un solo servicio y todavía no tiene gateway:
+
+- **Un servicio, solo `small`.** C1, C2, C3 y C5 se miden en la fase B. **C4 se mide en la fase C**, con 2 servicios y el gateway.
+- **Desde dónde se mide C1:** desde el equipo del responsable, **con la VPN apagada**, a través de `gcloud run services proxy` en `localhost`. Esto suma su conexión y el proxy, así que es más exigente que medir en el gateway. Hay 3 repeticiones de los 78 clips, y **cuenta el p95 de la peor repetición**:
+
+  | p95 de la peor repetición | Resultado |
+  |---|---|
+  | ≤ 7,5 s | **Pasa** |
+  | Más de 7,5 s y hasta 9,0 s (falla por 1,5 s o menos) | **No concluyente:** se decide en la fase C, midiendo en el gateway |
+  | Más de 9,0 s (falla por más de 1,5 s) | **Se recorta la nube** |
+
+- **C2:** se mide con el primer clip enviado tras al menos 20 minutos sin peticiones, después de comprobar en la consola que el servicio tiene 0 instancias.
+- **C5:** se calcula con el número de peticiones y sus latencias medidas, redondeadas a 100 ms, por 2 vCPU y 2 GiB. Se contrasta con el tiempo facturable que muestra la consola de Cloud Run.
+- **Ningún clip sale a la nube** sin la respuesta explícita del responsable sobre la autoría de las grabaciones y su OK para esa prueba.
+
 ## 4. Decisión
 
 | Resultado | Qué se hace |
