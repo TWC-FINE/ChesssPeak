@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve as resolvePath } from 'node:path';
 import { DEFAULT_OPTIONS, type ResolveOptions } from '@chessspeak/voice-parser';
 import type { SplitFilter } from '@chessspeak/voice-parser/src/metrics.js';
-import { loadCorpus, runConfig, toResultsFile, type ConfigResult, type ConfigSpec } from '../src/benchmark.js';
+import { loadCorpus, resultsFileName, runConfig, toResultsFile, type ConfigResult, type ConfigSpec } from '../src/benchmark.js';
 import { listClips } from '../src/clips.js';
 import { loadEnv, repoRoot } from '../src/env.js';
 import { gateFromEnv } from '../src/gate.js';
@@ -124,8 +124,8 @@ if (anyFake) console.warn('⚠ Hay clips sintéticos (.fake.wav): los resultados
 mkdirSync(outDir, { recursive: true });
 const runs: WhisperRun[] = [];
 for (const spec of specs) {
-  const label = `${spec.model}${spec.prompt === undefined ? ' sin prompt' : ' con prompt'}`;
-  console.log(`\n[${label}]`);
+  const configName = `${spec.model}${spec.prompt === undefined ? ' sin prompt' : ' con prompt'}`;
+  console.log(`\n[${configName}]`);
   const result: ConfigResult = await runConfig(spec, clips, {
     serverPath,
     modelPaths: { base: env.WHISPER_MODEL_BASE ?? '', small: env.WHISPER_MODEL_SMALL ?? '' },
@@ -143,7 +143,7 @@ for (const spec of specs) {
 
   const file = toResultsFile(result, { tag, corpusVersion: corpus.version, parser, gate, fake: anyFake });
   const stamp = new Date().toISOString().slice(0, 10);
-  const name = `${stamp}-whisper-${spec.model}-${spec.prompt === undefined ? 'noprompt' : 'prompt'}${label === undefined ? '' : `-${label}`}${anyFake ? '.fake' : ''}.json`;
+  const name = resultsFileName(stamp, spec, label, anyFake);
   writeFileSync(join(outDir, name), `${JSON.stringify(file, null, 2)}\n`);
   console.log(`  guardado ${join(outDir, name)}`);
   runs.push({ name, results: file, gated: result.gated, sent: result.sent });

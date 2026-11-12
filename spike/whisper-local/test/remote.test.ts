@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { loadCorpus, runConfig } from '../src/benchmark.js';
+import { loadCorpus, resultsFileName, runConfig } from '../src/benchmark.js';
 import type { ClipName } from '../src/clips.js';
 import { repoRoot } from '../src/env.js';
 import { DEFAULT_GATE } from '../src/gate.js';
@@ -67,6 +67,21 @@ describe('benchmark against a whisper-server that is already running (--url)', (
     expect(result.attempts[0]!.alternatives).toEqual([{ transcript: phrase.spoken }]);
     expect(result.attempts[0]!.latency?.recognitionMs).toBeGreaterThanOrEqual(0);
     expect(result.attempts[1]!.error).toBe('below-gate:too-quiet');
+  });
+});
+
+describe('results file name', () => {
+  const small = { model: 'small' as const, prompt: CHESS_PROMPT };
+
+  it('carries the --label, so repetitions do not overwrite each other', () => {
+    const names = [1, 2, 3].map((r) => resultsFileName('2026-11-12', small, `docker-cpus2-small-r${r}`, false));
+    expect(names[0]).toBe('2026-11-12-whisper-small-prompt-docker-cpus2-small-r1.json');
+    expect(new Set(names).size).toBe(3);
+  });
+
+  it('keeps the spike names without a label', () => {
+    expect(resultsFileName('2026-11-02', small, undefined, false)).toBe('2026-11-02-whisper-small-prompt.json');
+    expect(resultsFileName('2026-11-02', { model: 'base', prompt: undefined }, undefined, true)).toBe('2026-11-02-whisper-base-noprompt.fake.json');
   });
 });
 

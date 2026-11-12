@@ -146,6 +146,11 @@ export async function runConfig(spec: ConfigSpec, clips: ClipName[], options: Ru
   return { spec, attempts, gated, sent, skipped };
 }
 
+/** Name of the results JSON: one file per configuration and, with --label, per labelled run, so repetitions never overwrite each other. */
+export function resultsFileName(stamp: string, spec: ConfigSpec, label: string | undefined, fake: boolean): string {
+  return `${stamp}-whisper-${spec.model}-${spec.prompt === undefined ? 'noprompt' : 'prompt'}${label === undefined ? '' : `-${label}`}${fake ? '.fake' : ''}.json`;
+}
+
 function startLocal(spec: ConfigSpec, options: RunOptions): ReturnType<typeof startWhisper> {
   const modelPath = options.modelPaths[spec.model];
   if (modelPath === undefined || modelPath === '') throw new Error(`Falta la ruta del modelo ${spec.model} en .env`);
