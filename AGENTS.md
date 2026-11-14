@@ -17,7 +17,7 @@ A 14 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y en `m
 - `local-agent/`: pool de Whisper por procesos (ADR 10) y por URLs (ADR 12);
 - `whisper-cloud/`: los contenedores locales y lo preparado para AWS EC2.
 
-**Desplegado** desde el 8 de noviembre en Render, Neon, Atlas y Vercel. **Probado a mano con voz real, con una sola voz:** Web Speech y Whisper local desde el navegador. **Hecho también:** el C4, niveles 1 y 2 ([docs/c4.md](docs/c4.md)). **Pendiente:** la validación con otra voz, `docs/quality.md`, el ADR 9 y el README probado en una máquina limpia. **AWS EC2 está preparado pero sin probar:** no lo des por medido. El pool de `move-workers` (ADR 11) no existe y quedó sustituido por el ADR 12. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+**Desplegado** desde el 8 de noviembre en Render, Neon, Atlas y Vercel. **Probado a mano con voz real, con una sola voz:** Web Speech y Whisper local desde el navegador. **Hecho también:** el C4, niveles 1 y 2 ([docs/c4.md](docs/c4.md)). **Pendiente:** la validación con otra voz, `docs/quality.md`, el ADR 9 y el README probado en una máquina limpia. **AWS EC2 se midió el 14 de noviembre y se recortó:** C1 no cumple ([evidencia](docs/evidence/whisper-cloud-ec2/README.md)); no lo uses en la demo. El pool de `move-workers` (ADR 11) no existe y quedó sustituido por el ADR 12. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
 
 **Análisis con Stockfish:** se midió y la prueba **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). Sigue fuera de alcance salvo que se decida una versión nueva del criterio.
 

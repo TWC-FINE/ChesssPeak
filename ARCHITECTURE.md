@@ -32,7 +32,7 @@ El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de
 - Dos invitados juegan una partida en tiempo real, por escrito o por voz, con las dos bases, la telemetría y el historial.
 - Desplegado desde el 8 de noviembre en Render, Neon, Atlas y Vercel.
 - Web Speech y Whisper se probaron a mano con voz real, con una sola voz.
-- El balanceo de Whisper por URLs (ADR 12) se midió con 3 contenedores locales. **AWS EC2 sigue sin probar.**
+- El balanceo de Whisper por URLs (ADR 12) se midió con 3 contenedores locales. **AWS EC2 se midió el 14 de noviembre y se recortó:** C1 no cumple.
 - El pool de `move-workers` (ADR 11) no se construyó, y ese ADR quedó sustituido.
 
 Detalle en [README.md](README.md) y [docs/HANDOFF.md](docs/HANDOFF.md).
@@ -149,7 +149,7 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 | Postgres / Mongo | Neon / Atlas M0 |
 | Web | Publicada en Vercel (<https://chessspeak.vercel.app>). En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist` |
 | `local-agent` | En la máquina de quien usa Whisper |
-| Workers de Whisper por URL (ADR 12) | 3 contenedores locales (`whisper-cloud/compose.local.yml`), medidos. Una instancia AWS EC2 en `us-east-2` está preparada (`whisper-cloud/aws/`), **sin probar** |
+| Workers de Whisper por URL (ADR 12) | 3 contenedores locales (`whisper-cloud/compose.local.yml`), medidos. Una instancia AWS EC2 en `us-east-2` (`whisper-cloud/aws/`) se midió el 14 de noviembre y **se recortó**, porque C1 no cumple ([evidencia](docs/evidence/whisper-cloud-ec2/README.md)) |
 
 ## 10. Decisiones (ADRs)
 Media página cada una, escritas cuando se toma la decisión:

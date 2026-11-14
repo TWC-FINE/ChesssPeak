@@ -25,7 +25,7 @@ Ordenado el 14 de noviembre, con `main` en `08d3ccb`. **Nunca se recortan** la v
 
 | # | Qué | Quién |
 |---|---|---|
-| 13 | Experimento con una instancia EC2 (`whisper-cloud/aws/README.md`). **Es lo primero que se recorta** | El responsable del repo lanza y mide; Claude analiza los resultados |
+| 13 | Hecho el 14 de noviembre: experimento con una instancia EC2. **C1 no cumple y AWS se recorta** ([evidencia](evidence/whisper-cloud-ec2/README.md)). Falta parar y terminar la instancia (sección 7 de `whisper-cloud/aws/README.md`) y comprobar el gasto en la consola de facturación | Responsable del repo |
 | 14 | Medición en Chrome | Responsable del repo |
 | 15 | Medir los dos equipos y repetir la carga de Whisper en el más débil ([kit](kit-equipo-debil/LEEME.txt)) | Responsable del repo |
 | 16 | Probar el límite de `/auth/guest` desde otra red | Responsable del repo |
@@ -87,7 +87,7 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 **Decisión vigente desde el 14 de noviembre: [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md).** Whisper se balancea como servicio HTTP desde el `local-agent`, en modo URLs.
 
 - **Construido y medido:** el pool con 3 contenedores locales. La prueba de aislamiento no perdió ninguna petición en 3 de 3 repeticiones ([evidencia](evidence/url-pool-phase-c/README.md)).
-- **AWS EC2 sigue sin probarse.**
+- **AWS EC2 se midió el 14 de noviembre y se recortó.** Con una instancia, C2 y C3 cumplen, pero C1 no: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s. C4 no se midió ([evidencia](evidence/whisper-cloud-ec2/README.md)). El balanceo se demuestra con los 3 contenedores locales.
 - El pool de `move-workers` del ADR 11 no se construyó, y ese ADR quedó sustituido.
 
 **Antecedente, decisión del 5 de noviembre (sustituida):** El profesor no aprobó el modo de dictado y habló de repartir las jugadas entre servicios camino a la base de datos. Su «Eso puede ser» se toma como aprobación tentativa, no como confirmación. El supuesto más débil, el diseño, los límites y el criterio de éxito están en el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md). También cambió lo que se puede afirmar del pool de Whisper: ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre).
@@ -132,7 +132,7 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 | Demo | Dos laptops (la segunda, sin definir), datos del celular y video de respaldo. Guion de unos 10 minutos (cifra de trabajo), con versión corta | Sin definir: hora y duración. Tampoco se conoce la red de la sala |
 | Quién abre el proyecto | Basta la demo y el repo; el README se prueba con un clon nuevo en una máquina limpia | Sin definir si lo abre él mismo. Si lo abre, Whisper y las cuentas pesan más |
 | C4 | Niveles 1 y 2 (contexto y contenedores) en Mermaid, más los ADR y los escenarios de calidad | Puede esperar otro formato |
-| Balanceo | Ver el [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md), que sustituye al ADR 11, y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Lo medido son contenedores en una misma máquina: no se da por resuelto, y hay que decirlo al presentar. EC2 sin probar |
+| Balanceo | Ver el [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md), que sustituye al ADR 11, y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Lo medido son contenedores en una misma máquina: no se da por resuelto, y hay que decirlo al presentar. EC2 se midió y se recortó (C1 no cumple) |
 
 ## Lista de tareas
 Las tareas que dependen de un supuesto lo indican. **Revisado el 14 de noviembre:** `[x]` significa hecho; esos PR ya están fusionados en `main`.
@@ -173,7 +173,7 @@ Las tareas que dependen de un supuesto lo indican. **Revisado el 14 de noviembre
 - [ ] 23. Arrancar la demo de Whisper. Desde el ADR 12 se hace con los 3 contenedores y `WHISPER_URLS`, aislando y devolviendo desde el dashboard. `LB_WORKERS=3` queda como salida si falla Docker.
 - [ ] 24. Medir la latencia de Whisper en la segunda laptop (sin definir de dónde sale). Es aparte de la máquina limpia, que solo prueba el README.
 - [x] 25. Pool por URLs con aislar y devolver (#41), criterio de la fase C (#43) y su medición con 3 contenedores locales (#44).
-- [ ] 26. Experimento con una instancia EC2 en `us-east-2`, según la adenda de [whisper-cloud-criteria.md](whisper-cloud-criteria.md). Antes de lanzarla se añaden los precios oficiales con su fecha. **Es lo primero que se recorta** si falta tiempo para el README probado, el ensayo y el tag.
+- [x] 26. Experimento con una instancia EC2 en `us-east-2`, según la adenda de [whisper-cloud-criteria.md](whisper-cloud-criteria.md). Medido el 14 de noviembre: C1 no cumple y AWS se recorta ([evidencia](evidence/whisper-cloud-ec2/README.md)).
 
 ## Pulido opcional
 Solo si sobra tiempo al final. Ninguno bloquea la entrega.

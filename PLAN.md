@@ -23,7 +23,7 @@
 - **Pruebas manuales con voz real:** Web Speech el 7 y el 8 de noviembre, y Whisper el 8, con una sola voz.
 - **Balanceo de carga (requisito del profesor):** la decisión vigente es el [ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md). Whisper es un servicio HTTP, balanceado por URLs desde `local-agent`.
   - **Medido** con 3 contenedores locales el 14 de noviembre: aislar un worker no perdió ninguna petición en 3 de 3 repeticiones. Todo corrió en un solo equipo.
-  - **AWS EC2: preparado en `whisper-cloud/aws/`, sin probar.**
+  - **AWS EC2: medido el 14 de noviembre y recortado** (C1 no cumple; [evidencia](docs/evidence/whisper-cloud-ec2/README.md)).
   - El pool de `move-workers` (ADR 11) no se construyó, y ese ADR quedó sustituido.
   - El análisis con Stockfish no pasó su prueba de viabilidad ([docs/analysis-gate.md](docs/analysis-gate.md)).
 - **Falta:**
@@ -69,7 +69,7 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
 | Mínimo 2 bases de datos | Postgres (`games`, y `users` si se hace el login) + Mongo (`game_moves`, `voice_attempts`) |
 | 100% en GitHub | Repo público `chessspeak`, GPL-3.0, ramas por feature con PR, CI |
 | Microfrontends | 3 custom elements independientes (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`) que conviven en un index servido como web estática |
-| Balanceo de carga sobre un proceso crítico | Whisper como servicio, balanceado por URLs desde `local-agent` ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)). Se midió con 3 contenedores locales, y el pool por procesos (ADR 10) queda como salida. AWS EC2 sigue sin probar. **Cumplimiento sin confirmar:** todo lo medido corre en un solo equipo |
+| Balanceo de carga sobre un proceso crítico | Whisper como servicio, balanceado por URLs desde `local-agent` ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)). Se midió con 3 contenedores locales, y el pool por procesos (ADR 10) queda como salida. AWS EC2 se midió y se recortó (C1 no cumple). **Cumplimiento sin confirmar:** todo lo medido corre en un solo equipo |
 
 ## 5. Arquitectura
 
@@ -214,7 +214,7 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 | 9 | Licencia GPL-3.0 (por chessground) | **Sin escribir** |
 | 10 | Balanceo de carga de la transcripción en `local-agent` | **Aceptado** (4 nov); revisado el 5 nov. Queda como salida del ADR 12 |
 | 11 | Balanceo del guardado de jugadas con `move-workers` | **Sustituido por el ADR 12** (14 nov); el pool nunca se construyó |
-| 12 | Whisper como servicio, balanceado por URLs desde `local-agent` | **Aceptado** (14 nov). Medido con contenedores locales; EC2 sin probar |
+| 12 | Whisper como servicio, balanceado por URLs desde `local-agent` | **Aceptado** (14 nov). Medido con contenedores locales; EC2 medido y recortado (C1 no cumple) |
 
 ## 8. Spike — cerrado el 2 de noviembre
 Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`/`small`. Criterios fijados antes de medir (no se cambian), en [docs/spike-criteria.md](docs/spike-criteria.md):
@@ -239,7 +239,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 2. ✅ **Despliegue** en Render, Neon, Atlas y Vercel (8 de noviembre, #34).
 3. ✅ **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real (#25 a #28). Probada a mano con una sola voz.
 4. ✅ **Adaptador de Whisper local** (#29). Probado a mano el 8 de noviembre.
-5. ✅ **Balanceo:** el ADR 12 sustituye al pool de `move-workers`. Pool por URLs (#41), criterio (#43) y medición con 3 contenedores locales (#44). **EC2** está preparado (#46) y **sin probar**: es opcional y lo primero que se recorta.
+5. ✅ **Balanceo:** el ADR 12 sustituye al pool de `move-workers`. Pool por URLs (#41), criterio (#43) y medición con 3 contenedores locales (#44). **EC2** se preparó (#46), se midió el 14 de noviembre y **se recortó**, porque C1 no cumple.
 6. **Cierre (pendiente):**
    - validación con otra voz; sin otra voz, se hace con la del responsable del repo y se declara en `docs/quality.md`;
    - ✅ C4 niveles 1 y 2 ([docs/c4.md](docs/c4.md), #49);
@@ -250,7 +250,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 **Nunca se recorta:** voz, despliegue y README probado.
 
 **Si algo se atrasa, se avisa al responsable del repo** y se recorta primero, en este orden:
-1. Experimento en AWS EC2: el balanceo se demuestra con los contenedores locales.
+1. ✅ Experimento en AWS EC2: medido y recortado el 14 de noviembre (C1 no cumple). El balanceo se demuestra con los contenedores locales.
 2. Dashboard integrado: no se hace; queda `/lb/dashboard` de `local-agent` para la demo.
 3. Medición en Chrome (la demo usa Edge; el README recomienda Edge y dice que Chrome no se midió).
 4. Repetición de la carga de Whisper.
@@ -260,7 +260,7 @@ Después: dependency-cruiser y el aviso en navegadores sin Web Speech.
 **Fuera del plan:** el lote del parser (queda `spike-parser-freeze`, cuyas cifras siguen siendo válidas), `speechSynthesis`, login/registro, alfabeto OTAN, pestaña Precisión y la corrida con un modelo cuantizado.
 
 **Consecuencias, si se llegara a recortar** (también en `SPEC.md`):
-- **Si se recorta el experimento en EC2:** el balanceo queda demostrado solo con contenedores en un mismo equipo (ADR 12), y hay que decirlo al presentar.
+- **EC2 recortado el 14 de noviembre (C1 no cumple):** el balanceo queda demostrado solo con contenedores en un mismo equipo (ADR 12), y hay que decirlo al presentar.
 - El pool de `move-workers` y el adaptador de Whisper ya no son recortables: el primero se sustituyó por el ADR 12, y el segundo está hecho (#29).
 
 ### 9.3 Fases
@@ -289,7 +289,7 @@ El proyecto se presenta en vivo, en la fecha de entrega. Los riesgos principales
 | El resultado de B no se repite con otra voz o con frases nuevas (una voz, una corrida, IC95 inferior de 78 %) | Validación con otra voz, frases nuevas y otra laptop (sin definir quién aporta la voz ni de dónde sale la laptop); las cifras reales van a `quality.md` sin maquillar |
 | Cambiar el parser invalida las cifras del spike | El parser queda en `spike-parser-freeze`, sin lote de mejoras; se registra el hash usado |
 | Divergencia entre servidor y frontend | Contrato v0 de `shared/` versionado (`v: 1`); cambios solo por PR aprobado por el responsable del repo |
-| El profesor no acepta como balanceo real los contenedores en un solo equipo (ADR 12), igual que cuestionó los procesos locales (revisión del ADR 10) | Decirlo al presentar y mostrar lo medido. **EC2 está preparado pero sin probar** |
+| El profesor no acepta como balanceo real los contenedores en un solo equipo (ADR 12), igual que cuestionó los procesos locales (revisión del ADR 10) | Decirlo al presentar y mostrar lo medido. **EC2 se midió y se recortó: C1 no cumple** |
 | La demo del balanceo depende de Docker Desktop | Arrancarlo antes de la demo. Si falla, usar el pool por procesos (`LB_WORKERS=3`), que no necesita Docker |
 
 ## 11. Recomendaciones y objeciones
