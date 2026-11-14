@@ -1,6 +1,6 @@
 import { createServer, request, type Server } from 'node:http';
 import type { Socket } from 'node:net';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createMonitor, type Monitor } from '../src/monitor.js';
 import { WorkerPool, type PoolOptions, type WorkerHandle } from '../src/pool.js';
 import { agentConfigFromEnv, createAgent } from '../src/server.js';
@@ -15,6 +15,8 @@ const wav = new Uint8Array(4);
 interface FakeWhisper {
   url: string;
   healthy: boolean;
+  /** Answers 503 to this many /health probes first, whatever `healthy` says. */
+  unhealthyProbes: number;
   delayMs: number;
   healthHits: number;
   /** Stops listening and drops every connection, as a container that dies. */
@@ -35,7 +37,7 @@ async function fakeWhisper(): Promise<FakeWhisper> {
   const server: Server = createServer((req, res) => {
     if (req.url === '/health') {
       fake.healthHits++;
-      res.writeHead(fake.healthy ? 200 : 503).end();
+      res.writeHead(fake.healthy && fake.healthHits > fake.unhealthyProbes ? 200 : 503).end();
       return;
     }
     if (req.url === '/inference' && req.method === 'POST') {
@@ -64,6 +66,7 @@ async function fakeWhisper(): Promise<FakeWhisper> {
   const fake: FakeWhisper = {
     url: `http://127.0.0.1:${(server.address() as { port: number }).port}`,
     healthy: true,
+    unhealthyProbes: 0,
     delayMs: 20,
     healthHits: 0,
     crash: close,
@@ -107,8 +110,8 @@ function remoteHandle(url: string): WorkerHandle {
 describe('URL mode of the pool', () => {
   it('connects to every URL once its /health answers, with no process behind it', async () => {
     const [a, b] = await Promise.all([fakeWhisper(), fakeWhisper()]);
-    a!.healthy = false;
-    setTimeout(() => (a!.healthy = true), 100);
+    // counted probes, not a timer: on a slow machine the first probe could arrive after a timer had fired
+    a!.unhealthyProbes = 2;
     const pool = urlPool([a!.url, b!.url]);
     await pool.start();
     const stats = pool.stats();
@@ -137,12 +140,12 @@ describe('URL mode of the pool', () => {
     const [a, b] = await Promise.all([fakeWhisper(), fakeWhisper()]);
     const pool = urlPool([a!.url, b!.url], { failuresToDown: 2 });
     await pool.start();
+    // wait for the state change itself, not a fixed time: under load two failed probes can take longer than 120 ms
+    const settle = { timeout: 2000, interval: 10 };
     a!.healthy = false;
-    await sleep(120);
-    expect(state(pool, 'w1').state).not.toBe('up');
+    await vi.waitFor(() => expect(state(pool, 'w1').state).not.toBe('up'), settle);
     a!.healthy = true;
-    await sleep(200);
-    expect(state(pool, 'w1')).toMatchObject({ state: 'up' });
+    await vi.waitFor(() => expect(state(pool, 'w1')).toMatchObject({ state: 'up' }), settle);
     expect(state(pool, 'w1').restarts).toBeGreaterThanOrEqual(1);
   });
 
