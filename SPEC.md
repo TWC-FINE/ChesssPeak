@@ -20,7 +20,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 | R5 | Mínimo 2 bases de datos | Postgres + Mongo |
 | R6 | 100% en GitHub | Repo público, PRs, CI |
 | R7 | Microfrontends | 3 custom elements que conviven en un index (`pnpm serve:web`, Live Server o Vercel) |
-| R8 | Balanceo de carga sobre un proceso crítico | Whisper como servicio, balanceado por URLs desde `local-agent`, con dashboard y aislamiento de workers ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)). Se midió con 3 contenedores locales, y el pool por procesos ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)) queda como salida. AWS EC2 sigue sin probar. El ADR 11 quedó sustituido. Cumplimiento sin confirmar: todo lo medido corre en un solo equipo |
+| R8 | Balanceo de carga sobre un proceso crítico | Whisper como servicio, balanceado por URLs desde `local-agent`, con dashboard y aislamiento de workers ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)). Se midió con 3 contenedores locales, y el pool por procesos ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)) queda como salida. AWS EC2 se midió y se recortó (C1 no cumple). El ADR 11 quedó sustituido. Cumplimiento sin confirmar: todo lo medido corre en un solo equipo |
 
 ## 4. Requisitos funcionales
 **Núcleo (debe estar):**
@@ -72,5 +72,5 @@ Las cifras reales se registran en `docs/quality.md` tras la sesión de evaluaci�
 - No hay confirmación del profesor sobre los detalles de la demo, el despliegue, el dominio ni Live Server: son **supuestos**, listados en [docs/proximos-pasos.md](docs/proximos-pasos.md).
 - Decidido por el spike: idioma `es-CO`; reconocedor por defecto Web Speech con retardo de 400 ms (ADR 5). La demo se hace en Edge; Chrome sigue sin medirse.
 - **Consecuencias, si se llegara a recortar:**
-  - **Si se recorta el experimento en AWS EC2:** el balanceo queda demostrado solo con contenedores en un mismo equipo (ADR 12), y hay que decirlo al presentar.
+  - **Experimento en AWS EC2 recortado el 14 de noviembre (C1 no cumple):** el balanceo queda demostrado solo con contenedores en un mismo equipo (ADR 12), y hay que decirlo al presentar.
   - El adaptador de Whisper está hecho (#29), así que el criterio 2 ya no depende de un recorte.

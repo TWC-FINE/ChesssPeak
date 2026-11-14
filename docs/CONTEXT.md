@@ -32,8 +32,8 @@ Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; e
 ## Estado
 - **Desplegado desde el 8 de noviembre** en Render, Neon, Atlas y Vercel (<https://chessspeak.vercel.app>). Dos invitados juegan una partida en tiempo real, por escrito o por voz, en local y en la URL pública.
 - **Probado a mano con voz real, con una sola voz:** Web Speech el 7 y el 8 de noviembre, y Whisper local desde el navegador el 8, en la web local y en la pública. **Pendiente:** la validación con otra voz.
-- **Balanceo ([ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md)):** medido con 3 contenedores locales el 14 de noviembre; aislar un worker no perdió ninguna petición en 3 de 3 repeticiones. **AWS EC2: preparado en `whisper-cloud/aws/`, sin probar.** El pool de `move-workers` (ADR 11) no se construyó y ese ADR quedó sustituido.
-- **Sin probar:** Chrome, el dominio propio, el límite por IP desde otra red y AWS EC2.
+- **Balanceo ([ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md)):** medido con 3 contenedores locales el 14 de noviembre; aislar un worker no perdió ninguna petición en 3 de 3 repeticiones. **AWS EC2: medido con una instancia el 14 de noviembre y recortado,** porque C1 no cumple: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s ([evidencia](evidence/whisper-cloud-ec2/README.md)). El pool de `move-workers` (ADR 11) no se construyó y ese ADR quedó sustituido.
+- **Sin probar:** Chrome, el dominio propio y el límite por IP desde otra red.
 
 Detalle en [HANDOFF.md](HANDOFF.md).
 
@@ -41,7 +41,7 @@ Detalle en [HANDOFF.md](HANDOFF.md).
 - `packages/voice-parser/` — parser y corpus v0 (`corpus/`), métricas (`scripts/`). **Congelado** para el `test` v0.
 - `spike/web-speech/` — arnés de Web Speech; `spike/whisper-local/` — benchmark y agente HTTP de Whisper; `spike/results/` — JSON de las mediciones; `spike/recordings/` — WAV (fuera de git).
 - `local-agent/` — pool de `whisper-server` con cola, salud, dashboard (`/lb/dashboard`) y generador de carga: por procesos ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)) o por URLs, con aislar y devolver ([ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md)).
-- `whisper-cloud/` — imagen de `whisper-server` y `compose.local.yml` para los 3 contenedores locales; `aws/` con lo preparado para EC2 (sin probar).
+- `whisper-cloud/` — imagen de `whisper-server` y `compose.local.yml` para los 3 contenedores locales; `aws/` con lo usado para medir en EC2 (recortado).
 - `server/` — NestJS: `/health` y `/health/live`, auth de invitados, `POST /games`, gateway Socket.IO sobre `GameRoom`, guardado en Postgres y Mongo, y telemetría de voz (`voice-metrics`). Del pool de `move-workers` (sustituido) solo queda el puerto, con `MOVE_WORKERS=0`.
 - `web/` — shell con sesión y socket único, y 3 microfrontends: tablero, voz con caja de texto de respaldo (Web Speech y Whisper) e historial; `pnpm build:web`, `serve:web`, `smoke:web` y `e2e:web`.
 - `shared/` — contrato v1, ya en `main`.
@@ -75,7 +75,7 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [spike-notes.md](spike-notes.md) | Notas, equipo de referencia y **tareas pendientes por área** |
 | [deploy.md](deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [load-balancing.md](load-balancing.md) · [analysis-gate.md](analysis-gate.md) | Prueba de carga de Whisper · prueba del análisis con Stockfish |
-| [url-pool-criteria.md](url-pool-criteria.md) · [whisper-cloud-criteria.md](whisper-cloud-criteria.md) | Criterios y medición del pool por URLs · criterios del experimento en la nube (EC2 sin probar) |
+| [url-pool-criteria.md](url-pool-criteria.md) · [whisper-cloud-criteria.md](whisper-cloud-criteria.md) | Criterios y medición del pool por URLs · criterios del experimento en la nube (EC2 medido y recortado) |
 | [demo-script.md](demo-script.md) | Guion de la demo de unos 10 minutos, con plan de respaldo |
 | [c4.md](c4.md) | C4 niveles 1 y 2 (contexto y contenedores), en Mermaid |
 | [adr/](adr/) | ADR 1 a 8, 10 y 12 aceptados; el 11, sustituido por el 12; falta el ADR 9 |
@@ -98,5 +98,5 @@ Orden de trabajo y recortes en [PLAN.md](../PLAN.md), sección 9. **Tareas, supu
 2. **Validación** con otra voz (sin otra voz, con la del responsable del repo, declarado) y `docs/quality.md` con las cifras medidas.
 3. **Documentos:** el ADR 9.
 4. **Cierre:** README probado en una máquina limpia, ensayo con el [guion](demo-script.md), video de respaldo y tag.
-5. **Recortable:** el experimento con una instancia EC2, que sigue sin probar.
+5. **Recortado:** el experimento con una instancia EC2, medido el 14 de noviembre (C1 no cumple).
 - Tareas del spike por área (agente local, producto, CI y entrega): [spike-notes.md](spike-notes.md), sección 7.
