@@ -53,8 +53,14 @@ docker compose exec postgres psql -U chessspeak -d chessspeak -c "delete from ga
 
 El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa base local: no toca la de tests ni la nube.
 
-## Balanceo: pool de `move-workers` (ADR 11)
-**Decisión del 5 de noviembre.** El profesor no aprobó el modo de dictado y habló de repartir las jugadas entre servicios camino a la base de datos. Su «Eso puede ser» se toma como aprobación tentativa, no como confirmación. El supuesto más débil, el diseño, los límites y el criterio de éxito están en el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md). También cambió lo que se puede afirmar del pool de Whisper: ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre).
+## Balanceo: Whisper como servicio, por URLs (ADR 12)
+**Decisión vigente desde el 14 de noviembre: [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md).** Whisper se balancea como servicio HTTP desde el `local-agent`, en modo URLs.
+
+- **Construido y medido:** el pool con 3 contenedores locales. La prueba de aislamiento no perdió ninguna petición en 3 de 3 repeticiones ([evidencia](evidence/url-pool-phase-c/README.md)).
+- **AWS EC2 sigue sin probarse.**
+- El pool de `move-workers` del ADR 11 no se construyó, y ese ADR quedó sustituido.
+
+**Antecedente, decisión del 5 de noviembre (sustituida):** El profesor no aprobó el modo de dictado y habló de repartir las jugadas entre servicios camino a la base de datos. Su «Eso puede ser» se toma como aprobación tentativa, no como confirmación. El supuesto más débil, el diseño, los límites y el criterio de éxito están en el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md). También cambió lo que se puede afirmar del pool de Whisper: ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre).
 
 ## Propuesta descartada: modo de dictado
 **No se construye** (motivos en el ADR 11). Se conserva solo como registro.
@@ -96,7 +102,7 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 | Demo | Dos laptops (la segunda, sin definir), datos del celular y video de respaldo. Guion de unos 10 minutos (cifra de trabajo), con versión corta | Sin definir: hora y duración. Tampoco se conoce la red de la sala |
 | Quién abre el proyecto | Basta la demo y el repo; el README se prueba con un clon nuevo en una máquina limpia | Sin definir si lo abre él mismo. Si lo abre, Whisper y las cuentas pesan más |
 | C4 | Niveles 1 y 2 (contexto y contenedores) en Mermaid, más los ADR y los escenarios de calidad | Puede esperar otro formato |
-| Balanceo | Ver el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md) y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Procesos en la misma máquina: no se da por resuelto, y hay que decirlo al presentar |
+| Balanceo | Ver el [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md), que sustituye al ADR 11, y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Lo medido son contenedores en una misma máquina: no se da por resuelto, y hay que decirlo al presentar. EC2 sin probar |
 
 ## Lista de tareas
 Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:** `[x]` significa hecho; esos PR ya están fusionados en `main`.
@@ -129,13 +135,15 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 - [ ] 17. Dominio: cuando el profesor lo agregue y deje de rechazar consultas, conectarlo según lo que permita el hosting.
 - [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Es de la Fase 0, necesita crear las cuentas y es el paso 2 del orden de trabajo.
 
-**Balanceo (ADR 11)**
+**Balanceo (ADR 12; el ADR 11 quedó sustituido)**
 - [x] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. (PR #13)
-- [ ] 20. Pool y `move-workers`, con OK explícito del responsable del repo antes de empezar (paso 5 del orden de trabajo).
-- [ ] 21. Pruebas del ADR 11, con el criterio de éxito: matar un worker a mitad de partida sin perder ninguna jugada.
+- [ ] 20. ~~Pool y `move-workers`~~ **Recortada el 14 de noviembre:** la sustituye el ADR 12.
+- [ ] 21. ~~Pruebas del ADR 11~~ **Recortada el 14 de noviembre**, con la tarea 20.
 - [ ] 22. Medir los dos equipos el mismo día para saber cuál es el más débil, llevarle el WAV y repetir allí la prueba de carga de Whisper. Instrucciones: [docs/kit-equipo-debil/LEEME.txt](kit-equipo-debil/LEEME.txt).
-- [ ] 23. Arrancar la demo de Whisper con `LB_WORKERS=3`.
+- [ ] 23. Arrancar la demo de Whisper. Desde el ADR 12 se hace con los 3 contenedores y `WHISPER_URLS`, aislando y devolviendo desde el dashboard. `LB_WORKERS=3` queda como salida si falla Docker.
 - [ ] 24. Medir la latencia de Whisper en la segunda laptop (sin definir de dónde sale). Es aparte de la máquina limpia, que solo prueba el README.
+- [x] 25. Pool por URLs con aislar y devolver (#41), criterio de la fase C (#43) y su medición con 3 contenedores locales (#44).
+- [ ] 26. Experimento con una instancia EC2 en `us-east-2`, según la adenda de [whisper-cloud-criteria.md](whisper-cloud-criteria.md). Antes de lanzarla se añaden los precios oficiales con su fecha. **Es lo primero que se recorta** si falta tiempo para el README probado, el ensayo y el tag.
 
 ## Pulido opcional
 Solo si sobra tiempo al final. Ninguno bloquea la entrega.
@@ -148,7 +156,7 @@ Solo si sobra tiempo al final. Ninguno bloquea la entrega.
 - **`shared/`:** el contrato lo aprueba el responsable del repo; cualquier cambio va en un PR y sube la versión. Si falta algo, se anota.
 - **PR #3 y #10 a #14:** ya fusionados en `main`. Nada se fusiona a `main` sin aprobación expresa del responsable del repo.
 - **Parser y spike:** `packages/voice-parser/`, su corpus, `docs/spike-criteria.md` y los resultados siguen congelados; el lote de mejoras queda fuera del plan.
-- **Balanceo:** solo lo que fija el ADR 11. `GameRoom` y la validación no se tocan.
+- **Balanceo:** solo lo que fija el ADR 12. `GameRoom` y la validación no se tocan.
 - **`web/dist`:** solo en el commit de entrega, al congelar el código (supuesto).
 
 **Sin definir:** quién aporta la otra voz para la validación (sin otra voz, con la del responsable del repo, declarado en `docs/quality.md`), la segunda laptop de los ensayos y la máquina limpia del README.
