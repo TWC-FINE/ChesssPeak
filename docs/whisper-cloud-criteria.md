@@ -148,3 +148,57 @@ La añade el responsable del repo, que pidió conservarla dentro de la v1. No ca
 - [Cloud Build pricing](https://cloud.google.com/build/pricing)
 - [Create, edit, or delete budgets and budget alerts](https://docs.cloud.google.com/billing/docs/how-to/budgets)
 - [Cloud Run: memory limits](https://docs.cloud.google.com/run/docs/configuring/services/memory-limits)
+
+## 6. Adenda del 13 de noviembre: EC2 en lugar de Cloud Run
+
+La añade el responsable del repo **antes de medir nada en la nube**. Google Cloud quedó descartado porque pedía un prepago, y la nube pasa a ser AWS EC2.
+
+Esta adenda **no cambia el texto de la v1** de arriba. Tampoco cambia A1–A4 ni sus resultados: la fase A pasó con `small` ([evidencia](evidence/whisper-cloud-phase-a/README.md)). Lo que arriba nombra Cloud Run, `gcloud`, `min-instances` o sus precios se queda como estaba, pero no se aplica a EC2. Donde choquen, manda esta adenda.
+
+### Qué cambia
+
+- **Dónde:** AWS EC2, solo en la región `us-east-2`, en una cuenta del plan gratuito con créditos. La instancia candidata es `c7i-flex.large`. Sus vCPU y su memoria se copian de la página oficial de AWS antes de lanzarla, no de memoria.
+- **El gateway** es el `local-agent` del equipo del responsable, en modo por URLs (`WHISPER_URLS`), no el servidor de Render. El navegador y el contrato no cambian.
+- **Cada worker** es una instancia con un solo contenedor de la imagen `small` de la fase A, con los mismos límites: `--cpus=2 --memory=2g`.
+- **Acceso:** el puerto de whisper **no se abre a internet**.
+  - El contenedor publica su puerto solo en `127.0.0.1` de la instancia.
+  - El grupo de seguridad tiene una sola regla de entrada: el puerto 22, solo desde la IP pública del responsable con máscara `/32`. Si su IP cambia, se actualiza la regla; nunca se abre a `0.0.0.0/0`.
+  - La clave privada SSH vive fuera del repo y nunca se copia en registros ni en el chat.
+  - El agente llega a cada worker por un túnel SSH a un puerto de `localhost`, del 18201 en adelante. La URL de cada worker es `http://127.0.0.1:<puerto>`, así que el agente no maneja tokens.
+  - **Cambio frente al plan anterior:** el plan no abría el puerto 22. El túnel SSH lo necesita, y el responsable lo aceptó el 13 de noviembre con estas dos condiciones: la regla limitada a su IP `/32` y la clave fuera del repo.
+- **Sondeos:** como la URL del túnel es `localhost`, el mínimo de 15 s que el agente aplica a las URL remotas no se activa solo. Para EC2 se arranca el agente con `LB_PROBE_INTERVAL_MS=15000` o más. No hay reintentos sin tope.
+
+### Criterios en EC2
+
+| | Qué | Umbral |
+|---|---|---|
+| **C1** | p95 en caliente de un clip | ≤ **7,5 s**, medido como en la adenda del 12 de noviembre: desde el equipo del responsable, con la VPN apagada, 3 repeticiones de los 78 clips, y cuenta la peor. Se usa la misma tabla de «pasa», «no concluyente» y «se recorta». El túnel SSH sustituye al proxy de `gcloud` |
+| **C2** | Primer clip en una instancia recién arrancada | EC2 no escala a cero: la instancia se arranca a mano antes de cada sesión. C2 mide el primer clip después de que `/health` responda 200: ≤ **30 s**. El tiempo entre arrancar la instancia y que `/health` responda se anota sin umbral, porque ninguna petición lo espera |
+| **C3** | Aciertos top-1 sobre 78 | Los mismos umbrales que A3: `small` ≥ **68** |
+| **C4** | 2 instancias y 2–4 peticiones simultáneas; un worker se aísla en el gateway (`POST /lb/workers/:id/isolate`) a mitad de la prueba | **0** peticiones perdidas, con el reparto visible en `X-Worker` |
+| **C5** | Gasto de toda la prueba, con la demo incluida | ≤ **50 %** del presupuesto de 5 USD (2,5 USD) en créditos, y **0 USD** cargados a la tarjeta. Se comprueba en la consola de facturación de AWS |
+
+### Coste
+
+Antes de lanzar la primera instancia se añade aquí una tabla con los precios oficiales de AWS para `us-east-2`, con su fecha y su enlace. Debe cubrir:
+
+- las horas de instancia;
+- el volumen EBS, que se cobra también con la instancia parada;
+- la dirección IPv4 pública;
+- la transferencia de datos.
+
+Ninguna cifra sale de memoria.
+
+### Salvaguardas
+
+- Las instancias se paran al terminar cada sesión, y se terminan, con su volumen, después de la entrega. Tras cada prueba se da un comando para comprobar su estado y el gasto.
+- El presupuesto de 5 USD avisa, pero no limita el gasto.
+- Las claves no van al repo, ni a los registros, ni al chat. Esto incluye el par de claves SSH y cualquier credencial de AWS.
+- Ningún clip sale a la nube sin el OK explícito del responsable para esa prueba.
+
+### Decisión
+
+| Resultado | Qué se hace |
+|---|---|
+| C1–C5 se cumplen | El ADR 12 registra el pool en EC2 detrás del agente |
+| No se cumplen, o se acaba el tiempo | Se terminan las instancias. El balanceo se demuestra con los 3 contenedores locales (plan B), y el ADR 12 lo dice tal cual |
