@@ -6,7 +6,8 @@ import type { PoolStats, WorkerPool, WorkerStats } from './pool.js';
 import { HttpError, type ExtraRoutes } from './server.js';
 
 // Load balancer monitor: GET /lb/stats (JSON), GET /lb/events (Server-Sent Events, one snapshot per second),
-// POST /lb/workers/:id/kill (failure demo) and GET /lb/dashboard (the page in public/).
+// POST /lb/workers/:id/kill (failure demo, process mode), POST /lb/workers/:id/isolate and /restore
+// (failure demo in both modes) and GET /lb/dashboard (the page in public/).
 
 const run = promisify(execFile);
 
@@ -80,6 +81,7 @@ export interface Monitor {
 }
 
 const KILL_ROUTE = /^\/lb\/workers\/([\w-]+)\/kill$/;
+const ISOLATE_ROUTE = /^\/lb\/workers\/([\w-]+)\/(isolate|restore)$/;
 
 export function createMonitor(pool: WorkerPool, options: MonitorOptions = {}): Monitor {
   const readMemory = options.readMemory ?? readRss;
@@ -163,7 +165,26 @@ export function createMonitor(pool: WorkerPool, options: MonitorOptions = {}): M
       const result = pool.killWorker(kill[1]!);
       if (result === 'unknown') throw new HttpError(404, `No existe el worker ${kill[1]}`);
       if (result === 'not-up') throw new HttpError(409, `El worker ${kill[1]} no está activo`);
+      if (result === 'unsupported') throw new HttpError(409, 'En modo URLs no hay proceso que matar: usa aislar');
       json(res, 202, { killed: kill[1], pid: result.pid }, cors);
+      return true;
+    }
+
+    const isolate = ISOLATE_ROUTE.exec(path);
+    if (isolate !== null) {
+      if (req.method !== 'POST') throw new HttpError(405, 'Usa POST');
+      const [, id, action] = isolate as unknown as [string, string, 'isolate' | 'restore'];
+      if (action === 'isolate') {
+        const result = pool.isolateWorker(id);
+        if (result === 'unknown') throw new HttpError(404, `No existe el worker ${id}`);
+        if (result === 'already') throw new HttpError(409, `El worker ${id} ya está aislado`);
+        json(res, 202, { isolated: id }, cors);
+      } else {
+        const result = pool.restoreWorker(id);
+        if (result === 'unknown') throw new HttpError(404, `No existe el worker ${id}`);
+        if (result === 'not-isolated') throw new HttpError(409, `El worker ${id} no está aislado ni ha agotado sus reconexiones`);
+        json(res, 202, { restored: id }, cors);
+      }
       return true;
     }
 

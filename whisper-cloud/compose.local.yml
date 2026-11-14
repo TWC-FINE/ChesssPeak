@@ -1,0 +1,28 @@
+# Three local workers of the phase A image (small, whisper.cpp d1be6fd) for the URL mode of local-agent.
+#   docker compose -f whisper-cloud/compose.local.yml up -d      (builds the image if it is missing)
+#   WHISPER_URLS=http://127.0.0.1:18101,http://127.0.0.1:18102,http://127.0.0.1:18103 pnpm --filter @chessspeak/local-agent start
+#   docker compose -f whisper-cloud/compose.local.yml down
+# Ports are published on 127.0.0.1 only. Host port 8080 belongs to another program, hence 18101-18103.
+name: chessspeak-whisper
+
+x-worker: &worker
+  image: chessspeak-whisper:small-d1be6fd
+  build:
+    context: .
+    args:
+      MODEL: small
+  # the same limits as the phase A runs
+  cpus: 2
+  mem_limit: 2g
+  restart: "no"
+
+services:
+  w1:
+    <<: *worker
+    ports: ["127.0.0.1:18101:8080"]
+  w2:
+    <<: *worker
+    ports: ["127.0.0.1:18102:8080"]
+  w3:
+    <<: *worker
+    ports: ["127.0.0.1:18103:8080"]
