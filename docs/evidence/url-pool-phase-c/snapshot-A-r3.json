@@ -1,0 +1,148 @@
+{
+    "mode":  "url",
+    "strategy":  "least-connections",
+    "workerConcurrency":  1,
+    "queued":  0,
+    "queueMax":  12,
+    "timeoutMs":  15000,
+    "reconnectMax":  10,
+    "totals":  {
+                   "200":  13,
+                   "502":  0,
+                   "503":  0,
+                   "504":  0
+               },
+    "recent":  [
+                   {
+                       "at":  1794634343069,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6672
+                   },
+                   {
+                       "at":  1794634342698,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6613
+                   },
+                   {
+                       "at":  1794634336386,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6587
+                   },
+                   {
+                       "at":  1794634336082,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6593
+                   },
+                   {
+                       "at":  1794634329782,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6614
+                   },
+                   {
+                       "at":  1794634329486,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6596
+                   },
+                   {
+                       "at":  1794634323163,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6712
+                   },
+                   {
+                       "at":  1794634322887,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6498
+                   },
+                   {
+                       "at":  1794634316443,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6894
+                   },
+                   {
+                       "at":  1794634316385,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  6834
+                   },
+                   {
+                       "at":  1794634309528,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  7728
+                   },
+                   {
+                       "at":  1794634309480,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  7670
+                   },
+                   {
+                       "at":  1794634309349,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  7542
+                   }
+               ],
+    "workers":  [
+                    {
+                        "id":  "w1",
+                        "port":  18101,
+                        "url":  "http://127.0.0.1:18101",
+                        "state":  "up",
+                        "active":  1,
+                        "served":  6,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  43,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  1000,
+                        "latencyMs":  6651,
+                        "rssBytes":  null
+                    },
+                    {
+                        "id":  "w2",
+                        "port":  18102,
+                        "url":  "http://127.0.0.1:18102",
+                        "state":  "isolated",
+                        "active":  0,
+                        "served":  2,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  null,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  1000,
+                        "latencyMs":  7252,
+                        "rssBytes":  null
+                    },
+                    {
+                        "id":  "w3",
+                        "port":  18103,
+                        "url":  "http://127.0.0.1:18103",
+                        "state":  "up",
+                        "active":  1,
+                        "served":  5,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  43,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  1000,
+                        "latencyMs":  6553,
+                        "rssBytes":  null
+                    }
+                ],
+    "at":  1794634343244,
+    "agent":  {
+                  "pid":  11132,
+                  "uptimeSeconds":  43,
+                  "rssBytes":  69144576
+              }
+}

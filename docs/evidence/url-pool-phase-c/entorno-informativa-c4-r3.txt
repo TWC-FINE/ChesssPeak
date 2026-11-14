@@ -1,0 +1,8 @@
+Corrida: informativa-c4-r3
+Fecha: 2026-11-14 00:38:01 -05:00
+RAM libre: 2,871 MB
+Docker: encendido
+Contenedores en marcha (docker ps):
+  chessspeak-whisper-w3-1 chessspeak-whisper:small-d1be6fd Up 11 minutes
+  chessspeak-whisper-w2-1 chessspeak-whisper:small-d1be6fd Up 11 minutes
+  chessspeak-whisper-w1-1 chessspeak-whisper:small-d1be6fd Up 11 minutes
