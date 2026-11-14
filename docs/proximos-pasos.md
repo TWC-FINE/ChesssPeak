@@ -1,6 +1,36 @@
 # Próximos pasos
 
-Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026. La fecha, el orden de trabajo y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente y los supuestos.
+Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026 y revisado el 14 de noviembre, con `main` en `08d3ccb`. La fecha, el orden de trabajo y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente y los supuestos.
+
+## Lo que falta para la entrega del 19 de noviembre
+
+Ordenado el 14 de noviembre, con `main` en `08d3ccb`. **Nunca se recortan** la voz, el despliegue (los dos ya hechos) ni el README probado. «Responsable del repo» es quien tiene que hacerlo en persona, porque requiere su voz, su equipo, sus cuentas o su aprobación.
+
+| # | Qué falta | Quién | Notas |
+|---|---|---|---|
+| 1 | Revisar y fusionar los PR abiertos del 14 de noviembre: este, el guion de demo (#48) y el C4 (#49) | Responsable del repo | Sin fusión no cuentan como entregados |
+| 2 | Escribir las 40 frases de validación nuevas, en un archivo nuevo, sin tocar el corpus v0 | Responsable del repo | Claude puede preparar la plantilla del archivo |
+| 3 | Sesión de validación en Edge, con otra voz o, si no hay, con la del responsable (declarado), registrando el hash del parser | Responsable del repo (voz y sesión); Claude analiza con `pnpm metrics` | Sin estas cifras no se cumple el criterio 7 de `SPEC.md` |
+| 4 | `docs/quality.md` con las cifras medidas, siguiendo los escenarios de `PLAN.md`, 6.1 | Claude redacta con los resultados; el responsable aprueba | No se inventa ninguna cifra |
+| 5 | ADR 9 (licencia GPL-3.0, por chessground) | Claude | Media página |
+| 6 | Corregir lo que sigue desfasado fuera de estos documentos: el estado del ADR 6, `docs/CONTEXT.md` y la sección «Estado actual» de `AGENTS.md` | Claude, con el OK del responsable | La prueba con el Whisper real ya se hizo el 8 de noviembre |
+| 7 | **README probado con un clon nuevo en una máquina limpia.** Windows Sandbox es una opción sin probar | Responsable del repo (máquina y ejecución); Claude corrige el README con lo que falle | Nunca se recorta |
+| 8 | En la laptop de la demo: Edge contra `127.0.0.1:8765` (aviso de red local), micrófonos, Docker y los 3 contenedores, y la latencia de Whisper | Responsable del repo | Antes del ensayo, no el día de la demo |
+| 9 | Ensayo completo con el guion (#48), incluida la versión corta, con dos navegadores contra la nube, algo que aún no se ha probado | Responsable del repo | Lo que no se ensaye no se muestra |
+| 10 | Grabar el video de respaldo | Responsable del repo | Último recurso del plan B |
+| 11 | Commit de entrega con `web/dist` y tag `v1.0` | El responsable decide; Claude lo prepara | Solo al congelar el código |
+| 12 | El día de la demo: despertar Render (`/health`) con antelación, y arrancar Docker y los contenedores | Responsable del repo | La primera respuesta tras dormir tardó 52,5 s |
+
+**Recortables, en este orden, si falta tiempo para lo anterior:**
+
+| # | Qué | Quién |
+|---|---|---|
+| 13 | Experimento con una instancia EC2 (`whisper-cloud/aws/README.md`). **Es lo primero que se recorta** | El responsable del repo lanza y mide; Claude analiza los resultados |
+| 14 | Medición en Chrome | Responsable del repo |
+| 15 | Medir los dos equipos y repetir la carga de Whisper en el más débil ([kit](kit-equipo-debil/LEEME.txt)) | Responsable del repo |
+| 16 | Probar el límite de `/auth/guest` desde otra red | Responsable del repo |
+
+**No depende del equipo:** el dominio, que espera a que el profesor lo agregue en el hosting (ver «Dominio»). **Limpieza menor:** borrar las 2 partidas de prueba de la base local (ver «Limpiar las partidas de prueba»).
 
 ## Cómo retomar
 ```bash
@@ -15,7 +45,7 @@ pnpm install
 - **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Con **demo en vivo**.
 - **Documentación de arquitectura:** el profesor pide **C4**. Niveles 1 y 2; el formato es un supuesto.
 - **Dominio:** obtenido con [DigitalPlat FreeDomain](https://github.com/DigitalPlatDev/FreeDomain), como pidió el profesor. **En espera del profesor.** Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app`.
-- **Despliegue:** supuesto Render, Neon y Atlas. Ya no se espera una sugerencia del profesor. Crear las cuentas y las credenciales queda en manos del equipo.
+- **Despliegue:** Render, Neon, Atlas y Vercel, **desplegados el 8 de noviembre** con las cuentas del responsable del repo (`docs/deploy.md`).
 
 ## Puntos abiertos
 **Ninguno está resuelto.** Solo salen de aquí con evidencia o con una confirmación expresa.
@@ -89,12 +119,12 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 **Descartadas:** modo club con varios tableros (el micrófono no funciona por HTTP en la red local), Whisper central en la nube (sin CPU en el plan gratuito y se pierde el módulo local), balancear NestJS (exige Redis y sesiones pegajosas) y Stockfish (no pasó su prueba).
 
 ## Supuestos
-**Ya no se le puede preguntar nada más al profesor. Ninguno de estos puntos está confirmado por él.** Si alguno cambia, se corrige aquí.
+**Ninguno de estos puntos está confirmado por el profesor.** Si alguno cambia, se corrige aquí.
 
 | Tema | Supuesto | Riesgo o pendiente |
 |---|---|---|
 | Entrega | Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor) | Se supone que la demo es ese mismo día. Sin definir: hora y duración de la demo |
-| Despliegue | Render, Neon y Atlas, como en `render.yaml` y `docs/deploy.md`. `MOVE_WORKERS=0` en Render hasta medir la memoria | El profesor iba a sugerir dónde y cómo. Hay que crear las cuentas |
+| Despliegue | Render, Neon, Atlas y Vercel, como en `render.yaml` y `docs/deploy.md`; desplegado el 8 de noviembre. `MOVE_WORKERS=0` en Render | Render gratuito se duerme: hay que despertarlo antes de la demo |
 | Dominio | En espera del profesor. Mínimo garantizado: la web publicada en Vercel con su URL `vercel.app` | Delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas. No se sabe qué permite alojar ese hosting |
 | Microfrontends y Live Server | 3 custom elements sin Module Federation ni despliegues independientes (ADR 2). `web/dist` va en el commit de entrega, solo al congelar el código, y abre en `http://127.0.0.1:5500/web/dist/index.html` | Ensayar exactamente ese modo. La demo sigue usando `serve:web` |
 | Chrome | Sigue como recorte. Si la entrega la abre otra persona puede ser en Chrome | La medición es con voz real |
@@ -105,7 +135,7 @@ El primero las muestra; el segundo debe responder `DELETE 2`. Solo afecta a esa 
 | Balanceo | Ver el [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md), que sustituye al ADR 11, y la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) | Lo medido son contenedores en una misma máquina: no se da por resuelto, y hay que decirlo al presentar. EC2 sin probar |
 
 ## Lista de tareas
-Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:** `[x]` significa hecho; esos PR ya están fusionados en `main`.
+Las tareas que dependen de un supuesto lo indican. **Revisado el 14 de noviembre:** `[x]` significa hecho; esos PR ya están fusionados en `main`.
 
 **Preparación**
 - [x] 1. Abrir el PR de `docs/delivery-nov-19`. (PR #16)
@@ -124,16 +154,16 @@ Las tareas que dependen de un supuesto lo indican. **Marcado el 6 de noviembre:*
 - [x] 10. Shell real: sesión y socket único, en lugar de `web/shell/src/mocks.ts`. (PR #14)
 - [x] 11. `<mf-game>`: tablero real, `game:state`, `game:moved` y flecha de confirmación. (PR #14)
 - [x] 12. `<mf-voice-input>`: caja de texto → `resolve()` del parser → `cs:move-candidate`. (PR #14)
-- [x] 13. Reconocedores: Web Speech con 400 ms, Whisper contra `/transcribe` y uno falso para tests. (PR #26, #27 y #29) **Falta la prueba con voz real y con el Whisper real.**
+- [x] 13. Reconocedores: Web Speech con 400 ms, Whisper contra `/transcribe` y uno falso para tests. (PR #26, #27 y #29) Probados a mano con voz real: Web Speech el 7 y el 8 de noviembre, y el Whisper real el 8, con una sola voz.
 
 **Documentos**
-- [ ] 14. ADR 9 (licencia), y ADR 7 y 8 al terminar las tareas 3 y 6. ADR 8 en el PR #11 y ADR 7 en el PR #13; falta el ADR 9.
-- [ ] 15. 20 frases de validación, en un archivo nuevo, sin editar el corpus v0.
+- [ ] 14. ADR 9 (licencia). Los ADR 7 y 8 ya están aceptados (PR #13 y #11).
+- [ ] 15. 40 frases de validación (las que fija `PLAN.md`, 5.7), en un archivo nuevo, sin editar el corpus v0.
 - [ ] 16. Documentación de arquitectura con C4 (niveles 1 y 2 en Mermaid).
 
 **Según los supuestos**
 - [ ] 17. Dominio: cuando el profesor lo agregue y deje de rechazar consultas, conectarlo según lo que permita el hosting.
-- [ ] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Es de la Fase 0, necesita crear las cuentas y es el paso 2 del orden de trabajo.
+- [x] 18. Desplegar el backend y las bases en Render, Neon y Atlas, y publicar la web en Vercel. Hecho el 8 de noviembre (#34) y verificado desde fuera.
 
 **Balanceo (ADR 12; el ADR 11 quedó sustituido)**
 - [x] 19. Puerto `MovePersistence` con escritura directa, junto con la tarea 6. (PR #13)

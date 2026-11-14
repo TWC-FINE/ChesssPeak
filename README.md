@@ -6,7 +6,13 @@ Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebr
 
 Proyecto final de Arquitectura de Software.
 
-> **Estado (8 de noviembre de 2026):** Desplegado en <https://chessspeak.vercel.app>. Dos invitados juegan una partida en tiempo real, por escrito o por voz. Web Speech y Whisper local se probaron a mano en la web local y en la pública, **con una sola voz**, así que eso no sustituye la validación con otra persona. El límite de `/auth/guest` se corrigió en #37; falta probarlo desde otra red (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)). Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md).
+> **Estado (14 de noviembre de 2026):**
+> - Desplegado en <https://chessspeak.vercel.app>. Dos invitados juegan una partida en tiempo real, por escrito o por voz.
+> - Web Speech y Whisper local se probaron a mano en la web local y en la pública, **con una sola voz**, así que eso no sustituye la validación con otra persona.
+> - El balanceo de Whisper por URLs se midió con 3 contenedores locales ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)). **AWS EC2 sigue sin probar.**
+> - El límite de `/auth/guest` se corrigió en #37; falta probarlo desde otra red (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)).
+>
+> Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md) y [docs/HANDOFF.md](docs/HANDOFF.md).
 
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Está previsto presentarlo en una **demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
@@ -68,7 +74,7 @@ pnpm --filter @chessspeak/spike-whisper-local download   # binario y modelos, fu
 pnpm --filter @chessspeak/local-agent start              # agente en http://127.0.0.1:8765
 ```
 
-Después elígelo en el selector de reconocedor de la web. **Este camino aún no se ha probado con el Whisper real ni con voz real.**
+Después elígelo en el selector de reconocedor de la web. Se probó a mano con el Whisper real el 8 de noviembre de 2026, con una sola voz (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)).
 
 **Whisper en 3 contenedores, para la demo del balanceo (opcional, necesita Docker Desktop):**
 

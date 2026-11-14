@@ -5,7 +5,7 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 ## 1. Vista general
 
 ```
- Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; prevista también en Vercel)
+ Navegador (Edge/Chrome; `pnpm serve:web` o Live Server :5500; publicada en Vercel)
  ┌──────────────────────────────────────────────────────┐
  │ shell (TS vanilla): router, sesión, ÚNICO socket     │
  │  ├─ <mf-game>        tablero + jugadas (recibe socket)│
@@ -16,10 +16,11 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
          ▼                              ▼
  ┌─────────────────────┐        ┌──────────────────────────┐
  │ server (NestJS)     │        │ local-agent (Node)       │
- │ Render, 1 instancia │        │ 127.0.0.1:8765           │
- │ auth·games·         │        │ └─ whisper-server        │
- │ voice-metrics·health│        │    (whisper.cpp, local)  │
- └───┬──────────┬──────┘        └──────────────────────────┘
+ │ Render, 1 instancia │        │ 127.0.0.1:8765, gateway  │
+ │ auth·games·         │        │ └─ whisper-server ×N:    │
+ │ voice-metrics·health│        │    procesos (ADR 10) o   │
+ └───┬──────────┬──────┘        │    URLs (ADR 12)         │
+     │          │               └──────────────────────────┘
      ▼          ▼
  Postgres     MongoDB
  (Neon)       (Atlas M0)
@@ -27,7 +28,14 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
 
 El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de quien usa la aplicación (Whisper). El servidor solo recibe jugadas en UCI y telemetría.
 
-**Estado (6 de noviembre):** en local, dos invitados juegan una partida en tiempo real, por escrito o por voz, con las dos bases, la telemetría y el historial. **Sin probar:** voz real, Whisper real desde el navegador, y el despliegue, que aún no existe. **Sin código:** el pool de `move-workers` (ADR 11). Detalle en [README.md](README.md) y [docs/HANDOFF.md](docs/HANDOFF.md).
+**Estado (14 de noviembre):**
+- Dos invitados juegan una partida en tiempo real, por escrito o por voz, con las dos bases, la telemetría y el historial.
+- Desplegado desde el 8 de noviembre en Render, Neon, Atlas y Vercel.
+- Web Speech y Whisper se probaron a mano con voz real, con una sola voz.
+- El balanceo de Whisper por URLs (ADR 12) se midió con 3 contenedores locales. **AWS EC2 sigue sin probar.**
+- El pool de `move-workers` (ADR 11) no se construyó, y ese ADR quedó sustituido.
+
+Detalle en [README.md](README.md) y [docs/HANDOFF.md](docs/HANDOFF.md).
 
 ## 2. Componentes
 
@@ -40,7 +48,7 @@ El reconocimiento de voz ocurre en el navegador (Web Speech) o en la máquina de
 | `web/mf-game/` | Tablero (chessground, `viewOnly`), estado de la partida, envía `game:move` | Reconocimiento |
 | `web/mf-voice-input/` | Botón de hablar, selector y adaptadores de reconocimiento, confirmación, telemetría de cada frase | Acceso al socket |
 | `web/mf-history/` | Lista de jugadas, numeradas y en SAN | Acceso al socket |
-| `local-agent/` | Servicio HTTP que transcribe un WAV con un pool de whisper-server (1 worker por defecto, ADR 10); umbral de volumen y duración; dashboard | Reglas de ajedrez |
+| `local-agent/` | Gateway HTTP que transcribe un WAV con un pool de whisper-server, con umbral de volumen y duración y un dashboard. El pool es de procesos propios (1 por defecto, ADR 10) o, con `WHISPER_URLS`, de workers por URL, como los contenedores de `whisper-cloud/` (ADR 12) | Reglas de ajedrez |
 
 ### 2.1 Backend (monolito modular NestJS)
 Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`. `analysis` opcional; sin `signaling`.
@@ -51,7 +59,7 @@ Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`
 - **Rehidratación:** al reconectar se reconstruye la sala desde Mongo.
 - **Una sola instancia** en Render; no hace falta sticky session.
 - **Telemetría de voz:** una pasarela propia en `voice-metrics` guarda `voice:attempt` en `voice_attempts`, sin audio y con el `player` del token. Nunca responde al cliente: lo inválido o lo que no se puede guardar se registra en el log y se descarta, para no interrumpir la partida ([docs/protocol.md](docs/protocol.md)).
-- **Guardado por pool (previsto, aún sin código; ADR 11):** con `MOVE_WORKERS` mayor que 0, el gateway reparte `appendMove` entre procesos `move-worker`. `GameRoom` sigue siendo la única que valida. Con `MOVE_WORKERS=0`, el valor por defecto, se escribe directo.
+- **Puerto `MovePersistence`:** el guardado pasa por este puerto, que solo tiene la escritura directa. `MOVE_WORKERS=0` es el valor por defecto, y uno mayor aborta el arranque. El pool de `move-worker` del ADR 11 no se construyó, y ese ADR quedó sustituido por el ADR 12.
 
 ### 2.2 Microfrontends
 - Custom elements con Lit en light DOM, un proyecto Vite por microfrontend, salida única `web/dist/`.
@@ -139,8 +147,22 @@ Los percentiles p50/p95 se calculan en Node, no con agregaciones de Mongo.
 |---|---|
 | Backend | Render (una instancia; despertarla antes de evaluar) |
 | Postgres / Mongo | Neon / Atlas M0 |
-| Web | En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist`; prevista también en Vercel (URL `vercel.app`), aún sin desplegar |
+| Web | Publicada en Vercel (<https://chessspeak.vercel.app>). En local, `pnpm serve:web` (servidor estático de Node, `127.0.0.1:5500`; lo usa la demo) o Live Server sobre `web/dist` |
 | `local-agent` | En la máquina de quien usa Whisper |
+| Workers de Whisper por URL (ADR 12) | 3 contenedores locales (`whisper-cloud/compose.local.yml`), medidos. Una instancia AWS EC2 en `us-east-2` está preparada (`whisper-cloud/aws/`), **sin probar** |
 
 ## 10. Decisiones (ADRs)
-Media página cada una, escritas cuando se toma la decisión: monolito modular; microfrontends con custom elements; dos bases de datos; resolución contra jugadas legales; `SpeechRecognizer` como Strategy; `local-agent` por HTTP (alternativa: WebSocket saliente); estado en memoria + write-behind; invitados con token firmado; GPL-3.0. Calendario en [PLAN.md](PLAN.md).
+Media página cada una, escritas cuando se toma la decisión:
+
+- monolito modular;
+- microfrontends con custom elements;
+- dos bases de datos;
+- resolución contra jugadas legales;
+- `SpeechRecognizer` como Strategy;
+- `local-agent` por HTTP (alternativa: WebSocket saliente);
+- estado en memoria + write-behind;
+- invitados con token firmado;
+- balanceo de Whisper: por procesos (ADR 10) y como servicio por URLs (ADR 12, que sustituye al 11);
+- GPL-3.0 (ADR 9, sin escribir).
+
+El orden de trabajo está en [PLAN.md](PLAN.md).
