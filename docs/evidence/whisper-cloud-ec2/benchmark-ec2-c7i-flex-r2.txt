@@ -1,0 +1,187 @@
+116 clips en <repo>\spike\recordings; puerta 300 ms / -50 dBFS; 1 configuraciones.
+
+[small con prompt]
+
+  1/116
+  2/116
+  3/116
+  4/116
+  5/116
+  6/116
+  7/116
+  8/116
+  9/116
+  10/116
+  11/116
+  12/116
+  13/116
+  14/116
+  15/116
+  16/116
+  17/116
+  18/116
+  19/116
+  20/116
+  21/116
+  22/116
+  23/116
+  24/116
+  25/116
+  26/116
+  27/116
+  28/116
+  29/116
+  30/116
+  31/116
+  32/116
+  33/116
+  34/116
+  35/116
+  36/116
+  37/116
+  38/116
+  39/116
+  40/116
+  41/116
+  42/116
+  43/116
+  44/116
+  45/116
+  46/116
+  47/116
+  48/116
+  49/116
+  50/116
+  51/116
+  52/116
+  53/116
+  54/116
+  55/116
+  56/116
+  57/116
+  58/116
+  59/116
+  60/116
+  61/116
+  62/116
+  63/116
+  64/116
+  65/116
+  66/116
+  67/116
+  68/116
+  69/116
+  70/116
+  71/116
+  72/116
+  73/116
+  74/116
+  75/116
+  76/116
+  77/116
+  78/116
+  79/116
+  80/116
+  81/116
+  82/116
+  83/116
+  84/116
+  85/116
+  86/116
+  87/116
+  88/116
+  89/116
+  90/116
+  91/116
+  92/116
+  93/116
+  94/116
+  95/116
+  96/116
+  97/116
+  98/116
+  99/116
+  100/116
+  101/116
+  102/116
+  103/116
+  104/116
+  105/116
+  106/116
+  107/116
+  108/116
+  109/116
+  110/116
+  111/116
+  112/116
+  113/116
+  114/116
+  115/116
+  116/116
+  guardado <carpeta-de-salida>\2026-11-14-whisper-small-prompt-ec2-c7i-flex-r2.json
+
+whisper.cpp **d1be6fd (imagen Linux en http://127.0.0.1:18201) · ec2-c7i-flex-r2**, idioma `es`. Puerta fija antes de transcribir: duración ≥ 300 ms y volumen RMS ≥ -50 dBFS. Split evaluado: **test**.
+
+**Resumen por configuración** (sin N-best: Whisper devuelve una sola alternativa)
+
+| Configuración | Intentos V | Acierto top-1 | Aceptación errónea | Ambigüedad | Nomatch | Latencia p50 / p95 | Silencio+ruido: falsas aceptaciones |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18201) · ec2-c7i-flex-r2 · modelo small · con prompt de ajedrez | 78 | 87.2 % (68/78; IC95 78–93 %) | 0.0 % (0/78; IC95 0–5 %) | 7.7 % (6/78; IC95 4–16 %) | 5.1 % (4/78; IC95 2–12 %) | 11.21 s / 11.72 s (n=78) | 0/38 |
+
+**Clips de silencio y ruido (sin habla)**
+
+| Configuración | Clips | Frenados por la puerta | Enviados a Whisper | Acabaron en jugada o comando aceptado |
+| --- | --- | --- | --- | --- |
+| whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18201) · ec2-c7i-flex-r2 · modelo small · con prompt de ajedrez | 20 | 10 | 10 | 0 |
+
+**Clips en total**
+
+| Configuración | Clips | Frenados por la puerta | Enviados a Whisper |
+| --- | --- | --- | --- |
+| whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18201) · ec2-c7i-flex-r2 · modelo small · con prompt de ajedrez | 116 | 10 | 106 |
+
+La latencia de Whisper es optimista: mide solo la inferencia del clip ya grabado más el parser, sin grabación ni transporte HTTP (ver [spike-notes.md](spike-notes.md)).
+
+### whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18201) · ec2-c7i-flex-r2 · modelo small · con prompt de ajedrez
+
+Split evaluado: **test**. Modo elegido: **solo la primera alternativa**.
+
+**Archivos de resultados usados**
+
+| Archivo | Sesión | Idioma | Intentos |
+| --- | --- | --- | --- |
+| 2026-11-14-whisper-small-prompt-ec2-c7i-flex-r2.json | whisper-small-prompt-2026-11-14T17-46-39-624Z | es | 116 |
+
+Parámetros del parser: {"threshold":1,"margin":0.25,"rankPenalty":0.3,"nato":false}. Intentos válidos (V): 78.
+
+**Criterios** (ver [spike-criteria.md](spike-criteria.md))
+
+| Métrica | Umbral | Medido | Estado |
+| --- | --- | --- | --- |
+| Acierto top-1 | ≥ 85 % | 87.2 % (68/78; IC95 78–93 %) | cumple |
+| Aceptación errónea | ≤ 2 % | 0.0 % (0/78; IC95 0–5 %) | cumple |
+| Ambigüedad | ≤ 10 % | 7.7 % (6/78; IC95 4–16 %) | cumple |
+| Latencia p50 | ≤ 1,5 s | 11.21 s (n=78) | no cumple |
+| Latencia p95 | ≤ 3 s | 11.72 s (n=78) | no cumple |
+| Silencio / ruido | 0 aceptadas | 0/38 | cumple |
+
+**Comparación del N-best**
+
+| Modo | Acierto top-1 | Aceptación errónea | Ambigüedad | Nomatch |
+| --- | --- | --- | --- | --- |
+| Solo primera alternativa | 87.2 % (68/78; IC95 78–93 %) | 0.0 % (0/78; IC95 0–5 %) | 7.7 % (6/78; IC95 4–16 %) | 5.1 % (4/78; IC95 2–12 %) |
+| N-best (hasta 5) | 87.2 % (68/78; IC95 78–93 %) | 0.0 % (0/78; IC95 0–5 %) | 7.7 % (6/78; IC95 4–16 %) | 5.1 % (4/78; IC95 2–12 %) |
+
+Ganancia del N-best: 0.0 puntos. No se adopta: el acierto sube menos de 5 puntos.
+
+**Por condición** (informativo; no decide por separado)
+
+| Condición | Intentos V | Acierto top-1 | Aceptación errónea | Ambigüedad | Nomatch |
+| --- | --- | --- | --- | --- | --- |
+| quiet | 39 | 89.7 % (35/39; IC95 76–96 %) | 0.0 % (0/39; IC95 0–9 %) | 7.7 % (3/39; IC95 3–20 %) | 2.6 % (1/39; IC95 0–13 %) |
+| noisy | 39 | 84.6 % (33/39; IC95 70–93 %) | 0.0 % (0/39; IC95 0–9 %) | 7.7 % (3/39; IC95 3–20 %) | 7.7 % (3/39; IC95 3–20 %) |
+
+Comandos reconocidos (informativo): n/d.
+
+**Decisión según la regla del spike:** Acierto ≥ 85 % pero fallan: Latencia p50, Latencia p95. No se da por cumplido: corregir la causa y volver a medir con un test nuevo.
+
