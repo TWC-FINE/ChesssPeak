@@ -228,3 +228,77 @@ Ninguna cifra sale de memoria.
 |---|---|
 | C1–C5 se cumplen | El ADR 12 registra el pool en EC2 detrás del agente |
 | No se cumplen, o se acaba el tiempo | Se terminan las instancias. El balanceo se demuestra con los 3 contenedores locales (plan B), y el ADR 12 lo dice tal cual |
+
+## 7. Adenda del 14 de noviembre: C4 en EC2 como demostración del balanceo
+
+La añade el responsable del repo el 14 de noviembre, **antes de medir C4**, al reabrir EC2.
+
+**No cambia nada de lo anterior:**
+- el texto de la v1;
+- la adenda de EC2 y sus umbrales;
+- el resultado de C1, que sigue siendo **«no cumple»** ([evidencia](evidence/whisper-cloud-ec2/README.md)).
+
+### Motivo
+
+C1 no se cumplió con una instancia: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s. Aun así, el responsable del repo reabre EC2 con un solo objetivo: **demostrar el balanceo entre 2 máquinas reales**, no la velocidad.
+
+- Whisper local y Web Speech no cambian.
+- Whisper en EC2 no se presenta como apto para jugar por voz.
+
+### Montaje
+
+- **Instancias:**
+  - 2 `c7i-flex.large` en `us-east-2`, preparadas con [`whisper-cloud/aws/user-data.sh`](../whisper-cloud/aws/user-data.sh) sin cambios;
+  - un contenedor `small` en cada una, con `--cpus=2 --memory=2g`, publicado solo en `127.0.0.1` de la instancia.
+- **Acceso:**
+  - el mismo grupo de seguridad, con una sola regla: el puerto 22, solo desde la IP del responsable con `/32`;
+  - un par de claves nuevo, con la clave privada fuera del repo.
+- **Túneles:** uno por instancia, con `whisper-cloud/aws/tunnel.ps1 -LocalPort 18201` y `-LocalPort 18202`.
+- **Agente:**
+  - `WHISPER_URLS=http://127.0.0.1:18201,http://127.0.0.1:18202`, así que w1 es la primera instancia y w2 la segunda;
+  - `LB_PROBE_INTERVAL_MS=15000`, como pide la sección 6;
+  - `LB_TIMEOUT_MS=45000`, **solo como variable de entorno**, sin cambiar el código.
+- **Por qué 45 s:**
+  - Tras aislar w2, w1 atiende solo a 2 peticiones simultáneas. La peor espera es una inferencia más la propia, unos 25–28 s con las latencias medidas.
+  - El cliente de carga corta a los 60 s, así que el agente responde antes que él.
+  - El navegador sigue cortando a los 30 s, pero no participa en esta prueba.
+- **Clip:** el WAV por defecto de `load.ts`. Es una grabación del responsable del repo, que da su OK explícito antes de enviarlo en esta prueba.
+- **Entorno:**
+  - desde el equipo del responsable, con la VPN apagada y Docker local apagado, sin usar el equipo;
+  - antes de medir se comprueba por SSH, solo con lectura, que cada contenedor escucha solo en `127.0.0.1` y responde 200 en `/health`.
+
+### Prueba de aislamiento (criterio)
+
+**Concurrencia 2**, igual al número de workers antes de aislar.
+
+Son 3 repeticiones. En cada una:
+
+1. Se lanza la carga: `pnpm --filter @chessspeak/local-agent load --steps 2 --requests 40 --warmup 2 --label ec2-aislamiento-r<n>`.
+2. Cuando `/lb/stats` marca al menos 12 respuestas 200 (las 2 del calentamiento más 10 del escalón), se aísla w2 con `POST /lb/workers/w2/isolate` y se guarda `/lb/stats` justo después: es la **instantánea A**.
+3. Al terminar la carga se guarda `/lb/stats` otra vez: es la **instantánea B**.
+4. Se devuelve w2 con `POST /lb/workers/w2/restore` antes de la siguiente repetición, y se comprueba que vuelve a estar `up`.
+
+| | Qué | Umbral |
+|---|---|---|
+| **I1** | Respuestas 200 del escalón, según el JSON de `load.ts` | **40 de 40** en cada repetición, es decir, **0 perdidas**. Cualquier 502, 503, 504 o error de red cuenta como perdida |
+| **I2** | Peticiones nuevas que recibe w2 después de aislarlo | `B.w2.served − A.w2.served ≤ A.w2.active`: solo terminan las que ya tenía en curso |
+| **I3** | Reparto | Antes de aislar, en A: w1 y w2 han atendido **al menos 4** peticiones cada uno. Después de aislar, entre A y B: w1 atiende **al menos 20** |
+
+- **La latencia se registra, pero no es criterio.** No cambia C1.
+- **Si falla algo** (un túnel se cae, `/health` deja de responder o una repetición termina con error), se para y no se repite a ciegas.
+
+### Coste y tope
+
+- **Coste:** con los precios de la sección 6, cada instancia encendida cuesta unos 0,0915 USD por hora. Las 2 encendidas y olvidadas cuestan unos 4,40 USD al día.
+- **Al terminar cada sesión,** las 2 instancias se paran.
+- **Tope:** el **domingo 15 de noviembre de 2026 a las 22:00 (UTC−5)**. Si a esa hora no hay evidencia de C4 fusionada en `main` con la CI en verde:
+  - se terminan las 2 instancias;
+  - el ADR 12 vuelve a «recortado»;
+  - el balanceo se demuestra con los 3 contenedores locales.
+
+### Decisión
+
+| Resultado | Qué se hace |
+|---|---|
+| I1–I3 se cumplen en las 3 repeticiones | El ADR 12 registra el balanceo entre 2 instancias EC2 detrás del agente, como demostración, con C1 «no cumple» declarado |
+| No se cumplen, o se llega al tope | Se terminan las instancias. El balanceo se demuestra con los 3 contenedores locales, y el ADR 12 lo dice tal cual |
