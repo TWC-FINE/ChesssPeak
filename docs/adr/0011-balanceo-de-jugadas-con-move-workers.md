@@ -1,6 +1,8 @@
 # ADR 11 — Balanceo del guardado de jugadas con un pool de `move-workers`
 
-- **Estado:** Aceptado (5 de noviembre de 2026), **sobre dos supuestos débiles sin confirmar** (a continuación). El puerto `MovePersistence` existe en el PR #13; el pool de `move-workers` no existe todavía.
+- **Estado:** **Sustituido por el [ADR 12](0012-whisper-como-servicio-con-pool-por-urls.md)** (14 de noviembre de 2026). Se había aceptado el 5 de noviembre, sobre dos supuestos débiles sin confirmar (a continuación).
+  - **El pool de `move-workers` no se construyó.** El puerto `MovePersistence` sigue en el código (PR #13), con `MOVE_WORKERS=0` y escritura directa.
+  - El resto de este documento se conserva como registro de la decisión anterior.
 - **Relacionado:** [ADR 1](0001-nestjs-typescript-contratos-en-shared.md) · [ADR 3](0003-postgres-y-mongodb.md) · [ADR 10](0010-balanceo-de-carga-en-local-agent.md) · [ARCHITECTURE.md](../../ARCHITECTURE.md) §2.1
 
 ## Supuestos débiles: leer primero

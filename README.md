@@ -25,7 +25,7 @@ Proyecto final de Arquitectura de Software.
 | `web/` | Shell estático + 3 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`); en local con `pnpm serve:web` o Live Server, y prevista en Vercel |
 | `server/` | NestJS (monolito modular): auth, partidas, métricas de voz, health |
 | `packages/voice-parser/` | Parser de frases habladas a jugadas, TypeScript puro |
-| `local-agent/` | Módulo local en `127.0.0.1:8765`: pool de `whisper-server` (whisper.cpp) con cola, salud, dashboard y prueba de carga ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)) |
+| `local-agent/` | Módulo local en `127.0.0.1:8765`: gateway con cola, salud, dashboard y prueba de carga. Balancea procesos `whisper-server` (whisper.cpp, [ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)) o, con `WHISPER_URLS`, workers por URL como los contenedores de `whisper-cloud/` ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)) |
 | `spike/` | Código de medición: Web Speech, Whisper y la prueba de viabilidad del análisis |
 | `shared/` | Contrato compartido: eventos del socket, eventos `cs:*`, schemas zod |
 
@@ -69,6 +69,16 @@ pnpm --filter @chessspeak/local-agent start              # agente en http://127.
 ```
 
 Después elígelo en el selector de reconocedor de la web. **Este camino aún no se ha probado con el Whisper real ni con voz real.**
+
+**Whisper en 3 contenedores, para la demo del balanceo (opcional, necesita Docker Desktop):**
+
+```bash
+docker compose -f whisper-cloud/compose.local.yml up -d     # construye la imagen la primera vez (descarga whisper.cpp y el modelo)
+WHISPER_URLS=http://127.0.0.1:18101,http://127.0.0.1:18102,http://127.0.0.1:18103 pnpm --filter @chessspeak/local-agent start
+docker compose -f whisper-cloud/compose.local.yml down      # al terminar
+```
+
+El dashboard (`/lb/dashboard`) permite aislar y devolver cada worker. Detalle en [docs/load-balancing.md](docs/load-balancing.md), sección 9.
 
 **Pruebas:** `pnpm verify` no necesita Docker. `pnpm smoke:web` comprueba que los microfrontends cargan. `pnpm e2e:web` juega partidas completas en Edge o Chrome, con un reconocedor y un agente falsos: demuestra el flujo, no el reconocimiento.
 
@@ -119,6 +129,8 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 | Flujo de voz, confirmación, telemetría e historial | Probado con un reconocedor falso |
 | Web Speech con voz real en el producto | **Prueba manual el 8 de noviembre de 2026,** con una sola voz (la del responsable del repo), en <https://chessspeak.vercel.app> y en la web local. Partida con dos pestañas, por voz y por texto, con confirmación y recarga a mitad de partida: todo correcto. Ya había una primera prueba del 7 de noviembre sobre `5ed174b`. No sustituye la validación con otra persona. Las cifras del spike son de un arnés de medición y de una sola voz: no son cifras del producto |
 | Whisper real desde el navegador | **Prueba manual el 8 de noviembre de 2026,** con una sola voz, en la web local y en la pública. El agente corría en `127.0.0.1:8765`, con la URL de Vercel en `AGENT_ALLOWED_ORIGINS`: funciona. El dashboard mostró 24 peticiones con 200 y sin errores, por ejemplo de 1,87 a 1,97 s por transcripción en el equipo del responsable del repo. Esos tiempos son orientativos, no una medición formal, y se tomaron con Docker encendido. Se nota más retraso que con Web Speech, como se esperaba. **No consta** si Edge mostró el aviso de permiso de red local |
+| Balanceo de Whisper por URLs con 3 contenedores locales | **Medido el 14 de noviembre de 2026** con un criterio fijado antes de medir: aislar un worker con concurrencia 2 no perdió ninguna petición en 3 de 3 repeticiones. Todo en un solo equipo. Al aislarlo, el worker no tenía peticiones en curso ([evidencia](docs/evidence/url-pool-phase-c/README.md), [ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)) |
+| Whisper en AWS EC2 | **Sin probar:** no se ha lanzado ninguna instancia. Diseño en la adenda de [docs/whisper-cloud-criteria.md](docs/whisper-cloud-criteria.md) |
 | Despliegue en Render, Neon, Atlas y Vercel | **Desplegado.** Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>, las dos sobre `2c48755`. Verificado desde fuera el 8 de noviembre de 2026: `/health` con las dos bases en `up`, HTTPS válido en las dos URL, CORS solo para el origen de Vercel, y la web carga sus tres microfrontends sin pedir nada a otros hosts |
 | Partida por la API desplegada | **Probado el 8 de noviembre** con un script desde fuera: dos invitados, `POST /games` y Socket.IO por `wss`. Cuatro jugadas llegaron a los dos lados. En Edge sin interfaz, la web publicada entra como invitado y conecta por `wss`. Tras dormirse Render, al volver a entrar la partida se reconstruyó con sus jugadas (Mongo) y su resultado (Postgres) |
 | Dos navegadores reales contra la nube | **Sin probar** |

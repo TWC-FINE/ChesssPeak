@@ -6,7 +6,7 @@
 
 ChessSpeak permite jugar ajedrez diciendo las jugadas en voz alta. Una de sus dos formas de reconocer la voz es **Whisper local**: el navegador envía un clip WAV a un agente en `127.0.0.1:8765`, que lo transcribe en la CPU de la propia máquina. Cada transcripción consume varios segundos de CPU y no guarda estado, así que es el proceso crítico que elegimos balancear.
 
-**Límite que hay que tener presente:** en una partida real este balanceador ve **una petición a la vez**, porque los turnos alternan y cada jugador tiene su propio agente. Las escaleras de carga de este documento son **sintéticas**. Por eso `LB_WORKERS` vale 1 por defecto. El caso con carga natural que se evaluó, un análisis post-partida con Stockfish, no pasó su prueba: [analysis-gate.md](analysis-gate.md). **No está confirmado que este balanceador cumpla por sí solo el requisito:** ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre) y el [ADR 11](adr/0011-balanceo-de-jugadas-con-move-workers.md).
+**Límite que hay que tener presente:** en una partida real este balanceador ve **una petición a la vez**, porque los turnos alternan y cada jugador tiene su propio agente. Las escaleras de carga de este documento son **sintéticas**. Por eso `LB_WORKERS` vale 1 por defecto. El caso con carga natural que se evaluó, un análisis post-partida con Stockfish, no pasó su prueba: [analysis-gate.md](analysis-gate.md). **No está confirmado que este balanceador cumpla por sí solo el requisito:** ver la [revisión del ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md#revisión-del-5-de-noviembre). **Desde el 14 de noviembre la decisión vigente es el [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md):** Whisper como servicio, balanceado por URLs. Ver la [sección 9](#9-modo-por-urls-con-contenedores-adr-12). El ADR 11 quedó sustituido.
 
 Comparamos dos configuraciones con los mismos 12 hilos de CPU y la misma cola:
 
@@ -273,3 +273,35 @@ Pruebas funcionales en el mismo equipo de la sección 3, en sesiones aparte de l
 - Se mide un solo clip repetido. La latencia real varía con la duración de cada frase.
 - La latencia medida es la de extremo a extremo del agente (cola + transcripción), sin la grabación ni la red del navegador.
 - El reconocedor por defecto de la aplicación es Web Speech. Whisper, y por tanto este balanceo, es la alternativa local y exige instalar el agente.
+
+## 9. Modo por URLs con contenedores (ADR 12)
+
+Desde el 14 de noviembre, el mismo `local-agent` puede balancear workers que ya están en marcha en lugar de arrancar procesos. La decisión está en el [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md). Las secciones 1 a 8 siguen describiendo el modo por procesos, que es el valor por defecto.
+
+| Pieza | Modo por URLs |
+|---|---|
+| Instancias | Contenedores de la imagen [`whisper-cloud/Dockerfile`](../whisper-cloud/Dockerfile) (`small`, whisper.cpp `d1be6fd`), 3 en [`compose.local.yml`](../whisper-cloud/compose.local.yml), con 2 CPU y 2 GB cada uno, en `127.0.0.1:18101-18103` |
+| Conexión | `WHISPER_URLS`. «Arrancar» un worker es sondear su `/health` hasta que responda, con un plazo (`LB_CONNECT_TIMEOUT_MS`) |
+| Fallos | Un worker caído se detecta con los sondeos o con una petición fallida, que se reintenta una vez en otro worker. Tras `LB_RECONNECT_MAX` conexiones fallidas seguidas, deja de intentarlo |
+| Demo de fallo | Aislar y devolver, desde el dashboard o con `POST /lb/workers/:id/isolate` y `/restore`. Devolver da otra ronda completa de reconexiones. «Matar» responde 409, porque no hay proceso propio |
+| Fuera del equipo | Sondeo y reconexión como mucho cada 15 s, y solo https |
+
+**Cómo arrancarlo:**
+
+```bash
+docker compose -f whisper-cloud/compose.local.yml up -d --no-build   # la imagen se construye la primera vez sin --no-build
+WHISPER_URLS=http://127.0.0.1:18101,http://127.0.0.1:18102,http://127.0.0.1:18103 pnpm --filter @chessspeak/local-agent start
+docker compose -f whisper-cloud/compose.local.yml down               # al terminar
+```
+
+**Medición de la fase C (14 de noviembre),** con el [criterio v1](url-pool-criteria.md) fijado antes de medir y la [evidencia](evidence/url-pool-phase-c/README.md). Se hizo con Docker encendido, las bases paradas y solo los 3 contenedores en marcha.
+
+- **Aislamiento con concurrencia 2:** I1–I3 se cumplen en 3 de 3 repeticiones. Cada una tuvo 40 de 40 respuestas 200, y w2 no recibió nada nuevo después de aislarlo.
+  - **Salvedad:** w2 no tenía ninguna petición en curso al aislarlo, así que «lo que tenía en curso termina» solo lo cubre el test unitario.
+- **Medición informativa con concurrencia 4 y 3 workers:** aparecieron 504, como preveía el criterio, porque una petición siempre espera en cola. No tiene umbral, y sus cifras no son rendimiento.
+
+**Límites:**
+
+- Todo corrió en un solo equipo.
+- Los contenedores comparten su CPU y su RAM.
+- **AWS EC2 sigue sin probarse.**
