@@ -1,0 +1,96 @@
+{
+  "label": "ec2-aislamiento-r1",
+  "startedAt": "2026-11-14T19:15:28.341Z",
+  "finishedAt": "2026-11-14T19:22:06.334Z",
+  "environment": {
+    "platform": "win32",
+    "release": "10.0.19045",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "logicalCores": 12,
+    "totalMemoryMB": 16222,
+    "freeMemoryMBAtStart": 8235,
+    "node": "v24.20.0"
+  },
+  "agent": {
+    "url": "http://127.0.0.1:8765/transcribe",
+    "strategy": "least-connections",
+    "workers": 2,
+    "threadsPerWorker": null,
+    "workerConcurrency": 1,
+    "queueMax": 8,
+    "timeoutMs": 45000,
+    "model": "small"
+  },
+  "config": {
+    "wav": "spike/recordings/p05-01_quiet_r1_runB.wav",
+    "wavBytes": 78124,
+    "steps": [
+      2
+    ],
+    "requestsPerStep": 40,
+    "maxErrorRate": 0.05,
+    "requestTimeoutMs": 60000,
+    "warmup": 2
+  },
+  "result": {
+    "breakingPoint": null,
+    "maxStableConcurrency": 2
+  },
+  "steps": [
+    {
+      "concurrency": 2,
+      "requests": 40,
+      "durationMs": 384493,
+      "rps": 0.1,
+      "okRps": 0.1,
+      "counts": {
+        "200": 40,
+        "503": 0,
+        "504": 0,
+        "other": 0,
+        "error": 0
+      },
+      "errorRate": 0,
+      "latencyMs": {
+        "p50": 22477,
+        "p95": 22806,
+        "max": 22818,
+        "mean": 18938
+      },
+      "allLatencyMs": {
+        "p50": 22477,
+        "p95": 22806
+      },
+      "workers": {
+        "w1": 34,
+        "w2": 6
+      },
+      "broken": false
+    }
+  ],
+  "agentTotals": {
+    "before": {
+      "200": 0,
+      "502": 0,
+      "503": 0,
+      "504": 0
+    },
+    "after": {
+      "200": 42,
+      "502": 0,
+      "503": 0,
+      "504": 0
+    }
+  },
+  "workerRestarts": [
+    {
+      "id": "w1",
+      "restarts": 0
+    },
+    {
+      "id": "w2",
+      "restarts": 0
+    }
+  ]
+}

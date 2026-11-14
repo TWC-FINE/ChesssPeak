@@ -1,0 +1,7 @@
+Corrida: ec2-aislamiento-r2
+Fecha: 2026-11-14 14:22:07 -05:00
+RAM libre en el equipo del responsable: 8,326 MB
+VPN: apagada (confirmado por el responsable)
+Docker local: apagado (sin proceso de Docker Desktop)
+Destino: 2 instancias EC2 c7i-flex.large (us-east-2) a través de túneles SSH en 127.0.0.1:18201 (w1) y 127.0.0.1:18202 (w2)
+Agente: modo URLs, LB_TIMEOUT_MS=45000, LB_PROBE_INTERVAL_MS=15000; no se reinicia entre corridas

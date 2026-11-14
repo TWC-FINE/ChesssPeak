@@ -1,0 +1,11 @@
+Carga contra http://127.0.0.1:8765/transcribe · ec2-aislamiento-r3
+Agente: 2 worker(s), ? hilo(s) cada uno, estrategia least-connections
+Equipo: 12th Gen Intel(R) Core(TM) i5-12400F, 12 hilos, 16222 MB de RAM
+WAV: spike/recordings/p05-01_quiet_r1_runB.wav (78124 bytes) · 40 peticiones por escalón · quiebre si error > 5 %
+Calentamiento: 2 petición(es) que no cuentan…
+
+conc   rps  ok/s   p50 ms   p95 ms    200  503  504 otro  red  error  reparto
+   2   0.1   0.1    22369    22680     40    0    0    0    0  0.0 %  w1:34 w2:6
+
+Aguantó todos los escalones (máximo estable: 2 simultáneas).
+Reporte: <carpeta-de-salida>\load-2026-11-14T19-28-46-223Z-ec2-aislamiento-r3.json
