@@ -304,4 +304,4 @@ docker compose -f whisper-cloud/compose.local.yml down               # al termin
 
 - Todo corrió en un solo equipo.
 - Los contenedores comparten su CPU y su RAM.
-- **AWS EC2 se midió el 14 de noviembre y se recortó:** C1 no cumple ([evidencia](evidence/whisper-cloud-ec2/README.md)).
+- **AWS EC2, el 14 de noviembre:** con una instancia, C1 no cumple ([evidencia](evidence/whisper-cloud-ec2/README.md)). Con 2, C4 cumple con 2 instancias: el balanceo entre 2 máquinas, con 0 peticiones perdidas al aislar una a mitad de carga ([evidencia](evidence/whisper-cloud-ec2-c4/README.md)).

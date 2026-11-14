@@ -5,10 +5,11 @@
   - **AWS EC2 se probó y se recortó el 14 de noviembre.** Con una instancia `c7i-flex.large`, C1 no cumple: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s.
   - **Reabierto el 14 de noviembre, por decisión del responsable del repo, solo como demostración del balanceo:** 2 instancias detrás del agente. **Motivo:** mostrar el reparto entre 2 máquinas reales, que los contenedores locales no pueden mostrar. C1 sigue siendo «no cumple». El criterio de C4 se fijó antes de medir ([sección 7 de los criterios](../whisper-cloud-criteria.md#7-adenda-del-14-de-noviembre-c4-en-ec2-como-demostración-del-balanceo)).
   - **Tope:** el domingo 15 de noviembre a las 22:00 (UTC−5). Si no hay evidencia de C4 fusionada con la CI en verde, se terminan las instancias y el balanceo vuelve a los 3 contenedores locales.
+  - **C4 se cumplió el 14 de noviembre con 2 instancias:** I1–I3 en 3 de 3 repeticiones y 0 peticiones perdidas al aislar una instancia a mitad de carga ([evidencia](../evidence/whisper-cloud-ec2-c4/README.md)). Es el balanceo entre 2 máquinas reales. C1 sigue sin cumplirse.
 - **Relacionado:**
   - [ADR 5](0005-strategy-y-reconocedor-por-defecto.md) · [ADR 10](0010-balanceo-de-carga-en-local-agent.md) · [ADR 11](0011-balanceo-de-jugadas-con-move-workers.md) (sustituido)
   - [Criterios de Whisper en la nube](../whisper-cloud-criteria.md), con la adenda de EC2 y la de C4 (sección 7) · [Criterios de la fase C](../url-pool-criteria.md)
-  - Evidencia: [fase A](../evidence/whisper-cloud-phase-a/README.md) · [fase C](../evidence/url-pool-phase-c/README.md) · [EC2](../evidence/whisper-cloud-ec2/README.md)
+  - Evidencia: [fase A](../evidence/whisper-cloud-phase-a/README.md) · [fase C](../evidence/url-pool-phase-c/README.md) · [EC2](../evidence/whisper-cloud-ec2/README.md) · [C4 en EC2](../evidence/whisper-cloud-ec2-c4/README.md)
 
 ## Contexto
 
@@ -36,7 +37,7 @@
    - Las URL que salen del equipo se sondean y se reconectan como mucho cada 15 s, y tienen que usar https.
    - Fuera de la propia máquina, `http` solo se acepta en loopback.
 5. **Workers probados:** 3 contenedores locales, definidos en [`whisper-cloud/compose.local.yml`](../../whisper-cloud/compose.local.yml), con 2 CPU y 2 GB cada uno, en `127.0.0.1:18101-18103`. Son el plan B del balanceo y la base de la demo.
-6. **EC2 se probó con una instancia y se recortó** ([adenda](../whisper-cloud-criteria.md), [evidencia](../evidence/whisper-cloud-ec2/README.md)), porque C1 no cumple. **El 14 de noviembre se reabre solo para demostrar el balanceo**, con 2 instancias y C4 como criterio (sección 7 de los criterios). No se presenta como apto para jugar por voz. El diseño:
+6. **EC2 se probó con una instancia y se recortó** ([adenda](../whisper-cloud-criteria.md), [evidencia](../evidence/whisper-cloud-ec2/README.md)), porque C1 no cumple. **El 14 de noviembre se reabre solo para demostrar el balanceo**, con 2 instancias y C4 como criterio (sección 7 de los criterios). **C4 se cumplió** ([evidencia](../evidence/whisper-cloud-ec2-c4/README.md)). No se presenta como apto para jugar por voz. El diseño:
    - Cada instancia lleva un worker. El agente las usa con `WHISPER_URLS=http://127.0.0.1:18201,http://127.0.0.1:18202`, `LB_PROBE_INTERVAL_MS=15000` y `LB_TIMEOUT_MS=45000`, solo como variables de entorno.
    - El agente llega a cada worker por un túnel SSH. El grupo de seguridad solo abre el puerto 22, solo para la IP del responsable con `/32`, y la clave privada se queda fuera del repo.
    - El puerto de Whisper no se abre a internet.
@@ -59,14 +60,25 @@
   | **C2** | primer clip tras `/health` 200 ≤ 30 s | 11,52 s | Cumple |
   | **C1** | p95 de la peor de 3 repeticiones ≤ 7,5 s | 13,59 s; las otras dos, 11,72 y 11,68 s | **No cumple: se recorta la nube** (más de 9,0 s) |
   | **C3** | ≥ 68/78 en cada repetición | 68, 68 y 68 | Cumple, justo en el umbral |
-  | **C4** | 2 instancias | — | No medido |
+  | **C4** | 2 instancias | — | No medido con una instancia; ver abajo |
 
   La latencia dobla la de la fase A en local. **Causa probable, no confirmada:** las vCPU de las instancias «flex». No se midieron por separado la red, el túnel ni la CPU de la instancia.
+- **C4 en EC2 (sección 7 de los criterios, 14 de noviembre):** 2 `c7i-flex.large` detrás del agente, a través de 2 túneles SSH, con concurrencia 2 y aislando w2 a mitad de carga ([evidencia](../evidence/whisper-cloud-ec2-c4/README.md)).
+
+  | | Umbral | Medido en cada una de las 3 repeticiones | Resultado |
+  |---|---|---|---|
+  | **I1** | 40 de 40 respuestas 200 | 40 de 40, y 0 respuestas 502, 503 o 504 y 0 errores | Cumple |
+  | **I2** | w2 no recibe peticiones nuevas tras aislarlo | 1 terminada, que ya tenía en curso | Cumple |
+  | **I3** | Hasta A, al menos 4 cada uno; de A a B, w1 al menos 20 | 6 y 6; 29 | Cumple |
+
+  - **A diferencia de la fase C,** w2 tenía una petición en curso al aislarlo y la terminó.
+  - **El agente no se reinició entre repeticiones.** El umbral de 12 respuestas y las cuentas de I3 se calculan respecto a una instantánea tomada al empezar cada repetición.
+  - **Latencia, informativa:** p50 de unos 22,4 s y p95 de unos 22,7 s, porque tras aislar w2, w1 atiende las 2 peticiones en serie. No es cifra de rendimiento y no cambia C1.
 
 ## Qué no está probado
 
-- **Balanceo en la nube:** C4, con 2 instancias, no se midió, porque C1 ya había fallado con una. C5, el gasto, lo comprueba el responsable del repo en la consola de facturación de AWS.
-- **Varias máquinas:** todo lo medido corrió en un solo equipo. La objeción del profesor sobre los procesos locales vale también para contenedores en una sola máquina. Hay que decirlo al presentar.
+- **C5, el gasto:** lo comprueba el responsable del repo en la consola de facturación de AWS.
+- **Varias máquinas:** C4 mostró el reparto y el aislamiento entre 2 instancias EC2, pero **no demuestra escalado ni velocidad**, porque C1 no cumple. Lo medido en local corrió en un solo equipo, y la objeción del profesor sobre los procesos locales vale también para contenedores en una sola máquina. Hay que decirlo al presentar.
 - **La demo depende de Docker Desktop,** que el ADR 10 había descartado precisamente por eso. El modo por procesos sigue disponible como salida.
 - **En una partida real** el balanceador recibe una petición cada vez. Toda la carga medida es sintética.
 
@@ -84,5 +96,6 @@
 - (+) El navegador y el servidor no cambian, y el modo por procesos sigue como salida.
 - (−) En local todo comparte una máquina, así que no demuestra escalado.
 - (−) La demo con contenedores necesita Docker Desktop encendido. Además, 3 contenedores pueden usar hasta 6 de los 12 hilos y unos 2–3 GB de RAM.
-- (−) EC2 no cumplió C1. Si C4 no se demuestra antes del tope, el balanceo no sale del equipo: se demuestra solo con contenedores en una misma máquina, y hay que decirlo al presentar.
+- (+) C4 mostró el balanceo entre 2 máquinas reales en la nube, con 0 peticiones perdidas al aislar una instancia a mitad de carga.
+- (−) EC2 no cumplió C1: cada clip tarda el doble que en local, y Whisper en la nube no sirve para jugar por voz.
 - (−) La reapertura cuesta dinero y tiempo antes de la entrega. Depende de 2 túneles SSH y de la IP `/32` del responsable, y en EC2 cada clip tarda el doble que en local.

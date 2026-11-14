@@ -11,7 +11,7 @@
   - #41: el pool por URLs, con aislar y devolver.
   - #43 y #44: el criterio y la medición con 3 contenedores locales, con 0 peticiones perdidas al aislar un worker en 3 de 3 repeticiones.
   - #45: el ADR 12.
-  - **AWS EC2: preparado en #46 (`whisper-cloud/aws/`), medido el 14 de noviembre y recortado.** C1 no cumple: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s. C2 y C3 cumplen y C4 no se midió ([evidencia](evidence/whisper-cloud-ec2/README.md)).
+  - **AWS EC2: preparado en #46 (`whisper-cloud/aws/`) y medido el 14 de noviembre.** Con una instancia, C1 no cumple: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s. C2 y C3 cumplen ([evidencia](evidence/whisper-cloud-ec2/README.md)). Tras reabrirlo, C4 cumple con 2 instancias: el balanceo entre 2 máquinas, con 0 peticiones perdidas al aislar una a mitad de carga ([evidencia](evidence/whisper-cloud-ec2-c4/README.md)).
   - El pool de `move-workers` no se construyó.
 - **Hecho también:** el C4, niveles 1 y 2 ([c4.md](c4.md), #49).
 - **Falta:** `docs/quality.md` con la validación, el ADR 9, el README probado en una máquina limpia, el ensayo, el video de respaldo y el tag. La lista ordenada está en [proximos-pasos.md](proximos-pasos.md).
@@ -26,7 +26,7 @@
 3. **Se nota más retraso con Whisper** que con Web Speech, como se esperaba.
 4. **Permiso de red local de Edge:** no consta si apareció el aviso.
 
-**Sigue sin probar:** la validación con otra voz, el dominio propio, Chrome y el límite por IP desde otra red. AWS EC2 se midió y se recortó. `trust proxy` falló, y #37 lo corrigió (ver «Verificación del despliegue»).
+**Sigue sin probar:** la validación con otra voz, el dominio propio, Chrome y el límite por IP desde otra red. AWS EC2 se midió: C1 no cumple y C4 cumple. `trust proxy` falló, y #37 lo corrigió (ver «Verificación del despliegue»).
 
 **En resumen, al 6 de noviembre (sustituido por el bloque del 14 de noviembre):** dos invitados podían jugar una partida completa escribiendo, en Edge, con servidor local. Entonces faltaban la prueba con voz real, el Whisper real y el despliegue, que ya están hechos. Siguen faltando la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
 
@@ -104,7 +104,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | **Dos bases de datos** | **Hecho en local; Neon y Atlas, desplegados el 8 de noviembre** y en `up` según `/health` | Partidas y jugadas en #12 y #13. `voice_attempts` en #25, con integración contra Mongo real |
 | **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
 | **Microfrontends** | **Hecho en local** | Los 3 son reales: `<mf-game>` (#14), `<mf-voice-input>` (#26, #27 y #29) y `<mf-history>` (#28). `smoke:web` y `e2e:web` |
-| **Balanceo** | **Whisper como servicio por URLs (ADR 12): hecho y medido con 3 contenedores locales. Cumplimiento sin confirmar. AWS EC2: medido y recortado (C1 no cumple)** | Pool por procesos y dashboard (#6, ADR 10). Pool por URLs con aislar y devolver (#41), criterio y medición (#43, #44), ADR 12 (#45), experimento EC2 preparado (#46) y medido el 14 de noviembre. El ADR 11 quedó sustituido, y el pool de `move-workers` no se construyó |
+| **Balanceo** | **Whisper como servicio por URLs (ADR 12): hecho y medido con 3 contenedores locales. Cumplimiento sin confirmar. AWS EC2: C1 no cumple con una instancia; C4 cumple con 2** | Pool por procesos y dashboard (#6, ADR 10). Pool por URLs con aislar y devolver (#41), criterio y medición (#43, #44), ADR 12 (#45), experimento EC2 preparado (#46) y medido el 14 de noviembre. El ADR 11 quedó sustituido, y el pool de `move-workers` no se construyó |
 | **Dominio** | **Registrado y delegado; aún no funciona. En espera del profesor** | `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*, `REFUSED`, comprobado el 6 de noviembre). Mínimo garantizado: la URL `vercel.app`, publicada desde el 8 de noviembre |
 
 **Criterios de aceptación de `SPEC.md` §6:**
@@ -126,7 +126,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | **0. Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos, `serve:web`, CI, esquemas, `/health`, contrato (#3) y despliegue en Neon, Atlas, Render y Vercel (8 de noviembre) | Nada | Nada | ADR 9 |
 | **1. Partida entre invitados** | `local-agent`, `GameRoom`, auth y ADR 8, `POST /games`, gateway, guardado y ADR 7, shell, `<mf-game>` y caja de texto | Nada | Nada | Nada |
 | **2. Voz de punta a punta** | Parser, fin de partida, reconexión, Web Speech, adaptador Whisper, `voice-metrics`, telemetría, `<mf-history>` real, aviso sin Web Speech, latencia declarada y ADR 6. Prueba manual con voz real (una sola voz) | Nada | Nada | Validación con otra voz |
-| **3. Validación y entrega** | Balanceo por URLs medido con contenedores locales y ADR 12 (#41 a #45). Experimento EC2 preparado (#46), medido y recortado. C4 niveles 1 y 2 (#49) | Nada | Kit para la otra laptop (sin resultados) | `docs/quality.md`, 40 frases, validación, ensayos, clon nuevo, video, `web/dist` en la entrega, tag `v1.0` |
+| **3. Validación y entrega** | Balanceo por URLs medido con contenedores locales y ADR 12 (#41 a #45). Experimento EC2 preparado (#46) y medido: C1 no cumple y C4 cumple. C4 niveles 1 y 2 (#49) | Nada | Kit para la otra laptop (sin resultados) | `docs/quality.md`, 40 frases, validación, ensayos, clon nuevo, video, `web/dist` en la entrega, tag `v1.0` |
 
 **Llegó a `main` con #16:** ADR 11, revisión del ADR 10 y ADR 1, supuestos, evidencia de carga, kit y este archivo. **Pool de `move-workers`:** no se construyó; el ADR 12 (#45) sustituyó al ADR 11.
 
@@ -155,7 +155,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 19 | Commit de entrega con `web/dist` y tag `v1.0` | Responsable del repo decide; Claude lo prepara |
 | 20 | Dominio: esperar a que el profesor lo agregue en el hosting y, cuando deje de rechazar consultas, conectarlo. No registrar otro ni cambiar los nameservers | Responsable del repo |
 | 21 | Borrar las 2 partidas de prueba de la base local (comandos en `proximos-pasos.md`) | Responsable del repo |
-| 22 | Hecho el 14 de noviembre: experimento con una instancia EC2. C1 no cumple, así que AWS se recorta. Queda la limpieza: parar la instancia y, según la tabla de decisión de la adenda, terminarla con su volumen, siguiendo la sección 7 de `whisper-cloud/aws/README.md`. Comprobar el gasto (C5) en la consola de facturación | Responsable del repo |
+| 22 | Hecho el 14 de noviembre: EC2 con una instancia (C1 no cumple) y, tras reabrirlo, C4 con 2 instancias (cumple). Queda: parar las 2 instancias entre sesiones y terminarlas, con sus volúmenes, después de la entrega (sección 7 de `whisper-cloud/aws/README.md`). Decidir si EC2 se usa en la demo en vivo. Comprobar el gasto (C5) en la consola de facturación | Responsable del repo |
 
 **Antes de cualquier medición, hay que apagar Docker y registrar su estado.** Claude no empieza una medición sin avisar. **Al actualizar este documento, Docker no respondía y parecía apagado: hay que comprobarlo antes de medir.**
 
@@ -188,7 +188,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 2. ✅ **Despliegue** en Render, Neon, Atlas y Vercel (8 de noviembre).
 3. ✅ **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
 4. ✅ **Adaptador de Whisper local.**
-5. ✅ **Balanceo:** el ADR 12 sustituye al pool de `move-workers`, medido con contenedores locales. EC2 se midió el 14 de noviembre y se recortó, porque C1 no cumple.
+5. ✅ **Balanceo:** el ADR 12 sustituye al pool de `move-workers`, medido con contenedores locales. En EC2, el 14 de noviembre, C1 no cumple con una instancia, y C4 cumple con 2.
 6. **Cierre (pendiente):**
    - validación con otra voz; sin otra voz, se hace con la del responsable del repo y se declara en `docs/quality.md`;
    - ✅ C4 niveles 1 y 2 (#49);
@@ -203,7 +203,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 3. Repetición de la carga de Whisper.
 
 El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se llegara a recortar:**
-- **EC2 recortado el 14 de noviembre (C1 no cumple):** el balanceo queda demostrado solo con contenedores en un mismo equipo (ADR 12), y hay que decirlo al presentar.
+- **EC2 (14 de noviembre):** C1 no cumple, pero C4 demostró el balanceo entre 2 instancias. Si al final no se usa EC2, la demo en vivo del balanceo corre en un mismo equipo, y hay que decirlo al presentar.
 
 **Sin definir:** quién aporta la otra voz, de dónde sale la segunda laptop, cuál es la máquina limpia del README, hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
 
@@ -246,7 +246,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **Postgres 18 en Neon sin CI** | **Abierto.** Según el responsable del repo, Neon corre Postgres 18 y tiene aplicadas las dos migraciones; la CI y Docker usan `postgres:17`. La partida de prueba del 8 de noviembre funcionó contra Neon, pero ninguna prueba automática corre contra 18 |
 | **`0.0.0.0/0` en Atlas** | **Aceptado** (`docs/deploy.md`, «Riesgos»): Render gratuito no tiene IP fija |
 | **Chrome sin medir** | **Abierto, recortable.** Si la entrega la abre otra persona, puede ser en Chrome |
-| **Balanceo sin aceptación** | **Abierto.** El ADR 12 balancea Whisper como servicio por URLs, medido con 3 contenedores locales, todos en un mismo equipo. Esa objeción del profesor a lo local sigue en pie. AWS EC2 se midió con una instancia el 14 de noviembre y se recortó porque C1 no cumple, así que el balanceo no sale del equipo. No se demostró mejora de rendimiento: el beneficio medido es aislar un worker sin perder peticiones |
+| **Balanceo sin aceptación** | **Abierto.** El ADR 12 balancea Whisper como servicio por URLs, medido con 3 contenedores locales, todos en un mismo equipo. Esa objeción del profesor a lo local sigue en pie. En AWS EC2, C1 no cumple con una instancia, pero C4 mostró el reparto y el aislamiento entre 2 instancias, sin perder peticiones. No se demostró mejora de rendimiento: el beneficio medido es aislar un worker sin perder peticiones |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
 | **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15), las 6 fusiones de la cadena (`9a566aa`, `8f32cfc`, `05fd7a6`, `9d1bb44`, `de79815` y `311c0fa`), los *squash* de #16 (`af163bd`), #17 (`76b0dfe`), #18 (`9db85f6`), #19 (`23e4bcc`), #20 (`cd68b5a`), #21 (`579e14e`), #22 (`86044bc`), #23 (`76c4e04`), #24 (`12d39a1`), #25 (`ad1b178`), #26 (`7471bf3`), #27 (`5ed174b`), #28 (`c91e51b`), #29 (`ea21e65`) y #30 (`9567ca5`), y los 33 commits de la cadena. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta. Se aceptó así para las 5 fusiones restantes, y los *squash* hechos con `gh` también lo llevan |

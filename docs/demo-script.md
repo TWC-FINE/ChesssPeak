@@ -29,9 +29,9 @@ Para la demo en vivo de la entrega del 19 de noviembre de 2026, en **Edge**, con
 | 4:00–5:00 | **Recargar la ventana A** a mitad de partida | La partida se reconstruye desde Mongo, con las jugadas y el turno | Criterio 3 |
 | 5:00–6:00 | A cambia el reconocedor a **Whisper local** y dice **«ge cuatro»** → confirmar | Whisper corre en el equipo, en `local-agent` (`127.0.0.1:8765`), y el audio no sale de la máquina. Tarda más que Web Speech | R2, criterio 2 |
 | 6:00–6:45 | B, con Web Speech: **«dama hache cuatro»** → confirmar. **Mate** | El servidor valida cada jugada en UCI y detecta el fin de partida. **El servidor no sabe nada de voz** | Criterio 1 |
-| 6:45–8:45 | Abrir `/lb/dashboard`. En una terminal, lanzar la carga (sección 5). Con la carga en marcha, pulsar **«Aislar»** en w2. Mostrar que w1 y w3 siguen atendiendo y que no hay 502, 503 ni 504. Después, **«Devolver»** w2 | Whisper como servicio, balanceado por URLs con conexiones mínimas (ADR 12). Aislar saca un worker sin perder peticiones: se midió con 0 perdidas en 3 de 3 repeticiones. **Todo corre en un solo equipo: AWS EC2 se midió y se recortó, porque su latencia superó el umbral** | R8 |
+| 6:45–8:45 | Abrir `/lb/dashboard`. En una terminal, lanzar la carga (sección 5). Con la carga en marcha, pulsar **«Aislar»** en w2. Mostrar que w1 y w3 siguen atendiendo y que no hay 502, 503 ni 504. Después, **«Devolver»** w2 | Whisper como servicio, balanceado por URLs con conexiones mínimas (ADR 12). Aislar saca un worker sin perder peticiones: se midió con 0 perdidas en 3 de 3 repeticiones. **Aquí todo corre en un solo equipo.** Aparte, C4 demostró el balanceo entre 2 instancias EC2, aunque su latencia no cumple C1 | R8 |
 | 8:45–9:30 | Atlas: los últimos `voice_attempts` (`recognizer`, `transcript`, `outcome`, `accepted`, `latency.totalMs`) y `game_moves` de la partida. Neon: la consulta de la sección 5 | Telemetría por intento, sin audio; `player` lo pone el servidor. Dos bases: partidas en Postgres, y jugadas y telemetría en Mongo | R5, criterio 5 |
-| 9:30–10:00 | Cierre: repo público con CI en verde, ADR y limitaciones | Limitaciones, sin rodeos: una sola voz, balanceo en un equipo, EC2 medido y recortado (latencia por encima del umbral) | R6 |
+| 9:30–10:00 | Cierre: repo público con CI en verde, ADR y limitaciones | Limitaciones, sin rodeos: una sola voz, balanceo de la demo en un equipo, y EC2 con el balanceo demostrado (C4) pero la latencia por encima del umbral (C1) | R6 |
 
 **Versión corta, unos 5 minutos:** minutos 1:00–3:30, después 5:00–6:45 y por último la parte del dashboard sin la carga, aislando w2 en reposo.
 
@@ -93,5 +93,5 @@ En Atlas, colección `voice_attempts`, filtro `{ gameId: "<id de la partida>" }`
 
 - **Que la voz acierta siempre.** En el spike, Web Speech con 400 ms acertó el 87,2 %, con una sola voz: puede fallar 1 de cada 8 frases. La confirmación existe por eso.
 - **Que el balanceo da más rendimiento.** No se demostró. Lo medido es que aislar un worker no pierde peticiones, en un solo equipo.
-- **Que el balanceo corre en la nube.** AWS EC2 se midió el 14 de noviembre y se recortó: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s.
+- **Que Whisper en la nube sirve para jugar.** En EC2, el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s (C1). Lo que sí se demostró es el reparto entre 2 instancias sin perder peticiones (C4).
 - **Que la validación con otra voz está hecha,** salvo que `docs/quality.md` ya lo registre.
