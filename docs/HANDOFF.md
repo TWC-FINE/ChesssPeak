@@ -45,6 +45,12 @@
 | `feat/mf-history` | `66984ca` | `66984ca` | PR #28, fusionado con *squash* en `c91e51b` |
 | `feat/whisper-adapter` | `d9f6e22` | `d9f6e22` | PR #29, fusionado con *squash* en `ea21e65` |
 | `docs/voice-status` | `4108f53` | `4108f53` | PR #30, fusionado con *squash* en `9567ca5` |
+| `feat/whisper-cloud-image` | `e0a69c9` | Borrada | PR #40, fusionado con *squash* en `d3c072c` |
+| `feat/local-agent-url-pool` | `c819429` | Borrada | PR #41, fusionado con *squash* en `2edd552` |
+
+**Cuenta y autor desde el 14 de noviembre:** los commits, los push, los PR y las fusiones de este repo salen con la cuenta `softwarelazaro184-crypto`. La configuración local de git usa ese nombre y su correo noreply. Antes de cada push o fusión se comprueban la cuenta activa (`gh auth status`) y el autor de los commits por subir.
+
+En los *squash*, GitHub pone como nombre de autor **el nombre visible del perfil** de la cuenta, no el nombre de usuario; el correo sí es el noreply de la cuenta. Se acepta así. No se cambia el flujo de *squash* ni se hace push directo a `main`.
 
 Cadena fusionada en `main`, en este orden: #15 con *squash* (`24d4321`), y con commit de fusión #3 (`9a566aa`), #10 (`8f32cfc`), #11 (`05fd7a6`), #12 (`9d1bb44`), #13 (`de79815`) y #14 (`311c0fa`). El diff de cada PR de la cadena fue igual a su línea base, y su CI se revisó por trabajo con la base en `main`.
 
