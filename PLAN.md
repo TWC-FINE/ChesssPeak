@@ -208,7 +208,7 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 | 3 | Dos bases: Postgres (partidas) y Mongo (jugadas append-only y telemetría) | **Aceptado** (3 nov) |
 | 4 | Resolución de voz contra jugadas legales + criterios del spike | **Aceptado** (2 nov) |
 | 5 | `SpeechRecognizer` como Strategy; reconocedor por defecto (Web Speech en Edge con retardo de 400 ms; Whisper `small` alternativo) | **Aceptado** (2 nov) |
-| 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | **Aceptado** (6 nov). El ADR aún dice que falta la prueba con el Whisper real, que se hizo a mano el 8 nov |
+| 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | **Aceptado** (6 nov). Probado a mano con el Whisper real el 8 nov, con una sola voz |
 | 7 | Estado en memoria + write-behind idempotente | **Aceptado** (5 nov) |
 | 8 | Invitados con token firmado; login fuera del plan | **Aceptado** (5 nov) |
 | 9 | Licencia GPL-3.0 (por chessground) | **Sin escribir** |
