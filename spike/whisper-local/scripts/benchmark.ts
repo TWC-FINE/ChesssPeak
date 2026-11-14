@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve as resolvePath } from 'node:path';
 import { DEFAULT_OPTIONS, type ResolveOptions } from '@chessspeak/voice-parser';
 import type { SplitFilter } from '@chessspeak/voice-parser/src/metrics.js';
-import { loadCorpus, runConfig, toResultsFile, type ConfigResult, type ConfigSpec } from '../src/benchmark.js';
+import { loadCorpus, resultsFileName, runConfig, toResultsFile, type ConfigResult, type ConfigSpec } from '../src/benchmark.js';
 import { listClips } from '../src/clips.js';
 import { loadEnv, repoRoot } from '../src/env.js';
 import { gateFromEnv } from '../src/gate.js';
@@ -26,6 +26,9 @@ const USAGE = `Uso: pnpm --filter @chessspeak/spike-whisper-local benchmark [opc
   --threshold <n> --margin <n> --rank-penalty <n>   parámetros del parser (por defecto los del código)
   --min-duration-ms <n> --min-rms-dbfs <n>          puerta (por defecto: .env, 300 ms y -50 dBFS)
   --write-results          escribe el informe en docs/spike-results.md (solo test y nunca con datos sintéticos)
+  --url <http://host:puerto>  mide un whisper-server ya encendido (la imagen de whisper-cloud/ con docker run);
+                           exige un solo modelo en --models, el de la imagen, y --prompt on, porque la imagen lo fija
+  --label <texto>          se añade al nombre del JSON y a la descripción, p. ej. docker-cpus2-r1
 `;
 
 function fail(message: string): never {
@@ -90,8 +93,17 @@ const { clips, ignored } = clipList;
 if (clips.length === 0) fail(`No hay clips con nombre válido en ${wavDir}`);
 if (ignored.length > 0) console.warn(`Ignorados (nombre no reconocido): ${ignored.join(', ')}`);
 
-const serverPath = env.WHISPER_SERVER_PATH;
-if (!serverPath) fail('Falta WHISPER_SERVER_PATH en .env: ejecuta primero el script download.');
+const url = flags.get('--url');
+const label = flags.get('--label');
+if (label !== undefined && !/^[\w.-]+$/.test(label)) fail('--label: solo letras, números, punto, guion y guion bajo');
+if (url !== undefined) {
+  if (!/^https?:\/\/[^/]+$/.test(url)) fail('--url: http://host:puerto, sin ruta');
+  if (models.length !== 1) fail('--url necesita un solo modelo en --models: el de la imagen');
+  if (promptMode !== 'on') fail('--url necesita --prompt on: la imagen arranca siempre con el prompt de ajedrez');
+  if (write) fail('--write-results no se usa con --url: docs/spike-results.md es la medición del spike');
+}
+const serverPath = env.WHISPER_SERVER_PATH ?? '';
+if (url === undefined && !serverPath) fail('Falta WHISPER_SERVER_PATH en .env: ejecuta primero el script download.');
 
 const specs: ConfigSpec[] = models.flatMap((model) => {
   const out: ConfigSpec[] = [];
@@ -101,7 +113,8 @@ const specs: ConfigSpec[] = models.flatMap((model) => {
 });
 
 const corpus = loadCorpus();
-const tag = /whisper[\\/]([^\\/]+)[\\/]/.exec(serverPath)?.[1] ?? 'desconocido';
+const localTag = /whisper[\\/]([^\\/]+)[\\/]/.exec(serverPath)?.[1] ?? 'desconocido';
+const tag = url === undefined ? localTag : `d1be6fd (imagen Linux en ${url})${label === undefined ? '' : ` · ${label}`}`;
 const anyFake = clips.some((clip) => clip.fake);
 const port = Number(env.WHISPER_INTERNAL_PORT) || 8791;
 
@@ -111,13 +124,14 @@ if (anyFake) console.warn('⚠ Hay clips sintéticos (.fake.wav): los resultados
 mkdirSync(outDir, { recursive: true });
 const runs: WhisperRun[] = [];
 for (const spec of specs) {
-  const label = `${spec.model}${spec.prompt === undefined ? ' sin prompt' : ' con prompt'}`;
-  console.log(`\n[${label}]`);
+  const configName = `${spec.model}${spec.prompt === undefined ? ' sin prompt' : ' con prompt'}`;
+  console.log(`\n[${configName}]`);
   const result: ConfigResult = await runConfig(spec, clips, {
     serverPath,
     modelPaths: { base: env.WHISPER_MODEL_BASE ?? '', small: env.WHISPER_MODEL_SMALL ?? '' },
     language: env.WHISPER_LANGUAGE || 'es',
     port,
+    ...(url !== undefined ? { url } : {}),
     gate,
     parser,
     corpus,
@@ -129,7 +143,7 @@ for (const spec of specs) {
 
   const file = toResultsFile(result, { tag, corpusVersion: corpus.version, parser, gate, fake: anyFake });
   const stamp = new Date().toISOString().slice(0, 10);
-  const name = `${stamp}-whisper-${spec.model}-${spec.prompt === undefined ? 'noprompt' : 'prompt'}${anyFake ? '.fake' : ''}.json`;
+  const name = resultsFileName(stamp, spec, label, anyFake);
   writeFileSync(join(outDir, name), `${JSON.stringify(file, null, 2)}\n`);
   console.log(`  guardado ${join(outDir, name)}`);
   runs.push({ name, results: file, gated: result.gated, sent: result.sent });

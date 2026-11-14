@@ -1,0 +1,72 @@
+$ tsx scripts/benchmark.ts --url http://127.0.0.1:18080 --models base --prompt on --label docker-cpus2-base-r1 --out-dir '<carpeta-de-salida>'
+116 clips en <repo>\spike\recordings; puerta 300 ms / -50 dBFS; 1 configuraciones.
+
+[base con prompt]
+  1/116  2/116  3/116  4/116  5/116  6/116  7/116  8/116  9/116  10/116  11/116  12/116  13/116  14/116  15/116  16/116  17/116  18/116  19/116  20/116  21/116  22/116  23/116  24/116  25/116  26/116  27/116  28/116  29/116  30/116  31/116  32/116  33/116  34/116  35/116  36/116  37/116  38/116  39/116  40/116  41/116  42/116  43/116  44/116  45/116  46/116  47/116  48/116  49/116  50/116  51/116  52/116  53/116  54/116  55/116  56/116  57/116  58/116  59/116  60/116  61/116  62/116  63/116  64/116  65/116  66/116  67/116  68/116  69/116  70/116  71/116  72/116  73/116  74/116  75/116  76/116  77/116  78/116  79/116  80/116  81/116  82/116  83/116  84/116  85/116  86/116  87/116  88/116  89/116  90/116  91/116  92/116  93/116  94/116  95/116  96/116  97/116  98/116  99/116  100/116  101/116  102/116  103/116  104/116  105/116  106/116  107/116  108/116  109/116  110/116  111/116  112/116  113/116  114/116  115/116  116/116
+  guardado <carpeta-de-salida>\2026-11-12-whisper-base-prompt-base con prompt.json
+
+whisper.cpp **d1be6fd (imagen Linux en http://127.0.0.1:18080) · docker-cpus2-base-r1**, idioma `es`. Puerta fija antes de transcribir: duración ≥ 300 ms y volumen RMS ≥ -50 dBFS. Split evaluado: **test**.
+
+**Resumen por configuración** (sin N-best: Whisper devuelve una sola alternativa)
+
+| Configuración | Intentos V | Acierto top-1 | Aceptación errónea | Ambigüedad | Nomatch | Latencia p50 / p95 | Silencio+ruido: falsas aceptaciones |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18080) · docker-cpus2-base-r1 · modelo base · con prompt de ajedrez | 78 | 74.4 % (58/78; IC95 64–83 %) | 0.0 % (0/78; IC95 0–5 %) | 11.5 % (9/78; IC95 6–20 %) | 14.1 % (11/78; IC95 8–24 %) | 1.47 s / 1.64 s (n=78) | 0/38 |
+
+**Clips de silencio y ruido (sin habla)**
+
+| Configuración | Clips | Frenados por la puerta | Enviados a Whisper | Acabaron en jugada o comando aceptado |
+| --- | --- | --- | --- | --- |
+| whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18080) · docker-cpus2-base-r1 · modelo base · con prompt de ajedrez | 20 | 10 | 10 | 0 |
+
+**Clips en total**
+
+| Configuración | Clips | Frenados por la puerta | Enviados a Whisper |
+| --- | --- | --- | --- |
+| whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18080) · docker-cpus2-base-r1 · modelo base · con prompt de ajedrez | 116 | 10 | 106 |
+
+La latencia de Whisper es optimista: mide solo la inferencia del clip ya grabado más el parser, sin grabación ni transporte HTTP (ver [spike-notes.md](spike-notes.md)).
+
+### whisper.cpp d1be6fd (imagen Linux en http://127.0.0.1:18080) · docker-cpus2-base-r1 · modelo base · con prompt de ajedrez
+
+Split evaluado: **test**. Modo elegido: **solo la primera alternativa**.
+
+**Archivos de resultados usados**
+
+| Archivo | Sesión | Idioma | Intentos |
+| --- | --- | --- | --- |
+| 2026-11-12-whisper-base-prompt-base con prompt.json | whisper-base-prompt-2026-11-12T18-09-43-433Z | es | 116 |
+
+Parámetros del parser: {"threshold":1,"margin":0.25,"rankPenalty":0.3,"nato":false}. Intentos válidos (V): 78.
+
+**Criterios** (ver [spike-criteria.md](spike-criteria.md))
+
+| Métrica | Umbral | Medido | Estado |
+| --- | --- | --- | --- |
+| Acierto top-1 | ≥ 85 % | 74.4 % (58/78; IC95 64–83 %) | no cumple |
+| Aceptación errónea | ≤ 2 % | 0.0 % (0/78; IC95 0–5 %) | cumple |
+| Ambigüedad | ≤ 10 % | 11.5 % (9/78; IC95 6–20 %) | no cumple |
+| Latencia p50 | ≤ 1,5 s | 1.47 s (n=78) | cumple |
+| Latencia p95 | ≤ 3 s | 1.64 s (n=78) | cumple |
+| Silencio / ruido | 0 aceptadas | 0/38 | cumple |
+
+**Comparación del N-best**
+
+| Modo | Acierto top-1 | Aceptación errónea | Ambigüedad | Nomatch |
+| --- | --- | --- | --- | --- |
+| Solo primera alternativa | 74.4 % (58/78; IC95 64–83 %) | 0.0 % (0/78; IC95 0–5 %) | 11.5 % (9/78; IC95 6–20 %) | 14.1 % (11/78; IC95 8–24 %) |
+| N-best (hasta 5) | 74.4 % (58/78; IC95 64–83 %) | 0.0 % (0/78; IC95 0–5 %) | 11.5 % (9/78; IC95 6–20 %) | 14.1 % (11/78; IC95 8–24 %) |
+
+Ganancia del N-best: 0.0 puntos. No se adopta: el acierto sube menos de 5 puntos.
+
+**Por condición** (informativo; no decide por separado)
+
+| Condición | Intentos V | Acierto top-1 | Aceptación errónea | Ambigüedad | Nomatch |
+| --- | --- | --- | --- | --- | --- |
+| quiet | 39 | 71.8 % (28/39; IC95 56–83 %) | 0.0 % (0/39; IC95 0–9 %) | 10.3 % (4/39; IC95 4–24 %) | 17.9 % (7/39; IC95 9–33 %) |
+| noisy | 39 | 76.9 % (30/39; IC95 62–87 %) | 0.0 % (0/39; IC95 0–9 %) | 12.8 % (5/39; IC95 6–27 %) | 10.3 % (4/39; IC95 4–24 %) |
+
+Comandos reconocidos (informativo): n/d.
+
+**Decisión según la regla del spike:** Acierto top-1 entre 70 % y 85 %: reforzar alias y modo coordenadas y volver a medir con un test nuevo.
+
