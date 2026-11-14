@@ -1,6 +1,6 @@
 # ChessSpeak — Plan del proyecto
 
-> Última actualización: 14 de noviembre de 2026, con `main` en `08d3ccb`.
+> Última actualización: 14 de noviembre de 2026, con `main` en `39f5d65`.
 > **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Con demo en vivo. Orden de trabajo en la sección 9.
 > Equipo: **una persona trabaja sola, sin revisión de otra persona, y es la única que aprueba** (decisión del 6 de noviembre). Sigue sin definir quién aporta la otra voz, la segunda laptop de los ensayos y la máquina limpia del README.
 
@@ -28,7 +28,7 @@
   - El análisis con Stockfish no pasó su prueba de viabilidad ([docs/analysis-gate.md](docs/analysis-gate.md)).
 - **Falta:**
   - `docs/quality.md` con la validación;
-  - el ADR 9 y el C4;
+  - el ADR 9 (el C4, niveles 1 y 2, ya está en [docs/c4.md](docs/c4.md), #49);
   - el README probado en una máquina limpia;
   - el ensayo, el video de respaldo y el tag.
 
@@ -242,7 +242,7 @@ Se hizo antes de comprometer el diseño: Web Speech + chessops, y Whisper `base`
 5. ✅ **Balanceo:** el ADR 12 sustituye al pool de `move-workers`. Pool por URLs (#41), criterio (#43) y medición con 3 contenedores locales (#44). **EC2** está preparado (#46) y **sin probar**: es opcional y lo primero que se recorta.
 6. **Cierre (pendiente):**
    - validación con otra voz; sin otra voz, se hace con la del responsable del repo y se declara en `docs/quality.md`;
-   - C4 niveles 1 y 2;
+   - ✅ C4 niveles 1 y 2 ([docs/c4.md](docs/c4.md), #49);
    - README probado en una máquina limpia;
    - ensayo y tag.
 
