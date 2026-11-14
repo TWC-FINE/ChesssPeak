@@ -1,0 +1,8 @@
+Corrida: aislamiento-r2
+Fecha: 2026-11-14 00:29:09 -05:00
+RAM libre: 3,384 MB
+Docker: encendido
+Contenedores en marcha (docker ps):
+  chessspeak-whisper-w3-1 chessspeak-whisper:small-d1be6fd Up 3 minutes
+  chessspeak-whisper-w2-1 chessspeak-whisper:small-d1be6fd Up 3 minutes
+  chessspeak-whisper-w1-1 chessspeak-whisper:small-d1be6fd Up 3 minutes

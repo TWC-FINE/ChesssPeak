@@ -1,0 +1,250 @@
+{
+    "mode":  "url",
+    "strategy":  "least-connections",
+    "workerConcurrency":  1,
+    "queued":  0,
+    "queueMax":  12,
+    "timeoutMs":  15000,
+    "reconnectMax":  10,
+    "totals":  {
+                   "200":  43,
+                   "502":  0,
+                   "503":  0,
+                   "504":  0
+               },
+    "recent":  [
+                   {
+                       "at":  1794634291521,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6549
+                   },
+                   {
+                       "at":  1794634290545,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6681
+                   },
+                   {
+                       "at":  1794634284969,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6566
+                   },
+                   {
+                       "at":  1794634283861,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6521
+                   },
+                   {
+                       "at":  1794634278389,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6655
+                   },
+                   {
+                       "at":  1794634277338,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6666
+                   },
+                   {
+                       "at":  1794634271722,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6716
+                   },
+                   {
+                       "at":  1794634270670,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6589
+                   },
+                   {
+                       "at":  1794634265002,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6782
+                   },
+                   {
+                       "at":  1794634264078,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6749
+                   },
+                   {
+                       "at":  1794634258215,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6606
+                   },
+                   {
+                       "at":  1794634257327,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6654
+                   },
+                   {
+                       "at":  1794634251607,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6790
+                   },
+                   {
+                       "at":  1794634250671,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6718
+                   },
+                   {
+                       "at":  1794634244799,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6694
+                   },
+                   {
+                       "at":  1794634243951,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6581
+                   },
+                   {
+                       "at":  1794634238100,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6618
+                   },
+                   {
+                       "at":  1794634237368,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6629
+                   },
+                   {
+                       "at":  1794634231464,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6614
+                   },
+                   {
+                       "at":  1794634230737,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6467
+                   },
+                   {
+                       "at":  1794634224833,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6758
+                   },
+                   {
+                       "at":  1794634224245,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6709
+                   },
+                   {
+                       "at":  1794634218065,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6540
+                   },
+                   {
+                       "at":  1794634217533,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6698
+                   },
+                   {
+                       "at":  1794634211517,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6704
+                   },
+                   {
+                       "at":  1794634210833,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6629
+                   },
+                   {
+                       "at":  1794634204809,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6612
+                   },
+                   {
+                       "at":  1794634204201,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6582
+                   },
+                   {
+                       "at":  1794634198189,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  6828
+                   },
+                   {
+                       "at":  1794634197617,
+                       "worker":  "w3",
+                       "status":  200,
+                       "ms":  6708
+                   }
+               ],
+    "workers":  [
+                    {
+                        "id":  "w1",
+                        "port":  18101,
+                        "url":  "http://127.0.0.1:18101",
+                        "state":  "up",
+                        "active":  0,
+                        "served":  21,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  143,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  1000,
+                        "latencyMs":  6595,
+                        "rssBytes":  null
+                    },
+                    {
+                        "id":  "w2",
+                        "port":  18102,
+                        "url":  "http://127.0.0.1:18102",
+                        "state":  "isolated",
+                        "active":  0,
+                        "served":  2,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  null,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  1000,
+                        "latencyMs":  7127,
+                        "rssBytes":  null
+                    },
+                    {
+                        "id":  "w3",
+                        "port":  18103,
+                        "url":  "http://127.0.0.1:18103",
+                        "state":  "up",
+                        "active":  0,
+                        "served":  20,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  143,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  1000,
+                        "latencyMs":  6598,
+                        "rssBytes":  null
+                    }
+                ],
+    "at":  1794634291592,
+    "agent":  {
+                  "pid":  11432,
+                  "uptimeSeconds":  144,
+                  "rssBytes":  73687040
+              }
+}
