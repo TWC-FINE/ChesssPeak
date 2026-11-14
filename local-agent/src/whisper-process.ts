@@ -71,13 +71,14 @@ export interface Transcription {
   ms: number;
 }
 
-export async function transcribeWith(baseUrl: string, wav: Uint8Array, inferencePath = '/inference'): Promise<Transcription> {
+/** `signal` lets URL mode give up on a worker that never answers, so its slot does not stay taken forever. */
+export async function transcribeWith(baseUrl: string, wav: Uint8Array, inferencePath = '/inference', signal?: AbortSignal): Promise<Transcription> {
   const form = new FormData();
   form.append('file', new Blob([wav as Uint8Array<ArrayBuffer>], { type: 'audio/wav' }), 'clip.wav');
   form.append('response_format', 'json');
   form.append('temperature', '0.0');
   const started = performance.now();
-  const response = await fetch(`${baseUrl}${inferencePath}`, { method: 'POST', body: form });
+  const response = await fetch(`${baseUrl}${inferencePath}`, { method: 'POST', body: form, signal });
   const ms = performance.now() - started;
   if (!response.ok) throw new Error(`whisper-server -> HTTP ${response.status}`);
   const body = (await response.json()) as { text?: string; error?: string };
