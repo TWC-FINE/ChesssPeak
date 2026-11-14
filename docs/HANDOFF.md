@@ -2,6 +2,19 @@
 
 **Estado a 2026-11-06, 05:22 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
 
+**Estado a 14 de noviembre de 2026, con `main` en `08d3ccb`.** Este bloque manda sobre los bloques antiguos de abajo.
+- **Hecho en `main` y desplegado:**
+  - la partida entre invitados, la voz (Web Speech con 400 ms y Whisper local), la telemetría y el historial;
+  - Render, Neon, Atlas y Vercel, desde el 8 de noviembre.
+- **Probado a mano, con una sola voz:** Web Speech el 7 y el 8 de noviembre, y Whisper el 8. Falta la validación con otra persona.
+- **Balanceo:** el [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md) sustituye al ADR 11. Whisper como servicio, balanceado por URLs desde `local-agent`.
+  - #41: el pool por URLs, con aislar y devolver.
+  - #43 y #44: el criterio y la medición con 3 contenedores locales, con 0 peticiones perdidas al aislar un worker en 3 de 3 repeticiones.
+  - #45: el ADR 12.
+  - **AWS EC2: preparado en #46 (`whisper-cloud/aws/`), sin probar.**
+  - El pool de `move-workers` no se construyó.
+- **Falta:** `docs/quality.md` con la validación, el ADR 9, el C4, el README probado en una máquina limpia, el ensayo, el video de respaldo y el tag. La lista ordenada está en [proximos-pasos.md](proximos-pasos.md).
+
 **Añadido el 7 de noviembre:** el responsable del repo hizo a mano la prueba de voz con Web Speech `es-CO` en Edge, con el servidor local. Dictó los dos lados desde dos pestañas y jugó una partida completa sin fallos: se aplicaron las jugadas legales, se rechazaron las ilegales y se detectó el mate. Hubo una sola voz, la suya, así que **no sustituye la validación con otra persona.** La prueba corrió sobre `5ed174b`. Desde entonces #28 y #29 cambiaron `<mf-voice-input>`, así que el responsable del repo repetirá una pasada corta de Web Speech sobre el código actual, junto con la prueba de Whisper. También se cambió el puerto de Postgres en el `.env` local (ver «Notas para el README»). El resto del documento sigue con su estado del 6 de noviembre.
 
 **Añadido el 8 de noviembre:** el despliegue existe, y se verificó desde fuera ese mismo día (ver «Verificación del despliegue»). **El límite de `/auth/guest` fallaba en Render;** se corrigió en #37 y se probó el mismo día (ver «Verificación del despliegue»). Falta probarlo desde otra red.
@@ -12,11 +25,11 @@
 3. **Se nota más retraso con Whisper** que con Web Speech, como se esperaba.
 4. **Permiso de red local de Edge:** no consta si apareció el aviso.
 
-**Sigue sin probar:** la validación con otra voz, el dominio propio, Chrome y el límite por IP desde otra red. `trust proxy` falló, y #37 lo corrigió (ver «Verificación del despliegue»).
+**Sigue sin probar:** la validación con otra voz, el dominio propio, Chrome, el límite por IP desde otra red y AWS EC2. `trust proxy` falló, y #37 lo corrigió (ver «Verificación del despliegue»).
 
-**En resumen:** dos invitados pueden jugar una partida completa escribiendo, en Edge, con servidor local. Eso ya está en `main`, tras fusionar la cadena de PR. La voz también funciona, pero **solo se ha probado con un reconocedor y un agente falsos**. Faltan la prueba con voz real, el Whisper real, el despliegue, la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
+**En resumen, al 6 de noviembre (sustituido por el bloque del 14 de noviembre):** dos invitados podían jugar una partida completa escribiendo, en Edge, con servidor local. Entonces faltaban la prueba con voz real, el Whisper real y el despliegue, que ya están hechos. Siguen faltando la validación y los ensayos. Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).
 
-**Equipo (decisión del 6 de noviembre):** el responsable del repo trabaja solo, sin revisión del compañero, y es el único que aprueba. Por eso ya no se espera ninguna firma para el contrato (#3) ni para la cadena de PR.
+**Equipo (decisión del 6 de noviembre):** el responsable del repo trabaja solo, sin revisión de otra persona, y es el único que aprueba. Por eso ya no se espera ninguna firma para el contrato (#3) ni para la cadena de PR.
 
 ## Ramas y hashes
 
@@ -85,12 +98,12 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 |---|---|---|
 | **Nube** | **Desplegado el 8 de noviembre y verificado desde fuera,** salvo el límite de `/auth/guest` | Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>. Ver «Verificación del despliegue» |
 | **Módulo local** | **Agente: hecho y verificado. Desde el navegador: probado a mano con el Whisper real el 8 de noviembre,** en la web local y en la pública, con una sola voz | `local-agent` en `main` (#6). Adaptador y selector en #29. ADR 6 |
-| **Sockets** | **Hecho y verificado, solo en PR** | #13 y #14: integración con bases reales (`game-flow.int-spec.ts`) y `pnpm e2e:web`, 22 de 22 en Edge. Solo en local, sin nube |
+| **Sockets** | **Hecho, verificado y desplegado** | #13 y #14, en `main`: integración con bases reales (`game-flow.int-spec.ts`) y `pnpm e2e:web`. Probado contra la API desplegada el 8 de noviembre, con un script desde fuera, por `wss` |
 | **Micrófono** | **Hecho. Probado a mano con voz real, Web Speech el 7 y el 8 de noviembre y Whisper el 8,** con una sola voz | Web Speech en #27 y captura de audio en #29. El e2e usa un `SpeechRecognition` falso y el micrófono falso del navegador |
 | **Dos bases de datos** | **Hecho en local; Neon y Atlas, desplegados el 8 de noviembre** y en `up` según `/health` | Partidas y jugadas en #12 y #13. `voice_attempts` en #25, con integración contra Mongo real |
 | **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
 | **Microfrontends** | **Hecho en local** | Los 3 son reales: `<mf-game>` (#14), `<mf-voice-input>` (#26, #27 y #29) y `<mf-history>` (#28). `smoke:web` y `e2e:web` |
-| **Balanceo** | **Whisper: hecho y verificado, cumplimiento sin confirmar. `move-workers`: no empezado** | Pool y dashboard en `main` (#6). La evidencia de carga y el ensayo con un worker muerto están solo en `docs/delivery-nov-19`. ADR 10 revisado y ADR 11 solo en esa rama. Del pool solo existe el puerto |
+| **Balanceo** | **Whisper como servicio por URLs (ADR 12): hecho y medido con 3 contenedores locales. Cumplimiento sin confirmar. AWS EC2: sin probar** | Pool por procesos y dashboard (#6, ADR 10). Pool por URLs con aislar y devolver (#41), criterio y medición (#43, #44), ADR 12 (#45) y experimento EC2 preparado (#46). El ADR 11 quedó sustituido, y el pool de `move-workers` no se construyó |
 | **Dominio** | **Registrado y delegado; aún no funciona. En espera del profesor** | `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*, `REFUSED`, comprobado el 6 de noviembre). Mínimo garantizado: la URL `vercel.app`, publicada desde el 8 de noviembre |
 
 **Criterios de aceptación de `SPEC.md` §6:**
@@ -102,19 +115,19 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 3 | Desconexión y reconexión | Verificado en PR, en local |
 | 4 | Una frase ambigua o ilegible no mueve piezas | Verificado por texto y con reconocedor falso; **falta con voz real** |
 | 5 | `voice_attempts`, `game_moves` y Postgres | Verificado en local, con bases reales |
-| 6 | Backend en la nube, repo público y CI en verde | Backend en Render desde el 8 de noviembre, sobre `2c48755`, cuya CI quedó en verde por trabajo. Falta corregir el límite de `/auth/guest` |
-| 7 | `quality.md`, ADR y README probado con un clon nuevo | No empezado; hay ADR parciales |
+| 6 | Backend en la nube, repo público y CI en verde | Backend en Render desde el 8 de noviembre, sobre `2c48755`, cuya CI quedó en verde por trabajo. El límite de `/auth/guest` se corrigió en #37; falta probarlo desde otra red |
+| 7 | `quality.md`, ADR y README probado con un clon nuevo | ADR 1 a 8 y 10 a 12 escritos. **Faltan** `docs/quality.md`, el ADR 9 y el README probado con un clon nuevo |
 
 ## 2. Estado por fase del `PLAN.md`
 
 | Fase | En `main` | Solo en PR abiertos | Solo en local | No existe |
 |---|---|---|---|---|
-| **0. Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos, `serve:web`, CI, esquemas, `/health`, archivos de despliegue | Contrato (#3), sin fusionar | Nada | Despliegue en Neon, Atlas, Render y Vercel; ADR 9 |
-| **1. Partida entre invitados** | `local-agent` | `GameRoom` (#10), auth y ADR 8 (#11), `POST /games` (#12), gateway, guardado y ADR 7 (#13), shell, `<mf-game>` y caja de texto (#14) | Nada | Despliegue |
-| **2. Voz de punta a punta** | Parser, fin de partida, reconexión, Web Speech, adaptador Whisper, `voice-metrics`, telemetría, `<mf-history>` real, aviso sin Web Speech, latencia declarada y ADR 6 | Nada | Nada | Prueba con voz real |
-| **3. Validación y entrega** | Nada | Nada | Kit para la otra laptop (sin resultados) | `docs/quality.md`, 40 frases, validación, ensayos, clon nuevo, video, `web/dist` en la entrega, tag `v1.0` |
+| **0. Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos, `serve:web`, CI, esquemas, `/health`, contrato (#3) y despliegue en Neon, Atlas, Render y Vercel (8 de noviembre) | Nada | Nada | ADR 9 |
+| **1. Partida entre invitados** | `local-agent`, `GameRoom`, auth y ADR 8, `POST /games`, gateway, guardado y ADR 7, shell, `<mf-game>` y caja de texto | Nada | Nada | Nada |
+| **2. Voz de punta a punta** | Parser, fin de partida, reconexión, Web Speech, adaptador Whisper, `voice-metrics`, telemetría, `<mf-history>` real, aviso sin Web Speech, latencia declarada y ADR 6. Prueba manual con voz real (una sola voz) | Nada | Nada | Validación con otra voz |
+| **3. Validación y entrega** | Balanceo por URLs medido con contenedores locales y ADR 12 (#41 a #45). Experimento EC2 preparado (#46), sin probar | Nada | Kit para la otra laptop (sin resultados) | `docs/quality.md`, 40 frases, validación, ensayos, clon nuevo, video, C4, `web/dist` en la entrega, tag `v1.0` |
 
-**Llegó a `main` con #16:** ADR 11, revisión del ADR 10 y ADR 1, supuestos, evidencia de carga, kit y este archivo. **Pool de `move-workers`:** no existe.
+**Llegó a `main` con #16:** ADR 11, revisión del ADR 10 y ADR 1, supuestos, evidencia de carga, kit y este archivo. **Pool de `move-workers`:** no se construyó; el ADR 12 (#45) sustituyó al ADR 11.
 
 ## 3. Qué falta, por prioridad
 
@@ -126,12 +139,12 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 4 | Hecho: cadena fusionada en orden | Responsable del repo |
 | 5 | Hecho: cuentas y despliegue (8 de noviembre). `trust proxy` falló y se corrigió en #37 (`e06ecbc`), probado el mismo día. Pendiente: probar el límite desde otra red | Responsable del repo |
 | 6 | Lote del parser: fuera del plan, se queda `spike-parser-freeze` | Responsable del repo |
-| 7 | Decidir el pool de `move-workers` tras las pruebas de voz y el despliegue, y dar el OK explícito antes de empezar. Hasta entonces se considera no recortable | Responsable del repo |
+| 7 | Hecho: decidido el balanceo. El ADR 12 sustituye al pool de `move-workers` | Responsable del repo |
 | 8 | Hecho: Web Speech, pulsar para hablar y confirmación por voz (#26 y #27). Pruebas manuales con voz real el 7 y el 8 de noviembre, con una sola voz | Responsable del repo (voz real) |
 | 9 | Hecho: `voice-metrics` y telemetría (#25 y #26) | Claude |
 | 10 | Hecho: adaptador Whisper y selector (#29). Prueba manual con el Whisper real el 8 de noviembre, con una sola voz | Responsable del repo (voz real) y Claude |
 | 11 | Hecho: `<mf-history>` real (#28) | Claude |
-| 12 | Pool de `move-workers`, tras el OK explícito | Claude, tras el OK del responsable |
+| 12 | Recortada: el pool de `move-workers` se sustituyó por el pool de Whisper por URLs (#41), medido (#43, #44) y documentado (#45) | Claude |
 | 13 | ADR 9 y C4. El ADR 6, `ARCHITECTURE.md` y `docs/CONTEXT.md` ya están | Claude, tras el OK del responsable |
 | 14 | 40 frases de validación | Responsable del repo |
 | 15 | Medir los dos equipos con el kit y repetir la carga de Whisper en el más débil | Responsable del repo |
@@ -141,6 +154,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 19 | Commit de entrega con `web/dist` y tag `v1.0` | Responsable del repo decide; Claude lo prepara |
 | 20 | Dominio: esperar a que el profesor lo agregue en el hosting y, cuando deje de rechazar consultas, conectarlo. No registrar otro ni cambiar los nameservers | Responsable del repo |
 | 21 | Borrar las 2 partidas de prueba de la base local (comandos en `proximos-pasos.md`) | Responsable del repo |
+| 22 | Opcional, lo primero que se recorta: experimento con una instancia EC2 en `us-east-2`, siguiendo `whisper-cloud/aws/README.md` | Responsable del repo lanza y mide; Claude solo analiza |
 
 **Antes de cualquier medición, hay que apagar Docker y registrar su estado.** Claude no empieza una medición sin avisar. **Al actualizar este documento, Docker no respondía y parecía apagado: hay que comprobarlo antes de medir.**
 
@@ -169,12 +183,16 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 ### Orden de trabajo
 **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** La prioridad es este orden, no un calendario por días.
 
-1. **Fusionar la cadena** #3 y #10 a #14 y el PR de `docs/delivery-nov-19` ✅, antes del despliegue.
-2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
-3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
-4. **Adaptador de Whisper local.**
-5. **Pool de `move-workers`** (ADR 11), con OK explícito del responsable del repo antes de empezar. Se decide tras las pruebas de voz y el despliegue. **Hasta entonces se considera no recortable.**
-6. **Cierre:** validación con otra voz (sin otra voz, con la del responsable del repo, declarado en `docs/quality.md`), C4 niveles 1 y 2, README probado en máquina limpia, ensayo y tag.
+1. ✅ **Fusionar la cadena** #3 y #10 a #14 y el PR de `docs/delivery-nov-19`.
+2. ✅ **Despliegue** en Render, Neon, Atlas y Vercel (8 de noviembre).
+3. ✅ **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
+4. ✅ **Adaptador de Whisper local.**
+5. ✅ **Balanceo:** el ADR 12 sustituye al pool de `move-workers`, medido con contenedores locales. EC2 está preparado, sin probar y recortable.
+6. **Cierre (pendiente):**
+   - validación con otra voz; sin otra voz, se hace con la del responsable del repo y se declara en `docs/quality.md`;
+   - C4 niveles 1 y 2;
+   - README probado en una máquina limpia;
+   - ensayo y tag.
 
 **Nunca se recorta:** voz, despliegue y README probado.
 
@@ -184,8 +202,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 3. Repetición de la carga de Whisper.
 
 El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se llegara a recortar:**
-- **Si se recorta el pool de `move-workers`:** el balanceo queda solo en Whisper, riesgo asumido. Si el balanceo es obligatorio, el pool no es recortable.
-- **Si se recorta el adaptador de Whisper:** queda sin cumplir el criterio 2 de `SPEC.md`, se pone en duda R2 y suma 1,0 día neto frente a recortar el pool (estimación).
+- **Si se recorta el experimento en EC2:** el balanceo queda demostrado solo con contenedores en un mismo equipo (ADR 12), y hay que decirlo al presentar.
 
 **Sin definir:** quién aporta la otra voz, de dónde sale la segunda laptop, cuál es la máquina limpia del README, hora y duración de la demo, y si el profesor abrirá el proyecto él mismo.
 
@@ -197,6 +214,8 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 **La segunda laptop y la máquina limpia son cosas distintas.** La máquina limpia prueba el README. La segunda laptop sigue pendiente aparte, para medir la latencia de Whisper y para los ensayos.
 
 ### Plan de despliegue aprobado (Paso C)
+**Histórico: el despliegue se hizo el 8 de noviembre** (ver «Verificación del despliegue»). Lo que sigue describe el plan previo.
+
 **El código y los documentos están en `main` (#20 a #23), pero aún no se ha desplegado:** faltan las cuentas, y `render.yaml` y `docs/deploy.md` no se han probado contra los servicios reales. Las cuentas y credenciales las pone el responsable del repo en cada panel, nunca en el repo.
 
 - **`/health/live`:** ruta sin bases para el sondeo de Render. `/health` conserva el detalle con `HEALTH_PROBE_TIMEOUT_MS`. No se presenta como beneficio que Render deje de despertar a Neon: es una suposición.
@@ -208,47 +227,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 
 ## 4. Avance estimado
 
-**Es una estimación, no una medida.** El plan no trae días-persona por bloque: los pesos salen de su calendario anterior, de 18 días-persona. El reparto dentro de cada fila es una suposición de este documento.
-
-| Bloque | Peso | Hecho en `main` | Hecho contando PR | Restante contando PR |
-|---|---|---:|---:|---:|
-| Spike, Fase 0 y `local-agent` * | 5,00 | 5,00 | 5,00 | 0,00 |
-| Contrato y `GameRoom` (#3, #10) | 1,00 | 0 | 1,00 | 0,00 |
-| Auth y límite (#11) | 0,50 | 0 | 0,50 | 0,00 |
-| Despliegue | 0,40 | 0 | 0 | 0,40 |
-| ADR 9 | 0,10 | 0 | 0 | 0,10 |
-| Fusión e instalación | 1,00 | 0 | 0 | 1,00 |
-| `POST /games` (#12) | 0,50 | 0 | 0,50 | 0,00 |
-| Gateway, guardado y ADR 7 (#13) | 2,00 | 0 | 2,00 | 0,00 |
-| Shell, `<mf-game>` y caja de texto (#14) | 2,50 | 0 | 2,50 | 0,00 |
-| Fin de partida y reconexión (#13) | 1,25 | 0 | 1,25 | 0,00 |
-| `voice-metrics` | 0,75 | 0 | 0 | 0,75 |
-| Confirmación con flecha, por texto (#14) | 0,25 | 0 | 0,25 | 0,00 |
-| Web Speech y pulsar para hablar | 1,00 | 0 | 0 | 1,00 |
-| `<mf-history>` real | 0,50 | 0 | 0 | 0,50 |
-| Telemetría por el shell | 0,25 | 0 | 0 | 0,25 |
-| Endurecimiento y ADR 6 (el lote del parser queda fuera) | 1,00 | 0 | 0 | 1,00 |
-| Adaptador Whisper, latencia y aviso | 1,00 | 0 | 0 | 1,00 |
-| Validación y `quality.md` | 1,00 | 0 | 0 | 1,00 |
-| Primer ensayo y clon nuevo | 1,00 | 0 | 0 | 1,00 |
-| Correcciones, ensayo, video y tag | 2,00 | 0 | 0 | 2,00 |
-| Pool de `move-workers` y pruebas ** | 2,00 | 0 | 0 | 2,00 |
-| 40 frases de validación ** | 0,50 | 0 | 0 | 0,50 |
-| Documentación C4 ** | 0,50 | 0 | 0 | 0,50 |
-| Repetir la carga de Whisper ** | 0,50 | 0 | 0 | 0,50 |
-| **Total** | **26,50** | **5,00** | **13,00** | **13,50** |
-
-\* No estaba en el calendario anterior: su peso son los 5 días con commits en `main`. \*\* No estaba en las 18 jornadas del calendario anterior: su peso es una estimación de este documento.
-
-| Medida | Solo `main` | Contando PR abiertos |
-|---|---:|---:|
-| **Proyecto completo (26,5)** | **18,9 %** | **49,1 %** |
-| Solo trabajo desde el 5 de noviembre (21,5) | 0,0 % | 37,2 % |
-
-**Supuestos y límites:**
-- **«Hecho» significa verificado con CI y pruebas.** Nada de lo contado como PR tiene revisión de otra persona, y puede cambiar con el contrato.
-- **Se cuenta entero un bloque verificado en local,** aunque aún no se haya probado en la nube.
-- **Los pesos no miden esfuerzo real:** los 8 días-persona contados en PR se escribieron en muy poco tiempo y sin revisión. Lo que falta depende más de personas, voz real y laptops, así que no se puede extrapolar ese ritmo.
+**Retirado el 14 de noviembre.** La estimación del 6 de noviembre, en días-persona, ya no reflejaba el estado: desde entonces se fusionaron la voz, el despliegue y el balanceo. Lo hecho está en el bloque del 14 de noviembre, al principio de este documento, y lo que falta, ordenado y con su responsable, en [proximos-pasos.md](proximos-pasos.md).
 
 ## 5. Riesgos abiertos
 
@@ -265,7 +244,7 @@ El lote del parser queda fuera (`spike-parser-freeze`). **Consecuencias, si se l
 | **Postgres 18 en Neon sin CI** | **Abierto.** Según el responsable del repo, Neon corre Postgres 18 y tiene aplicadas las dos migraciones; la CI y Docker usan `postgres:17`. La partida de prueba del 8 de noviembre funcionó contra Neon, pero ninguna prueba automática corre contra 18 |
 | **`0.0.0.0/0` en Atlas** | **Aceptado** (`docs/deploy.md`, «Riesgos»): Render gratuito no tiene IP fija |
 | **Chrome sin medir** | **Abierto, recortable.** Si la entrega la abre otra persona, puede ser en Chrome |
-| **Balanceo sin aceptación** | **Abierto.** Whisper quedó en duda por ser local, y el ADR 11 se apoya en dos supuestos débiles. Tampoco se demostró mejora de rendimiento: el beneficio medido es la tolerancia a fallos |
+| **Balanceo sin aceptación** | **Abierto.** El ADR 12 balancea Whisper como servicio por URLs, medido con 3 contenedores locales, todos en un mismo equipo. Esa objeción del profesor a lo local sigue en pie. AWS EC2 está preparado, sin probar. No se demostró mejora de rendimiento: el beneficio medido es aislar un worker sin perder peticiones |
 | **`POST /games` sin límite** | **Conocido (ADR 8).** |
 | **Sin revisión independiente** | **Aceptado.** El responsable del repo trabaja solo. `main` no tiene protección: exigir PR depende de activarla en Settings |
 | **Correo institucional en `main`** | **Conocido; no se reescribe.** Lo llevan como autor `24d4321` (el *squash* de #15), las 6 fusiones de la cadena (`9a566aa`, `8f32cfc`, `05fd7a6`, `9d1bb44`, `de79815` y `311c0fa`), los *squash* de #16 (`af163bd`), #17 (`76b0dfe`), #18 (`9db85f6`), #19 (`23e4bcc`), #20 (`cd68b5a`), #21 (`579e14e`), #22 (`86044bc`), #23 (`76c4e04`), #24 (`12d39a1`), #25 (`ad1b178`), #26 (`7471bf3`), #27 (`5ed174b`), #28 (`c91e51b`), #29 (`ea21e65`) y #30 (`9567ca5`), y los 33 commits de la cadena. Quitarlo exigiría `--force`. Los commits nuevos hechos en local usan la dirección `noreply` de GitHub. **Resultado de la prueba con #3:** `gh pr merge --author-email` con la dirección `noreply` responde `Invalid email address`, y sin esa opción la fusión lleva el correo institucional, aunque el correo privado esté activo en la cuenta. Se aceptó así para las 5 fusiones restantes, y los *squash* hechos con `gh` también lo llevan |
