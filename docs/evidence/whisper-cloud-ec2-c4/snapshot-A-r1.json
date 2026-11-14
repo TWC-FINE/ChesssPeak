@@ -1,0 +1,127 @@
+{
+    "mode":  "url",
+    "strategy":  "least-connections",
+    "workerConcurrency":  1,
+    "queued":  0,
+    "queueMax":  8,
+    "timeoutMs":  45000,
+    "reconnectMax":  10,
+    "totals":  {
+                   "200":  12,
+                   "502":  0,
+                   "503":  0,
+                   "504":  0
+               },
+    "recent":  [
+                   {
+                       "at":  1794683808447,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  13269
+                   },
+                   {
+                       "at":  1794683798144,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  11288
+                   },
+                   {
+                       "at":  1794683795175,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  13311
+                   },
+                   {
+                       "at":  1794683786854,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  11260
+                   },
+                   {
+                       "at":  1794683781861,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  13350
+                   },
+                   {
+                       "at":  1794683775591,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  11263
+                   },
+                   {
+                       "at":  1794683768509,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  13332
+                   },
+                   {
+                       "at":  1794683764326,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  11242
+                   },
+                   {
+                       "at":  1794683755159,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  13346
+                   },
+                   {
+                       "at":  1794683753081,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  11271
+                   },
+                   {
+                       "at":  1794683741803,
+                       "worker":  "w2",
+                       "status":  200,
+                       "ms":  13447
+                   },
+                   {
+                       "at":  1794683739520,
+                       "worker":  "w1",
+                       "status":  200,
+                       "ms":  11170
+                   }
+               ],
+    "workers":  [
+                    {
+                        "id":  "w1",
+                        "port":  18201,
+                        "url":  "http://127.0.0.1:18201",
+                        "state":  "up",
+                        "active":  1,
+                        "served":  6,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  442,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  15000,
+                        "latencyMs":  11113,
+                        "rssBytes":  null
+                    },
+                    {
+                        "id":  "w2",
+                        "port":  18202,
+                        "url":  "http://127.0.0.1:18202",
+                        "state":  "isolated",
+                        "active":  1,
+                        "served":  6,
+                        "failed":  0,
+                        "restarts":  0,
+                        "uptimeSeconds":  null,
+                        "nextRestartInMs":  null,
+                        "probeIntervalMs":  15000,
+                        "latencyMs":  13182,
+                        "rssBytes":  null
+                    }
+                ],
+    "at":  1794683808842,
+    "agent":  {
+                  "pid":  10032,
+                  "uptimeSeconds":  442,
+                  "rssBytes":  68239360
+              }
+}
