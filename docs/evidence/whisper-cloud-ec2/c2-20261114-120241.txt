@@ -1,0 +1,3 @@
+C2 · instancia recién arrancada · 2026-11-14 12:03:12 -05:00
+De Start a /health 200 (sin umbral, con sondeo cada 15 s): 19 s
+Primer clip (p05-01_quiet_r1_runB.wav): HTTP 200 en 11.52 s (umbral 30 s) -> CUMPLE
