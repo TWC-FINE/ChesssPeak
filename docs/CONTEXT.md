@@ -1,12 +1,12 @@
 # ChessSpeak — contexto para ponerse al día
 
-Una página. Estado a **6 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
+Una página. Estado a **14 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
 
 ## Qué es
 Ajedrez en línea donde las jugadas **se dicen en voz alta** en español (“caballo efe tres”). El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide **confirmación explícita** y la aplica en tiempo real entre dos jugadores. Proyecto final de Arquitectura de Software. **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** **Con demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
 
 ## Requisitos del profesor
-Desplegado en la nube (Render, Neon, Atlas; la web en Vercel con su URL `vercel.app` es el mínimo garantizado) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements) · **balanceo de carga** sobre un proceso crítico (ADR 10 y 11; cumplimiento sin confirmar). Ya no se le puede preguntar al profesor: lo que seguía abierto son **supuestos**, en [proximos-pasos.md](proximos-pasos.md).
+Desplegado en la nube (Render, Neon, Atlas; la web en Vercel con su URL `vercel.app` es el mínimo garantizado) · **módulo local** (el agente Whisper en localhost cuenta; confirmado) · **sockets** (Socket.IO) · **micrófono** (Web Speech con la nube de Google es aceptable; confirmado) · **2 bases de datos** (Postgres + Mongo) · todo en GitHub · **microfrontends** (3 custom elements) · **balanceo de carga** sobre un proceso crítico (Whisper como servicio, balanceado por URLs, [ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md); cumplimiento sin confirmar, porque todo lo medido corre en un solo equipo). Lo que sigue abierto, sin confirmación del profesor, son **supuestos**, en [proximos-pasos.md](proximos-pasos.md). El dominio propio está en espera del profesor.
 
 ## Enfoque: la voz
 Se genera la forma hablada de **cada jugada legal** y se elige la más parecida a lo reconocido (umbral, margen, ambigüedad). Nunca propone una jugada ilegal. Un `SpeechRecognizer` intercambiable (Strategy) permite Web Speech, Whisper local, caja de texto y uno falso para tests. El servidor **no sabe de voz**: solo valida jugadas en UCI.
@@ -27,16 +27,22 @@ Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; e
 2. Los microfrontends se hablan con eventos `cs:*` y reciben su contexto por propiedad; los tipos y el protocolo viven en `shared/`.
 3. **Servidor NestJS** (monolito modular, una instancia en Render): `auth` de invitados, `games`, `voice-metrics`, `health`; estado de partida en memoria (`GameRoom` pura).
 4. **Datos:** Postgres (`games`) y Mongo (`game_moves`, `voice_attempts`; nunca audio), con escritura diferida e idempotente.
-5. **`local-agent`** (Node) envuelve `whisper-server` en `http://127.0.0.1:8765`; el navegador lo llama con CORS y la cabecera de red privada. `voice-parser` es TypeScript puro sin DOM.
+5. **`local-agent`** (Node) atiende en `http://127.0.0.1:8765` y reparte la transcripción entre varios `whisper-server`: procesos propios (ADR 10) o URLs de servicios ya en marcha, como contenedores (ADR 12). El navegador lo llama con CORS y la cabecera de red privada. `voice-parser` es TypeScript puro sin DOM.
 
 ## Estado
-En local, dos invitados juegan una partida en tiempo real, por escrito o por voz. **Sin probar:** voz real, Whisper real desde el navegador y el despliegue, que aún no existe. **Sin código:** el pool de `move-workers`. Detalle en [HANDOFF.md](HANDOFF.md).
+- **Desplegado desde el 8 de noviembre** en Render, Neon, Atlas y Vercel (<https://chessspeak.vercel.app>). Dos invitados juegan una partida en tiempo real, por escrito o por voz, en local y en la URL pública.
+- **Probado a mano con voz real, con una sola voz:** Web Speech el 7 y el 8 de noviembre, y Whisper local desde el navegador el 8, en la web local y en la pública. **Pendiente:** la validación con otra voz.
+- **Balanceo ([ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md)):** medido con 3 contenedores locales el 14 de noviembre; aislar un worker no perdió ninguna petición en 3 de 3 repeticiones. **AWS EC2: preparado en `whisper-cloud/aws/`, sin probar.** El pool de `move-workers` (ADR 11) no se construyó y ese ADR quedó sustituido.
+- **Sin probar:** Chrome, el dominio propio, el límite por IP desde otra red y AWS EC2.
+
+Detalle en [HANDOFF.md](HANDOFF.md).
 
 ## Estructura del repo (lo que existe hoy)
 - `packages/voice-parser/` — parser y corpus v0 (`corpus/`), métricas (`scripts/`). **Congelado** para el `test` v0.
 - `spike/web-speech/` — arnés de Web Speech; `spike/whisper-local/` — benchmark y agente HTTP de Whisper; `spike/results/` — JSON de las mediciones; `spike/recordings/` — WAV (fuera de git).
-- `local-agent/` — pool de `whisper-server` con cola, salud, dashboard (`/lb/dashboard`) y generador de carga ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)).
-- `server/` — NestJS: `/health` y `/health/live`, auth de invitados, `POST /games`, gateway Socket.IO sobre `GameRoom`, guardado en Postgres y Mongo, y telemetría de voz (`voice-metrics`). Del pool de `move-workers` solo existe el puerto.
+- `local-agent/` — pool de `whisper-server` con cola, salud, dashboard (`/lb/dashboard`) y generador de carga: por procesos ([ADR 10](adr/0010-balanceo-de-carga-en-local-agent.md)) o por URLs, con aislar y devolver ([ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md)).
+- `whisper-cloud/` — imagen de `whisper-server` y `compose.local.yml` para los 3 contenedores locales; `aws/` con lo preparado para EC2 (sin probar).
+- `server/` — NestJS: `/health` y `/health/live`, auth de invitados, `POST /games`, gateway Socket.IO sobre `GameRoom`, guardado en Postgres y Mongo, y telemetría de voz (`voice-metrics`). Del pool de `move-workers` (sustituido) solo queda el puerto, con `MOVE_WORKERS=0`.
 - `web/` — shell con sesión y socket único, y 3 microfrontends: tablero, voz con caja de texto de respaldo (Web Speech y Whisper) e historial; `pnpm build:web`, `serve:web`, `smoke:web` y `e2e:web`.
 - `shared/` — contrato v1, ya en `main`.
 - `spike/analysis-gate/` — prueba de viabilidad del análisis con Stockfish: **no pasó** ([analysis-gate.md](analysis-gate.md)).
@@ -69,7 +75,9 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [spike-notes.md](spike-notes.md) | Notas, equipo de referencia y **tareas pendientes por área** |
 | [deploy.md](deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [load-balancing.md](load-balancing.md) · [analysis-gate.md](analysis-gate.md) | Prueba de carga de Whisper · prueba del análisis con Stockfish |
-| [adr/](adr/) | ADR 1 a 8, 10 y 11 aceptados; falta el ADR 9 |
+| [url-pool-criteria.md](url-pool-criteria.md) · [whisper-cloud-criteria.md](whisper-cloud-criteria.md) | Criterios y medición del pool por URLs · criterios del experimento en la nube (EC2 sin probar) |
+| [demo-script.md](demo-script.md) | Guion de la demo de unos 10 minutos, con plan de respaldo |
+| [adr/](adr/) | ADR 1 a 8, 10 y 12 aceptados; el 11, sustituido por el 12; falta el ADR 9 |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) | Ramas, commits, PR · reglas para asistentes de IA |
 
 ## CI (GitHub Actions)
@@ -85,10 +93,9 @@ Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pn
 
 ## Qué sigue
 Orden de trabajo y recortes en [PLAN.md](../PLAN.md), sección 9. **Tareas, supuestos, dominio y balanceo: [proximos-pasos.md](proximos-pasos.md).**
-1. **Fusionar la cadena** #3 y #10 a #14 y el PR de `docs/delivery-nov-19` ✅, antes del despliegue.
-2. **Despliegue** en Render, Neon, Atlas y Vercel, con las cuentas del responsable del repo.
-3. **Voz de punta a punta:** Web Speech `es-CO` con 400 ms, `voice:attempt` y `voice_attempts`, y `<mf-history>` real.
-4. **Adaptador de Whisper local.**
-5. **Pool de `move-workers`** (ADR 11), con OK explícito del responsable del repo antes de empezar.
-6. **Cierre:** validación con otra voz (sin otra voz, con la del responsable del repo, declarado en `docs/quality.md`), C4 niveles 1 y 2, README probado en máquina limpia, ensayo y tag.
+1. ✅ **Hecho:** la cadena de PR, el despliegue, la voz de punta a punta, el adaptador de Whisper local y el balanceo del ADR 12 con contenedores locales.
+2. **Validación** con otra voz (sin otra voz, con la del responsable del repo, declarado) y `docs/quality.md` con las cifras medidas.
+3. **Documentos:** el ADR 9 y el C4, niveles 1 y 2.
+4. **Cierre:** README probado en una máquina limpia, ensayo con el [guion](demo-script.md), video de respaldo y tag.
+5. **Recortable:** el experimento con una instancia EC2, que sigue sin probar.
 - Tareas del spike por área (agente local, producto, CI y entrega): [spike-notes.md](spike-notes.md), sección 7.

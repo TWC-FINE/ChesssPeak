@@ -10,7 +10,14 @@ Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “
 **Hay demo en vivo,** en Edge, con la web en local (`pnpm serve:web`) y el backend en Render. Guion y calendario en [PLAN.md](PLAN.md), secciones 3 y 9. No añadas funcionalidades fuera del núcleo: los opcionales salieron del plan por la fecha.
 
 ## Estado actual
-A 6 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y en `main` existen `packages/voice-parser/`, `spike/`, `local-agent/` (pool de Whisper, ADR 10), `server/` (esqueleto: `/health`, Postgres, Mongo y `appendMove`), `web/` (shell y 3 microfrontends de marcador de posición) y CI. **También en `main`, desde la fusión de la cadena de PR:** el contrato v1 de `shared/`, `GameRoom`, la autenticación, `POST /games`, Socket.IO y la partida por texto. **No existen todavía** la voz en la interfaz, `voice_attempts`, `<mf-history>` real ni el despliegue. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+A 14 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y en `main` existen:
+- `packages/voice-parser/`, `spike/` y CI;
+- `shared/` (contrato v1) y `server/`: `GameRoom`, invitados, `POST /games`, Socket.IO, guardado en Postgres y Mongo, y `voice_attempts`;
+- `web/`: el shell y los 3 microfrontends reales, con Web Speech (400 ms), Whisper local y caja de texto;
+- `local-agent/`: pool de Whisper por procesos (ADR 10) y por URLs (ADR 12);
+- `whisper-cloud/`: los contenedores locales y lo preparado para AWS EC2.
+
+**Desplegado** desde el 8 de noviembre en Render, Neon, Atlas y Vercel. **Probado a mano con voz real, con una sola voz:** Web Speech y Whisper local desde el navegador. **Pendiente:** la validación con otra voz, `docs/quality.md`, el ADR 9, el C4 y el README probado en una máquina limpia. **AWS EC2 está preparado pero sin probar:** no lo des por medido. El pool de `move-workers` (ADR 11) no existe y quedó sustituido por el ADR 12. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
 
 **Análisis con Stockfish:** se midió y la prueba **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). Sigue fuera de alcance salvo que se decida una versión nueva del criterio.
 
