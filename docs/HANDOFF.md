@@ -2,7 +2,7 @@
 
 **Estado a 2026-11-06, 05:22 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
 
-**Estado a 14 de noviembre de 2026, con `main` en `08d3ccb`.** Este bloque manda sobre los bloques antiguos de abajo.
+**Estado a 14 de noviembre de 2026, con `main` en `39f5d65`.** Este bloque manda sobre los bloques antiguos de abajo.
 - **Hecho en `main` y desplegado:**
   - la partida entre invitados, la voz (Web Speech con 400 ms y Whisper local), la telemetría y el historial;
   - Render, Neon, Atlas y Vercel, desde el 8 de noviembre.
@@ -13,7 +13,8 @@
   - #45: el ADR 12.
   - **AWS EC2: preparado en #46 (`whisper-cloud/aws/`), sin probar.**
   - El pool de `move-workers` no se construyó.
-- **Falta:** `docs/quality.md` con la validación, el ADR 9, el C4, el README probado en una máquina limpia, el ensayo, el video de respaldo y el tag. La lista ordenada está en [proximos-pasos.md](proximos-pasos.md).
+- **Hecho también:** el C4, niveles 1 y 2 ([c4.md](c4.md), #49).
+- **Falta:** `docs/quality.md` con la validación, el ADR 9, el README probado en una máquina limpia, el ensayo, el video de respaldo y el tag. La lista ordenada está en [proximos-pasos.md](proximos-pasos.md).
 
 **Añadido el 7 de noviembre:** el responsable del repo hizo a mano la prueba de voz con Web Speech `es-CO` en Edge, con el servidor local. Dictó los dos lados desde dos pestañas y jugó una partida completa sin fallos: se aplicaron las jugadas legales, se rechazaron las ilegales y se detectó el mate. Hubo una sola voz, la suya, así que **no sustituye la validación con otra persona.** La prueba corrió sobre `5ed174b`. Desde entonces #28 y #29 cambiaron `<mf-voice-input>`, así que el responsable del repo repetirá una pasada corta de Web Speech sobre el código actual, junto con la prueba de Whisper. También se cambió el puerto de Postgres en el `.env` local (ver «Notas para el README»). El resto del documento sigue con su estado del 6 de noviembre.
 
@@ -125,7 +126,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | **0. Fundaciones** | Monorepo, esqueletos, shell y 3 proyectos, `serve:web`, CI, esquemas, `/health`, contrato (#3) y despliegue en Neon, Atlas, Render y Vercel (8 de noviembre) | Nada | Nada | ADR 9 |
 | **1. Partida entre invitados** | `local-agent`, `GameRoom`, auth y ADR 8, `POST /games`, gateway, guardado y ADR 7, shell, `<mf-game>` y caja de texto | Nada | Nada | Nada |
 | **2. Voz de punta a punta** | Parser, fin de partida, reconexión, Web Speech, adaptador Whisper, `voice-metrics`, telemetría, `<mf-history>` real, aviso sin Web Speech, latencia declarada y ADR 6. Prueba manual con voz real (una sola voz) | Nada | Nada | Validación con otra voz |
-| **3. Validación y entrega** | Balanceo por URLs medido con contenedores locales y ADR 12 (#41 a #45). Experimento EC2 preparado (#46), sin probar | Nada | Kit para la otra laptop (sin resultados) | `docs/quality.md`, 40 frases, validación, ensayos, clon nuevo, video, C4, `web/dist` en la entrega, tag `v1.0` |
+| **3. Validación y entrega** | Balanceo por URLs medido con contenedores locales y ADR 12 (#41 a #45). Experimento EC2 preparado (#46), sin probar. C4 niveles 1 y 2 (#49) | Nada | Kit para la otra laptop (sin resultados) | `docs/quality.md`, 40 frases, validación, ensayos, clon nuevo, video, `web/dist` en la entrega, tag `v1.0` |
 
 **Llegó a `main` con #16:** ADR 11, revisión del ADR 10 y ADR 1, supuestos, evidencia de carga, kit y este archivo. **Pool de `move-workers`:** no se construyó; el ADR 12 (#45) sustituyó al ADR 11.
 
@@ -145,7 +146,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 10 | Hecho: adaptador Whisper y selector (#29). Prueba manual con el Whisper real el 8 de noviembre, con una sola voz | Responsable del repo (voz real) y Claude |
 | 11 | Hecho: `<mf-history>` real (#28) | Claude |
 | 12 | Recortada: el pool de `move-workers` se sustituyó por el pool de Whisper por URLs (#41), medido (#43, #44) y documentado (#45) | Claude |
-| 13 | ADR 9 y C4. El ADR 6, `ARCHITECTURE.md` y `docs/CONTEXT.md` ya están | Claude, tras el OK del responsable |
+| 13 | ADR 9. Hecho: C4 (#49). El ADR 6, `ARCHITECTURE.md` y `docs/CONTEXT.md` ya están (#50) | Claude, tras el OK del responsable |
 | 14 | 40 frases de validación | Responsable del repo |
 | 15 | Medir los dos equipos con el kit y repetir la carga de Whisper en el más débil | Responsable del repo |
 | 16 | Medir en Chrome, si no se recorta | Responsable del repo (voz real) |
@@ -190,7 +191,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 5. ✅ **Balanceo:** el ADR 12 sustituye al pool de `move-workers`, medido con contenedores locales. EC2 está preparado, sin probar y recortable.
 6. **Cierre (pendiente):**
    - validación con otra voz; sin otra voz, se hace con la del responsable del repo y se declara en `docs/quality.md`;
-   - C4 niveles 1 y 2;
+   - ✅ C4 niveles 1 y 2 (#49);
    - README probado en una máquina limpia;
    - ensayo y tag.
 

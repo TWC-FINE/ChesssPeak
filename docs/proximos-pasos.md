@@ -1,6 +1,6 @@
 # Próximos pasos
 
-Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026 y revisado el 14 de noviembre, con `main` en `08d3ccb`. La fecha, el orden de trabajo y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente y los supuestos.
+Dónde quedó el trabajo y cómo seguir desde otro equipo. Escrito el 5 de noviembre de 2026 y revisado el 14 de noviembre, con `main` en `39f5d65`. La fecha, el orden de trabajo y el alcance vigentes están en [PLAN.md](../PLAN.md); aquí están lo pendiente y los supuestos.
 
 ## Lo que falta para la entrega del 19 de noviembre
 
@@ -8,12 +8,12 @@ Ordenado el 14 de noviembre, con `main` en `08d3ccb`. **Nunca se recortan** la v
 
 | # | Qué falta | Quién | Notas |
 |---|---|---|---|
-| 1 | Revisar y fusionar los PR abiertos del 14 de noviembre: este, el guion de demo (#48) y el C4 (#49) | Responsable del repo | Sin fusión no cuentan como entregados |
+| 1 | Hecho: fusionados el 14 de noviembre la revisión de estado (#47), el guion de demo (#48) y el C4 (#49) | Responsable del repo | — |
 | 2 | Escribir las 40 frases de validación nuevas, en un archivo nuevo, sin tocar el corpus v0 | Responsable del repo | Claude puede preparar la plantilla del archivo |
 | 3 | Sesión de validación en Edge, con otra voz o, si no hay, con la del responsable (declarado), registrando el hash del parser | Responsable del repo (voz y sesión); Claude analiza con `pnpm metrics` | Sin estas cifras no se cumple el criterio 7 de `SPEC.md` |
 | 4 | `docs/quality.md` con las cifras medidas, siguiendo los escenarios de `PLAN.md`, 6.1 | Claude redacta con los resultados; el responsable aprueba | No se inventa ninguna cifra |
 | 5 | ADR 9 (licencia GPL-3.0, por chessground) | Claude | Media página |
-| 6 | Corregir lo que sigue desfasado fuera de estos documentos: el estado del ADR 6, `docs/CONTEXT.md` y la sección «Estado actual» de `AGENTS.md` | Claude, con el OK del responsable | La prueba con el Whisper real ya se hizo el 8 de noviembre |
+| 6 | Hecho (#50 y #52): el estado del ADR 6, `docs/CONTEXT.md`, la sección «Estado actual» de `AGENTS.md` y la fila del ADR 6 en `PLAN.md` | Claude, con el OK del responsable | La prueba con el Whisper real se hizo el 8 de noviembre |
 | 7 | **README probado con un clon nuevo en una máquina limpia.** Windows Sandbox es una opción sin probar | Responsable del repo (máquina y ejecución); Claude corrige el README con lo que falle | Nunca se recorta |
 | 8 | En la laptop de la demo: Edge contra `127.0.0.1:8765` (aviso de red local), micrófonos, Docker y los 3 contenedores, y la latencia de Whisper | Responsable del repo | Antes del ensayo, no el día de la demo |
 | 9 | Ensayo completo con el guion (#48), incluida la versión corta, con dos navegadores contra la nube, algo que aún no se ha probado | Responsable del repo | Lo que no se ensaye no se muestra |
@@ -159,7 +159,7 @@ Las tareas que dependen de un supuesto lo indican. **Revisado el 14 de noviembre
 **Documentos**
 - [ ] 14. ADR 9 (licencia). Los ADR 7 y 8 ya están aceptados (PR #13 y #11).
 - [ ] 15. 40 frases de validación (las que fija `PLAN.md`, 5.7), en un archivo nuevo, sin editar el corpus v0.
-- [ ] 16. Documentación de arquitectura con C4 (niveles 1 y 2 en Mermaid).
+- [x] 16. Documentación de arquitectura con C4 (niveles 1 y 2 en Mermaid). (PR #49)
 
 **Según los supuestos**
 - [ ] 17. Dominio: cuando el profesor lo agregue y deje de rechazar consultas, conectarlo según lo que permita el hosting.
