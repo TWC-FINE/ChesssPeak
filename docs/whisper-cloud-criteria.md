@@ -189,6 +189,32 @@ Antes de lanzar la primera instancia se añade aquí una tabla con los precios o
 
 Ninguna cifra sale de memoria.
 
+**Precios verificados el 14 de noviembre de 2026**, en las páginas oficiales enlazadas. Las cifras de EC2 y EBS coinciden con los datos de precios que esas páginas publicaron el mismo día, a las 01:29 UTC. Lo marcado `[S]` no está verificado.
+
+| Concepto | Cifra oficial en `us-east-2` | Fuente |
+|---|---|---|
+| `c7i-flex.large`, Linux, bajo demanda | **0,08479 USD por hora**, con 2 vCPU y 4 GiB | [EC2 On-Demand Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) |
+| Volumen EBS gp3 | **0,08 USD por GB-mes**. Incluye 3 000 IOPS y 125 MB/s; solo se cobra lo que pase de ahí | [Amazon EBS pricing](https://aws.amazon.com/ebs/pricing/) |
+| Dirección IPv4 pública | **0,005 USD por hora**, en uso o inactiva | [Amazon VPC pricing](https://aws.amazon.com/vpc/pricing/) |
+| Transferencia de salida a internet | **100 GB gratis al mes**, sumando todos los servicios y regiones | [EC2 On-Demand Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) |
+| Plan gratuito, para cuentas creadas desde el 15 de julio de 2025 | 100 USD de crédito al crear la cuenta y hasta 100 USD más por completar actividades. El plan termina a los 6 meses o al agotarse los créditos. Según la documentación, no genera cargos. `c7i-flex.large` está entre los tipos aptos | [Free Tier plans](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/free-tier-plans.html) · [EC2 Free Tier](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-free-tier-usage.html) |
+
+- **Cuenta:** el saldo de 120 USD y el tipo de plan los indica el responsable del repo `[S]`.
+- **Instancias «flex»:** la página oficial dice que escalan a rendimiento completo «a majority of the time». Su tabla muestra un 40 % para el tamaño de 2 vCPU, en una columna cuyo encabezado no se pudo comprobar `[S]`. Puede afectar a C1 frente a la fase A.
+
+**Coste por hora encendida:** 0,08479 (instancia) + 0,005 (IPv4) + 16 GB × 0,08 / 730 h (volumen) ≈ **0,0915 USD**.
+
+**Instancia parada:** el volumen se sigue cobrando. La IPv4 pública asignada automáticamente se libera al parar y no se cobra `[S]`.
+
+| Escenario | Uso supuesto | Coste estimado |
+|---|---|---|
+| Construcción de la imagen | Hasta 1 h encendida `[S]` | ≈ 0,09 USD |
+| Sesión de medición (C2 y 3 × 78 clips, con margen) | ≈ 2 h encendida `[S]` | ≈ 0,18 USD |
+| Volumen de 16 GB parado hasta la entrega | 6 días | ≈ 0,26 USD |
+| Demo, si se usa | 3 h encendida | ≈ 0,27 USD |
+| **Total previsto** | | **≈ 0,81 USD**, el 32 % del límite de C5 (2,5 USD) |
+| **Riesgo: olvidarla encendida** | 24 h | **≈ 2,20 USD al día.** Supera C5 en algo más de un día y el presupuesto de 5 USD en unos 2,3 días |
+
 ### Salvaguardas
 
 - Las instancias se paran al terminar cada sesión, y se terminan, con su volumen, después de la entrega. Tras cada prueba se da un comando para comprobar su estado y el gasto.
