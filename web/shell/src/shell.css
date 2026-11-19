@@ -131,7 +131,6 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
   flex-wrap: wrap;
   gap: 12px clamp(14px, 2.2vw, 32px);
   padding: 14px clamp(16px, 3vw, 48px);
-  min-height: 72px;
 }
 .cs-brand { display: inline-flex; align-items: center; gap: 14px; font-family: var(--cs-serif); font-size: clamp(24px, 2.4vw, 36px); font-weight: 700; line-height: 1; }
 .cs-logo {
@@ -225,7 +224,9 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
 .cs-message { color: var(--cs-warn); flex-basis: 100%; text-align: right; }
 
 /* section title with a rule, like the "Partida demo" heading */
-.cs-section-head { display: flex; align-items: center; gap: 18px; padding: 6px clamp(16px, 3vw, 48px) 0; }
+.cs-section-head { display: flex; align-items: center; gap: 18px; padding: 0 clamp(16px, 3vw, 48px); }
+/* the rule stops where the board controls (turn, "Girar tablero") sit, at the right of this line */
+@media (min-width: 761px) { .cs-section-head { padding-right: calc(clamp(16px, 3vw, 48px) + 320px); } }
 .cs-route {
   display: flex;
   align-items: center;
@@ -246,22 +247,29 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
 }
 .cs-rule { flex: 1 1 120px; height: 1px; min-width: 60px; background: linear-gradient(90deg, rgba(216, 184, 120, 0.65), rgba(168, 94, 104, 0.45) 60%, transparent); }
 
-/* three zones: board, "Tu jugada", "Jugadas". The board takes what the viewport leaves. */
+/* three zones: board, "Tu jugada", "Jugadas". The board comes first: it takes the height of the
+   window (never less than 500px), and the panels keep a fixed width beside it. */
 .cs-layout {
-  --cs-board: clamp(360px, min(calc(100vh - 215px), calc(100vw - 760px)), 900px);
+  --cs-board: clamp(500px, min(calc(100vh - 140px), calc(100vw - 720px)), 940px);
+  position: relative;
   display: grid;
-  grid-template-columns: var(--cs-board) minmax(290px, 1fr) minmax(260px, 340px);
+  grid-template-columns: var(--cs-board) minmax(290px, 360px) minmax(250px, 320px);
+  justify-content: center;
   gap: clamp(16px, 1.8vw, 28px);
-  padding: 20px clamp(16px, 3vw, 48px) 40px;
+  padding: 16px clamp(16px, 3vw, 48px) 40px;
   align-items: start;
+}
+/* the board controls go up to the section title line, so the board can use that height */
+@media (min-width: 761px) {
+  .cs-layout > [data-mf='mf-game'] .csg-toolbar { position: absolute; top: -41px; right: clamp(16px, 3vw, 48px); }
 }
 .cs-slot { min-width: 0; }
 .cs-unavailable { margin: 0; padding: var(--cs-gap); border: 1px dashed var(--cs-warn); border-radius: 14px; color: var(--cs-warn); }
 
 @media (max-width: 1199px) {
   .cs-layout {
-    --cs-board: clamp(360px, min(calc(100vh - 215px), calc(100vw - 420px)), 900px);
-    grid-template-columns: var(--cs-board) minmax(280px, 1fr);
+    --cs-board: clamp(440px, min(calc(100vh - 140px), calc(100vw - 400px)), 900px);
+    grid-template-columns: var(--cs-board) minmax(280px, 360px);
     grid-template-rows: auto 1fr;
   }
   .cs-layout > [data-mf='mf-game'] { grid-row: span 2; }
