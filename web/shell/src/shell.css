@@ -1,15 +1,161 @@
 @import '@chessspeak/shared/tokens.css';
 
-body { margin: 0; background: var(--cs-bg); color: var(--cs-text); font-family: var(--cs-font); }
+/* Burgundy theme. The tokens are redefined on body (not in shared/tokens.css) so the
+   microfrontends inherit them inside the shell; their standalone pages keep the default theme. */
+body {
+  --cs-bg: #250c14;
+  --cs-surface: #35121e;
+  --cs-surface-2: #481b29;
+  --cs-border: #793a49;
+  --cs-text: #f5e8d2;
+  --cs-muted: #cbb9a7;
+  --cs-accent: #d8b878;
+  --cs-rose: #a85e68;
+  --cs-warn: #e9b872;
+  --cs-radius: 14px;
+  --cs-gap: 14px;
+  /* Inter and Playfair Display only when installed: the web makes no requests to external hosts (smoke:web). */
+  --cs-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cs-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--cs-bg);
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgba(168, 94, 104, 0.22), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(216, 184, 120, 0.08), transparent 60%);
+  background-attachment: fixed;
+  color: var(--cs-text);
+  font-family: var(--cs-font);
+  font-size: 15px;
+  line-height: 1.45;
+}
 a { color: var(--cs-accent); }
-.cs-header { display: flex; gap: var(--cs-gap); align-items: baseline; justify-content: space-between; padding: var(--cs-gap) 16px; border-bottom: 1px solid var(--cs-border); }
-.cs-route { margin: 0; padding: var(--cs-gap) 16px 0; color: var(--cs-muted); }
-.cs-layout { display: grid; grid-template-columns: minmax(280px, 480px) minmax(220px, 1fr) minmax(220px, 1fr); gap: var(--cs-gap); padding: 16px; align-items: start; }
+
+/* controls shared by the shell and the microfrontends */
+body button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  color: var(--cs-text);
+  background: var(--cs-surface-2);
+  border: 1px solid var(--cs-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+body button:hover:not(:disabled) { background: #5a2434; border-color: var(--cs-rose); }
+body button:active:not(:disabled) { transform: translateY(1px); }
+body button:disabled { opacity: 0.5; cursor: not-allowed; }
+body button[type='submit'] { background: var(--cs-rose); border-color: var(--cs-rose); color: #fff7ea; }
+body button[type='submit']:hover:not(:disabled) { background: #b96d77; border-color: #c88a92; }
+body input:not([type='radio']):not([type='checkbox']) {
+  font: inherit;
+  color: var(--cs-text);
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  min-width: 0;
+}
+body input[type='radio'] { accent-color: var(--cs-rose); }
+body input::placeholder { color: rgba(203, 185, 167, 0.6); }
+body input:disabled { opacity: 0.55; }
+body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; }
+
+/* header */
+.cs-header {
+  display: flex;
+  gap: var(--cs-gap);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 12px 24px;
+  background: rgba(37, 12, 20, 0.85);
+  border-bottom: 1px solid var(--cs-border);
+}
+.cs-brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--cs-serif); font-size: 1.6rem; font-weight: 700; letter-spacing: 0.01em; }
+.cs-logo {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--cs-rose), #6b2a3a);
+  border: 1px solid rgba(216, 184, 120, 0.55);
+  color: #fff7ea;
+  font-family: 'Segoe UI Symbol', 'DejaVu Sans', serif;
+  font-size: 1.55rem;
+  font-weight: 400;
+  font-variant-emoji: text;
+  line-height: 1;
+}
+.cs-header nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.cs-header nav a {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--cs-muted);
+  font-weight: 500;
+  text-decoration: none;
+}
+.cs-header nav a:hover { color: var(--cs-text); border-color: var(--cs-border); background: var(--cs-surface); }
+
+/* session bar: guest sign-in, new game, invite link */
+.cs-session:empty { display: none; }
+.cs-session {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+  margin: 16px 24px 0;
+  padding: 12px 16px;
+  background: var(--cs-surface);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+}
+.cs-session p, .cs-form { margin: 0; }
+.cs-form, .cs-who, .cs-start, .cs-invite { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cs-form label { display: inline-flex; gap: 8px; align-items: center; color: var(--cs-muted); }
+.cs-who { font-weight: 600; }
+.cs-start, .cs-invite { color: var(--cs-muted); }
+.cs-invite code {
+  word-break: break-all;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--cs-bg);
+  border: 1px solid var(--cs-border);
+  color: var(--cs-accent);
+}
+.cs-message { color: var(--cs-warn); flex-basis: 100%; }
+
+.cs-route { margin: 0; padding: 12px 24px 0; color: var(--cs-muted); font-size: 0.9rem; }
+
+/* three zones: board, "Tu jugada", "Jugadas". The board takes what the viewport leaves. */
+.cs-layout {
+  --cs-board: clamp(320px, min(calc(100vh - 220px), calc(100vw - 700px)), 860px);
+  display: grid;
+  grid-template-columns: var(--cs-board) minmax(280px, 1fr) minmax(240px, 320px);
+  gap: 20px;
+  padding: 16px 24px 32px;
+  align-items: start;
+}
 .cs-slot { min-width: 0; }
 .cs-unavailable { margin: 0; padding: var(--cs-gap); border: 1px dashed var(--cs-warn); border-radius: var(--cs-radius); color: var(--cs-warn); }
-@media (max-width: 900px) { .cs-layout { grid-template-columns: 1fr; } }
-.cs-session { padding: var(--cs-gap) 16px 0; }
-.cs-session p, .cs-form { margin: 0 0 6px; }
-.cs-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.cs-invite code { word-break: break-all; }
-.cs-message { color: var(--cs-warn); }
+
+@media (max-width: 1199px) {
+  .cs-layout {
+    --cs-board: clamp(320px, min(calc(100vh - 220px), calc(100vw - 400px)), 860px);
+    grid-template-columns: var(--cs-board) minmax(260px, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+  .cs-layout > [data-mf='mf-game'] { grid-row: span 2; }
+}
+@media (max-width: 760px) {
+  .cs-header { padding: 10px 16px; }
+  .cs-session { margin: 12px 16px 0; }
+  .cs-route { padding: 10px 16px 0; }
+  .cs-layout { grid-template-columns: minmax(0, 1fr); padding: 12px 16px 24px; }
+  .cs-layout > [data-mf='mf-game'] { grid-row: auto; }
+}
