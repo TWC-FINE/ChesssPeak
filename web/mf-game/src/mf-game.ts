@@ -1,5 +1,7 @@
 import { LitElement, html } from 'lit';
 import { Chessground } from 'chessground';
+import { Chess } from 'chessops/chess';
+import { parseFen } from 'chessops/fen';
 import type { Api } from 'chessground/api';
 import type { Key } from 'chessground/types';
 import {
@@ -54,6 +56,35 @@ const END_TEXT: Record<GameEnd['termination'], string> = {
 
 const squares = (uci: string): [Key, Key] => [uci.slice(0, 2) as Key, uci.slice(2, 4) as Key];
 
+const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] as const;
+const RANKS = ['1', '2', '3', '4', '5', '6', '7', '8'] as const;
+const START_COUNT = { q: 1, r: 2, b: 2, n: 2, p: 8 } as const;
+const ROLE_NAME = { q: 'queen', r: 'rook', b: 'bishop', n: 'knight', p: 'pawn' } as const;
+type Letter = keyof typeof START_COUNT;
+type Side = 'white' | 'black';
+
+/** Pieces each side has taken, strongest first, from what is missing on the board (a promotion can hide one). */
+export function capturedBy(fen: string): Record<Side, string[]> {
+  const placement = [...(fen.split(' ')[0] ?? '')];
+  const taken: Record<Side, string[]> = { white: [], black: [] };
+  for (const letter of Object.keys(START_COUNT) as Letter[]) {
+    const blackLeft = placement.filter((char) => char === letter).length;
+    const whiteLeft = placement.filter((char) => char === letter.toUpperCase()).length;
+    for (let count = blackLeft; count < START_COUNT[letter]; count++) taken.white.push(ROLE_NAME[letter]);
+    for (let count = whiteLeft; count < START_COUNT[letter]; count++) taken.black.push(ROLE_NAME[letter]);
+  }
+  return taken;
+}
+
+/** Whether the side to move is in check. Only for display: the server decides the rules. */
+export function inCheck(fen: string): boolean {
+  try {
+    return Chess.fromSetup(parseFen(fen).unwrap()).unwrap().isCheck();
+  } catch {
+    return false;
+  }
+}
+
 /** Board of the game (chessground, view only). Shows what the server says through the socket of its context. */
 export class MfGame extends LitElement {
   static override properties = { context: { attribute: false } };
@@ -67,6 +98,8 @@ export class MfGame extends LitElement {
   private end: GameEnd | undefined;
   private arrow: string | undefined;
   private error = '';
+  /** Only this browser's view: "Girar tablero" shows the other side, the game does not change. */
+  private flipped = false;
 
   protected override createRenderRoot(): HTMLElement {
     return this;
@@ -104,13 +137,59 @@ export class MfGame extends LitElement {
 
   protected override render() {
     const context = this.context;
+    const fen = this.state?.fen ?? START_FEN;
+    const files = this.orientation() === 'white' ? [...FILES] : [...FILES].reverse();
+    const ranks = this.orientation() === 'white' ? [...RANKS].reverse() : [...RANKS];
+    const coord = (text: string, kind: string, row: number, column: number) =>
+      html`<span class="csg-coord csg-${kind}" style="grid-area: ${row} / ${column}">${text}</span>`;
     return html`<div class="csg-root">
-      <div class="csg-board"></div>
+      <div class="csg-toolbar">
+        ${this.renderTurn(fen)}
+        <button type="button" class="csg-flip" data-action="flip" aria-pressed=${String(this.flipped)} @click=${this.flip}>Girar tablero</button>
+      </div>
+      <div class="csg-card">
+        <div class="csg-frame">
+          ${files.map((file, index) => coord(file, 'file', 1, index + 2))}
+          ${files.map((file, index) => coord(file, 'file', 10, index + 2))}
+          ${ranks.map((rank, index) => coord(rank, 'rank', index + 2, 1))}
+          ${ranks.map((rank, index) => coord(rank, 'rank', index + 2, 10))}
+          <div class="csg-board"></div>
+        </div>
+      </div>
+      ${this.renderTrays(fen)}
       <p class="csg-info">partida: ${context?.gameId ?? 'sin partida'} · orientación: ${this.orientation()}</p>
       ${this.renderStatus()}
       ${this.error === '' ? '' : html`<p class="csg-error" role="alert">${this.error}</p>`}
     </div>`;
   }
+
+  private renderTurn(fen: string) {
+    const turn = this.state?.turn ?? 'white';
+    return html`<span class="csg-turn" data-turn=${turn}>
+      <span class="csg-turn-dot" aria-hidden="true"></span>Turno: ${turn === 'white' ? 'Blancas' : 'Negras'}
+      ${inCheck(fen) ? html`<span class="csg-check">Jaque</span>` : ''}
+    </span>`;
+  }
+
+  /** The pieces are drawn by chessground's piece set, which only applies inside .cg-wrap. */
+  private renderTrays(fen: string) {
+    const taken = capturedBy(fen);
+    const tray = (by: Side, label: string) => {
+      const color = by === 'white' ? 'black' : 'white';
+      return html`<div class="csg-tray cg-wrap" data-by=${by}>
+        <span class="csg-tray-label">${label}</span>
+        <span class="csg-tray-pieces">
+          ${taken[by].length === 0 ? html`<span class="csg-tray-empty">Ninguna</span>` : taken[by].map((role) => html`<piece class="${role} ${color}"></piece>`)}
+        </span>
+      </div>`;
+    };
+    return html`<div class="csg-trays">${tray('white', 'Capturadas por blancas')}${tray('black', 'Capturadas por negras')}</div>`;
+  }
+
+  private readonly flip = (): void => {
+    this.flipped = !this.flipped;
+    this.requestUpdate();
+  };
 
   private renderStatus() {
     const state = this.state;
@@ -139,6 +218,8 @@ export class MfGame extends LitElement {
       orientation: this.orientation(),
       turnColor: this.state?.turn ?? 'white',
       lastMove: this.lastUci === undefined ? undefined : squares(this.lastUci),
+      check: inCheck(this.state?.fen ?? START_FEN),
+      coordinates: false,
       viewOnly: true,
     } as const;
     if (this.ground === undefined) this.ground = Chessground(host, config);
@@ -153,7 +234,9 @@ export class MfGame extends LitElement {
 
   private orientation(): 'white' | 'black' {
     const yours = this.state?.yourColor;
-    return yours === 'white' || yours === 'black' ? yours : (this.context?.orientation ?? 'white');
+    const side = yours === 'white' || yours === 'black' ? yours : (this.context?.orientation ?? 'white');
+    if (!this.flipped) return side;
+    return side === 'white' ? 'black' : 'white';
   }
 
   private resetGame(): void {
@@ -162,6 +245,7 @@ export class MfGame extends LitElement {
     this.end = undefined;
     this.arrow = undefined;
     this.error = '';
+    this.flipped = false;
   }
 
   private useSocket(socket: GameSocket | null): void {

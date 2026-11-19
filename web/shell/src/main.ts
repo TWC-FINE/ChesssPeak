@@ -40,6 +40,11 @@ function render(): void {
   const route = parseRoute(location.hash);
   const routeLabel = document.getElementById('cs-route');
   if (routeLabel !== null) routeLabel.textContent = describeRoute(route);
+  const hash = location.hash === '' || location.hash === '#' ? '#/' : location.hash;
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('.cs-nav a')) {
+    if (link.getAttribute('href') === hash) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  }
   const gameId = gameIdOf(route);
 
   const bar = document.getElementById('cs-session');

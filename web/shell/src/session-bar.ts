@@ -34,6 +34,7 @@ function signInForm(actions: SessionBarActions): HTMLFormElement {
   input.maxLength = 24;
   input.required = true;
   input.autocomplete = 'off';
+  input.placeholder = 'Ingresa tu nombre…';
   label.append(input);
   const submit = document.createElement('button');
   submit.type = 'submit';

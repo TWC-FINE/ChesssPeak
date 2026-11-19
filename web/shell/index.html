@@ -7,13 +7,25 @@
     <link rel="stylesheet" href="./shell.css" />
   </head>
   <body>
+    <div class="cs-decor" aria-hidden="true">
+      <div class="cs-decor-checker"></div>
+      <span class="cs-decor-knight">&#x265E;&#xFE0E;</span>
+      <span class="cs-decor-pawn cs-p1">&#x265F;&#xFE0E;</span>
+      <span class="cs-decor-pawn cs-p2">&#x265F;&#xFE0E;</span>
+      <span class="cs-decor-fallen">&#x265A;&#xFE0E;</span>
+      <span class="cs-decor-king">&#x265A;&#xFE0E;</span>
+    </div>
     <header class="cs-header">
-      <strong class="cs-brand"><span class="cs-logo" aria-hidden="true">&#9822;</span>ChessSpeak</strong>
-      <nav><a href="#/">Inicio</a> <a href="#/game/demo">Partida de ejemplo</a></nav>
+      <strong class="cs-brand"><span class="cs-logo" aria-hidden="true">&#x265E;&#xFE0E;</span>ChessSpeak</strong>
+      <span class="cs-divider" aria-hidden="true"></span>
+      <nav class="cs-nav"><a href="#/" data-nav="home">Inicio</a> <a href="#/game/demo" data-nav="demo">Partida de ejemplo</a></nav>
+      <section id="cs-session" class="cs-session"></section>
     </header>
     <main id="cs-main">
-      <section id="cs-session" class="cs-session"></section>
-      <p id="cs-route" class="cs-route"></p>
+      <div class="cs-section-head">
+        <p id="cs-route" class="cs-route"></p>
+        <span class="cs-rule" aria-hidden="true"></span>
+      </div>
       <div class="cs-layout">
         <section data-mf="mf-game" class="cs-slot"></section>
         <section data-mf="mf-voice-input" class="cs-slot"></section>
