@@ -1,33 +1,88 @@
 @import '@chessspeak/shared/tokens.css';
 
 mf-game { display: block; font-family: var(--cs-font); color: var(--cs-text); }
-.csg-root { display: flex; flex-direction: column; gap: var(--cs-gap); width: 100%; }
-.csg-board {
-  width: 100%;
-  aspect-ratio: 1;
+.csg-root { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+
+/* turn and "Girar tablero" */
+.csg-toolbar { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+.csg-turn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--cs-border);
+  background: rgba(37, 12, 20, 0.5);
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.csg-turn-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--cs-accent); background: #f8edda; transition: background 0.25s ease; }
+.csg-turn[data-turn='black'] .csg-turn-dot { background: #24090f; }
+.csg-check {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(194, 58, 80, 0.25);
+  border: 1px solid rgba(194, 58, 80, 0.7);
+  color: #ffd9de;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.csg-flip::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12a8 8 0 0 1 14-5.3L20 9M20 12a8 8 0 0 1-14 5.3L4 15'/><path d='M20 4v5h-5M4 20v-5h5'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12a8 8 0 0 1 14-5.3L20 9M20 12a8 8 0 0 1-14 5.3L4 15'/><path d='M20 4v5h-5M4 20v-5h5'/></svg>") center / contain no-repeat;
+}
+
+/* board card: coordinates outside the squares, as in a printed board */
+.csg-card {
   container-type: inline-size;
+  padding: clamp(4px, 1.2cqi, 14px);
+  border-radius: 20px;
+  border: 1px solid var(--cs-border);
+  background:
+    linear-gradient(180deg, rgba(245, 232, 210, 0.04), transparent 30%),
+    linear-gradient(160deg, #521f2f 0%, #431827 50%, #371320 100%);
+  box-shadow: 0 34px 60px -28px rgba(8, 1, 4, 0.85), inset 0 1px 0 rgba(245, 232, 210, 0.08), inset 0 0 0 1px rgba(216, 184, 120, 0.06);
+}
+.csg-frame {
+  display: grid;
+  grid-template-columns: 0.56fr repeat(8, 1fr) 0.56fr;
+  grid-template-rows: 0.56fr repeat(8, 1fr) 0.56fr;
+  aspect-ratio: 1;
+  width: 100%;
+}
+.csg-coord {
+  display: grid;
+  place-items: center;
+  font-family: var(--cs-serif, Georgia, serif);
+  font-weight: 600;
+  font-size: clamp(12px, 3.6cqi, 25px);
+  line-height: 1;
+  color: var(--cs-text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  user-select: none;
+}
+.csg-file { text-transform: uppercase; }
+.csg-board {
+  grid-area: 2 / 2 / 10 / 10;
+  width: 100%;
+  height: 100%;
   border-radius: 6px;
   box-shadow:
-    0 0 0 1px var(--cs-border),
-    0 0 0 8px var(--cs-surface, #35121e),
-    0 0 0 9px var(--cs-border),
-    0 18px 40px rgba(0, 0, 0, 0.45);
+    0 0 0 1px rgba(216, 184, 120, 0.55),
+    0 0 0 5px rgba(37, 12, 20, 0.45),
+    0 0 0 6px rgba(216, 184, 120, 0.18),
+    0 18px 34px -10px rgba(8, 1, 4, 0.7);
 }
-.csg-info { margin: 6px 0 0; font-size: 0.85rem; color: var(--cs-muted); }
-.csg-players, .csg-status, .csg-error { margin: 0; }
-.csg-players { color: var(--cs-text); }
-.csg-status {
-  align-self: flex-start;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  background: var(--cs-surface, #35121e);
-  border: 1px solid var(--cs-border);
-}
-.csg-status[data-status='active'] { border-color: var(--cs-accent); }
-.csg-error { color: var(--cs-warn); }
 
-/* board: cream and rose squares instead of the brown theme of chessground */
+/* squares: cream and rose instead of the brown theme of chessground */
 mf-game cg-board {
   background-color: #f1dec0;
   background-image: conic-gradient(#a86b73 0 90deg, #f1dec0 0 180deg, #a86b73 0 270deg, #f1dec0 0);
@@ -36,30 +91,50 @@ mf-game cg-board {
 }
 mf-game cg-board square.last-move { background-color: rgba(216, 184, 120, 0.55); }
 mf-game cg-board square.check {
-  background: radial-gradient(ellipse at center, rgba(214, 52, 62, 1) 0%, rgba(190, 30, 45, 0.9) 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%);
+  background: radial-gradient(ellipse at center, rgba(214, 52, 62, 1) 0%, rgba(194, 58, 80, 0.9) 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%);
 }
 
-/* coordinates: large serif labels inside the edge squares */
-mf-game .cg-wrap coords {
-  opacity: 1;
-  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  font-weight: 700;
-  font-size: clamp(11px, 3.4cqi, 22px);
+/* captured pieces: chessground's piece images, laid out in a row */
+.csg-trays { display: flex; flex-wrap: wrap; gap: 12px; }
+mf-game .csg-tray {
+  flex: 1 1 220px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px dashed rgba(121, 58, 73, 0.9);
+  background: rgba(37, 12, 20, 0.35);
 }
-mf-game .cg-wrap coords.ranks { left: 0; top: 0; width: auto; height: 100%; }
-mf-game .cg-wrap coords.ranks coord { transform: none; padding: 0.25em 0 0 0.35em; line-height: 1; }
-mf-game .cg-wrap coords.files { left: 0; bottom: 0; width: 100%; height: auto; text-transform: lowercase; }
-mf-game .cg-wrap coords.files coord { text-align: right; padding: 0 0.35em 0.2em 0; line-height: 1; }
-/* the bottom-left square is dark in both orientations: light labels on dark squares, and the other way round */
-mf-game .orientation-white .ranks :nth-child(odd),
-mf-game .orientation-black .ranks :nth-child(even),
-mf-game .orientation-white .files :nth-child(odd),
-mf-game .orientation-black .files :nth-child(even) {
-  color: #f1dec0;
+.csg-tray-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cs-muted); white-space: nowrap; }
+.csg-tray-pieces { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; min-height: 26px; }
+mf-game .csg-tray piece {
+  position: static;
+  display: block;
+  width: 26px;
+  height: 26px;
+  padding: 2px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background-color: #f1dec0;
+  background-origin: content-box;
+  background-clip: border-box;
+  background-size: contain;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(216, 184, 120, 0.55);
+  will-change: auto;
 }
-mf-game .orientation-white .ranks :nth-child(even),
-mf-game .orientation-black .ranks :nth-child(odd),
-mf-game .orientation-white .files :nth-child(even),
-mf-game .orientation-black .files :nth-child(odd) {
-  color: #8a4653;
+.csg-tray-empty { font-size: 0.85rem; color: rgba(203, 185, 167, 0.6); }
+
+.csg-info { margin: 0; font-size: 0.85rem; color: var(--cs-muted); }
+.csg-players, .csg-status, .csg-error { margin: 0; }
+.csg-status {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: rgba(37, 12, 20, 0.5);
+  border: 1px solid var(--cs-border);
 }
+.csg-error { color: var(--cs-warn); }

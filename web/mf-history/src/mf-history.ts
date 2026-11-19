@@ -78,7 +78,12 @@ export class MfHistory extends LitElement {
       <h2 class="csh-title">Jugadas</h2>
       ${lastPly === 0
         ? html`<p class="csh-info">${this.context?.gameId == null ? 'Sin partida.' : 'Aún no hay jugadas.'}</p>`
-        : html`<ol class="csh-moves" aria-label="Jugadas de la partida">
+        : html`<div class="csh-cols" aria-hidden="true">
+              <span></span>
+              <span><i class="csh-dot csh-dot-white"></i>Blancas</span>
+              <span><i class="csh-dot csh-dot-black"></i>Negras</span>
+            </div>
+            <ol class="csh-moves" aria-label="Jugadas de la partida">
             ${rows.map((number) => {
               const whitePly = number * 2 - 1;
               const blackPly = number * 2;

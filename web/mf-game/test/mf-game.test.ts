@@ -284,3 +284,44 @@ describe('replay', () => {
     expect(turnOf(AFTER_E5)).toBe('white');
   });
 });
+
+describe('board extras: turn, check, captures and flip', () => {
+  // after 1.e4 d5 2.exd5 Qxd5 3.Nc3 Qe5+: each side took a pawn, and white is in check
+  const CHECK_FEN = 'rnb1kbnr/ppp1pppp/8/4q3/8/2N5/PPPP1PPP/R1BQKBNR w KQkq - 1 4';
+
+  it('lists the pieces each side took, and whether the side to move is in check', async () => {
+    const { capturedBy, inCheck } = await import('../src/mf-game.js');
+    expect(capturedBy(state().fen)).toEqual({ white: [], black: [] });
+    expect(capturedBy(CHECK_FEN)).toEqual({ white: ['pawn'], black: ['pawn'] });
+    expect(inCheck(state().fen)).toBe(false);
+    expect(inCheck(CHECK_FEN)).toBe(true);
+    expect(inCheck('not a fen')).toBe(false);
+  });
+
+  it('shows the turn, the check and the captured pieces', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ fen: CHECK_FEN, plyCount: 6 }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-turn')?.textContent).toContain('Turno: Blancas');
+    expect(element.querySelector('.csg-check')?.textContent).toBe('Jaque');
+    expect(element.querySelectorAll('.csg-tray[data-by=white] piece.pawn.black')).toHaveLength(1);
+    expect(element.querySelectorAll('.csg-tray[data-by=black] piece.pawn.white')).toHaveLength(1);
+    expect(element.querySelectorAll('cg-board piece')).toHaveLength(30);
+  });
+
+  it('turns the board for this browser only, and starts again unturned in another game', async () => {
+    const { socket, sent } = fakeSocket();
+    const element = await mountGame(socket);
+    const before = sent.length;
+    element.querySelector<HTMLButtonElement>('[data-action=flip]')!.click();
+    await element.updateComplete;
+    expect(element.querySelector('.orientation-black')).not.toBeNull();
+    expect(element.querySelector('[data-action=flip]')?.getAttribute('aria-pressed')).toBe('true');
+    expect([...element.querySelectorAll('.csg-file')].slice(0, 8).map((file) => file.textContent).join('')).toBe('hgfedcba');
+    expect(sent.length).toBe(before);
+    element.context = { v: 1, gameId: 'g2', orientation: 'white', socket };
+    await element.updateComplete;
+    expect(element.querySelector('.orientation-white')).not.toBeNull();
+  });
+});

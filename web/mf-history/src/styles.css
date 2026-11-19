@@ -2,19 +2,83 @@
 
 mf-history { display: block; font-family: var(--cs-font); color: var(--cs-text); }
 .csh-root {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: var(--cs-gap);
-  padding: 18px;
-  background: var(--cs-surface);
-  border: 1px solid var(--cs-border);
+  gap: 12px;
+  padding: 0 0 22px;
   border-radius: var(--cs-radius);
+  border: 1px solid var(--cs-border);
+  background: var(--cs-panel-bg, var(--cs-surface));
+  box-shadow: var(--cs-panel-shadow, none);
 }
-.csh-title { margin: 0; font-family: var(--cs-serif, Georgia, serif); font-size: 1.5rem; font-weight: 700; }
-.csh-moves { margin: 0; padding: 0; list-style: none; max-height: 24rem; overflow-y: auto; font-variant-numeric: tabular-nums; }
-.csh-row { display: flex; gap: 8px; align-items: center; padding: 5px 8px; border-radius: 8px; }
-.csh-row:nth-child(odd) { background: rgba(0, 0, 0, 0.16); }
-.csh-number { min-width: 3ch; color: var(--cs-muted); }
-.csh-san { min-width: 7ch; padding: 1px 6px; border-radius: 6px; font-weight: 500; }
-.csh-san[data-last] { font-weight: 700; color: var(--cs-bg); background: var(--cs-accent); }
-.csh-info { margin: 0; font-size: 0.9rem; color: var(--cs-muted); }
+/* a faint king in the corner, behind the moves */
+.csh-root::after {
+  content: '\2654\FE0E';
+  position: absolute;
+  right: -6px;
+  bottom: -26px;
+  font-family: var(--cs-glyph, serif);
+  font-size: 170px;
+  line-height: 1;
+  color: var(--cs-text);
+  opacity: 0.05;
+  pointer-events: none;
+}
+.csh-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(121, 58, 73, 0.75);
+  font-family: var(--cs-serif, Georgia, serif);
+  font-size: clamp(22px, 1.9vw, 28px);
+  font-weight: 600;
+}
+.csh-title::before {
+  content: '';
+  width: 26px;
+  height: 26px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M9 6h11M9 12h11M9 18h11'/><circle cx='4.5' cy='6' r='1.2' fill='black'/><circle cx='4.5' cy='12' r='1.2' fill='black'/><circle cx='4.5' cy='18' r='1.2' fill='black'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M9 6h11M9 12h11M9 18h11'/><circle cx='4.5' cy='6' r='1.2' fill='black'/><circle cx='4.5' cy='12' r='1.2' fill='black'/><circle cx='4.5' cy='18' r='1.2' fill='black'/></svg>") center / contain no-repeat;
+}
+.csh-info { position: relative; z-index: 1; margin: 4px 26px 8px; font-family: var(--cs-serif, Georgia, serif); font-style: italic; font-size: 1.15rem; color: var(--cs-muted); }
+
+/* two columns, white and black, like a score sheet */
+.csh-cols, .csh-row { display: grid; grid-template-columns: 38px 1fr 1fr; gap: 8px; align-items: center; }
+.csh-cols { position: relative; z-index: 1; padding: 0 28px 0 24px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cs-muted); }
+.csh-cols > span { display: flex; align-items: center; gap: 8px; }
+.csh-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--cs-accent); }
+.csh-dot-white { background: #f8edda; }
+.csh-dot-black { background: #24090f; }
+.csh-moves {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 14px 0 18px;
+  list-style: none;
+  max-height: min(46vh, 380px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cs-border) transparent;
+}
+.csh-row { padding: 4px 6px; border-radius: 10px; }
+.csh-row:nth-child(odd) { background: rgba(37, 12, 20, 0.28); }
+.csh-number { font-family: var(--cs-serif, Georgia, serif); font-weight: 600; color: var(--cs-accent); text-align: right; padding-right: 4px; }
+.csh-san {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  background: rgba(245, 232, 210, 0.07);
+  border: 1px solid rgba(245, 232, 210, 0.1);
+}
+.csh-san + .csh-san { background: rgba(20, 5, 10, 0.35); border-color: rgba(121, 58, 73, 0.55); }
+.csh-san[data-last] { font-weight: 700; color: #2a0e16; background: var(--cs-accent); border-color: var(--cs-accent); }

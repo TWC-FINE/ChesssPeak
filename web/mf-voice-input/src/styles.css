@@ -4,81 +4,159 @@ mf-voice-input { display: block; font-family: var(--cs-font); color: var(--cs-te
 .csv-root {
   display: flex;
   flex-direction: column;
-  gap: var(--cs-gap);
-  padding: 18px;
-  background: var(--cs-surface);
-  border: 1px solid var(--cs-border);
+  gap: 16px;
+  padding: 22px clamp(16px, 1.5vw, 22px) 24px;
   border-radius: var(--cs-radius);
+  border: 1px solid var(--cs-border);
+  background: var(--cs-panel-bg, var(--cs-surface));
+  box-shadow: var(--cs-panel-shadow, none);
 }
-.csv-title { margin: 0; font-family: var(--cs-serif, Georgia, serif); font-size: 1.5rem; font-weight: 700; }
+.csv-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-family: var(--cs-serif, Georgia, serif);
+  font-size: clamp(22px, 1.9vw, 28px);
+  font-weight: 600;
+}
+.csv-title::before {
+  content: '';
+  width: 28px;
+  height: 28px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><rect x='9' y='3' width='6' height='11' rx='3'/><path d='M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8'/></svg>") center / contain no-repeat;
+  mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><rect x='9' y='3' width='6' height='11' rx='3'/><path d='M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8'/></svg>") center / contain no-repeat;
+}
 .csv-info { margin: 0; font-size: 0.82rem; color: var(--cs-muted); }
-.csv-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
-.csv-label { display: flex; flex-direction: column; gap: 6px; flex: 1 1 200px; font-size: 0.9rem; color: var(--cs-muted); }
-.csv-input { font: inherit; padding: 9px 12px; color: var(--cs-text); }
+
+/* recognizer row with a status dot */
+.csv-selector [data-action='choose-recognizer'] {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border-color: rgba(121, 58, 73, 0.85);
+  background: rgba(37, 12, 20, 0.45);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.csv-selector [data-action='choose-recognizer']::before {
+  content: '';
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cs-accent);
+  box-shadow: 0 0 0 3px rgba(216, 184, 120, 0.15);
+}
+.csv-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--cs-border);
+  border-radius: 12px;
+  background: rgba(37, 12, 20, 0.35);
+}
+.csv-options legend { padding: 0 6px; color: var(--cs-muted); font-size: 0.85rem; }
+.csv-options label { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+[data-agent-state] { color: var(--cs-muted); font-size: 0.85rem; }
+
+/* hold-to-talk: a round microphone in its own zone, with the label below */
+.csv-talk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 0;
+  padding: clamp(20px, 2.2vw, 30px) 18px clamp(18px, 2vw, 26px);
+  border-radius: 14px;
+  border: 1px solid rgba(121, 58, 73, 0.9);
+  background:
+    radial-gradient(260px 160px at 50% 30%, rgba(168, 94, 104, 0.22), transparent 70%),
+    rgba(121, 58, 73, 0.18);
+  color: var(--cs-text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.csv-talk::before {
+  content: '';
+  width: clamp(88px, 7vw, 106px);
+  height: clamp(88px, 7vw, 106px);
+  border-radius: 50%;
+  border: 1px solid rgba(245, 232, 210, 0.18);
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5E8D2' stroke-width='1.8' stroke-linecap='round'><rect x='9' y='3' width='6' height='11' rx='3'/><path d='M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8'/></svg>") center / 42% no-repeat,
+    radial-gradient(circle at 50% 32%, #6a2a3c 0%, #4f1d2c 55%, #3d1522 100%);
+  box-shadow: 0 14px 26px -12px rgba(0, 0, 0, 0.8), 0 0 0 14px rgba(37, 12, 20, 0.25), 0 0 0 15px rgba(245, 232, 210, 0.12), inset 0 1px 0 rgba(245, 232, 210, 0.12);
+  margin: 16px 0 6px;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.csv-talk:hover:not(:disabled) { background: radial-gradient(260px 160px at 50% 30%, rgba(168, 94, 104, 0.3), transparent 70%), rgba(121, 58, 73, 0.24); }
+.csv-talk:hover:not(:disabled)::before { transform: scale(1.03); }
+.csv-talk[data-state='listening'] { outline: 2px solid currentColor; color: var(--cs-accent); }
+.csv-talk[data-state='listening']::before {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round'><rect x='9' y='3' width='6' height='11' rx='3'/><path d='M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8'/></svg>") center / 42% no-repeat,
+    radial-gradient(circle at 50% 32%, #c47a85 0%, #a85e68 50%, #874452 100%);
+  transform: scale(1.06);
+  box-shadow: 0 0 0 6px rgba(216, 184, 120, 0.25), 0 0 40px rgba(216, 184, 120, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  animation: csv-pulse 1.6s ease-out infinite;
+}
+.csv-talk[data-state='processing']::before { opacity: 0.6; }
+@keyframes csv-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(216, 184, 120, 0.5), 0 0 40px rgba(216, 184, 120, 0.35); }
+  100% { box-shadow: 0 0 0 22px rgba(216, 184, 120, 0), 0 0 40px rgba(216, 184, 120, 0.35); }
+}
+@media (prefers-reduced-motion: reduce) { .csv-talk[data-state='listening']::before { animation: none; } }
+
+.csv-notice { margin: 0; padding: 10px 14px; border-radius: 12px; border: 1px dashed var(--cs-warn); color: var(--cs-warn); font-size: 0.9rem; }
+
+/* text box: the "o" separator only appears when there is a microphone above it */
+.csv-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: end; }
+.csv-talk ~ .csv-form::before {
+  content: 'o';
+  grid-column: 1 / -1;
+  margin: 2px 0 6px;
+  text-align: center;
+  font-family: var(--cs-serif, Georgia, serif);
+  font-size: 20px;
+  line-height: 1;
+  background:
+    linear-gradient(90deg, transparent, rgba(203, 185, 167, 0.5)) left center / calc(50% - 20px) 1px no-repeat,
+    linear-gradient(90deg, rgba(203, 185, 167, 0.5), transparent) right center / calc(50% - 20px) 1px no-repeat;
+}
+.csv-label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; color: var(--cs-muted); }
+.csv-input { font: inherit; font-size: 1rem; font-weight: 500; letter-spacing: normal; min-height: 52px; padding: 0 16px; border-radius: 14px; color: var(--cs-text); }
+.csv-form button[type='submit'] { min-height: 52px; padding: 0 20px; border-radius: 14px; }
+
 .csv-candidate, .csv-message { margin: 0; }
 .csv-candidate {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 12px;
-  background: var(--cs-surface-2, var(--cs-surface));
+  background: rgba(216, 184, 120, 0.08);
   border: 1px solid var(--cs-accent);
 }
-.csv-candidate strong { font-family: var(--cs-serif, Georgia, serif); font-size: 1.2rem; color: var(--cs-accent); }
-.csv-candidate [data-action='confirm'] { background: var(--cs-rose, var(--cs-accent)); border-color: var(--cs-rose, var(--cs-accent)); }
-.csv-message { padding: 8px 12px; border-radius: 10px; background: rgba(0, 0, 0, 0.18); }
-
-/* hold-to-talk button */
-.csv-talk {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 64px;
-  font: inherit;
-  font-size: 1rem;
+.csv-candidate strong { font-family: var(--cs-serif, Georgia, serif); font-size: 1.25rem; color: var(--cs-accent); }
+.csv-candidate [data-action='confirm'] {
   font-weight: 600;
-  padding: 12px 18px;
-  border-radius: 999px;
-  touch-action: none;
-  user-select: none;
-  color: #fff7ea;
-  background: linear-gradient(145deg, var(--cs-rose, #a85e68), #6b2a3a);
-  border: 1px solid rgba(216, 184, 120, 0.55);
+  color: #2a0e16;
+  background: linear-gradient(180deg, #f7e7c8 0%, #e3c99a 100%);
+  border-color: rgba(216, 184, 120, 0.9);
 }
-.csv-talk::before {
-  content: '';
-  flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.85;
-}
-.csv-talk[data-state='listening'] {
-  outline: 2px solid currentColor;
-  background: linear-gradient(145deg, #c46f7a, #8a3446);
-  box-shadow: 0 0 0 6px rgba(216, 184, 120, 0.25);
-}
-.csv-talk[data-state='listening']::before { background: #ffd9a0; animation: csv-pulse 1s ease-in-out infinite; }
-.csv-talk[data-state='processing']::before { opacity: 0.4; }
-@keyframes csv-pulse { 50% { transform: scale(1.5); opacity: 0.5; } }
-@media (prefers-reduced-motion: reduce) { .csv-talk[data-state='listening']::before { animation: none; } }
-
-.csv-notice { margin: 0; padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--cs-warn); color: var(--cs-warn); font-size: 0.9rem; }
-.csv-selector [data-action='choose-recognizer'] { font-size: 0.85rem; }
-.csv-options {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 8px 0 0;
-  padding: 10px 12px;
-  border: 1px solid var(--cs-border);
-  border-radius: 12px;
-}
-.csv-options legend { padding: 0 6px; color: var(--cs-muted); font-size: 0.85rem; }
-.csv-options label { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-[data-agent-state] { color: var(--cs-muted); font-size: 0.85rem; }
+.csv-message { padding: 8px 12px; border-radius: 10px; background: rgba(37, 12, 20, 0.35); color: var(--cs-text); font-size: 0.92rem; }
