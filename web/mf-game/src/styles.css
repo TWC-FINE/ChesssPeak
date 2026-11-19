@@ -1,9 +1,65 @@
 @import '@chessspeak/shared/tokens.css';
 
 mf-game { display: block; font-family: var(--cs-font); color: var(--cs-text); }
-.csg-root { display: flex; flex-direction: column; gap: var(--cs-gap); max-width: 480px; }
-.csg-board { width: 100%; aspect-ratio: 1; }
-.csg-info { margin: 0; font-size: 0.9rem; color: var(--cs-muted); }
+.csg-root { display: flex; flex-direction: column; gap: var(--cs-gap); width: 100%; }
+.csg-board {
+  width: 100%;
+  aspect-ratio: 1;
+  container-type: inline-size;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px var(--cs-border),
+    0 0 0 8px var(--cs-surface, #35121e),
+    0 0 0 9px var(--cs-border),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.csg-info { margin: 6px 0 0; font-size: 0.85rem; color: var(--cs-muted); }
 .csg-players, .csg-status, .csg-error { margin: 0; }
-.csg-status { font-weight: 600; }
+.csg-players { color: var(--cs-text); }
+.csg-status {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: var(--cs-surface, #35121e);
+  border: 1px solid var(--cs-border);
+}
+.csg-status[data-status='active'] { border-color: var(--cs-accent); }
 .csg-error { color: var(--cs-warn); }
+
+/* board: cream and rose squares instead of the brown theme of chessground */
+mf-game cg-board {
+  background-color: #f1dec0;
+  background-image: conic-gradient(#a86b73 0 90deg, #f1dec0 0 180deg, #a86b73 0 270deg, #f1dec0 0);
+  background-size: 25% 25%;
+  border-radius: 4px;
+}
+mf-game cg-board square.last-move { background-color: rgba(216, 184, 120, 0.55); }
+mf-game cg-board square.check {
+  background: radial-gradient(ellipse at center, rgba(214, 52, 62, 1) 0%, rgba(190, 30, 45, 0.9) 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%);
+}
+
+/* coordinates: large serif labels inside the edge squares */
+mf-game .cg-wrap coords {
+  opacity: 1;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: clamp(11px, 3.4cqi, 22px);
+}
+mf-game .cg-wrap coords.ranks { left: 0; top: 0; width: auto; height: 100%; }
+mf-game .cg-wrap coords.ranks coord { transform: none; padding: 0.25em 0 0 0.35em; line-height: 1; }
+mf-game .cg-wrap coords.files { left: 0; bottom: 0; width: 100%; height: auto; text-transform: lowercase; }
+mf-game .cg-wrap coords.files coord { text-align: right; padding: 0 0.35em 0.2em 0; line-height: 1; }
+/* the bottom-left square is dark in both orientations: light labels on dark squares, and the other way round */
+mf-game .orientation-white .ranks :nth-child(odd),
+mf-game .orientation-black .ranks :nth-child(even),
+mf-game .orientation-white .files :nth-child(odd),
+mf-game .orientation-black .files :nth-child(even) {
+  color: #f1dec0;
+}
+mf-game .orientation-white .ranks :nth-child(even),
+mf-game .orientation-black .ranks :nth-child(odd),
+mf-game .orientation-white .files :nth-child(even),
+mf-game .orientation-black .files :nth-child(odd) {
+  color: #8a4653;
+}
