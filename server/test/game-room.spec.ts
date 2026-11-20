@@ -570,6 +570,32 @@ describe('clock', () => {
     expect(clockOf(resigned, 10 * MIN)).toMatchObject({ blackMs: MIN, running: null });
   });
 
+  it('adds the increment after each move but the first of white, and keeps it after a restart', () => {
+    const room = new GameRoom('g1', ana, 'white', 3 * MIN, 2_000);
+    room.join(ana);
+    room.join(beto);
+    const first = room.move(ana.id, 'e2e4', 1, 0);
+    if (!first.ok) throw new Error(first.message);
+    expect(first.moved.clock).toEqual({ initialMs: 3 * MIN, incrementMs: 2_000, whiteMs: 3 * MIN, blackMs: 3 * MIN, running: 'black' });
+    room.move(beto.id, 'e7e5', 2, 10_000);
+    const third = room.move(ana.id, 'g1f3', 3, 14_000);
+    if (!third.ok) throw new Error(third.message);
+    expect(third.moved.clock).toMatchObject({ whiteMs: 3 * MIN - 4_000 + 2_000, blackMs: 3 * MIN - 10_000 + 2_000 });
+    expect(room.msToFlag(15_000)).toBe(3 * MIN - 8_000 - 1_000);
+    expect(room.incrementMs).toBe(2_000);
+    expect(gameStateSchema.parse(room.stateFor(ana.id, 14_000)).clock?.incrementMs).toBe(2_000);
+    const back = GameRoom.rehydrate(room.snapshot());
+    expect(back.incrementMs).toBe(2_000);
+    expect(back.stateFor(ana.id, 14_000).clock).toEqual(room.stateFor(ana.id, 14_000).clock);
+  });
+
+  it('has no increment unless one is given', () => {
+    const room = clockRoom();
+    expect(room.incrementMs).toBeUndefined();
+    expect(room.snapshot()).not.toHaveProperty('incrementMs');
+    expect(clockOf(room)).not.toHaveProperty('incrementMs');
+  });
+
   it('rebuilds the clock after a restart from the time of each move', () => {
     const room = clockRoom();
     room.move(ana.id, 'e2e4', 1, 0);
