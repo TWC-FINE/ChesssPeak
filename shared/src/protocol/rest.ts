@@ -30,6 +30,28 @@ export type CreateGameRequest = z.infer<typeof createGameRequestSchema>;
 export const createGameResponseSchema = z.object({ gameId: gameIdSchema });
 export type CreateGameResponse = z.infer<typeof createGameResponseSchema>;
 
+/** Most games GET /games/open returns. */
+export const OPEN_GAMES_LIMIT = 20;
+/** A waiting game older than this is left out of GET /games/open: its creator has most likely gone. */
+export const OPEN_GAME_MAX_AGE_MS = 30 * 60_000;
+
+/** One game of GET /games/open: created, and waiting for a rival. */
+export const openGameSchema = z.object({
+  gameId: gameIdSchema,
+  creator: z.string().min(1).max(24),
+  /** The seat the creator took; whoever joins gets the other one. */
+  creatorColor: colorSchema,
+  /** Milliseconds on each clock; absent for a game without a clock. */
+  clockMs: z.number().int().min(1).optional(),
+  /** ISO 8601. */
+  createdAt: z.string().datetime({ offset: true }),
+});
+export type OpenGame = z.infer<typeof openGameSchema>;
+
+/** Response of GET /games/open (public, no token): newest first, at most OPEN_GAMES_LIMIT. */
+export const openGamesResponseSchema = z.object({ games: z.array(openGameSchema) });
+export type OpenGamesResponse = z.infer<typeof openGamesResponseSchema>;
+
 /** Elo every player starts with. */
 export const INITIAL_RATING = 1200;
 
