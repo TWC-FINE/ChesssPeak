@@ -119,6 +119,14 @@ describe('games clock (real Postgres)', () => {
     expect(untimed.clockMs).toBeNull();
   });
 
+  it('keeps the increment of a clock, and rejects one without a clock or longer than a minute', async () => {
+    const timed = await create({ status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 180000, clockIncrementMs: 2000 });
+    expect(timed.clockIncrementMs).toBe(2000);
+    await rejectedBy('games_clock_increment_ms_range', { status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockIncrementMs: 2000 });
+    await rejectedBy('games_clock_increment_ms_range', { status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 180000, clockIncrementMs: 60001 });
+    await rejectedBy('games_clock_increment_ms_range', { status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 180000, clockIncrementMs: 0 });
+  });
+
   it('rejects a clock of zero or longer than an hour', async () => {
     await rejectedBy('games_clock_ms_range', { status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 0 });
     await rejectedBy('games_clock_ms_range', { status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 3600001 });
