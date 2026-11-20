@@ -17,6 +17,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 | `POST /auth/guest` | — | `{ displayName }` (1–24 caracteres, se recorta) | `{ token, identity }`; `identity = { kind: 'guest', guestId, displayName }`. El nombre solo va dentro de `identity` | 400 cuerpo inválido · 429 límite (`@nestjs/throttler`) |
 | `POST /games` | `Authorization: Bearer <token>` | `{ color? }`, con `color` = `white` \| `black` \| `random` (si falta, `random`) | `{ gameId }` | 400 cuerpo inválido · 401 sin token o token inválido |
 | `GET /ranking` | — (público) | — | `{ entries, gamesRated }`; cada `entry = { rank, displayName, rating, games, wins, draws, losses }`, del mejor Elo al peor | 503 sin base de datos |
+| `GET /ranking/:displayName` | — (público) | — | `{ entry, games, ratingHistory }`: la fila del jugador en todo el ranking; sus 20 partidas más recientes (`gameId`, `color`, `opponent`, `outcome` = `win` \| `draw` \| `loss`, `termination`, `finishedAt`, `rating`, `ratingChange`); y su Elo tras cada partida, desde 1200. El nombre se compara sin espacios a los lados y sin distinguir mayúsculas | 400 nombre vacío o de más de 24 caracteres; 404 sin partidas puntuadas; 503 sin base de datos |
 
 ### Ranking
 
