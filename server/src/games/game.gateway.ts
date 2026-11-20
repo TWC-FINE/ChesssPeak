@@ -7,6 +7,7 @@ import {
   gameDrawOfferSchema,
   gameJoinSchema,
   gameMoveSchema,
+  gameReactSchema,
   gameRematchAnswerSchema,
   gameRematchOfferSchema,
   gameResignSchema,
@@ -14,6 +15,7 @@ import {
   type GameErrorCode,
   type GameMoved,
   type Identity,
+  REACTION_COOLDOWN_MS,
   type ServerToClientEvents,
   socketAuthSchema,
 } from '@chessspeak/shared';
@@ -32,6 +34,8 @@ interface SocketData {
   games: Set<string>;
   /** Those of `games` it joined without a seat, as a spectator. */
   watching: Set<string>;
+  /** When this socket last reacted, for REACTION_COOLDOWN_MS. */
+  reactedAt?: number;
 }
 export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
 type GameServer = Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
@@ -194,6 +198,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     if (!answered.ok) return this.refuse(socket, answered.code, answered.message);
     if (answered.seats !== undefined) return this.startRematch(room, answered.seats);
     this.server.to(room.gameId).emit('game:rematch', { gameId: room.gameId, offeredBy: null });
+  }
+
+  /** Relayed to the room and forgotten. Too many in a row are dropped without an answer: that is not an error to show. */
+  @SubscribeMessage('game:react')
+  async react(@ConnectedSocket() socket: GameSocket, @MessageBody() payload: unknown): Promise<void> {
+    const request = gameReactSchema.safeParse(payload);
+    if (!request.success) return this.refuse(socket, 'unauthorized', 'Invalid payload');
+    const now = Date.now();
+    if (socket.data.reactedAt !== undefined && now - socket.data.reactedAt < REACTION_COOLDOWN_MS) return;
+    // taken before the await: two reactions sent together would otherwise both get past the check
+    socket.data.reactedAt = now;
+    const room = await this.joinedRoomOrRefuse(socket, request.data.gameId);
+    if (room === undefined) return;
+
+    const reacted = room.react(playerOf(socket.data.identity).id);
+    if (!reacted.ok) return this.refuse(socket, reacted.code, reacted.message);
+    this.server.to(room.gameId).emit('game:reaction', { gameId: room.gameId, from: reacted.from, reaction: request.data.reaction });
   }
 
   async handleDisconnect(socket: GameSocket): Promise<void> {

@@ -321,6 +321,25 @@ describe('draws by repetition and by fifty moves', () => {
   });
 });
 
+describe('quick reactions', () => {
+  it('lets the players react while the game is played and once it is over', () => {
+    const room = activeRoom();
+    expect(room.react(ana.id)).toEqual({ ok: true, from: 'white' });
+    expect(room.react(beto.id)).toEqual({ ok: true, from: 'black' });
+    room.resign(ana.id);
+    expect(room.react(ana.id)).toEqual({ ok: true, from: 'white' });
+  });
+
+  it('refuses a spectator, a game still waiting and a cancelled one', () => {
+    const room = activeRoom();
+    room.join(carla);
+    expect(room.react(carla.id)).toEqual(refusal('unauthorized'));
+    const waiting = new GameRoom('g2', ana, 'white');
+    waiting.join(ana);
+    expect(waiting.react(ana.id)).toEqual(refusal('unauthorized'));
+  });
+});
+
 describe('draw offers', () => {
   const agreement = { gameId: 'g1', result: '1/2-1/2', termination: 'agreement' };
 

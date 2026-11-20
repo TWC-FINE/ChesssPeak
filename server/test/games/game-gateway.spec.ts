@@ -5,7 +5,7 @@ import { Global, Logger, Module } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
-import { gameDrawSchema, gameEndSchema, gameRematchSchema, gameErrorSchema, gameMovedSchema, gameStateSchema, type Color, type GameEnd, type GameState, type GuestAuthResponse } from '@chessspeak/shared';
+import { gameDrawSchema, gameEndSchema, gameReactionSchema, gameRematchSchema, gameErrorSchema, gameMovedSchema, gameStateSchema, type Color, type GameEnd, type GameState, type GuestAuthResponse } from '@chessspeak/shared';
 import { io, type Socket } from 'socket.io-client';
 import { GuestTokenService } from '../../src/auth/guest-token.service';
 import { GameMovesRepository } from '../../src/database/mongo/game-moves.repository';
@@ -434,6 +434,30 @@ describe('end of the game', () => {
     const error = errorOf(black);
     black.emit('game:move', { gameId, uci: 'e7e5', ply: 1 });
     expect((await error).code).toBe('unauthorized');
+  });
+});
+
+describe('quick reactions', () => {
+  it('relays a reaction to everybody in the game, and drops the next one sent too soon', async () => {
+    const server = await start();
+    const { gameId, white, black } = await activeGame(server);
+    const heard: unknown[] = [];
+    black.on('game:reaction', (reaction) => heard.push(reaction));
+    const first = next(white, 'game:reaction');
+    white.emit('game:react', { gameId, reaction: 'good-luck' });
+    white.emit('game:react', { gameId, reaction: 'oops' });
+    expect(gameReactionSchema.parse(await first)).toEqual({ gameId, from: 'white', reaction: 'good-luck' });
+    // a move after the reactions arrives after them too: by then the dropped one would have been relayed
+    await play(gameId, white, black, 'e2e4', 1);
+    expect(heard).toEqual([{ gameId, from: 'white', reaction: 'good-luck' }]);
+  });
+
+  it('refuses a reaction that is not one of the fixed ones', async () => {
+    const server = await start();
+    const { gameId, white } = await activeGame(server);
+    const refused = next<{ code: string }>(white, 'game:error');
+    white.emit('game:react', { gameId, reaction: 'any text' } as never);
+    expect((await refused).code).toBe('unauthorized');
   });
 });
 

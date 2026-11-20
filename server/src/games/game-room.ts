@@ -311,6 +311,14 @@ export class GameRoom {
     return { ok: true, offeredBy: color };
   }
 
+  /** A quick reaction: only a seat, in a game being played or already finished. Changes nothing in the room. */
+  react(playerId: string): RoomResult<{ from: Color }> {
+    const color = this.colorOf(playerId);
+    if (color === undefined) return refuse('unauthorized', 'You have no seat in this game');
+    if (this.status !== 'active' && this.status !== 'finished') return refuse('unauthorized', `The game is ${this.status}`);
+    return { ok: true, from: color };
+  }
+
   /** Answers the rival's pending rematch offer. */
   answerRematch(playerId: string, accept: boolean): RoomResult<{ seats?: Record<Color, RoomPlayer> }> {
     const color = this.colorOf(playerId);
