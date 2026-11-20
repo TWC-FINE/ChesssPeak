@@ -13,3 +13,8 @@ export function parseRoute(hash: string): Route {
 export function gameIdOf(route: Route): string | null {
   return route.name === 'game' ? route.id : null;
 }
+
+/** Where a game lives, for links and for cs:open-game. */
+export function gameHash(gameId: string): string {
+  return `#/game/${encodeURIComponent(gameId)}`;
+}

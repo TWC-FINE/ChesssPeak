@@ -3,6 +3,7 @@ import { readConfig, timeoutMs } from './config.js';
 import { connect, type GameConnection } from './connection.js';
 import { contextFor } from './contexts.js';
 import { loadMicrofrontend } from './loader.js';
+import { followGameRequests } from './navigation.js';
 import { gameIdOf, parseRoute, type Route } from './router.js';
 import { renderSessionBar } from './session-bar.js';
 import { clearSession, loadSession, saveSession } from './session.js';
@@ -152,6 +153,9 @@ async function mount(tag: (typeof TAGS)[number]): Promise<void> {
 }
 
 window.addEventListener('hashchange', render);
+followGameRequests(document, (hash) => {
+  location.hash = hash;
+});
 forwardVoiceAttempts(document, () => connection);
 render();
 // Each microfrontend loads on its own: one failing never blocks the others.
