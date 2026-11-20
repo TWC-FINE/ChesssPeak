@@ -22,10 +22,14 @@ export class GamesService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Creates a game in `waiting`, with the creator's seat reserved. The other seat stays empty until game:join. */
-  async create(identity: Identity, requested: CreateGameRequest['color']): Promise<string> {
+  /**
+   * Creates a game in `waiting`, with the creator's seat reserved. The other seat stays empty until game:join.
+   * With `clockMinutes`, each player gets that much time.
+   */
+  async create(identity: Identity, requested: CreateGameRequest['color'], clockMinutes?: CreateGameRequest['clockMinutes']): Promise<string> {
     try {
-      const game = await this.prisma.game.create({ data: seatFor(identity, pickColor(requested)), select: { id: true } });
+      const data = { ...seatFor(identity, pickColor(requested)), ...(clockMinutes === undefined ? {} : { clockMs: clockMinutes * 60_000 }) };
+      const game = await this.prisma.game.create({ data, select: { id: true } });
       return game.id;
     } catch (error) {
       this.logger.error(`Could not create a game: ${(error as Error).message}`);

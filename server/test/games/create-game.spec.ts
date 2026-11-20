@@ -75,6 +75,16 @@ describe('POST /games', () => {
     );
   });
 
+  it.each([3, 5, 10])('gives each player %i minutes when asked', async (clockMinutes) => {
+    await post({ color: 'white', clockMinutes }).expect(201);
+    expect(savedData().clockMs).toBe(clockMinutes * 60_000);
+  });
+
+  it('creates a game without a clock when none is asked for', async () => {
+    await post({ color: 'white' }).expect(201);
+    expect('clockMs' in savedData()).toBe(false);
+  });
+
   it.each([['with no body', undefined], ['with an empty body', {}], ['with random', { color: 'random' }]])(
     'draws a color %s',
     async (_case, body) => {
@@ -90,6 +100,8 @@ describe('POST /games', () => {
     ['an unknown color', { color: 'green' }],
     ['an identity sent by the client', { color: 'white', guestId: 'someone-else' }],
     ['a user id sent by the client', { userId: 'someone-else' }],
+    ['a clock the contract does not offer', { clockMinutes: 7 }],
+    ['a clock in milliseconds', { clockMs: 1 }],
   ])('rejects %s with 400 and saves nothing', async (_case, body) => {
     await post(body).expect(400);
     expect(create).not.toHaveBeenCalled();
