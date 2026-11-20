@@ -15,7 +15,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 | Método y ruta | Auth | Petición (estricta) | Respuesta | Errores |
 |---|---|---|---|---|
 | `POST /auth/guest` | — | `{ displayName }` (1–24 caracteres, se recorta) | `{ token, identity }`; `identity = { kind: 'guest', guestId, displayName }`. El nombre solo va dentro de `identity` | 400 cuerpo inválido · 429 límite (`@nestjs/throttler`) |
-| `POST /games` | `Authorization: Bearer <token>` | `{ color? }`, con `color` = `white` \| `black` \| `random` (si falta, `random`) | `{ gameId }` | 400 cuerpo inválido · 401 sin token o token inválido |
+| `POST /games` | `Authorization: Bearer <token>` | `{ color?, clockMinutes? }`, con `color` = `white` \| `black` \| `random` (si falta, `random`) y `clockMinutes` = `3` \| `5` \| `10` (si falta, la partida no tiene reloj) | `{ gameId }` | 400 cuerpo inválido · 401 sin token o token inválido |
 | `GET /ranking` | — (público) | — | `{ entries, gamesRated }`; cada `entry = { rank, displayName, rating, games, wins, draws, losses }`, del mejor Elo al peor | 503 sin base de datos |
 | `GET /ranking/:displayName` | — (público) | — | `{ entry, games, ratingHistory }`: la fila del jugador en todo el ranking; sus 20 partidas más recientes (`gameId`, `color`, `opponent`, `outcome` = `win` \| `draw` \| `loss`, `termination`, `finishedAt`, `rating`, `ratingChange`); y su Elo tras cada partida, desde 1200. El nombre se compara sin espacios a los lados y sin distinguir mayúsculas | 400 nombre vacío o de más de 24 caracteres; 404 sin partidas puntuadas; 503 sin base de datos |
 
@@ -54,8 +54,8 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 
 | Evento | Payload | Emite | Escucha | Cuándo |
 |---|---|---|---|---|
-| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor, drawOffer?, rematchOffer?, nextGameId? }`; cada asiento es `{ displayName, connected }` o `null`; `drawOffer` es el color que ofreció tablas sin respuesta, y no viene si no hay oferta; `rematchOffer` es lo mismo para la revancha, y `nextGameId`, la partida de la revancha aceptada | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
-| `game:moved` | `{ gameId, ply, uci, san, fen }` | servidor | `<mf-game>` (los dos jugadores) | tras una jugada válida |
+| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor, drawOffer?, rematchOffer?, nextGameId?, clock? }`; cada asiento es `{ displayName, connected }` o `null`; `drawOffer` es el color que ofreció tablas sin respuesta, y no viene si no hay oferta; `rematchOffer` es lo mismo para la revancha, y `nextGameId`, la partida de la revancha aceptada; `clock` = `{ initialMs, whiteMs, blackMs, running }` solo en una partida con reloj, con los milisegundos que le quedan a cada uno cuando el servidor envió el mensaje, y `running` = el color cuyo tiempo corre, o `null` | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
+| `game:moved` | `{ gameId, ply, uci, san, fen, clock? }`; `clock` es el reloj tras la jugada, en una partida con reloj | servidor | `<mf-game>` (los dos jugadores) | tras una jugada válida |
 | `game:end` | `{ gameId, result, termination }` | servidor | `<mf-game>` | fin de la partida |
 | `game:draw` | `{ gameId, offeredBy }`; `offeredBy` es `white`, `black` o `null` | servidor | `<mf-game>` (los dos jugadores) | al ofrecer tablas (el color) y al rechazarlas (`null`) |
 | `game:rematch` | `{ gameId, offeredBy, nextGameId? }`; `offeredBy` es `white`, `black` o `null`; `nextGameId` es la partida nueva, ya activa | servidor | `<mf-game>` (los dos jugadores) | al ofrecer la revancha (el color), al rechazarla (`null`) y al aceptarla (`null` y `nextGameId`) |
@@ -64,7 +64,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 **Valores:**
 - `status`: `waiting` \| `active` \| `finished` \| `aborted` (los mismos que `games` en Postgres).
 - `result`: `1-0` \| `0-1` \| `1/2-1/2` \| `*` (`*` solo en `aborted`).
-- `termination`: `checkmate`, `stalemate`, `insufficient_material`, `resignation`, `abandonment`, `aborted`, `agreement` (tablas aceptadas por los dos, siempre `1/2-1/2`); **reservados en v1**: `threefold_repetition`, `fifty_moves`.
+- `termination`: `checkmate`, `stalemate`, `insufficient_material`, `resignation`, `abandonment`, `aborted`, `agreement` (tablas aceptadas por los dos, siempre `1/2-1/2`), `timeout` (a un jugador se le acabó el tiempo; gana el rival); **reservados en v1**: `threefold_repetition`, `fifty_moves`.
 - `game:error.code`:
   - `not_your_turn`: no te toca;
   - `illegal`: la jugada no es legal en la posición;
@@ -179,6 +179,7 @@ Respuestas provisionales a las dudas de revisión del contrato v1. Quedan **marc
 |---|---|
 | Tablas | Desde el 20 de noviembre: `game:draw-offer`, `game:draw-answer` y `game:draw`, con `termination: 'agreement'`. Hay una sola oferta pendiente a la vez. **Cualquier jugada la retira**, y no se anuncia con `game:draw`: quien recibe `game:moved` la descarta. Tampoco sobrevive a un reinicio del servidor, porque no se guarda. **Pendiente de la aprobación del responsable del repo** |
 | Revancha | Desde el 20 de noviembre: `game:rematch-offer`, `game:rematch-answer` y `game:rematch`, y `cs:open-game` en el navegador. Solo con la partida **terminada** (no cancelada), una oferta pendiente a la vez, y como mucho una revancha por partida. La partida nueva se crea ya activa, con los mismos jugadores y los colores invertidos. La oferta no sobrevive a un reinicio del servidor; `nextGameId`, tampoco. **Pendiente de la aprobación del responsable del repo** |
+| Reloj | Desde el 20 de noviembre: `clockMinutes` en `POST /games`, `clock` en `game:state` y `game:moved`, y `termination: 'timeout'`. Sin incremento. El reloj arranca tras la primera jugada de blancas, y lo decide el servidor: una jugada que llega sin tiempo no se juega y la partida termina por `timeout`. Al terminar por otra causa, el reloj se queda como estaba en la última jugada. Tras un reinicio del servidor, el tiempo se reconstruye con la hora de las jugadas guardadas, así que el rato caído cuenta para quien tenía el turno. La revancha conserva el reloj. **Pendiente de la aprobación del responsable del repo** |
 | `game:leave`, acks | **No hay** en v1: ni salida explícita ni acks de Socket.IO. Las respuestas van por `game:moved`, `game:state` y `game:error`. Se pueden añadir después como eventos nuevos (cambio aditivo) |
 | `voice:attempt` | `fen` y `normalized` **se quedan** en el mensaje |
 | `cs:position` | `turn` y `yourColor` **se quedan** |
