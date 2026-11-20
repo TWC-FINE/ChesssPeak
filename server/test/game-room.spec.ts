@@ -240,6 +240,105 @@ describe('end of the game', () => {
   });
 });
 
+describe('draw offers', () => {
+  const agreement = { gameId: 'g1', result: '1/2-1/2', termination: 'agreement' };
+
+  it('shows the pending offer to both players', () => {
+    const room = activeRoom();
+    expect(room.offerDraw(ana.id)).toEqual({ ok: true, offeredBy: 'white' });
+    expect(room.stateFor(ana.id).drawOffer).toBe('white');
+    expect(room.stateFor(beto.id).drawOffer).toBe('white');
+    expect(room.status).toBe('active');
+  });
+
+  it('ends in a draw by agreement when the rival accepts', () => {
+    const room = activeRoom();
+    room.offerDraw(ana.id);
+    expect(room.answerDraw(beto.id, true)).toEqual({ ok: true, end: agreement });
+    expect(room.status).toBe('finished');
+    expect(room.stateFor(ana.id).drawOffer).toBeUndefined();
+  });
+
+  it('goes on when the rival declines, and the same player can offer again', () => {
+    const room = activeRoom();
+    room.offerDraw(ana.id);
+    expect(room.answerDraw(beto.id, false)).toEqual({ ok: true });
+    expect(room.stateFor(ana.id).drawOffer).toBeUndefined();
+    expect(room.status).toBe('active');
+    expect(room.offerDraw(ana.id)).toEqual({ ok: true, offeredBy: 'white' });
+  });
+
+  it('takes an offer back from the rival as accepting it', () => {
+    const room = activeRoom();
+    room.offerDraw(beto.id);
+    expect(room.offerDraw(ana.id)).toEqual({ ok: true, end: agreement });
+  });
+
+  it('keeps one offer when the same player offers twice', () => {
+    const room = activeRoom();
+    room.offerDraw(ana.id);
+    expect(room.offerDraw(ana.id)).toEqual({ ok: true, offeredBy: 'white' });
+    expect(room.status).toBe('active');
+  });
+
+  it('withdraws the offer on any move', () => {
+    const offeredBeforeMoving = activeRoom();
+    offeredBeforeMoving.offerDraw(ana.id);
+    play(offeredBeforeMoving, 'e2e4');
+    expect(offeredBeforeMoving.stateFor(beto.id).drawOffer).toBeUndefined();
+    expect(offeredBeforeMoving.answerDraw(beto.id, true)).toEqual(refusal('unauthorized'));
+
+    const declinedByPlaying = activeRoom();
+    play(declinedByPlaying, 'e2e4');
+    declinedByPlaying.offerDraw(ana.id);
+    play(declinedByPlaying, 'e7e5');
+    expect(declinedByPlaying.stateFor(ana.id).drawOffer).toBeUndefined();
+  });
+
+  it('refuses to answer an offer that does not exist or is your own', () => {
+    const room = activeRoom();
+    expect(room.answerDraw(beto.id, true)).toEqual(refusal('unauthorized'));
+    room.offerDraw(ana.id);
+    expect(room.answerDraw(ana.id, true)).toEqual(refusal('unauthorized'));
+    expect(room.status).toBe('active');
+  });
+
+  it('refuses offers and answers from outside, before the game starts and after it ends', () => {
+    expect(activeRoom().offerDraw(carla.id)).toEqual(refusal('unauthorized'));
+    expect(activeRoom().answerDraw(carla.id, true)).toEqual(refusal('unauthorized'));
+    expect(new GameRoom('g1', ana, 'white').offerDraw(ana.id)).toEqual(refusal('unauthorized'));
+    const finished = activeRoom();
+    finished.offerDraw(ana.id);
+    finished.resign(beto.id);
+    expect(finished.answerDraw(beto.id, true)).toEqual(refusal('unauthorized'));
+    expect(finished.offerDraw(beto.id)).toEqual(refusal('unauthorized'));
+    expect(finished.result?.termination).toBe('resignation');
+    expect(finished.stateFor(ana.id).drawOffer).toBeUndefined();
+  });
+
+  it('does not keep the offer through a restart, but keeps the draw', () => {
+    const pending = activeRoom();
+    pending.offerDraw(ana.id);
+    expect(GameRoom.rehydrate(pending.snapshot()).stateFor(ana.id).drawOffer).toBeUndefined();
+
+    const drawn = activeRoom();
+    drawn.offerDraw(ana.id);
+    drawn.answerDraw(beto.id, true);
+    const back = GameRoom.rehydrate(drawn.snapshot());
+    expect(back.result).toEqual(agreement);
+    expect(back.status).toBe('finished');
+  });
+
+  it('every message passes the schemas of @chessspeak/shared', () => {
+    const room = activeRoom();
+    room.offerDraw(beto.id);
+    gameStateSchema.parse(room.stateFor(ana.id));
+    const answered = room.answerDraw(ana.id, true);
+    if (!answered.ok || answered.end === undefined) throw new Error('expected the end');
+    gameEndSchema.parse(answered.end);
+  });
+});
+
 describe('connections and abandonment', () => {
   it('shows the connection state of each seat', () => {
     const room = activeRoom();

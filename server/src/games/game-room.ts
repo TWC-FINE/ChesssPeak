@@ -54,6 +54,8 @@ export class GameRoom {
   private readonly moves: MoveRecord[] = [];
   private readonly seats: Record<Color, Seat | null> = { white: null, black: null };
   private end: GameEnd | undefined;
+  /** Who offered a draw the rival has not answered. Not in the snapshot: an offer does not survive a restart. */
+  private drawOffer: Color | undefined;
 
   /** The creator's color is already decided: `random` is drawn by whoever creates the room. */
   constructor(
@@ -158,6 +160,30 @@ export class GameRoom {
     return this.end === undefined ? { ok: true, moved } : { ok: true, moved, end: { ...this.end } };
   }
 
+  /**
+   * Offers a draw. While the rival's offer is pending, offering accepts it: both want the draw. Offering twice keeps
+   * the one offer, so a repeated send changes nothing.
+   */
+  offerDraw(playerId: string): RoomResult<{ offeredBy: Color } | { end: GameEnd }> {
+    const color = this.colorOf(playerId);
+    if (color === undefined) return refuse('unauthorized', 'You have no seat in this game');
+    if (this.status !== 'active') return refuse('unauthorized', `The game is ${this.status}`);
+    if (this.drawOffer === opposite(color)) return { ok: true, end: this.finish('1/2-1/2', 'agreement') };
+    this.drawOffer = color;
+    return { ok: true, offeredBy: color };
+  }
+
+  /** Answers the rival's pending offer. Only the rival of whoever offered can answer, and only once. */
+  answerDraw(playerId: string, accept: boolean): RoomResult<{ end?: GameEnd }> {
+    const color = this.colorOf(playerId);
+    if (color === undefined) return refuse('unauthorized', 'You have no seat in this game');
+    if (this.status !== 'active') return refuse('unauthorized', `The game is ${this.status}`);
+    if (this.drawOffer !== opposite(color)) return refuse('unauthorized', 'There is no draw offer from your rival');
+    if (accept) return { ok: true, end: this.finish('1/2-1/2', 'agreement') };
+    this.drawOffer = undefined;
+    return { ok: true };
+  }
+
   resign(playerId: string): RoomResult<{ end: GameEnd }> {
     const color = this.colorOf(playerId);
     if (color === undefined) return refuse('unauthorized', 'You have no seat in this game');
@@ -197,6 +223,7 @@ export class GameRoom {
       turn: this.position.turn,
       seats: { white: seat('white'), black: seat('black') },
       yourColor: view,
+      ...(this.drawOffer === undefined ? {} : { drawOffer: this.drawOffer }),
     };
   }
 
@@ -226,6 +253,8 @@ export class GameRoom {
     const record: MoveRecord = { ply: this.plyCount + 1, uci, san: makeSan(this.position, move) };
     this.position.play(move);
     this.moves.push(record);
+    // a move withdraws any offer: the one who offered moved on, or the rival declined it by playing
+    this.drawOffer = undefined;
     const ending = terminationOf(this.position);
     if (ending !== undefined) this.finish(ending.result, ending.termination);
     return record;
@@ -233,6 +262,7 @@ export class GameRoom {
 
   private finish(result: GameEnd['result'], termination: GameEnd['termination']): GameEnd {
     this.end = { gameId: this.gameId, result, termination };
+    this.drawOffer = undefined;
     return { ...this.end };
   }
 }
