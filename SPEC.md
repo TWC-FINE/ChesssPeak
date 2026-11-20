@@ -45,6 +45,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF20. Revancha: con la partida terminada, un jugador pide la revancha desde `<mf-game>` y el rival la acepta o la rechaza. Si la acepta, el servidor crea una partida nueva, ya activa, con los mismos jugadores y los colores invertidos, y los dos pasan a ella (`cs:open-game`). Una revancha por partida.
 - RF21. Reloj por partida: al crearla se elige sin reloj, 3, 5 o 10 minutos por jugador, sin incremento. El reloj arranca tras la primera jugada de blancas y lo cuenta el servidor; a quien se le acaba el tiempo pierde (`timeout`). `<mf-game>` muestra los dos relojes y la revancha conserva el mismo.
 - RF22. Tablas por triple repetición y por la regla de las 50 jugadas, automáticas: el servidor termina la partida en tablas cuando la misma posición aparece por tercera vez, o tras 100 medias jugadas sin captura ni jugada de peón. El mate tiene prioridad.
+- RF23. Espectadores: quien abre el enlace de una partida sin asiento libre la mira en tiempo real, con el tablero, el historial y los relojes, pero no puede jugar, rendirse ni ofrecer tablas o revancha. Los jugadores ven cuántos miran. Si hay revancha, el espectador pasa a mirarla también.
 
 **Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.2):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.

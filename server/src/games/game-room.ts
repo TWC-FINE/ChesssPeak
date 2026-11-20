@@ -37,6 +37,9 @@ interface ClockState {
   lastMoveAt: number | undefined;
 }
 
+/** Who joined: a seat, or a spectator once the seats are taken. Only a seat activates the game. */
+export type Joined = { color: Color; activated: boolean } | { color: 'spectator'; activated: false };
+
 interface Seat extends RoomPlayer {
   /** Open sockets: one player can have several tabs, and closing one must not disconnect them. */
   connections: number;
@@ -95,6 +98,8 @@ export class GameRoom {
   /** `creating` from the moment both want the rematch until the store answers; then the new game. One per game. */
   private rematch: 'creating' | { nextGameId: string } | undefined;
   private readonly clock: ClockState | undefined;
+  /** Open sockets of each identity that watches without a seat. Not in the snapshot, like the connections. */
+  private readonly watchers = new Map<string, number>();
   /** How many times each position has been on the board, by `repetitionKey`. */
   private readonly seen = new Map<string, number>();
 
@@ -172,24 +177,39 @@ export class GameRoom {
 
   /**
    * Takes a seat, in the order of docs/protocol.md §2: the one this identity already has (a reconnection, or the
-   * creator's reserved seat), or else the free one while the game is waiting. Call it once per socket.
+   * creator's reserved seat), or else the free one while the game is waiting. Without a free seat, the identity
+   * watches. Call it once per socket.
    */
-  join(player: RoomPlayer): RoomResult<{ color: Color; activated: boolean }> {
+  join(player: RoomPlayer): RoomResult<Joined> {
     const current = this.colorOf(player.id);
     if (current !== undefined) {
       this.seats[current]!.connections++;
       return { ok: true, color: current, activated: false };
     }
-    if (this.status !== 'waiting') return refuse('unauthorized', 'The game has no free seat');
+    if (this.status !== 'waiting') {
+      this.watchers.set(player.id, (this.watchers.get(player.id) ?? 0) + 1);
+      return { ok: true, color: 'spectator', activated: false };
+    }
     const color: Color = this.seats.white === null ? 'white' : 'black';
     this.seats[color] = { ...player, connections: 1 };
     return { ok: true, color, activated: true };
   }
 
-  /** One socket of this player closed. Returns the color when that left them with no open socket. */
-  disconnect(playerId: string): Color | undefined {
+  /** How many identities watch without a seat, with at least one open socket. */
+  get spectators(): number {
+    return this.watchers.size;
+  }
+
+  /** One socket of this identity closed. Returns its view when that left it with no open socket. */
+  disconnect(playerId: string): PlayerView | undefined {
     const color = this.colorOf(playerId);
-    if (color === undefined) return undefined;
+    if (color === undefined) {
+      const open = this.watchers.get(playerId);
+      if (open === undefined) return undefined;
+      if (open > 1) this.watchers.set(playerId, open - 1);
+      else this.watchers.delete(playerId);
+      return open > 1 ? undefined : 'spectator';
+    }
     const seat = this.seats[color]!;
     if (seat.connections === 0) return undefined;
     seat.connections--;
@@ -328,7 +348,7 @@ export class GameRoom {
 
   /** The state one player receives; `yourColor` is the only part that differs between them. */
   stateFor(playerId: string, now?: number): GameState {
-    const view: PlayerView = this.colorOf(playerId) ?? 'spectator'; // reserved in v1: join() never lets a third identity in
+    const view: PlayerView = this.colorOf(playerId) ?? 'spectator';
     const seat = (color: Color): GameState['seats'][Color] => {
       const current = this.seats[color];
       return current === null ? null : { displayName: current.displayName, connected: current.connections > 0 };
@@ -346,6 +366,7 @@ export class GameRoom {
       ...(this.rematchOffer === undefined ? {} : { rematchOffer: this.rematchOffer }),
       ...(this.rematch === undefined || this.rematch === 'creating' ? {} : { nextGameId: this.rematch.nextGameId }),
       ...(this.clock === undefined ? {} : { clock: this.clockAt(now) }),
+      ...(this.watchers.size === 0 ? {} : { spectators: this.watchers.size }),
     };
   }
 

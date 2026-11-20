@@ -28,9 +28,10 @@ const attempt = (overrides: Partial<VoiceAttemptPayload> = {}): VoiceAttemptPayl
   ...overrides,
 });
 
-function socketIn(games: string[] = [GAME_ID]) {
+function socketIn(games: string[] = [GAME_ID], watching: string[] = []) {
   const emit = jest.fn();
-  const socket = { data: { identity: { kind: 'guest', guestId: 'guest-1', displayName: 'Ana' }, games: new Set(games) }, emit } as unknown as GameSocket;
+  const data = { identity: { kind: 'guest', guestId: 'guest-1', displayName: 'Ana' }, games: new Set(games), watching: new Set(watching) };
+  const socket = { data, emit } as unknown as GameSocket;
   return { socket, emit };
 }
 
@@ -75,6 +76,12 @@ describe('voice:attempt', () => {
   it('drops an attempt for a game the socket did not join', async () => {
     const { gateway, save } = gatewayWith();
     await gateway.record(socketIn([]).socket, attempt());
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('drops an attempt from a spectator of the game', async () => {
+    const { gateway, save } = gatewayWith();
+    await gateway.record(socketIn([GAME_ID], [GAME_ID]).socket, attempt());
     expect(save).not.toHaveBeenCalled();
   });
 

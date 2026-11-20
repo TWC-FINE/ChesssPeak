@@ -30,6 +30,8 @@ interface SocketData {
   identity: Identity;
   /** The games this socket joined, so that closing it counts once in each. */
   games: Set<string>;
+  /** Those of `games` it joined without a seat, as a spectator. */
+  watching: Set<string>;
 }
 export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
 type GameServer = Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>;
@@ -65,6 +67,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
       if (identity === undefined) return next(new Error('unauthorized'));
       socket.data.identity = identity;
       socket.data.games = new Set();
+      socket.data.watching = new Set();
       next();
     });
   }
@@ -95,9 +98,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
 
     socket.data.games.add(room.gameId);
     await socket.join(room.gameId);
-    this.cancelAbandon(room.gameId, joined.color);
-    if (joined.activated) this.queue.push(room.gameId, 'activate', () => this.store.activate(room.gameId, joined.color, player));
-    this.watchAbsentRival(room, joined.color, player.id);
+    if (joined.color === 'spectator') {
+      socket.data.watching.add(room.gameId);
+    } else {
+      const color = joined.color;
+      this.cancelAbandon(room.gameId, color);
+      if (joined.activated) this.queue.push(room.gameId, 'activate', () => this.store.activate(room.gameId, color, player));
+      this.watchAbsentRival(room, color, player.id);
+    }
     // after a restart no timer runs: the first join of the game starts it again
     if (!this.flagTimers.has(room.gameId)) this.scheduleFlag(room);
     this.broadcastState(room);
@@ -197,7 +205,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
       const left = room.disconnect(playerOf(socket.data.identity).id);
       if (left === undefined) continue;
       this.broadcastState(room);
-      if (room.status === 'active') this.scheduleAbandon(room, left);
+      // a spectator who leaves abandons nothing
+      if (left !== 'spectator' && room.status === 'active') this.scheduleAbandon(room, left);
     }
   }
 
