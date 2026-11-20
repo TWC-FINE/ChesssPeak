@@ -16,6 +16,13 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 |---|---|---|---|---|
 | `POST /auth/guest` | — | `{ displayName }` (1–24 caracteres, se recorta) | `{ token, identity }`; `identity = { kind: 'guest', guestId, displayName }`. El nombre solo va dentro de `identity` | 400 cuerpo inválido · 429 límite (`@nestjs/throttler`) |
 | `POST /games` | `Authorization: Bearer <token>` | `{ color? }`, con `color` = `white` \| `black` \| `random` (si falta, `random`) | `{ gameId }` | 400 cuerpo inválido · 401 sin token o token inválido |
+| `GET /ranking` | — (público) | — | `{ entries, gamesRated }`; cada `entry = { rank, displayName, rating, games, wins, draws, losses }`, del mejor Elo al peor | 503 sin base de datos |
+
+### Ranking
+
+- Sale de las partidas `finished` de Postgres con resultado `1-0`, `0-1` o `1/2-1/2`, en orden de `finished_at`. Las abandonadas (`*`) no cuentan.
+- Se agrupa por **nombre visible** (sin distinguir mayúsculas ni espacios de los extremos): un invitado recibe un `guestId` nuevo en cada entrada, así que el `guestId` no sirve para seguir a una persona. Una partida entre dos nombres iguales no cuenta.
+- Elo: todos empiezan con `INITIAL_RATING = 1200`; `K = 40` durante las 10 primeras partidas de cada jugador y `K = 20` después. `rank` es compartido entre jugadores con el mismo Elo.
 
 ### Asientos y color
 
@@ -78,7 +85,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 
 | Evento | Payload | Emite | Escucha |
 |---|---|---|---|
-| `cs:mf-ready` | `{ v, name }` | cada microfrontend al registrarse | shell |
+| `cs:mf-ready` | `{ v, name }`; `name` = `mf-game` \| `mf-voice-input` \| `mf-history` \| `mf-ranking` | cada microfrontend al registrarse | shell |
 | `cs:position` | `{ v, gameId, fen, plyCount, turn, yourColor }`; `plyCount` = media jugadas jugadas hasta ahora (0 al inicio). **Solo el FEN**: sin listas de jugadas legales | `<mf-game>`, tras cada cambio | `<mf-voice-input>` |
 | `cs:move-candidate` | `{ v, gameId, ply, uci, san, source }`; `source` = `voice` \| `text` | `<mf-voice-input>` | `<mf-game>` (dibuja la flecha) |
 | `cs:move-confirmed` | `{ v, gameId, ply, uci, source }` | `<mf-voice-input>` (voz «sí» o botón) | `<mf-game>` (envía `game:move`) |
@@ -95,6 +102,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 | `<mf-game>` | `{ v, gameId, orientation, socket }`. `socket` cumple `GameSocket` (el `Socket` de socket.io-client) o es `null` |
 | `<mf-voice-input>` | `{ v, gameId, lang, recognizer, releaseDelayMs?, agentUrl }`. Sin `releaseDelayMs` usa `DEFAULT_RELEASE_DELAY_MS = 400` de `shared` ([ADR 5](adr/0005-strategy-y-reconocedor-por-defecto.md)) |
 | `<mf-history>` | `{ v, gameId }`. Las jugadas llegan por `cs:move-applied` |
+| `<mf-ranking>` | `{ v, apiUrl }`. Lee él mismo `GET /ranking`, que es público: no recibe socket ni token. `apiUrl` es `null` si la web no tiene servidor configurado |
 
 ## 6. Una jugada por voz, de punta a punta
 

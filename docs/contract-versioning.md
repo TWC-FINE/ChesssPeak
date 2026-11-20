@@ -37,3 +37,4 @@ Lo que no está permitido exige **v: 2**: nueva constante, handshake con `v: 2` 
 | Versión | Fecha | Cambio |
 |---|---|---|
 | v1 | 2 de noviembre de 2026 | Primera versión (socket, REST, `cs:*`, contextos). Fusionada en `main` el 6 de noviembre, con la aprobación del responsable del repo. |
+| v1 | 20 de noviembre de 2026 | Aditivo, sigue en `v: 1`: `GET /ranking` (`rankingResponseSchema`, `INITIAL_RATING`), el contexto de `<mf-ranking>` y el nombre `mf-ranking` en `cs:mf-ready`. El shell y los microfrontends se publican juntos en `web/dist`, así que ningún shell antiguo recibe el nombre nuevo. Pendiente de la aprobación del responsable del repo. |
