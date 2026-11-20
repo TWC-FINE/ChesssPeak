@@ -67,11 +67,18 @@ describe('api', () => {
 
   it('creates a game with the token', async () => {
     const fetcher = answering(201, { gameId: 'g1' });
-    await expect(createGame('http://api', 'tok', 'black', fetcher)).resolves.toBe('g1');
+    await expect(createGame('http://api', 'tok', { color: 'black' }, fetcher)).resolves.toBe('g1');
     const [url, init] = (fetcher as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
     expect(url).toBe('http://api/games');
     expect(init.body).toBe('{"color":"black"}');
     expect(init.headers).toMatchObject({ Authorization: 'Bearer tok' });
+  });
+
+  it('sends the clock chosen for the game', async () => {
+    const fetcher = answering(201, { gameId: 'g1' });
+    await createGame('http://api', 'tok', { color: 'random', clockMinutes: 5 }, fetcher);
+    const [, init] = (fetcher as unknown as { mock: { calls: [string, RequestInit][] } }).mock.calls[0]!;
+    expect(init.body).toBe('{"color":"random","clockMinutes":5}');
   });
 
   it.each([
@@ -84,7 +91,7 @@ describe('api', () => {
   });
 
   it('explains an expired session when creating a game', async () => {
-    await expect(createGame('http://api', 'tok', 'white', answering(401))).rejects.toThrow('caducó');
+    await expect(createGame('http://api', 'tok', { color: 'white' }, answering(401))).rejects.toThrow('caducó');
   });
 
   it('explains a server that cannot be reached', async () => {
