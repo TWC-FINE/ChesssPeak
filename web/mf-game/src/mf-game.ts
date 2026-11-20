@@ -17,8 +17,11 @@ import {
   type GameError,
   type GameErrorCode,
   type GameMoved,
+  type GameReaction,
   type GameSocket,
   type GameState,
+  REACTION_COOLDOWN_MS,
+  type Reaction,
 } from '@chessspeak/shared';
 import baseCss from 'chessground/assets/chessground.base.css?inline';
 import brownCss from 'chessground/assets/chessground.brown.css?inline';
@@ -36,6 +39,18 @@ if (!document.getElementById(STYLE_ID)) {
   style.textContent = [baseCss, brownCss, piecesCss, ownCss].join('\n');
   document.head.append(style);
 }
+
+/** The text of each quick reaction: the contract only carries its name. */
+export const REACTION_TEXT: Record<Reaction, string> = {
+  hello: '¡Hola!',
+  'good-luck': '¡Suerte!',
+  'well-played': '¡Bien jugado!',
+  oops: '¡Uy!',
+  thanks: '¡Gracias!',
+  'good-game': '¡Buena partida!',
+};
+/** How long a reaction stays on screen. */
+export const REACTION_SHOWN_MS = 4000;
 
 /** The interface decides the text from the code; game:error.message is only for debugging (docs/protocol.md §7). */
 const ERROR_TEXT: Record<GameErrorCode, string> = {
@@ -149,6 +164,12 @@ export class MfGame extends LitElement {
   private readoutOn = readoutPreference();
   /** The ply shown while a finished game is reviewed (cs:review); undefined is the position of the game. */
   private reviewPly: number | undefined;
+  /** The last reaction heard, while it is on screen. */
+  private reaction: { text: string; mine: boolean } | undefined;
+  private reactionTimer: ReturnType<typeof setTimeout> | undefined;
+  /** Until when the reaction buttons rest, as the server drops what comes sooner. */
+  private reactionsRestUntil = 0;
+  private restTimer: ReturnType<typeof setTimeout> | undefined;
 
   protected override createRenderRoot(): HTMLElement {
     return this;
@@ -171,6 +192,8 @@ export class MfGame extends LitElement {
     document.removeEventListener('cs:review', this.onReview);
     this.useSocket(null);
     this.stopTicking();
+    this.clearReaction();
+    clearTimeout(this.restTimer);
     this.synced = undefined;
     this.ground?.destroy();
     this.ground = undefined;
@@ -221,6 +244,7 @@ export class MfGame extends LitElement {
       ${this.renderStatus()}
       ${this.renderDraw()}
       ${this.renderRematch()}
+      ${this.renderReactions()}
       ${this.error === '' ? '' : html`<p class="csg-error" role="alert">${this.error}</p>`}
     </div>`;
   }
@@ -324,6 +348,39 @@ export class MfGame extends LitElement {
   }
 
   /** Once the game is finished: offer a rematch, wait, answer it, or go to the one both accepted. */
+  /** Buttons for the players; the reaction heard, for everybody in the game. */
+  private renderReactions() {
+    const state = this.state;
+    if (state === undefined) return '';
+    const seated = state.yourColor !== 'spectator' && (state.status === 'active' || state.status === 'finished');
+    const resting = Date.now() < this.reactionsRestUntil;
+    const heard = this.reaction === undefined ? '' : html`<p class="csg-reaction" role="status" ?data-mine=${this.reaction.mine}>${this.reaction.text}</p>`;
+    if (!seated) return heard;
+    return html`<div class="csg-reactions" aria-label="Reacciones rápidas">
+        ${(Object.keys(REACTION_TEXT) as Reaction[]).map(
+          (reaction) =>
+            html`<button type="button" data-reaction=${reaction} ?disabled=${resting} @click=${() => this.sendReaction(reaction)}>${REACTION_TEXT[reaction]}</button>`,
+        )}
+      </div>
+      ${heard}`;
+  }
+
+  private sendReaction(reaction: Reaction): void {
+    const gameId = this.state?.gameId;
+    if (this.socket === null || gameId === undefined || Date.now() < this.reactionsRestUntil) return;
+    this.socket.emit('game:react', { gameId, reaction });
+    this.reactionsRestUntil = Date.now() + REACTION_COOLDOWN_MS;
+    clearTimeout(this.restTimer);
+    this.restTimer = setTimeout(() => this.requestUpdate(), REACTION_COOLDOWN_MS);
+    this.requestUpdate();
+  }
+
+  private clearReaction(): void {
+    clearTimeout(this.reactionTimer);
+    this.reactionTimer = undefined;
+    this.reaction = undefined;
+  }
+
   private renderRematch() {
     const state = this.state;
     if (state === undefined || this.end === undefined || state.status !== 'finished' || state.yourColor === 'spectator') return '';
@@ -448,6 +505,7 @@ export class MfGame extends LitElement {
     this.end = undefined;
     this.arrow = undefined;
     this.reviewPly = undefined;
+    this.clearReaction();
     this.error = '';
     this.drawDeclined = false;
     this.rematchDeclined = false;
@@ -461,12 +519,14 @@ export class MfGame extends LitElement {
     this.socket?.off('game:end', this.onEnd);
     this.socket?.off('game:draw', this.onDraw);
     this.socket?.off('game:rematch', this.onRematch);
+    this.socket?.off('game:reaction', this.onReaction);
     this.socket?.off('game:error', this.onError);
     socket?.on('game:state', this.onState);
     socket?.on('game:moved', this.onMoved);
     socket?.on('game:end', this.onEnd);
     socket?.on('game:draw', this.onDraw);
     socket?.on('game:rematch', this.onRematch);
+    socket?.on('game:reaction', this.onReaction);
     socket?.on('game:error', this.onError);
     this.socket = socket;
   }
@@ -560,6 +620,20 @@ export class MfGame extends LitElement {
   };
 
   /** A rematch both accepted opens right away for both players; an old one, found on rejoin, waits for the button. */
+  private readonly onReaction = (reaction: GameReaction): void => {
+    const state = this.state;
+    if (state === undefined || reaction.gameId !== state.gameId) return;
+    const mine = reaction.from === state.yourColor;
+    const who = mine ? 'Tú' : (state.seats[reaction.from]?.displayName ?? COLOR_TEXT[reaction.from]);
+    this.clearReaction();
+    this.reaction = { text: `${who}: ${REACTION_TEXT[reaction.reaction]}`, mine };
+    this.reactionTimer = setTimeout(() => {
+      this.clearReaction();
+      this.requestUpdate();
+    }, REACTION_SHOWN_MS);
+    this.requestUpdate();
+  };
+
   private readonly onRematch = (rematch: GameRematch): void => {
     const state = this.state;
     if (state === undefined || rematch.gameId !== state.gameId) return;

@@ -178,3 +178,9 @@ mf-game .csg-tray piece {
 /* a finished game reviewed from <mf-history> */
 .csg-review { margin: 0; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--cs-accent); color: var(--cs-accent); font-size: 0.9rem; }
 .csg-increment { align-self: center; font-size: 0.8rem; color: var(--cs-muted); }
+
+/* quick reactions: fixed texts, and the last one heard */
+.csg-reactions { display: flex; flex-wrap: wrap; gap: 6px; }
+.csg-reactions button { padding: 4px 10px; font-size: 0.85rem; border-radius: 999px; }
+.csg-reaction { margin: 0; padding: 6px 12px; width: fit-content; border-radius: 999px; background: var(--cs-accent); color: #2a0e16; font-weight: 600; }
+.csg-reaction[data-mine] { background: transparent; color: var(--cs-accent); border: 1px solid var(--cs-accent); }
