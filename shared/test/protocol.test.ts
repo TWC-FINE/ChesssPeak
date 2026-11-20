@@ -6,6 +6,9 @@ import {
   clientEventSchemas,
   createGameRequestSchema,
   createGameResponseSchema,
+  gameDrawAnswerSchema,
+  gameDrawOfferSchema,
+  gameDrawSchema,
   gameEndSchema,
   gameErrorSchema,
   gameJoinSchema,
@@ -84,8 +87,18 @@ describe('client → server (strict)', () => {
     expect(gameMoveSchema.safeParse({ gameId: 'g1', uci: 'e2e4', ply: 1, color: 'white' }).success).toBe(false);
     expect(gameJoinSchema.safeParse({ gameId: 'g1', userId: 'u1' }).success).toBe(false);
     expect(gameResignSchema.safeParse({ gameId: 'g1', player: 'x' }).success).toBe(false);
+    expect(gameDrawOfferSchema.safeParse({ gameId: 'g1', color: 'white' }).success).toBe(false);
+    expect(gameDrawAnswerSchema.safeParse({ gameId: 'g1', accept: true, player: 'x' }).success).toBe(false);
     expect(voiceAttemptSchema.safeParse({ ...attempt, player: 'x' }).success).toBe(false);
     expect(voiceAttemptSchema.safeParse({ ...attempt, createdAt: '2026-11-02' }).success).toBe(false);
+  });
+
+  it('validates the draw offer and its answer', () => {
+    expect(gameDrawOfferSchema.safeParse({ gameId: 'g1' }).success).toBe(true);
+    expect(gameDrawAnswerSchema.safeParse({ gameId: 'g1', accept: true }).success).toBe(true);
+    expect(gameDrawAnswerSchema.safeParse({ gameId: 'g1', accept: false }).success).toBe(true);
+    expect(gameDrawAnswerSchema.safeParse({ gameId: 'g1' }).success).toBe(false);
+    expect(gameDrawAnswerSchema.safeParse({ gameId: 'g1', accept: 'yes' }).success).toBe(false);
   });
 
   it('validates a voice attempt, nested objects included', () => {
@@ -117,6 +130,12 @@ describe('server → client (tolerant)', () => {
     expect('clock' in newer).toBe(false);
   });
 
+  it('carries a pending draw offer only when there is one', () => {
+    expect(gameStateSchema.parse(state).drawOffer).toBeUndefined();
+    expect(gameStateSchema.parse({ ...state, drawOffer: 'black' }).drawOffer).toBe('black');
+    expect(gameStateSchema.safeParse({ ...state, drawOffer: 'spectator' }).success).toBe(false);
+  });
+
   it('counts half-moves with plyCount, 0 at the start and never negative', () => {
     expect(gameStateSchema.safeParse({ ...state, moves: [], plyCount: 0 }).success).toBe(true);
     expect(gameStateSchema.safeParse({ ...state, plyCount: -1 }).success).toBe(false);
@@ -135,6 +154,10 @@ describe('server → client (tolerant)', () => {
     expect(gameMovedSchema.safeParse({ gameId: 'g1', ply: 0, uci: 'e2e4', san: 'e4', fen: state.fen }).success).toBe(false);
     expect(gameEndSchema.safeParse({ gameId: 'g1', result: '1-0', termination: 'checkmate' }).success).toBe(true);
     expect(gameEndSchema.safeParse({ gameId: 'g1', result: '*', termination: 'aborted' }).success).toBe(true);
+    expect(gameEndSchema.safeParse({ gameId: 'g1', result: '1/2-1/2', termination: 'agreement' }).success).toBe(true);
+    expect(gameDrawSchema.safeParse({ gameId: 'g1', offeredBy: 'white' }).success).toBe(true);
+    expect(gameDrawSchema.safeParse({ gameId: 'g1', offeredBy: null }).success).toBe(true);
+    expect(gameDrawSchema.safeParse({ gameId: 'g1' }).success).toBe(false);
     expect(gameEndSchema.safeParse({ gameId: 'g1', result: '2-0', termination: 'checkmate' }).success).toBe(false);
     for (const code of ['not_your_turn', 'illegal', 'stale_ply', 'unauthorized', 'not_found']) {
       expect(gameErrorSchema.safeParse({ code, message: 'x' }).success).toBe(true);
@@ -176,17 +199,20 @@ describe('types match the schemas', () => {
     expectTypeOf<ClientPayload<'game:join'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:join']>>();
     expectTypeOf<ClientPayload<'game:move'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:move']>>();
     expectTypeOf<ClientPayload<'game:resign'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:resign']>>();
+    expectTypeOf<ClientPayload<'game:draw-offer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:draw-offer']>>();
+    expectTypeOf<ClientPayload<'game:draw-answer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:draw-answer']>>();
     expectTypeOf<ClientPayload<'voice:attempt'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['voice:attempt']>>();
     expectTypeOf<ServerPayload<'game:state'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:state']>>();
     expectTypeOf<ServerPayload<'game:moved'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:moved']>>();
     expectTypeOf<ServerPayload<'game:end'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:end']>>();
+    expectTypeOf<ServerPayload<'game:draw'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:draw']>>();
     expectTypeOf<ServerPayload<'game:error'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:error']>>();
   });
 
   it('every event of the generics has a schema and vice versa', () => {
     expectTypeOf<keyof ClientToServerEvents>().toEqualTypeOf<keyof typeof clientEventSchemas>();
     expectTypeOf<keyof ServerToClientEvents>().toEqualTypeOf<keyof typeof serverEventSchemas>();
-    expect(Object.keys(clientEventSchemas).sort()).toEqual(['game:join', 'game:move', 'game:resign', 'voice:attempt']);
-    expect(Object.keys(serverEventSchemas).sort()).toEqual(['game:end', 'game:error', 'game:moved', 'game:state']);
+    expect(Object.keys(clientEventSchemas).sort()).toEqual(['game:draw-answer', 'game:draw-offer', 'game:join', 'game:move', 'game:resign', 'voice:attempt']);
+    expect(Object.keys(serverEventSchemas).sort()).toEqual(['game:draw', 'game:end', 'game:error', 'game:moved', 'game:state']);
   });
 });

@@ -27,7 +27,10 @@ export type GameStatus = z.infer<typeof gameStatusSchema>;
 export const gameResultSchema = z.enum(['1-0', '0-1', '1/2-1/2', '*']);
 export type GameResult = z.infer<typeof gameResultSchema>;
 
-/** `threefold_repetition` and `fifty_moves` are RESERVED: not detected in v1. */
+/**
+ * `threefold_repetition` and `fifty_moves` are RESERVED: not detected in v1. `agreement` (a draw both players
+ * accepted) came later in v1, see docs/contract-versioning.md.
+ */
 export const terminationSchema = z.enum([
   'checkmate',
   'stalemate',
@@ -37,6 +40,7 @@ export const terminationSchema = z.enum([
   'aborted',
   'threefold_repetition',
   'fifty_moves',
+  'agreement',
 ]);
 export type Termination = z.infer<typeof terminationSchema>;
 
