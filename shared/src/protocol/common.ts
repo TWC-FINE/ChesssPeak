@@ -15,7 +15,7 @@ export const fenSchema = z.string().min(1);
 export const colorSchema = z.enum(['white', 'black']);
 export type Color = z.infer<typeof colorSchema>;
 
-/** `spectator` is RESERVED: not used in v1 (a third identity that joins is rejected). */
+/** `spectator` was reserved; since 20 November 2026 it is whoever joins a game whose seats are taken. */
 export const playerViewSchema = z.enum(['white', 'black', 'spectator']);
 export type PlayerView = z.infer<typeof playerViewSchema>;
 
@@ -48,6 +48,6 @@ export type Termination = z.infer<typeof terminationSchema>;
 
 /** Members of the enums above that v1 does not emit yet. */
 export const RESERVED_IN_V1 = {
-  playerView: ['spectator'],
+  playerView: [],
   termination: [],
 } as const;

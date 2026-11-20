@@ -235,6 +235,24 @@ describe('server → client (tolerant)', () => {
     expect(rematch.parse({ gameId: 'g1', offeredBy: null, extra: 1 })).toEqual({ gameId: 'g1', offeredBy: null });
   });
 
+  it('takes the number of spectators of game:state only as a positive whole number', () => {
+    const state = serverEventSchemas['game:state'];
+    const base = {
+      gameId: 'g1',
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      moves: [],
+      plyCount: 0,
+      status: 'active',
+      turn: 'white',
+      seats: { white: null, black: null },
+      yourColor: 'spectator',
+    };
+    expect(state.safeParse(base).success).toBe(true);
+    expect(state.parse({ ...base, spectators: 2 }).spectators).toBe(2);
+    expect(state.safeParse({ ...base, spectators: 0 }).success).toBe(false);
+    expect(state.safeParse({ ...base, spectators: 1.5 }).success).toBe(false);
+  });
+
   it('keeps the rematch fields of game:state optional', () => {
     const state = serverEventSchemas['game:state'];
     const base = {
@@ -275,7 +293,7 @@ describe('server → client (tolerant)', () => {
   });
 
   it('marks the reserved values', () => {
-    expect(RESERVED_IN_V1.playerView).toEqual(['spectator']);
+    expect(RESERVED_IN_V1.playerView).toEqual([]);
     expect(RESERVED_IN_V1.termination).toEqual([]);
   });
 });
