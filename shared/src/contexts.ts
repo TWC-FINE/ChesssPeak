@@ -34,3 +34,11 @@ export const historyContextSchema = z.object({
 });
 /** The moves arrive through cs:move-applied, not through the context. */
 export type HistoryContext = z.infer<typeof historyContextSchema>;
+
+export const rankingContextSchema = z.object({
+  v: z.literal(1),
+  /** Server base URL, e.g. https://api.example.com; null when the web has none configured. */
+  apiUrl: z.string().url().nullable(),
+});
+/** <mf-ranking> reads the public GET /ranking itself: it needs no socket and no token. */
+export type RankingContext = z.infer<typeof rankingContextSchema>;
