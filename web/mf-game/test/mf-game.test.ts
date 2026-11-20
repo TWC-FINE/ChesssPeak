@@ -418,3 +418,88 @@ describe('draw offers', () => {
     expect(element.querySelector('.csg-draw')).toBeNull();
   });
 });
+
+describe('rematch', () => {
+  const button = (element: GameElement, action: string) => element.querySelector<HTMLButtonElement>(`[data-action=${action}]`);
+  const finished = async (over: Partial<GameState> = {}) => {
+    const { socket, sent, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ status: 'finished', ...over }));
+    receive('game:end', { gameId: 'g1', result: '1-0', termination: 'resignation' });
+    await element.updateComplete;
+    return { element, sent, receive };
+  };
+  const opened = (element: GameElement) => {
+    const ids: string[] = [];
+    element.addEventListener('cs:open-game', (event) => ids.push((event as CustomEvent<{ gameId: string }>).detail.gameId));
+    return ids;
+  };
+
+  it('offers a rematch once the game is finished, and not before', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state());
+    await element.updateComplete;
+    expect(button(element, 'offer-rematch')).toBeNull();
+
+    const { element: done, sent } = await finished();
+    button(done, 'offer-rematch')!.click();
+    expect(sent.at(-1)).toEqual(['game:rematch-offer', { gameId: 'g1' }]);
+  });
+
+  it('waits after offering, and says when the rival declined', async () => {
+    const { element, receive } = await finished();
+    receive('game:rematch', { gameId: 'g1', offeredBy: 'white' });
+    await element.updateComplete;
+    expect(element.textContent).toContain('Pediste la revancha. Esperando respuesta.');
+    receive('game:rematch', { gameId: 'g1', offeredBy: null });
+    await element.updateComplete;
+    expect(element.textContent).toContain('Tu rival rechazó la revancha.');
+    expect(button(element, 'offer-rematch')).not.toBeNull();
+  });
+
+  it('lets the rival accept or decline', async () => {
+    const { element, sent } = await finished({ yourColor: 'black', rematchOffer: 'white' });
+    expect(element.textContent).toContain('Tu rival quiere la revancha');
+    button(element, 'accept-rematch')!.click();
+    expect(sent.at(-1)).toEqual(['game:rematch-answer', { gameId: 'g1', accept: true }]);
+    button(element, 'decline-rematch')!.click();
+    expect(sent.at(-1)).toEqual(['game:rematch-answer', { gameId: 'g1', accept: false }]);
+  });
+
+  it('asks the shell to open the new game as soon as both accepted', async () => {
+    const { element, receive } = await finished({ rematchOffer: 'white' });
+    const ids = opened(element);
+    receive('game:rematch', { gameId: 'g1', offeredBy: null, nextGameId: 'g2' });
+    await element.updateComplete;
+    expect(ids).toEqual(['g2']);
+    expect(element.textContent).not.toContain('Tu rival rechazó la revancha.');
+  });
+
+  it('only shows a button to a rematch it finds when coming back', async () => {
+    const { element } = await finished({ nextGameId: 'g2' });
+    const ids = opened(element);
+    expect(ids).toEqual([]);
+    button(element, 'open-rematch')!.click();
+    expect(ids).toEqual(['g2']);
+    expect(button(element, 'offer-rematch')).toBeNull();
+  });
+
+  it('shows nothing to a spectator, after a cancelled game, or for another game', async () => {
+    const { element } = await finished({ yourColor: 'spectator' });
+    expect(element.querySelector('.csg-rematch')).toBeNull();
+
+    const { socket, receive } = fakeSocket();
+    const aborted = await mountGame(socket);
+    receive('game:state', state({ status: 'waiting' }));
+    receive('game:end', { gameId: 'g1', result: '*', termination: 'aborted' });
+    await aborted.updateComplete;
+    expect(aborted.querySelector('.csg-rematch')).toBeNull();
+
+    const { element: other, receive: hear } = await finished();
+    const ids = opened(other);
+    hear('game:rematch', { gameId: 'other', offeredBy: null, nextGameId: 'g9' });
+    expect(ids).toEqual([]);
+  });
+});
+
