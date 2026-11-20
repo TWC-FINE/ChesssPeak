@@ -1,4 +1,4 @@
-import type { CreateGameRequest } from '@chessspeak/shared';
+import { CLOCK_MINUTES, type CreateGameRequest } from '@chessspeak/shared';
 
 export interface SessionBarState {
   displayName: string | null;
@@ -11,7 +11,8 @@ export interface SessionBarState {
 
 export interface SessionBarActions {
   signIn(displayName: string): void;
-  createGame(color: NonNullable<CreateGameRequest['color']>): void;
+  /** `clockMinutes` is undefined for a game without a clock. */
+  createGame(color: NonNullable<CreateGameRequest['color']>, clockMinutes: CreateGameRequest['clockMinutes']): void;
   signOut(): void;
 }
 
@@ -22,6 +23,28 @@ function button(label: string, onClick: () => void, name: string): HTMLButtonEle
   element.dataset.action = name;
   element.addEventListener('click', onClick);
   return element;
+}
+
+/** "Sin reloj" or the minutes of the contract; the value is read when a color is chosen. */
+function clockSelect(): HTMLSelectElement {
+  const select = document.createElement('select');
+  select.name = 'clock';
+  select.dataset.clock = '';
+  select.setAttribute('aria-label', 'Reloj');
+  const option = (value: string, text: string) => {
+    const element = document.createElement('option');
+    element.value = value;
+    element.textContent = text;
+    return element;
+  };
+  select.append(option('', 'Sin reloj'), ...CLOCK_MINUTES.map((minutes) => option(String(minutes), `${minutes} min`)));
+  return select;
+}
+
+/** The minutes of an option of the clock select, or undefined for "Sin reloj" and anything the contract does not offer. */
+export function clockMinutesOf(value: string): CreateGameRequest['clockMinutes'] {
+  const minutes = Number(value);
+  return CLOCK_MINUTES.find((offered) => offered === minutes);
 }
 
 function signInForm(actions: SessionBarActions): HTMLFormElement {
@@ -62,12 +85,16 @@ export function renderSessionBar(host: HTMLElement, state: SessionBarState, acti
       const start = document.createElement('p');
       start.className = 'cs-start';
       start.textContent = 'Crear partida con: ';
+      const clock = clockSelect();
+      const create = (color: NonNullable<CreateGameRequest['color']>) => () => actions.createGame(color, clockMinutesOf(clock.value));
       start.append(
-        button('Blancas', () => actions.createGame('white'), 'create-white'),
+        clock,
         ' ',
-        button('Negras', () => actions.createGame('black'), 'create-black'),
+        button('Blancas', create('white'), 'create-white'),
         ' ',
-        button('Al azar', () => actions.createGame('random'), 'create-random'),
+        button('Negras', create('black'), 'create-black'),
+        ' ',
+        button('Al azar', create('random'), 'create-random'),
       );
       children.push(start);
     } else {
