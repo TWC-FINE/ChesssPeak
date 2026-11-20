@@ -25,6 +25,7 @@ import brownCss from 'chessground/assets/chessground.brown.css?inline';
 import piecesCss from 'chessground/assets/chessground.cburnett.css?inline';
 import { fensAfter, turnOf } from './replay.js';
 import { saveSoundPreference, soundPreference, webAudioSound, type MoveSound } from './sound.js';
+import { browserSpeaker, readoutPreference, saveReadoutPreference, spokenSan, type MoveSpeaker } from './speech.js';
 import ownCss from './styles.css?inline';
 
 // Light DOM means the styles are global: inject them once.
@@ -142,6 +143,10 @@ export class MfGame extends LitElement {
   sound: MoveSound = webAudioSound();
   /** Kept in this browser, for every game. */
   private soundOn = soundPreference();
+  /** What reads the moves aloud; a test replaces it. */
+  speaker: MoveSpeaker = browserSpeaker();
+  /** Kept in this browser too: whether the moves of the rival are read aloud. */
+  private readoutOn = readoutPreference();
 
   protected override createRenderRoot(): HTMLElement {
     return this;
@@ -189,8 +194,11 @@ export class MfGame extends LitElement {
       <div class="csg-toolbar">
         ${this.renderTurn(fen)}
         ${this.renderClocks()}
-        <button type="button" class="csg-sound" data-action="toggle-sound" aria-pressed=${String(this.soundOn)} @click=${this.toggleSound}>
-          ${this.soundOn ? 'Sonido: sí' : 'Sonido: no'}
+        <button type="button" class="csg-toggle csg-sound" data-action="toggle-sound" aria-pressed=${String(this.soundOn)} title=${this.soundOn ? 'Quitar el sonido de las jugadas' : 'Poner el sonido de las jugadas'} @click=${this.toggleSound}>
+          Sonido
+        </button>
+        <button type="button" class="csg-toggle csg-readout" data-action="toggle-readout" aria-pressed=${String(this.readoutOn)} title=${this.readoutOn ? 'Dejar de leer en voz alta las jugadas del rival' : 'Leer en voz alta las jugadas del rival'} @click=${this.toggleReadout}>
+          Leer jugadas
         </button>
         <button type="button" class="csg-flip" data-action="flip" aria-pressed=${String(this.flipped)} @click=${this.flip}>Girar tablero</button>
       </div>
@@ -257,6 +265,17 @@ export class MfGame extends LitElement {
     saveSoundPreference(this.soundOn);
     this.requestUpdate();
   };
+
+  private readonly toggleReadout = (): void => {
+    this.readoutOn = !this.readoutOn;
+    saveReadoutPreference(this.readoutOn);
+    this.requestUpdate();
+  };
+
+  /** The moves of the rival are read aloud; a spectator hears them all. Never the player's own: they just said it. */
+  private readAloud(mover: 'white' | 'black', san: string): void {
+    if (this.readoutOn && this.state?.yourColor !== mover) this.speaker.say(spokenSan(san));
+  }
 
   private beep(kind: 'move' | 'capture' | 'end'): void {
     if (this.soundOn) this.sound.play(kind);
@@ -461,6 +480,7 @@ export class MfGame extends LitElement {
       this.socket?.emit('game:join', { gameId: state.gameId });
       return;
     }
+    const mover = state.turn;
     // a move withdraws the pending draw offer (docs/protocol.md §7)
     const { drawOffer: _withdrawn, ...rest } = state;
     this.state = {
@@ -479,6 +499,7 @@ export class MfGame extends LitElement {
     this.announcePosition(this.state);
     // only a move that arrives live sounds: loading the state of a game is silent
     this.beep(moved.san.includes('x') ? 'capture' : 'move');
+    this.readAloud(mover, moved.san);
     this.requestUpdate();
   };
 
