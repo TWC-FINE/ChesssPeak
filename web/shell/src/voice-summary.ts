@@ -55,9 +55,7 @@ function cell(tag: 'th' | 'td', text: string): HTMLTableCellElement {
 
 /** The page of the route #/voz: one row per recognizer, and what the numbers mean. */
 export function renderVoiceSummary(host: HTMLElement, state: VoiceSummaryState, refresh: () => void): void {
-  const title = document.createElement('h2');
-  title.className = 'cs-voice-title';
-  title.textContent = 'Telemetría de voz';
+  // the section head of the shell already names the page
   const again = document.createElement('button');
   again.type = 'button';
   again.dataset.action = 'refresh-voice';
@@ -65,7 +63,7 @@ export function renderVoiceSummary(host: HTMLElement, state: VoiceSummaryState, 
   again.addEventListener('click', refresh);
   const head = document.createElement('div');
   head.className = 'cs-voice-head';
-  head.append(title, again);
+  head.append(again);
   const children: HTMLElement[] = [head];
 
   const note = (text: string, alert = false) => {
