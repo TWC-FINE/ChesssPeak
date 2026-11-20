@@ -8,7 +8,7 @@ import { renderSessionBar } from './session-bar.js';
 import { clearSession, loadSession, saveSession } from './session.js';
 import { forwardVoiceAttempts } from './telemetry.js';
 
-const TAGS = ['mf-game', 'mf-voice-input', 'mf-history'] as const;
+const TAGS = ['mf-game', 'mf-voice-input', 'mf-history', 'mf-ranking'] as const;
 const config = readConfig();
 const mounted = new Map<string, HTMLElement>();
 
@@ -29,6 +29,7 @@ let message = '';
 function describeRoute(route: Route): string {
   if (route.name === 'home') return 'Inicio (sin partida)';
   if (route.name === 'game') return `Partida ${route.id}`;
+  if (route.name === 'ranking') return 'Ranking de jugadores';
   return `Ruta desconocida: ${route.hash}`;
 }
 
@@ -46,6 +47,10 @@ function render(): void {
     else link.removeAttribute('aria-current');
   }
   const gameId = gameIdOf(route);
+  // the ranking takes the place of the board; the game microfrontends stay mounted underneath
+  const main = document.getElementById('cs-main');
+  if (main !== null) main.dataset.view = route.name === 'ranking' ? 'ranking' : 'game';
+  const ranking = { apiUrl: config.PUBLIC_API_URL || null, active: route.name === 'ranking' };
 
   const bar = document.getElementById('cs-session');
   if (bar !== null) {
@@ -53,7 +58,7 @@ function render(): void {
   }
   for (const [tag, element] of mounted) {
     // every new context object makes <mf-game> ask the server for the state, which a reconnection needs
-    (element as HTMLElement & { context?: unknown }).context = contextFor(tag, gameId, config.PUBLIC_AGENT_URL || null, online ? connection : null);
+    (element as HTMLElement & { context?: unknown }).context = contextFor(tag, gameId, config.PUBLIC_AGENT_URL || null, online ? connection : null, ranking);
   }
 }
 
