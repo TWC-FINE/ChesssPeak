@@ -3,6 +3,8 @@ import { ConnectedSocket, MessageBody, type OnGatewayDisconnect, type OnGatewayI
 import {
   type ClientToServerEvents,
   type Color,
+  gameDrawAnswerSchema,
+  gameDrawOfferSchema,
   gameJoinSchema,
   gameMoveSchema,
   gameResignSchema,
@@ -119,6 +121,32 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     const resigned = room.resign(playerOf(socket.data.identity).id);
     if (!resigned.ok) return this.refuse(socket, resigned.code, resigned.message);
     this.finish(room, resigned.end);
+  }
+
+  @SubscribeMessage('game:draw-offer')
+  async offerDraw(@ConnectedSocket() socket: GameSocket, @MessageBody() payload: unknown): Promise<void> {
+    const request = gameDrawOfferSchema.safeParse(payload);
+    if (!request.success) return this.refuse(socket, 'unauthorized', 'Invalid payload');
+    const room = await this.joinedRoomOrRefuse(socket, request.data.gameId);
+    if (room === undefined) return;
+
+    const offered = room.offerDraw(playerOf(socket.data.identity).id);
+    if (!offered.ok) return this.refuse(socket, offered.code, offered.message);
+    if ('end' in offered) return this.finish(room, offered.end);
+    this.server.to(room.gameId).emit('game:draw', { gameId: room.gameId, offeredBy: offered.offeredBy });
+  }
+
+  @SubscribeMessage('game:draw-answer')
+  async answerDraw(@ConnectedSocket() socket: GameSocket, @MessageBody() payload: unknown): Promise<void> {
+    const request = gameDrawAnswerSchema.safeParse(payload);
+    if (!request.success) return this.refuse(socket, 'unauthorized', 'Invalid payload');
+    const room = await this.joinedRoomOrRefuse(socket, request.data.gameId);
+    if (room === undefined) return;
+
+    const answered = room.answerDraw(playerOf(socket.data.identity).id, request.data.accept);
+    if (!answered.ok) return this.refuse(socket, answered.code, answered.message);
+    if (answered.end !== undefined) return this.finish(room, answered.end);
+    this.server.to(room.gameId).emit('game:draw', { gameId: room.gameId, offeredBy: null });
   }
 
   async handleDisconnect(socket: GameSocket): Promise<void> {
