@@ -218,6 +218,37 @@ describe('server → client (tolerant)', () => {
     expect(profileNameSchema.safeParse('x'.repeat(25)).success).toBe(false);
   });
 
+  it('validates the rematch events, strict from the client and tolerant from the server', () => {
+    expect(clientEventSchemas['game:rematch-offer'].safeParse({ gameId: 'g1' }).success).toBe(true);
+    expect(clientEventSchemas['game:rematch-offer'].safeParse({ gameId: 'g1', color: 'white' }).success).toBe(false);
+    expect(clientEventSchemas['game:rematch-answer'].safeParse({ gameId: 'g1', accept: false }).success).toBe(true);
+    expect(clientEventSchemas['game:rematch-answer'].safeParse({ gameId: 'g1' }).success).toBe(false);
+    expect(clientEventSchemas['game:rematch-answer'].safeParse({ gameId: 'g1', accept: 'yes' }).success).toBe(false);
+
+    const rematch = serverEventSchemas['game:rematch'];
+    expect(rematch.safeParse({ gameId: 'g1', offeredBy: 'black' }).success).toBe(true);
+    expect(rematch.safeParse({ gameId: 'g1', offeredBy: null, nextGameId: 'g2' }).success).toBe(true);
+    expect(rematch.safeParse({ gameId: 'g1', offeredBy: 'red' }).success).toBe(false);
+    expect(rematch.parse({ gameId: 'g1', offeredBy: null, extra: 1 })).toEqual({ gameId: 'g1', offeredBy: null });
+  });
+
+  it('keeps the rematch fields of game:state optional', () => {
+    const state = serverEventSchemas['game:state'];
+    const base = {
+      gameId: 'g1',
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      moves: [],
+      plyCount: 0,
+      status: 'finished',
+      turn: 'white',
+      seats: { white: null, black: null },
+      yourColor: 'white',
+    };
+    expect(state.safeParse(base).success).toBe(true);
+    expect(state.parse({ ...base, rematchOffer: 'white', nextGameId: 'g2' })).toMatchObject({ rematchOffer: 'white', nextGameId: 'g2' });
+    expect(state.safeParse({ ...base, rematchOffer: 'nobody' }).success).toBe(false);
+  });
+
   it('marks the reserved values', () => {
     expect(RESERVED_IN_V1.playerView).toEqual(['spectator']);
     expect(RESERVED_IN_V1.termination).toEqual(['threefold_repetition', 'fifty_moves']);
@@ -233,18 +264,21 @@ describe('types match the schemas', () => {
     expectTypeOf<ClientPayload<'game:resign'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:resign']>>();
     expectTypeOf<ClientPayload<'game:draw-offer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:draw-offer']>>();
     expectTypeOf<ClientPayload<'game:draw-answer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:draw-answer']>>();
+    expectTypeOf<ClientPayload<'game:rematch-offer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:rematch-offer']>>();
+    expectTypeOf<ClientPayload<'game:rematch-answer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:rematch-answer']>>();
     expectTypeOf<ClientPayload<'voice:attempt'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['voice:attempt']>>();
     expectTypeOf<ServerPayload<'game:state'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:state']>>();
     expectTypeOf<ServerPayload<'game:moved'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:moved']>>();
     expectTypeOf<ServerPayload<'game:end'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:end']>>();
     expectTypeOf<ServerPayload<'game:draw'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:draw']>>();
+    expectTypeOf<ServerPayload<'game:rematch'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:rematch']>>();
     expectTypeOf<ServerPayload<'game:error'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:error']>>();
   });
 
   it('every event of the generics has a schema and vice versa', () => {
     expectTypeOf<keyof ClientToServerEvents>().toEqualTypeOf<keyof typeof clientEventSchemas>();
     expectTypeOf<keyof ServerToClientEvents>().toEqualTypeOf<keyof typeof serverEventSchemas>();
-    expect(Object.keys(clientEventSchemas).sort()).toEqual(['game:draw-answer', 'game:draw-offer', 'game:join', 'game:move', 'game:resign', 'voice:attempt']);
-    expect(Object.keys(serverEventSchemas).sort()).toEqual(['game:draw', 'game:end', 'game:error', 'game:moved', 'game:state']);
+    expect(Object.keys(clientEventSchemas).sort()).toEqual(['game:draw-answer', 'game:draw-offer', 'game:join', 'game:move', 'game:rematch-answer', 'game:rematch-offer', 'game:resign', 'voice:attempt']);
+    expect(Object.keys(serverEventSchemas).sort()).toEqual(['game:draw', 'game:end', 'game:error', 'game:moved', 'game:rematch', 'game:state']);
   });
 });
