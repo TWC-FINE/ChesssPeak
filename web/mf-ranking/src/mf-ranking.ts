@@ -45,6 +45,7 @@ const TERMINATION_TEXT: Record<NonNullable<ProfileGame['termination']>, string> 
   threefold_repetition: 'triple repetición',
   fifty_moves: '50 jugadas',
   agreement: 'mutuo acuerdo',
+  timeout: 'tiempo',
 };
 
 const signed = (value: number): string => (value > 0 ? `+${value}` : value < 0 ? `−${-value}` : '±0');
