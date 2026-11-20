@@ -92,7 +92,7 @@ ChessSpeak/
 ```
 
 ### 5.2 Backend (NestJS, monolito modular)
-- Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`. `analysis` opcional; sin `signaling`.
+- Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `ranking`, `health`. `analysis` opcional; sin `signaling`.
 - Estado de partida en memoria: clase `GameRoom` pura (sin Nest). Se actualiza de forma síncrona antes de cualquier `await`.
 - Persistencia por jugada en Mongo (write-behind), idempotente: `updateOne({gameId, plyCount: ply-1}, {$push, $inc: {plyCount: 1}})`. Rehidratación desde Mongo al reconectar.
 - El servidor valida la jugada (UCI) y **no sabe de voz**.
@@ -145,6 +145,7 @@ Los percentiles (p50/p95) se calculan en Node, no con pipelines de agregación d
 - Comunicación con CustomEvent tipados con prefijo `cs:`, definidos en `shared/`.
 - Sin Shadow DOM: CSS plano con prefijo por microfrontend y tokens compartidos.
 - La pestaña “Precisión” de `<mf-history>` (una tabla) queda **fuera del plan** por la fecha del 19.
+- `<mf-ranking>` (RF15) muestra el ranking Elo en la ruta `#/ranking`, en lugar del tablero. No recibe socket: pide `GET /ranking` al servidor solo cuando su ruta se abre, y valida la respuesta con el esquema de `shared/`.
 
 ### 5.6 Contrato v0 de `shared/`
 - **5 de noviembre:** un **borrador mínimo y versionado** (campo `v: 1`) en un **PR abierto**. Mínimo: lo imprescindible para trabajar por separado en el servidor y en la web.
