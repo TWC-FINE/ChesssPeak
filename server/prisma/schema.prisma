@@ -43,6 +43,8 @@ model Game {
   termination String?
   /// Milliseconds on each player's clock at the start; null for a game without a clock (CHECK: 1 ms to 1 h).
   clockMs     Int?    @map("clock_ms")
+  /// Milliseconds added after each move; null for none. Only with clock_ms, at most a minute (CHECK).
+  clockIncrementMs Int? @map("clock_increment_ms")
 
   /// Per color, at most one of user_id and guest_id is set (CHECK).
   whiteUserId  String? @map("white_user_id") @db.Uuid
