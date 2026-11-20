@@ -78,6 +78,22 @@ export function capturedBy(fen: string): Record<Side, string[]> {
   return taken;
 }
 
+/** Usual piece values; the king does not count. */
+const PIECE_VALUE: Record<string, number> = { q: 9, r: 5, b: 3, n: 3, p: 1 };
+
+/**
+ * White's material minus black's, from the pieces on the board (so a promotion counts as the new piece).
+ * Positive when white is ahead, negative when black is.
+ */
+export function materialBalance(fen: string): number {
+  let balance = 0;
+  for (const char of fen.split(' ')[0] ?? '') {
+    const value = PIECE_VALUE[char.toLowerCase()];
+    if (value !== undefined) balance += char === char.toLowerCase() ? -value : value;
+  }
+  return balance;
+}
+
 /** Whether the side to move is in check. Only for display: the server decides the rules. */
 export function inCheck(fen: string): boolean {
   try {
@@ -179,13 +195,16 @@ export class MfGame extends LitElement {
   /** The pieces are drawn by chessground's piece set, which only applies inside .cg-wrap. */
   private renderTrays(fen: string) {
     const taken = capturedBy(fen);
+    const balance = materialBalance(fen);
     const tray = (by: Side, label: string) => {
       const color = by === 'white' ? 'black' : 'white';
+      const ahead = by === 'white' ? balance : -balance;
       return html`<div class="csg-tray cg-wrap" data-by=${by}>
         <span class="csg-tray-label">${label}</span>
         <span class="csg-tray-pieces">
           ${taken[by].length === 0 ? html`<span class="csg-tray-empty">Ninguna</span>` : taken[by].map((role) => html`<piece class="${role} ${color}"></piece>`)}
         </span>
+        ${ahead > 0 ? html`<span class="csg-material" title="Ventaja de material">+${ahead}</span>` : ''}
       </div>`;
     };
     return html`<div class="csg-trays">${tray('white', 'Capturadas por blancas')}${tray('black', 'Capturadas por negras')}</div>`;
