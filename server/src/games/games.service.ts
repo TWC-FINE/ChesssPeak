@@ -1,6 +1,6 @@
 import { randomInt } from 'node:crypto';
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
-import type { Color, CreateGameRequest, Identity } from '@chessspeak/shared';
+import { OPEN_GAME_MAX_AGE_MS, OPEN_GAMES_LIMIT, type Color, type CreateGameRequest, type Identity, type OpenGame } from '@chessspeak/shared';
 import { PrismaService } from '../database/prisma.service';
 
 /** The creator's color. `random`, or no choice at all, is drawn here by the server. */
@@ -14,6 +14,28 @@ function seatFor(identity: Identity, color: Color) {
   return color === 'white'
     ? { whiteGuestId: id.guestId, whiteUserId: id.userId, whiteName: identity.displayName }
     : { blackGuestId: id.guestId, blackUserId: id.userId, blackName: identity.displayName };
+}
+
+/** What GET /games/open reads of a row of `games`. */
+export interface WaitingRow {
+  id: string;
+  whiteName: string | null;
+  blackName: string | null;
+  clockMs: number | null;
+  createdAt: Date;
+}
+
+/** A waiting game as the lobby shows it; a row with no creator seat (damaged data) is left out. */
+export function openGameOf(row: WaitingRow): OpenGame | undefined {
+  const creatorColor: Color | undefined = row.whiteName !== null ? 'white' : row.blackName !== null ? 'black' : undefined;
+  if (creatorColor === undefined) return undefined;
+  return {
+    gameId: row.id,
+    creator: (creatorColor === 'white' ? row.whiteName : row.blackName)!,
+    creatorColor,
+    ...(row.clockMs === null ? {} : { clockMs: row.clockMs }),
+    createdAt: row.createdAt.toISOString(),
+  };
 }
 
 @Injectable()
@@ -34,6 +56,22 @@ export class GamesService {
     } catch (error) {
       this.logger.error(`Could not create a game: ${(error as Error).message}`);
       throw new ServiceUnavailableException('Could not create the game');
+    }
+  }
+
+  /** Recent games waiting for a rival, newest first. Postgres is the record: a game that just started may still show. */
+  async open(now: number = Date.now()): Promise<OpenGame[]> {
+    try {
+      const rows = await this.prisma.game.findMany({
+        where: { status: 'waiting', createdAt: { gte: new Date(now - OPEN_GAME_MAX_AGE_MS) } },
+        orderBy: { createdAt: 'desc' },
+        take: OPEN_GAMES_LIMIT,
+        select: { id: true, whiteName: true, blackName: true, clockMs: true, createdAt: true },
+      });
+      return rows.flatMap((row) => openGameOf(row) ?? []);
+    } catch (error) {
+      this.logger.error(`Could not read the open games: ${(error as Error).message}`);
+      throw new ServiceUnavailableException('Could not read the open games');
     }
   }
 }
