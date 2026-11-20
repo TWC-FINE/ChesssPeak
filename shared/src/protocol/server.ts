@@ -10,6 +10,7 @@ import {
   terminationSchema,
   uciSchema,
 } from './common.js';
+import { reactionSchema } from './client.js';
 
 // Server → client. NOT strict on purpose: unknown fields are dropped, so an older client keeps
 // working when v1 grows (additive changes only, see docs/contract-versioning.md).
@@ -90,6 +91,10 @@ export type GameDraw = z.infer<typeof gameDrawSchema>;
 export const gameRematchSchema = z.object({ gameId: gameIdSchema, offeredBy: colorSchema.nullable(), nextGameId: gameIdSchema.optional() });
 export type GameRematch = z.infer<typeof gameRematchSchema>;
 
+/** A player reacted; everybody in the room hears it, spectators too. Not stored anywhere. */
+export const gameReactionSchema = z.object({ gameId: gameIdSchema, from: colorSchema, reaction: reactionSchema });
+export type GameReaction = z.infer<typeof gameReactionSchema>;
+
 export const gameErrorCodeSchema = z.enum(['not_your_turn', 'illegal', 'stale_ply', 'unauthorized', 'not_found']);
 export type GameErrorCode = z.infer<typeof gameErrorCodeSchema>;
 
@@ -102,6 +107,7 @@ export const serverEventSchemas = {
   'game:end': gameEndSchema,
   'game:draw': gameDrawSchema,
   'game:rematch': gameRematchSchema,
+  'game:reaction': gameReactionSchema,
   'game:error': gameErrorSchema,
 } as const;
 export type ServerEventName = keyof typeof serverEventSchemas;
