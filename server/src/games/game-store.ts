@@ -32,10 +32,11 @@ export class GameStore {
     return {
       gameId,
       seats: { white: seat(game.whiteGuestId, game.whiteName), black: seat(game.blackGuestId, game.blackName) },
-      moves: (stored?.moves ?? []).map(({ ply, uci }) => ({ ply, uci })),
+      moves: (stored?.moves ?? []).map(({ ply, uci, at }) => ({ ply, uci, ...(at instanceof Date ? { at: at.getTime() } : {}) })),
       ...(game.result !== null && game.termination !== null
         ? { end: { gameId, result: game.result, termination: game.termination } as GameEnd }
         : {}),
+      ...(game.clockMs === null ? {} : { clockMs: game.clockMs }),
     };
   }
 
@@ -46,11 +47,12 @@ export class GameStore {
     await this.setMongoStatus(gameId, 'active');
   }
 
-  /** A new game with both seats taken, already active: the rematch. Returns its id. */
-  async createActive(seats: Record<Color, RoomPlayer>): Promise<string> {
+  /** A new game with both seats taken, already active: the rematch, with the same clock. Returns its id. */
+  async createActive(seats: Record<Color, RoomPlayer>, clockMs?: number): Promise<string> {
     const game = await this.prisma.game.create({
       data: {
         status: 'active',
+        clockMs: clockMs ?? null,
         whiteGuestId: seats.white.id,
         whiteName: seats.white.displayName,
         blackGuestId: seats.black.id,
