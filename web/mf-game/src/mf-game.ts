@@ -147,6 +147,8 @@ export class MfGame extends LitElement {
   speaker: MoveSpeaker = browserSpeaker();
   /** Kept in this browser too: whether the moves of the rival are read aloud. */
   private readoutOn = readoutPreference();
+  /** The ply shown while a finished game is reviewed (cs:review); undefined is the position of the game. */
+  private reviewPly: number | undefined;
 
   protected override createRenderRoot(): HTMLElement {
     return this;
@@ -157,6 +159,7 @@ export class MfGame extends LitElement {
     document.addEventListener('cs:move-candidate', this.onCandidate);
     document.addEventListener('cs:move-cancelled', this.onCancelled);
     document.addEventListener('cs:move-confirmed', this.onConfirmed);
+    document.addEventListener('cs:review', this.onReview);
     const detail: CsEventDetail<'cs:mf-ready'> = { v: 1, name: 'mf-game' };
     this.dispatchEvent(new CustomEvent('cs:mf-ready', { ...CS_EVENT_INIT, detail }));
   }
@@ -165,6 +168,7 @@ export class MfGame extends LitElement {
     document.removeEventListener('cs:move-candidate', this.onCandidate);
     document.removeEventListener('cs:move-cancelled', this.onCancelled);
     document.removeEventListener('cs:move-confirmed', this.onConfirmed);
+    document.removeEventListener('cs:review', this.onReview);
     this.useSocket(null);
     this.stopTicking();
     this.synced = undefined;
@@ -185,7 +189,7 @@ export class MfGame extends LitElement {
 
   protected override render() {
     const context = this.context;
-    const fen = this.state?.fen ?? START_FEN;
+    const fen = this.shownFen();
     const files = this.orientation() === 'white' ? [...FILES] : [...FILES].reverse();
     const ranks = this.orientation() === 'white' ? [...RANKS].reverse() : [...RANKS];
     const coord = (text: string, kind: string, row: number, column: number) =>
@@ -212,6 +216,7 @@ export class MfGame extends LitElement {
         </div>
       </div>
       ${this.renderTrays(fen)}
+      ${this.renderReview()}
       <p class="csg-info">partida: ${context?.gameId ?? 'sin partida'} · orientación: ${this.orientation()}</p>
       ${this.renderStatus()}
       ${this.renderDraw()}
@@ -221,7 +226,7 @@ export class MfGame extends LitElement {
   }
 
   private renderTurn(fen: string) {
-    const turn = this.state?.turn ?? 'white';
+    const turn = this.reviewPly === undefined ? (this.state?.turn ?? 'white') : turnOf(fen);
     return html`<span class="csg-turn" data-turn=${turn}>
       <span class="csg-turn-dot" aria-hidden="true"></span>Turno: ${turn === 'white' ? 'Blancas' : 'Negras'}
       ${inCheck(fen) ? html`<span class="csg-check">Jaque</span>` : ''}
@@ -379,12 +384,14 @@ export class MfGame extends LitElement {
     else this.stopTicking();
     const host = this.querySelector<HTMLElement>('.csg-board');
     if (host === null) return;
+    const fen = this.shownFen();
+    const lastUci = this.reviewPly === undefined ? this.lastUci : this.state?.moves[this.reviewPly - 1]?.uci;
     const config = {
-      fen: this.state?.fen ?? START_FEN,
+      fen,
       orientation: this.orientation(),
-      turnColor: this.state?.turn ?? 'white',
-      lastMove: this.lastUci === undefined ? undefined : squares(this.lastUci),
-      check: inCheck(this.state?.fen ?? START_FEN),
+      turnColor: this.reviewPly === undefined ? (this.state?.turn ?? 'white') : turnOf(fen),
+      lastMove: lastUci === undefined ? undefined : squares(lastUci),
+      check: inCheck(fen),
       coordinates: false,
       viewOnly: true,
     } as const;
@@ -396,6 +403,21 @@ export class MfGame extends LitElement {
       const [orig, dest] = squares(this.arrow);
       this.ground.setAutoShapes([{ orig, dest, brush: 'green' }]);
     }
+  }
+
+  /** The position on the board: the game's, or the one after the reviewed ply. */
+  private shownFen(): string {
+    const fen = this.state?.fen ?? START_FEN;
+    if (this.reviewPly === undefined || this.state === undefined) return fen;
+    if (this.reviewPly === 0) return START_FEN;
+    return fensAfter(this.state.moves)[this.reviewPly - 1] ?? fen;
+  }
+
+  private renderReview() {
+    if (this.reviewPly === undefined || this.state === undefined) return '';
+    const total = this.state.moves.length;
+    const where = this.reviewPly === 0 ? 'la posición inicial' : `la jugada ${this.reviewPly} de ${total}`;
+    return html`<p class="csg-review" role="status">Repasando ${where}. La partida terminó en la jugada ${total}.</p>`;
   }
 
   private orientation(): 'white' | 'black' {
@@ -424,6 +446,7 @@ export class MfGame extends LitElement {
     this.lastUci = undefined;
     this.end = undefined;
     this.arrow = undefined;
+    this.reviewPly = undefined;
     this.error = '';
     this.drawDeclined = false;
     this.rematchDeclined = false;
@@ -568,6 +591,14 @@ export class MfGame extends LitElement {
   private readonly onCancelled = (event: Event): void => {
     if ((event as CustomEvent<CsEventDetail<'cs:move-cancelled'>>).detail.gameId !== this.context?.gameId) return;
     this.arrow = undefined;
+    this.requestUpdate();
+  };
+
+  /** Only a finished game is reviewed: a live board always shows the game. */
+  private readonly onReview = (event: Event): void => {
+    const { gameId, ply } = (event as CustomEvent<CsEventDetail<'cs:review'>>).detail;
+    if (gameId !== this.context?.gameId || this.end === undefined || this.state === undefined) return;
+    this.reviewPly = ply === null || ply >= this.state.moves.length ? undefined : ply;
     this.requestUpdate();
   };
 

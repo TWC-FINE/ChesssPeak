@@ -709,3 +709,57 @@ describe('reading the moves aloud', () => {
     expect(next.element.querySelector('[data-action=toggle-readout]')?.getAttribute('aria-pressed')).toBe('false');
   });
 });
+
+describe('review of a finished game', () => {
+  const played = state({
+    fen: AFTER_E5,
+    plyCount: 2,
+    turn: 'white',
+    moves: [
+      { ply: 1, uci: 'e2e4', san: 'e4' },
+      { ply: 2, uci: 'e7e5', san: 'e5' },
+    ],
+  });
+  const review = async (element: GameElement, ply: number | null, gameId = 'g1') => {
+    document.dispatchEvent(new CustomEvent('cs:review', { detail: { v: 1, gameId, ply } }));
+    await element.updateComplete;
+  };
+  const turn = (element: GameElement) => element.querySelector<HTMLElement>('.csg-turn')?.dataset.turn;
+
+  it('ignores a review while the game is being played', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', played);
+    await review(element, 1);
+    expect(element.querySelector('.csg-review')).toBeNull();
+  });
+
+  it('shows the position after the reviewed move, and the final one again', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', played);
+    receive('game:end', { gameId: 'g1', result: '1-0', termination: 'resignation' });
+    await review(element, 1);
+    expect(element.querySelector('.csg-review')?.textContent).toContain('Repasando la jugada 1 de 2');
+    expect(turn(element)).toBe('black');
+    await review(element, 0);
+    expect(element.querySelector('.csg-review')?.textContent).toContain('la posición inicial');
+    expect(turn(element)).toBe('white');
+    await review(element, 1, 'g2');
+    expect(element.querySelector('.csg-review')?.textContent).toContain('la posición inicial');
+    await review(element, null);
+    expect(element.querySelector('.csg-review')).toBeNull();
+    expect(element.textContent).toContain('Partida terminada');
+  });
+
+  it('forgets the review with the game', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', played);
+    receive('game:end', { gameId: 'g1', result: '1-0', termination: 'resignation' });
+    await review(element, 1);
+    element.context = { v: 1, gameId: 'g2', orientation: 'white', socket };
+    await element.updateComplete;
+    expect(element.querySelector('.csg-review')).toBeNull();
+  });
+});

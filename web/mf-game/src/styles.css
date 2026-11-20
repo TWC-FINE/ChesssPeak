@@ -174,3 +174,6 @@ mf-game .csg-tray piece {
 .csg-draw, .csg-rematch { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .csg-draw-note { font-size: 0.9rem; color: var(--cs-muted); }
 .csg-draw[role='status'] .csg-draw-note, .csg-rematch[role='status'] .csg-draw-note { color: var(--cs-text); font-weight: 600; }
+
+/* a finished game reviewed from <mf-history> */
+.csg-review { margin: 0; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--cs-accent); color: var(--cs-accent); font-size: 0.9rem; }
