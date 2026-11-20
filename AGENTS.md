@@ -43,6 +43,7 @@ web/shell/              index.html, router por hash, sesión, único socket
 web/mf-game/            <mf-game>
 web/mf-voice-input/     <mf-voice-input>
 web/mf-history/         <mf-history>
+web/mf-ranking/         <mf-ranking>
 web/dist/               salida de build:web (solo se commitea en la entrega)
 local-agent/            Node + TS, pool de whisper-server en 127.0.0.1:8765
 spike/                  código de medición: Web Speech, Whisper y viabilidad del análisis

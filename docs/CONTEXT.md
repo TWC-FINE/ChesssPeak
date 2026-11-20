@@ -23,7 +23,7 @@ Se genera la forma hablada de **cada jugada legal** y se elige la más parecida 
 Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; el lote de mejoras del parser queda **fuera del plan**, y la validación usa frases nuevas y registra el hash del parser. **Salvedades:** una voz y una corrida B; el límite inferior del IC95 de B (78 %) queda por debajo del 85 %; no se puede atribuir la mejora solo al retardo (fallos no truncados con ruido: 20 en A, 6 en B; posible efecto de práctica); todo en **Edge 156**, **Chrome no se midió**; la latencia de Whisper es solo inferencia, en un i5-12400F (6 núcleos/12 hilos; en otros equipos será distinta); y hay sesgo de selección entre las 4 configuraciones de Whisper.
 
 ## Arquitectura en 5 líneas
-1. **Shell** estático (TypeScript vanilla) abre el único socket y monta 3 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`, Lit en light DOM), servidos en el puerto 5500 con `pnpm serve:web` o Live Server.
+1. **Shell** estático (TypeScript vanilla) abre el único socket y monta 4 microfrontends (`<mf-game>`, `<mf-voice-input>`, `<mf-history>`, `<mf-ranking>`, Lit en light DOM), servidos en el puerto 5500 con `pnpm serve:web` o Live Server.
 2. Los microfrontends se hablan con eventos `cs:*` y reciben su contexto por propiedad; los tipos y el protocolo viven en `shared/`.
 3. **Servidor NestJS** (monolito modular, una instancia en Render): `auth` de invitados, `games`, `voice-metrics`, `health`; estado de partida en memoria (`GameRoom` pura).
 4. **Datos:** Postgres (`games`) y Mongo (`game_moves`, `voice_attempts`; nunca audio), con escritura diferida e idempotente.

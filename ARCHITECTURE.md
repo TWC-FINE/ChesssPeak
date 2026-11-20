@@ -10,7 +10,8 @@ Mapa del sistema: componentes, responsabilidades, comunicación y datos. No es u
  │ shell (TS vanilla): router, sesión, ÚNICO socket     │
  │  ├─ <mf-game>        tablero + jugadas (recibe socket)│
  │  ├─ <mf-voice-input> pulsar para hablar + confirmar  │
- │  └─ <mf-history>     lista de jugadas, (Precisión)   │
+ │  ├─ <mf-history>     lista de jugadas, (Precisión)   │
+ │  └─ <mf-ranking>     ranking Elo (#/ranking)         │
  └───────┬──────────────────────────────┬───────────────┘
          │ HTTP + Socket.IO             │ HTTP (CORS + PNA)
          ▼                              ▼
@@ -48,10 +49,11 @@ Detalle en [README.md](README.md) y [docs/HANDOFF.md](docs/HANDOFF.md).
 | `web/mf-game/` | Tablero (chessground, `viewOnly`), estado de la partida, envía `game:move` | Reconocimiento |
 | `web/mf-voice-input/` | Botón de hablar, selector y adaptadores de reconocimiento, confirmación, telemetría de cada frase | Acceso al socket |
 | `web/mf-history/` | Lista de jugadas, numeradas y en SAN | Acceso al socket |
+| `web/mf-ranking/` | Ranking Elo de los jugadores, pedido con `GET /ranking` | Acceso al socket |
 | `local-agent/` | Gateway HTTP que transcribe un WAV con un pool de whisper-server, con umbral de volumen y duración y un dashboard. El pool es de procesos propios (1 por defecto, ADR 10) o, con `WHISPER_URLS`, de workers por URL, como los contenedores de `whisper-cloud/` (ADR 12) | Reglas de ajedrez |
 
 ### 2.1 Backend (monolito modular NestJS)
-Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `health`. `analysis` opcional; sin `signaling`.
+Módulos: `auth` (invitados; login opcional), `games`, `voice-metrics`, `ranking`, `health`. `analysis` opcional; sin `signaling`.
 
 - **`GameRoom`** (`server/src/games/game-room.ts`): clase pura, sin Nest. Es la fuente de verdad en memoria de una partida; se actualiza **de forma síncrona antes de cualquier `await`**. No tiene temporizadores ni E/S: el plazo de abandono, el sorteo de color, la autenticación, la persistencia y el reenvío son de quien la llama.
 - **chessops en el servidor:** su build CommonJS no carga en Node porque el paquete declara `type: module`. `patches/chessops@0.15.1.patch` lo corrige con `pnpm patch`, sin tocar su código. **Al actualizar chessops hay que revisar ese parche.** Un test lo comprueba con Node real, porque Jest no detecta el fallo.
