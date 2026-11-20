@@ -2,6 +2,10 @@ import { describe, expect, expectTypeOf, it } from 'vitest';
 import type { z } from 'zod';
 import {
   PROTOCOL_VERSION,
+  OPEN_GAME_MAX_AGE_MS,
+  OPEN_GAMES_LIMIT,
+  openGameSchema,
+  openGamesResponseSchema,
   RESERVED_IN_V1,
   clientEventSchemas,
   clockSchema,
@@ -233,6 +237,18 @@ describe('server → client (tolerant)', () => {
     expect(rematch.safeParse({ gameId: 'g1', offeredBy: null, nextGameId: 'g2' }).success).toBe(true);
     expect(rematch.safeParse({ gameId: 'g1', offeredBy: 'red' }).success).toBe(false);
     expect(rematch.parse({ gameId: 'g1', offeredBy: null, extra: 1 })).toEqual({ gameId: 'g1', offeredBy: null });
+  });
+
+  it('validates the open games of GET /games/open', () => {
+    const game = { gameId: 'g1', creator: 'Ana', creatorColor: 'white', createdAt: '2026-11-20T10:00:00.000Z' };
+    expect(openGamesResponseSchema.safeParse({ games: [] }).success).toBe(true);
+    expect(openGamesResponseSchema.parse({ games: [{ ...game, clockMs: 300000, extra: 1 }] }).games[0]).toEqual({ ...game, clockMs: 300000 });
+    expect(openGameSchema.safeParse({ ...game, creatorColor: 'random' }).success).toBe(false);
+    expect(openGameSchema.safeParse({ ...game, creator: '' }).success).toBe(false);
+    expect(openGameSchema.safeParse({ ...game, clockMs: 0 }).success).toBe(false);
+    expect(openGameSchema.safeParse({ ...game, createdAt: 'ayer' }).success).toBe(false);
+    expect(OPEN_GAMES_LIMIT).toBe(20);
+    expect(OPEN_GAME_MAX_AGE_MS).toBe(30 * 60_000);
   });
 
   it('takes the number of spectators of game:state only as a positive whole number', () => {
