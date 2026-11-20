@@ -6,6 +6,7 @@ import type { Api } from 'chessground/api';
 import type { Key } from 'chessground/types';
 import {
   CS_EVENT_INIT,
+  type Clock,
   START_FEN,
   type CsEventDetail,
   type CsEventName,
@@ -96,6 +97,15 @@ export function materialBalance(fen: string): number {
   return balance;
 }
 
+/** Below this, a clock is shown as running low. */
+export const LOW_TIME_MS = 20_000;
+
+/** A clock as m:ss, rounding up: it shows 0:00 only once the time is really over. */
+export function formatClock(ms: number): string {
+  const seconds = Math.ceil(Math.max(0, ms) / 1000);
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
 /** Whether the side to move is in check. Only for display: the server decides the rules. */
 export function inCheck(fen: string): boolean {
   try {
@@ -124,6 +134,9 @@ export class MfGame extends LitElement {
   private rematchDeclined = false;
   /** Only this browser's view: "Girar tablero" shows the other side, the game does not change. */
   private flipped = false;
+  /** The last clock from the server and when it arrived; the running one counts down from there between messages. */
+  private clock: { value: Clock; receivedAt: number } | undefined;
+  private ticker: ReturnType<typeof setInterval> | undefined;
 
   protected override createRenderRoot(): HTMLElement {
     return this;
@@ -143,6 +156,7 @@ export class MfGame extends LitElement {
     document.removeEventListener('cs:move-cancelled', this.onCancelled);
     document.removeEventListener('cs:move-confirmed', this.onConfirmed);
     this.useSocket(null);
+    this.stopTicking();
     this.synced = undefined;
     this.ground?.destroy();
     this.ground = undefined;
@@ -169,6 +183,7 @@ export class MfGame extends LitElement {
     return html`<div class="csg-root">
       <div class="csg-toolbar">
         ${this.renderTurn(fen)}
+        ${this.renderClocks()}
         <button type="button" class="csg-flip" data-action="flip" aria-pressed=${String(this.flipped)} @click=${this.flip}>Girar tablero</button>
       </div>
       <div class="csg-card">
@@ -195,6 +210,20 @@ export class MfGame extends LitElement {
       <span class="csg-turn-dot" aria-hidden="true"></span>Turno: ${turn === 'white' ? 'Blancas' : 'Negras'}
       ${inCheck(fen) ? html`<span class="csg-check">Jaque</span>` : ''}
     </span>`;
+  }
+
+  /** Only in a game with a clock. The server decides when time is over; this only shows it going down. */
+  private renderClocks() {
+    if (this.clock === undefined) return '';
+    const { value, receivedAt } = this.clock;
+    const left = (color: Side) => (value.running === color ? value[`${color}Ms`] - (Date.now() - receivedAt) : value[`${color}Ms`]);
+    const chip = (color: Side) => {
+      const ms = left(color);
+      return html`<span class="csg-clock" data-color=${color} ?data-running=${value.running === color} ?data-low=${ms < LOW_TIME_MS}>
+        ${COLOR_TEXT[color]} <b>${formatClock(ms)}</b>
+      </span>`;
+    };
+    return html`<span class="csg-clocks" role="timer" aria-label="Reloj">${chip('white')}${chip('black')}</span>`;
   }
 
   /** The pieces are drawn by chessground's piece set, which only applies inside .cg-wrap. */
@@ -308,6 +337,8 @@ export class MfGame extends LitElement {
   }
 
   protected override updated(): void {
+    if (this.clock?.value.running != null && this.end === undefined) this.startTicking();
+    else this.stopTicking();
     const host = this.querySelector<HTMLElement>('.csg-board');
     if (host === null) return;
     const config = {
@@ -336,8 +367,22 @@ export class MfGame extends LitElement {
     return side === 'white' ? 'black' : 'white';
   }
 
+  private startTicking(): void {
+    this.ticker ??= setInterval(() => this.requestUpdate(), 250);
+  }
+
+  private stopTicking(): void {
+    clearInterval(this.ticker);
+    this.ticker = undefined;
+  }
+
+  private setClock(clock: Clock | undefined): void {
+    this.clock = clock === undefined ? undefined : { value: clock, receivedAt: Date.now() };
+  }
+
   private resetGame(): void {
     this.state = undefined;
+    this.clock = undefined;
     this.lastUci = undefined;
     this.end = undefined;
     this.arrow = undefined;
@@ -375,6 +420,7 @@ export class MfGame extends LitElement {
   private readonly onState = (state: GameState): void => {
     if (state.gameId !== this.context?.gameId) return;
     this.state = state;
+    this.setClock(state.clock);
     this.lastUci = state.moves.at(-1)?.uci;
     this.error = '';
     // CONTRACT: the FEN of each move is recalculated here because game:state does not carry it, and cs:move-applied
@@ -405,6 +451,7 @@ export class MfGame extends LitElement {
       turn: turnOf(moved.fen),
       moves: [...state.moves, { ply: moved.ply, uci: moved.uci, san: moved.san }],
     };
+    if (moved.clock !== undefined) this.setClock(moved.clock);
     this.lastUci = moved.uci;
     this.arrow = undefined;
     this.error = '';
@@ -418,10 +465,21 @@ export class MfGame extends LitElement {
     if (end.gameId !== this.context?.gameId) return;
     this.end = end;
     this.arrow = undefined;
+    this.freezeClock(end);
     if (this.state !== undefined) this.state = { ...this.state, status: end.termination === 'aborted' ? 'aborted' : 'finished' };
     this.emitEvent('cs:game-ended', { v: 1, gameId: end.gameId, result: end.result, termination: end.termination });
     this.requestUpdate();
   };
+
+  /** The clocks stop where they were; the one that ran out shows zero. */
+  private freezeClock(end: GameEnd): void {
+    const clock = this.clock;
+    if (clock === undefined || clock.value.running === null) return;
+    const running = clock.value.running;
+    const key = `${running}Ms` as const;
+    const left = end.termination === 'timeout' ? 0 : Math.max(0, clock.value[key] - (Date.now() - clock.receivedAt));
+    this.setClock({ ...clock.value, [key]: left, running: null });
+  }
 
   private readonly onDraw = (draw: GameDraw): void => {
     const state = this.state;
