@@ -19,7 +19,7 @@ import {
  */
 const v = z.literal(1);
 
-export const mfNameSchema = z.enum(['mf-game', 'mf-voice-input', 'mf-history']);
+export const mfNameSchema = z.enum(['mf-game', 'mf-voice-input', 'mf-history', 'mf-ranking']);
 export type MfName = z.infer<typeof mfNameSchema>;
 
 /** Where the confirmed or proposed move comes from. */

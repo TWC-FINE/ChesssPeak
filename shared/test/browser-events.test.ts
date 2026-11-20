@@ -5,6 +5,7 @@ import {
   csEventSchemas,
   gameContextSchema,
   historyContextSchema,
+  rankingContextSchema,
   releaseDelayOf,
   voiceInputContextSchema,
 } from '../src/index.js';
@@ -70,6 +71,14 @@ describe('contexts (v1)', () => {
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: null }).success).toBe(true);
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'no es url' }).success).toBe(false);
     expect(historyContextSchema.safeParse({ v: 1, gameId: 'g' }).success).toBe(true);
+  });
+
+  it('validates the ranking context and its microfrontend name', () => {
+    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: 'http://127.0.0.1:3000' }).success).toBe(true);
+    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: null }).success).toBe(true);
+    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: 'no es url' }).success).toBe(false);
+    expect(rankingContextSchema.safeParse({ v: 1 }).success).toBe(false);
+    expect(csEventSchemas['cs:mf-ready'].safeParse({ v: 1, name: 'mf-ranking' }).success).toBe(true);
   });
 
   it('takes the release delay from shared unless the context overrides it', () => {
