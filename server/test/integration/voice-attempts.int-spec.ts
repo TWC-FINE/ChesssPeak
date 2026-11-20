@@ -151,3 +151,30 @@ describe('voice:attempt (real MongoDB and a real socket)', () => {
     expect(documents.map((document) => document.tryIndex).sort()).toEqual([1, 2]);
   });
 });
+
+describe('GET /voice-metrics/summary (real MongoDB)', () => {
+  beforeEach(async () => {
+    process.env.GUEST_TOKEN_SECRET = 'a'.repeat(64);
+    await start();
+    await collection().deleteMany({ recognizer: 'fake' });
+  });
+
+  afterEach(async () => {
+    await collection().deleteMany({ recognizer: 'fake' });
+    await stop();
+    process.env = { ...saved };
+  });
+
+  it('sums up the stored attempts without their transcripts', async () => {
+    const { socket, gameId } = await playerInGame();
+    socket.emit('voice:attempt', attempt(gameId, { recognizer: 'fake', tryIndex: 1 }));
+    socket.emit('voice:attempt', attempt(gameId, { recognizer: 'fake', tryIndex: 2, accepted: false, latency: { recognitionMs: 900, resolveMs: 2, totalMs: 902 } }));
+    socket.emit('voice:attempt', attempt(gameId, { recognizer: 'fake', tryIndex: 3, transcript: '', normalized: '', alternatives: [], candidates: [], resolvedUci: null, outcome: 'nomatch', accepted: false }));
+    await documentsUpTo(gameId, 3);
+
+    const response = await http().get('/voice-metrics/summary').expect(200);
+    const fake = response.body.recognizers.find((summary: { recognizer: string }) => summary.recognizer === 'fake');
+    expect(fake).toMatchObject({ attempts: 3, silences: 1, proposed: 2, confirmed: 1, recognitionMs: { p50: 500, p95: 900 } });
+    expect(JSON.stringify(response.body)).not.toContain('peón');
+  });
+});
