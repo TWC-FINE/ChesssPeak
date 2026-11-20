@@ -94,7 +94,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 | Evento | Payload | Emite | Escucha |
 |---|---|---|---|
 | `cs:mf-ready` | `{ v, name }`; `name` = `mf-game` \| `mf-voice-input` \| `mf-history` \| `mf-ranking` | cada microfrontend al registrarse | shell |
-| `cs:position` | `{ v, gameId, fen, plyCount, turn, yourColor }`; `plyCount` = media jugadas jugadas hasta ahora (0 al inicio). **Solo el FEN**: sin listas de jugadas legales | `<mf-game>`, tras cada cambio | `<mf-voice-input>` |
+| `cs:position` | `{ v, gameId, fen, plyCount, turn, yourColor, status? }`; `plyCount` = media jugadas jugadas hasta ahora (0 al inicio); `status` es el de `game:state` (opcional, añadido después en v1: el shell lo usa para el aviso de turno en el título). **Solo el FEN**: sin listas de jugadas legales | `<mf-game>`, tras cada cambio | `<mf-voice-input>` |
 | `cs:move-candidate` | `{ v, gameId, ply, uci, san, source }`; `source` = `voice` \| `text` | `<mf-voice-input>` | `<mf-game>` (dibuja la flecha) |
 | `cs:move-confirmed` | `{ v, gameId, ply, uci, source }` | `<mf-voice-input>` (voz «sí» o botón) | `<mf-game>` (envía `game:move`) |
 | `cs:move-cancelled` | `{ v, gameId, ply, reason }`; `reason` = `user` \| `position-changed` \| `game-ended` | `<mf-voice-input>` | `<mf-game>` (borra la flecha) |

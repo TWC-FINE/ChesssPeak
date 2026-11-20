@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { voiceAttemptSchema } from './protocol/client.js';
 import {
   colorSchema,
+  gameStatusSchema,
   fenSchema,
   gameIdSchema,
   gameResultSchema,
@@ -37,6 +38,8 @@ export const csEventSchemas = {
     plyCount: z.number().int().min(0),
     turn: colorSchema,
     yourColor: playerViewSchema,
+    /** Optional: added later in v1. Without it, a listener cannot tell a waiting or finished game from a live one. */
+    status: gameStatusSchema.optional(),
   }),
   /** A resolved move waiting for confirmation (mf-game draws the arrow). Emitter: mf-voice-input. */
   'cs:move-candidate': z.object({ v, gameId: gameIdSchema, ply: plySchema, uci: uciSchema, san: z.string().min(1), source: moveSourceSchema }),
