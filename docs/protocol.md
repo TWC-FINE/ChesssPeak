@@ -64,7 +64,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 **Valores:**
 - `status`: `waiting` \| `active` \| `finished` \| `aborted` (los mismos que `games` en Postgres).
 - `result`: `1-0` \| `0-1` \| `1/2-1/2` \| `*` (`*` solo en `aborted`).
-- `termination`: `checkmate`, `stalemate`, `insufficient_material`, `resignation`, `abandonment`, `aborted`, `agreement` (tablas aceptadas por los dos, siempre `1/2-1/2`), `timeout` (a un jugador se le acabó el tiempo; gana el rival); **reservados en v1**: `threefold_repetition`, `fifty_moves`.
+- `termination`: `checkmate`, `stalemate`, `insufficient_material`, `resignation`, `abandonment`, `aborted`, `agreement` (tablas aceptadas por los dos, siempre `1/2-1/2`), `timeout` (a un jugador se le acabó el tiempo; gana el rival), `threefold_repetition` (la misma posición por tercera vez: mismas piezas, turno, enroques y captura al paso posible) y `fifty_moves` (100 medias jugadas seguidas sin captura ni jugada de peón). Las dos últimas estaban reservadas y se detectan desde el 20 de noviembre de 2026: son tablas **automáticas**, sin reclamarlas, porque por voz no hay cómo reclamar. El mate va antes: un mate en la jugada 100 es mate.
 - `game:error.code`:
   - `not_your_turn`: no te toca;
   - `illegal`: la jugada no es legal en la posición;
