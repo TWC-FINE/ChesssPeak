@@ -28,7 +28,7 @@
   - El análisis con Stockfish no pasó su prueba de viabilidad ([docs/analysis-gate.md](docs/analysis-gate.md)).
 - **Falta:**
   - `docs/quality.md` con la validación;
-  - el ADR 9 (el C4, niveles 1 y 2, ya está en [docs/c4.md](docs/c4.md), #49);
+  - aceptar el ADR 9, propuesto el 20 de noviembre (el C4, niveles 1 y 2, ya está en [docs/c4.md](docs/c4.md), #49);
   - el README probado en una máquina limpia;
   - el ensayo, el video de respaldo y el tag.
 
@@ -212,7 +212,7 @@ Media página cada uno, **escritos cuando se toma la decisión**, no al final.
 | 6 | `local-agent` por HTTP en localhost frente a WebSocket saliente | **Aceptado** (6 nov). Probado a mano con el Whisper real el 8 nov, con una sola voz |
 | 7 | Estado en memoria + write-behind idempotente | **Aceptado** (5 nov) |
 | 8 | Invitados con token firmado; login fuera del plan | **Aceptado** (5 nov) |
-| 9 | Licencia GPL-3.0 (por chessground) | **Sin escribir** |
+| 9 | Licencia GPL-3.0 (por chessground) | **Propuesto** (20 nov), en [docs/adr/0009-licencia-gpl-3.md](docs/adr/0009-licencia-gpl-3.md) |
 | 10 | Balanceo de carga de la transcripción en `local-agent` | **Aceptado** (4 nov); revisado el 5 nov. Queda como salida del ADR 12 |
 | 11 | Balanceo del guardado de jugadas con `move-workers` | **Sustituido por el ADR 12** (14 nov); el pool nunca se construyó |
 | 12 | Whisper como servicio, balanceado por URLs desde `local-agent` | **Aceptado** (14 nov). Medido con contenedores locales. En EC2, C1 no cumple y C4 cumple |

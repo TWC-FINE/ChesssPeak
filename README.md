@@ -173,4 +173,4 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 
 ## Licencia
 
-GPL-3.0 (por la dependencia de chessground).
+GPL-3.0 (por la dependencia de chessground). El motivo está en el [ADR 9](docs/adr/0009-licencia-gpl-3.md).

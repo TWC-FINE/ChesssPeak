@@ -12,7 +12,7 @@ Ordenado el 14 de noviembre, con `main` en `08d3ccb`. **Nunca se recortan** la v
 | 2 | Escribir las 40 frases de validación nuevas, en un archivo nuevo, sin tocar el corpus v0 | Responsable del repo | Claude puede preparar la plantilla del archivo |
 | 3 | Sesión de validación en Edge, con otra voz o, si no hay, con la del responsable (declarado), registrando el hash del parser | Responsable del repo (voz y sesión); Claude analiza con `pnpm metrics` | Sin estas cifras no se cumple el criterio 7 de `SPEC.md` |
 | 4 | `docs/quality.md` con las cifras medidas, siguiendo los escenarios de `PLAN.md`, 6.1 | Claude redacta con los resultados; el responsable aprueba | No se inventa ninguna cifra |
-| 5 | ADR 9 (licencia GPL-3.0, por chessground) | Claude | Media página |
+| 5 | Escrito el 20 de noviembre: ADR 9 (licencia GPL-3.0, por chessground), [0009-licencia-gpl-3.md](adr/0009-licencia-gpl-3.md) | Claude; lo acepta el responsable del repo | Media página |
 | 6 | Hecho (#50 y #52): el estado del ADR 6, `docs/CONTEXT.md`, la sección «Estado actual» de `AGENTS.md` y la fila del ADR 6 en `PLAN.md` | Claude, con el OK del responsable | La prueba con el Whisper real se hizo el 8 de noviembre |
 | 7 | **README probado con un clon nuevo en una máquina limpia.** Windows Sandbox es una opción sin probar | Responsable del repo (máquina y ejecución); Claude corrige el README con lo que falle | Nunca se recorta |
 | 8 | En la laptop de la demo: Edge contra `127.0.0.1:8765` (aviso de red local), micrófonos, Docker y los 3 contenedores, y la latencia de Whisper | Responsable del repo | Antes del ensayo, no el día de la demo |
@@ -157,7 +157,7 @@ Las tareas que dependen de un supuesto lo indican. **Revisado el 14 de noviembre
 - [x] 13. Reconocedores: Web Speech con 400 ms, Whisper contra `/transcribe` y uno falso para tests. (PR #26, #27 y #29) Probados a mano con voz real: Web Speech el 7 y el 8 de noviembre, y el Whisper real el 8, con una sola voz.
 
 **Documentos**
-- [ ] 14. ADR 9 (licencia). Los ADR 7 y 8 ya están aceptados (PR #13 y #11).
+- [x] 14. ADR 9 (licencia), escrito el 20 de noviembre; falta que lo acepte el responsable del repo. Los ADR 7 y 8 ya están aceptados (PR #13 y #11).
 - [ ] 15. 40 frases de validación (las que fija `PLAN.md`, 5.7), en un archivo nuevo, sin editar el corpus v0.
 - [x] 16. Documentación de arquitectura con C4 (niveles 1 y 2 en Mermaid). (PR #49)
 
