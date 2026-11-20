@@ -5,7 +5,7 @@ import { Global, Logger, Module } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
-import { gameEndSchema, gameErrorSchema, gameMovedSchema, gameStateSchema, type Color, type GameEnd, type GameState, type GuestAuthResponse } from '@chessspeak/shared';
+import { gameDrawSchema, gameEndSchema, gameErrorSchema, gameMovedSchema, gameStateSchema, type Color, type GameEnd, type GameState, type GuestAuthResponse } from '@chessspeak/shared';
 import { io, type Socket } from 'socket.io-client';
 import { GuestTokenService } from '../../src/auth/guest-token.service';
 import { GameMovesRepository } from '../../src/database/mongo/game-moves.repository';
@@ -379,6 +379,64 @@ describe('end of the game', () => {
     await end;
     const error = errorOf(black);
     black.emit('game:move', { gameId, uci: 'e7e5', ply: 1 });
+    expect((await error).code).toBe('unauthorized');
+  });
+});
+
+describe('draw offers', () => {
+  it('tells both players about the offer and ends in a draw when the rival accepts', async () => {
+    const server = await start();
+    const { gameId, white, black } = await activeGame(server);
+    const whiteSees = next(white, 'game:draw');
+    const blackSees = next(black, 'game:draw');
+    white.emit('game:draw-offer', { gameId });
+    expect(gameDrawSchema.parse(await whiteSees)).toEqual({ gameId, offeredBy: 'white' });
+    expect(gameDrawSchema.parse(await blackSees)).toEqual({ gameId, offeredBy: 'white' });
+
+    const whiteEnd = next(white, 'game:end');
+    black.emit('game:draw-answer', { gameId, accept: true });
+    const end = { gameId, result: '1/2-1/2', termination: 'agreement' };
+    expect(gameEndSchema.parse(await whiteEnd)).toEqual(end);
+    await server.queue.drained(gameId);
+    expect(world.ended).toEqual([{ end, status: 'finished' }]);
+  });
+
+  it('tells both players when the offer is declined, and the game goes on', async () => {
+    const server = await start();
+    const { gameId, white, black } = await activeGame(server);
+    const offered = next(black, 'game:draw');
+    white.emit('game:draw-offer', { gameId });
+    await offered;
+    const declined = next<{ offeredBy: Color | null }>(white, 'game:draw', (d) => d.offeredBy === null);
+    black.emit('game:draw-answer', { gameId, accept: false });
+    expect(await declined).toEqual({ gameId, offeredBy: null });
+    expect((await play(gameId, white, black, 'e2e4', 1)).san).toBe('e4');
+  });
+
+  it('gives a pending offer back to whoever joins again', async () => {
+    const server = await start();
+    const { gameId, white, black } = await activeGame(server);
+    const offered = next(white, 'game:draw');
+    black.emit('game:draw-offer', { gameId });
+    await offered;
+    const state = stateOf(white);
+    white.emit('game:join', { gameId });
+    expect((await state).drawOffer).toBe('black');
+  });
+
+  it('refuses an answer when there is no offer from the rival', async () => {
+    const server = await start();
+    const { gameId, white } = await activeGame(server);
+    const error = errorOf(white);
+    white.emit('game:draw-answer', { gameId, accept: true });
+    expect((await error).code).toBe('unauthorized');
+  });
+
+  it('rejects a payload with an extra field', async () => {
+    const server = await start();
+    const { gameId, white } = await activeGame(server);
+    const error = errorOf(white);
+    white.emit('game:draw-offer', { gameId, color: 'black' });
     expect((await error).code).toBe('unauthorized');
   });
 });
