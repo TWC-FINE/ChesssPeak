@@ -101,3 +101,26 @@ mf-ranking { display: block; font-family: var(--cs-font); color: var(--cs-text);
   .csr-wide { display: none; }
   .csr-refresh { margin-left: 0; }
 }
+
+/* a player's name opens their profile */
+.csr-player-link {
+  all: unset;
+  cursor: pointer;
+  font-weight: 600;
+  border-bottom: 1px dashed rgba(216, 184, 120, 0.45);
+}
+.csr-player-link:hover { color: var(--cs-accent); border-bottom-color: var(--cs-accent); }
+.csr-player-link:focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; border-radius: 2px; }
+
+/* the profile, over the ranking */
+.csr-back { position: relative; z-index: 1; align-self: flex-start; margin: 0 24px; }
+.csr-profile { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; padding: 0 26px; }
+.csr-profile-name { margin: 0; font-family: var(--cs-serif, Georgia, serif); font-size: 1.5rem; font-weight: 600; }
+.csr-stats { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; }
+.csr-stats div { display: flex; flex-direction: column; gap: 2px; }
+.csr-stats dt { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cs-muted); }
+.csr-stats dd { margin: 0; font-variant-numeric: tabular-nums; }
+.csr-spark { width: min(240px, 100%); height: 48px; color: var(--cs-accent); }
+.csr-games tr[data-outcome='win'] .csr-outcome { color: #b9e4c0; }
+.csr-games tr[data-outcome='loss'] .csr-outcome { color: #f2b7bf; }
+.csr-change { font-size: 0.8rem; color: var(--cs-muted); }

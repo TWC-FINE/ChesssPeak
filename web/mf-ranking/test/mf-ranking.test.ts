@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { RankingContext, RankingResponse } from '@chessspeak/shared';
+import type { ProfileResponse, RankingContext, RankingResponse } from '@chessspeak/shared';
 
 type RankingElement = HTMLElement & { context?: RankingContext; updateComplete: Promise<boolean>; load(): Promise<void> };
 
@@ -157,5 +157,93 @@ describe('<mf-ranking>', () => {
     const element = await mount();
     expect(element.querySelector('.csr-player img')).toBeNull();
     expect(text(element.querySelector('.csr-player')!)).toBe('<img src=x>');
+  });
+});
+
+describe('<mf-ranking> player profile', () => {
+  const profile: ProfileResponse = {
+    entry: ranking.entries[0]!,
+    games: [
+      { gameId: 'g2', color: 'black', opponent: 'Luis', outcome: 'win', termination: 'agreement', finishedAt: '2026-11-20T18:00:00.000Z', rating: 1240, ratingChange: 20 },
+      { gameId: 'g1', color: 'white', opponent: 'Marta', outcome: 'loss', termination: null, finishedAt: null, rating: 1180, ratingChange: -20 },
+    ],
+    ratingHistory: [1200, 1180, 1240],
+  };
+  const answer = (body: unknown, status = 200) => fetchMock.mockImplementation(async (input) => (String(input).endsWith('/ranking') ? json(ranking) : json(body, status)));
+  const open = async (element: RankingElement, name = 'Ana') => {
+    element.querySelector<HTMLButtonElement>(`[data-player="${name}"]`)!.click();
+    await settle(element);
+  };
+
+  it('opens the profile of a player from their name, with an encoded path', async () => {
+    answer(profile);
+    const element = await mount({ apiUrl: `${API_URL}/` });
+    await open(element);
+    expect(fetchMock).toHaveBeenLastCalledWith(`${API_URL}/ranking/Ana`);
+    expect(text(element.querySelector('.csr-profile-name')!)).toBe('Ana');
+    expect([...element.querySelectorAll('.csr-stats dd')].map(text)).toEqual(['1', '1240', '1240', '2 G · 0 E · 0 P']);
+    expect(element.querySelector('.csr-spark')?.getAttribute('aria-label')).toBe('Elo de 1200 a 1240');
+    expect(rows(element)).toEqual([
+      [expect.stringContaining('2026'), 'Negras', 'Luis', 'Ganó', 'mutuo acuerdo', '1240 +20'],
+      ['—', 'Blancas', 'Marta', 'Perdió', '—', '1180 −20'],
+    ]);
+  });
+
+  it('encodes a name with spaces and accents', async () => {
+    fetchMock.mockImplementation(async (input) =>
+      String(input).endsWith('/ranking') ? json({ ...ranking, entries: [{ ...ranking.entries[0]!, displayName: 'José Luis' }] }) : json(profile),
+    );
+    const element = await mount();
+    await open(element, 'José Luis');
+    expect(fetchMock).toHaveBeenLastCalledWith(`${API_URL}/ranking/Jos%C3%A9%20Luis`);
+  });
+
+  it('goes back to the ranking, and closes the profile when the route opens again', async () => {
+    answer(profile);
+    const element = await mount();
+    await open(element);
+    element.querySelector<HTMLButtonElement>('[data-action=back]')!.click();
+    await element.updateComplete;
+    expect(element.querySelector('.csr-profile')).toBeNull();
+    expect(rows(element)).toHaveLength(3);
+
+    await open(element);
+    element.context = { v: 1, apiUrl: API_URL, active: false };
+    await settle(element);
+    element.context = { v: 1, apiUrl: API_URL, active: true };
+    await settle(element);
+    expect(element.querySelector('.csr-profile')).toBeNull();
+  });
+
+  it('says when the player has no finished game, or the server fails or answers nonsense', async () => {
+    const element = await mount();
+    answer({ message: 'No rated games for that player' }, 404);
+    await open(element);
+    expect(text(element.querySelector('[role=alert]')!)).toBe('Este jugador aún no tiene partidas terminadas.');
+
+    element.querySelector<HTMLButtonElement>('[data-action=back]')!.click();
+    await element.updateComplete;
+    answer({ message: 'down' }, 503);
+    await open(element);
+    expect(text(element.querySelector('[role=alert]')!)).toContain('(503)');
+
+    element.querySelector<HTMLButtonElement>('[data-action=back]')!.click();
+    await element.updateComplete;
+    answer({ entry: 'Ana' });
+    await open(element);
+    expect(text(element.querySelector('[role=alert]')!)).toContain('no se entiende');
+  });
+
+  it('ignores a profile that arrives after going back', async () => {
+    let release: (response: Response) => void = () => undefined;
+    const element = await mount();
+    fetchMock.mockImplementation(() => new Promise<Response>((resolve) => (release = resolve)));
+    element.querySelector<HTMLButtonElement>('[data-player="Ana"]')!.click();
+    await element.updateComplete;
+    expect(text(element)).toContain('Cargando el perfil de Ana');
+    element.querySelector<HTMLButtonElement>('[data-action=back]')!.click();
+    release(json(profile));
+    await settle(element);
+    expect(element.querySelector('.csr-profile')).toBeNull();
   });
 });
