@@ -7,6 +7,8 @@ import {
   gameDrawOfferSchema,
   gameJoinSchema,
   gameMoveSchema,
+  gameRematchAnswerSchema,
+  gameRematchOfferSchema,
   gameResignSchema,
   type GameEnd,
   type GameErrorCode,
@@ -149,6 +151,32 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     this.server.to(room.gameId).emit('game:draw', { gameId: room.gameId, offeredBy: null });
   }
 
+  @SubscribeMessage('game:rematch-offer')
+  async offerRematch(@ConnectedSocket() socket: GameSocket, @MessageBody() payload: unknown): Promise<void> {
+    const request = gameRematchOfferSchema.safeParse(payload);
+    if (!request.success) return this.refuse(socket, 'unauthorized', 'Invalid payload');
+    const room = await this.joinedRoomOrRefuse(socket, request.data.gameId);
+    if (room === undefined) return;
+
+    const offered = room.offerRematch(playerOf(socket.data.identity).id);
+    if (!offered.ok) return this.refuse(socket, offered.code, offered.message);
+    if ('seats' in offered) return this.startRematch(room, offered.seats);
+    this.server.to(room.gameId).emit('game:rematch', { gameId: room.gameId, offeredBy: offered.offeredBy });
+  }
+
+  @SubscribeMessage('game:rematch-answer')
+  async answerRematch(@ConnectedSocket() socket: GameSocket, @MessageBody() payload: unknown): Promise<void> {
+    const request = gameRematchAnswerSchema.safeParse(payload);
+    if (!request.success) return this.refuse(socket, 'unauthorized', 'Invalid payload');
+    const room = await this.joinedRoomOrRefuse(socket, request.data.gameId);
+    if (room === undefined) return;
+
+    const answered = room.answerRematch(playerOf(socket.data.identity).id, request.data.accept);
+    if (!answered.ok) return this.refuse(socket, answered.code, answered.message);
+    if (answered.seats !== undefined) return this.startRematch(room, answered.seats);
+    this.server.to(room.gameId).emit('game:rematch', { gameId: room.gameId, offeredBy: null });
+  }
+
   async handleDisconnect(socket: GameSocket): Promise<void> {
     const games = socket.data.games ?? new Set<string>();
     for (const gameId of games) {
@@ -173,6 +201,24 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     for (const color of ['white', 'black'] as const) this.cancelAbandon(room.gameId, color);
     this.queue.push(room.gameId, 'finish', () => this.store.finish(end, room.status));
     this.server.to(room.gameId).emit('game:end', end);
+  }
+
+  /**
+   * Both want the rematch: the new game is created before anyone is told, so `nextGameId` always exists. If the store
+   * fails, the offer is gone and they can offer again.
+   */
+  private async startRematch(room: GameRoom, seats: Record<Color, RoomPlayer>): Promise<void> {
+    let nextGameId: string;
+    try {
+      nextGameId = await this.store.createActive(seats);
+    } catch (error) {
+      this.logger.error(`Could not create the rematch of ${room.gameId}: ${(error as Error).message}`);
+      room.rematchFailed();
+      this.server.to(room.gameId).emit('game:rematch', { gameId: room.gameId, offeredBy: null });
+      return;
+    }
+    room.rematchCreated(nextGameId);
+    this.server.to(room.gameId).emit('game:rematch', { gameId: room.gameId, offeredBy: null, nextGameId });
   }
 
   private scheduleAbandon(room: GameRoom, color: Color): void {

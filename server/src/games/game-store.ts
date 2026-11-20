@@ -46,6 +46,23 @@ export class GameStore {
     await this.setMongoStatus(gameId, 'active');
   }
 
+  /** A new game with both seats taken, already active: the rematch. Returns its id. */
+  async createActive(seats: Record<Color, RoomPlayer>): Promise<string> {
+    const game = await this.prisma.game.create({
+      data: {
+        status: 'active',
+        whiteGuestId: seats.white.id,
+        whiteName: seats.white.displayName,
+        blackGuestId: seats.black.id,
+        blackName: seats.black.displayName,
+      },
+      select: { id: true },
+    });
+    await this.repository.createGame(game.id);
+    await this.setMongoStatus(game.id, 'active');
+    return game.id;
+  }
+
   /** Safe to retry. */
   async finish(end: GameEnd, status: GameStatus): Promise<void> {
     await this.prisma.game.update({
