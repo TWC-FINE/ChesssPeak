@@ -112,9 +112,9 @@ function enter(displayName: string): void {
   );
 }
 
-function startGame(color: 'white' | 'black' | 'random'): void {
+function startGame(color: 'white' | 'black' | 'random', clockMinutes: 3 | 5 | 10 | undefined): void {
   if (session === null) return;
-  createGame(config.PUBLIC_API_URL, session.token, color).then(
+  createGame(config.PUBLIC_API_URL, session.token, clockMinutes === undefined ? { color } : { color, clockMinutes }).then(
     (gameId) => {
       message = '';
       location.hash = `#/game/${gameId}`;

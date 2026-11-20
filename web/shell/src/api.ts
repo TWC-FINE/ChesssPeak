@@ -28,8 +28,9 @@ export function signIn(apiUrl: string, displayName: string, fetcher: Fetch = fet
   });
 }
 
-export async function createGame(apiUrl: string, token: string, color: CreateGameRequest['color'], fetcher: Fetch = fetch): Promise<string> {
-  const { gameId } = await post<CreateGameResponse>(fetcher, `${apiUrl}/games`, { color }, {
+/** `request` goes as it is: a game without `clockMinutes` has no clock. */
+export async function createGame(apiUrl: string, token: string, request: CreateGameRequest, fetcher: Fetch = fetch): Promise<string> {
+  const { gameId } = await post<CreateGameResponse>(fetcher, `${apiUrl}/games`, request, {
     401: 'Tu sesión caducó. Vuelve a entrar.',
     503: 'No se pudo crear la partida. Inténtalo de nuevo.',
   }, token);
