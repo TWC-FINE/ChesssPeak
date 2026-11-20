@@ -1,4 +1,4 @@
-import type { RankingContext, RankingResponse } from '@chessspeak/shared';
+import type { ProfileResponse, RankingContext, RankingResponse } from '@chessspeak/shared';
 
 const element = document.getElementById('mf');
 const log = document.getElementById('log');
@@ -19,8 +19,27 @@ const ranking: RankingResponse = {
 };
 const API_URL = 'http://ranking.simulado';
 const realFetch = window.fetch.bind(window);
+// every player gets the same made-up profile, with their own row
+const profile = (displayName: string): ProfileResponse | undefined => {
+  const entry = ranking.entries.find((candidate) => candidate.displayName.toLowerCase() === displayName.toLowerCase());
+  if (entry === undefined) return undefined;
+  return {
+    entry,
+    games: [
+      { gameId: 'g2', color: 'black', opponent: 'Rival', outcome: 'win', termination: 'checkmate', finishedAt: '2026-11-20T18:00:00.000Z', rating: entry.rating, ratingChange: 18 },
+      { gameId: 'g1', color: 'white', opponent: 'Rival', outcome: 'draw', termination: 'agreement', finishedAt: '2026-11-19T18:00:00.000Z', rating: entry.rating - 18, ratingChange: 2 },
+    ],
+    ratingHistory: [1200, entry.rating - 18, entry.rating],
+  };
+};
+const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 window.fetch = async (input, init) => {
-  if (String(input) === `${API_URL}/ranking`) return new Response(JSON.stringify(ranking), { headers: { 'Content-Type': 'application/json' } });
+  const url = String(input);
+  if (url === `${API_URL}/ranking`) return reply(ranking);
+  if (url.startsWith(`${API_URL}/ranking/`)) {
+    const found = profile(decodeURIComponent(url.slice(`${API_URL}/ranking/`.length)));
+    return found === undefined ? reply({ message: 'No rated games for that player' }, 404) : reply(found);
+  }
   return realFetch(input, init);
 };
 
