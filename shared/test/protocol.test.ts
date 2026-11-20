@@ -4,6 +4,8 @@ import {
   PROTOCOL_VERSION,
   RESERVED_IN_V1,
   clientEventSchemas,
+  clockSchema,
+  createGameRequestSchema as createGameRequest,
   createGameRequestSchema,
   createGameResponseSchema,
   gameDrawAnswerSchema,
@@ -19,6 +21,7 @@ import {
   guestAuthRequestSchema,
   guestAuthResponseSchema,
   INITIAL_RATING,
+  CLOCK_MINUTES,
   PROFILE_GAMES,
   profileGameSchema,
   profileNameSchema,
@@ -130,8 +133,8 @@ describe('client → server (strict)', () => {
 describe('server → client (tolerant)', () => {
   it('accepts a full game state and drops unknown fields instead of failing', () => {
     expect(gameStateSchema.safeParse(state).success).toBe(true);
-    const newer = gameStateSchema.parse({ ...state, clock: { white: 60 } });
-    expect('clock' in newer).toBe(false);
+    const newer = gameStateSchema.parse({ ...state, premoves: ['e7e5'] });
+    expect('premoves' in newer).toBe(false);
   });
 
   it('carries a pending draw offer only when there is one', () => {
@@ -247,6 +250,28 @@ describe('server → client (tolerant)', () => {
     expect(state.safeParse(base).success).toBe(true);
     expect(state.parse({ ...base, rematchOffer: 'white', nextGameId: 'g2' })).toMatchObject({ rematchOffer: 'white', nextGameId: 'g2' });
     expect(state.safeParse({ ...base, rematchOffer: 'nobody' }).success).toBe(false);
+  });
+
+  it('accepts a clock of 3, 5 or 10 minutes when creating a game, and nothing else', () => {
+    expect(CLOCK_MINUTES).toEqual([3, 5, 10]);
+    for (const clockMinutes of CLOCK_MINUTES) expect(createGameRequest.safeParse({ clockMinutes }).success).toBe(true);
+    expect(createGameRequest.safeParse({ color: 'white' }).success).toBe(true);
+    expect(createGameRequest.safeParse({ clockMinutes: 4 }).success).toBe(false);
+    expect(createGameRequest.safeParse({ clockMinutes: '5' }).success).toBe(false);
+    expect(createGameRequest.safeParse({ clockMs: 300000 }).success).toBe(false);
+  });
+
+  it('validates the clocks, in game:state and in game:moved, and the timeout', () => {
+    const clock = { initialMs: 300000, whiteMs: 299000, blackMs: 300000, running: 'black' };
+    expect(clockSchema.safeParse(clock).success).toBe(true);
+    expect(clockSchema.safeParse({ ...clock, running: null }).success).toBe(true);
+    expect(clockSchema.safeParse({ ...clock, whiteMs: -1 }).success).toBe(false);
+    expect(clockSchema.safeParse({ ...clock, initialMs: 0 }).success).toBe(false);
+    expect(clockSchema.safeParse({ ...clock, blackMs: 0.5 }).success).toBe(false);
+    const moved = { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: 'x' };
+    expect(serverEventSchemas['game:moved'].safeParse(moved).success).toBe(true);
+    expect(serverEventSchemas['game:moved'].parse({ ...moved, clock }).clock).toEqual(clock);
+    expect(serverEventSchemas['game:end'].safeParse({ gameId: 'g1', result: '0-1', termination: 'timeout' }).success).toBe(true);
   });
 
   it('marks the reserved values', () => {

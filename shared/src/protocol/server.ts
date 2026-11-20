@@ -17,6 +17,18 @@ import {
 export const moveRecordSchema = z.object({ ply: plySchema, uci: uciSchema, san: z.string().min(1) });
 export type MoveRecord = z.infer<typeof moveRecordSchema>;
 
+/**
+ * The clocks of a game that has them, in milliseconds left, as the server counted them when it sent the message.
+ * `running` is the color whose time is going down: null before the first move of white and once the game is over.
+ */
+export const clockSchema = z.object({
+  initialMs: z.number().int().positive(),
+  whiteMs: z.number().int().min(0),
+  blackMs: z.number().int().min(0),
+  running: colorSchema.nullable(),
+});
+export type Clock = z.infer<typeof clockSchema>;
+
 export const seatSchema = z.object({ displayName: z.string().min(1), connected: z.boolean() });
 export type Seat = z.infer<typeof seatSchema>;
 
@@ -37,6 +49,8 @@ export const gameStateSchema = z.object({
   rematchOffer: colorSchema.optional(),
   /** The game of the rematch both players accepted. Optional: added later in v1. */
   nextGameId: gameIdSchema.optional(),
+  /** Only in a game created with a clock. Optional: added later in v1. */
+  clock: clockSchema.optional(),
 });
 export type GameState = z.infer<typeof gameStateSchema>;
 
@@ -46,6 +60,8 @@ export const gameMovedSchema = z.object({
   uci: uciSchema,
   san: z.string().min(1),
   fen: fenSchema,
+  /** The clocks right after this move, in a game that has them. Optional: added later in v1. */
+  clock: clockSchema.optional(),
 });
 export type GameMoved = z.infer<typeof gameMovedSchema>;
 
