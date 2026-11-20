@@ -257,7 +257,8 @@ export class MfGame extends LitElement {
       if (seat === null) return `${COLOR_TEXT[color]}: libre`;
       return `${COLOR_TEXT[color]}: ${seat.displayName}${seat.connected ? '' : ' (desconectado)'}`;
     };
-    return html`<p class="csg-players">${player('white')} · ${player('black')}</p>
+    const watching = state.spectators === undefined ? '' : ` · ${state.spectators} ${state.spectators === 1 ? 'espectador' : 'espectadores'}`;
+    return html`<p class="csg-players">${player('white')} · ${player('black')}${watching}</p>
       <p class="csg-status" data-status=${state.status}>${this.statusText(state)}</p>`;
   }
 
@@ -332,7 +333,7 @@ export class MfGame extends LitElement {
   private statusText(state: GameState): string {
     if (this.end !== undefined) return `Partida terminada: ${this.end.result} (${END_TEXT[this.end.termination]}).`;
     if (state.status === 'waiting') return 'Esperando al otro jugador.';
-    const you = state.yourColor === 'spectator' ? '' : `Juegas con ${COLOR_TEXT[state.yourColor]}. `;
+    const you = state.yourColor === 'spectator' ? 'Miras la partida. ' : `Juegas con ${COLOR_TEXT[state.yourColor]}. `;
     return `${you}${state.turn === state.yourColor ? 'Te toca.' : `Le toca a ${COLOR_TEXT[state.turn]}.`}`;
   }
 

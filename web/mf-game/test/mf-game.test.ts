@@ -574,3 +574,26 @@ describe('clock', () => {
     expect(element.querySelector('.csg-clocks')).toBeNull();
   });
 });
+
+describe('spectator', () => {
+  it('says the receiver is watching, and offers nothing', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ yourColor: 'spectator', spectators: 1 }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-status')?.textContent).toContain('Miras la partida. Le toca a blancas.');
+    expect(element.querySelector('.csg-draw')).toBeNull();
+    expect(element.querySelector('.csg-players')?.textContent).toContain('1 espectador');
+  });
+
+  it('shows the players how many watch, and nothing when nobody does', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ spectators: 3 }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-players')?.textContent).toContain('3 espectadores');
+    receive('game:state', state());
+    await element.updateComplete;
+    expect(element.querySelector('.csg-players')?.textContent).not.toContain('espectador');
+  });
+});
