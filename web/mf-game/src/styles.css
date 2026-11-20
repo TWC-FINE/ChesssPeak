@@ -125,6 +125,16 @@ mf-game .csg-tray piece {
   box-shadow: inset 0 0 0 1px rgba(216, 184, 120, 0.55);
   will-change: auto;
 }
+.csg-material {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--cs-accent);
+  color: var(--cs-accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 .csg-tray-empty { font-size: 0.85rem; color: rgba(203, 185, 167, 0.6); }
 
 .csg-info { margin: 0; font-size: 0.85rem; color: var(--cs-muted); }

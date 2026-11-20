@@ -310,6 +310,31 @@ describe('board extras: turn, check, captures and flip', () => {
     expect(element.querySelectorAll('cg-board piece')).toHaveLength(30);
   });
 
+  it('counts the material on the board, a promoted piece as what it became', async () => {
+    const { materialBalance } = await import('../src/mf-game.js');
+    expect(materialBalance(state().fen)).toBe(0);
+    expect(materialBalance(CHECK_FEN)).toBe(0);
+    // 1.e4 d5 2.exd5: white is a pawn up
+    expect(materialBalance('rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2')).toBe(1);
+    // black has a rook and a knight more
+    expect(materialBalance('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKB2 w kq - 0 1')).toBe(-13);
+    // white promoted a pawn to a queen: 8 more than the pawn it was
+    expect(materialBalance('Q3k3/8/8/8/8/8/8/4K3 w - - 0 1')).toBe(9);
+  });
+
+  it('shows the material advantage only on the side that is ahead', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ fen: CHECK_FEN, plyCount: 6 }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-material')).toBeNull();
+
+    receive('game:state', state({ fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/1NBQKB2 b kq - 0 1', plyCount: 6 }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-tray[data-by=white] .csg-material')).toBeNull();
+    expect(element.querySelector('.csg-tray[data-by=black] .csg-material')?.textContent).toBe('+13');
+  });
+
   it('turns the board for this browser only, and starts again unturned in another game', async () => {
     const { socket, sent } = fakeSocket();
     const element = await mountGame(socket);
