@@ -15,6 +15,9 @@ import {
   gameStateSchema,
   guestAuthRequestSchema,
   guestAuthResponseSchema,
+  INITIAL_RATING,
+  rankingEntrySchema,
+  rankingResponseSchema,
   serverEventSchemas,
   socketAuthSchema,
   uciSchema,
@@ -144,6 +147,20 @@ describe('server → client (tolerant)', () => {
     expect('displayName' in response).toBe(false);
     expect(response.identity.displayName).toBe('Ana');
     expect(createGameResponseSchema.safeParse({ gameId: 'g1' }).success).toBe(true);
+  });
+
+  it('validates the ranking and drops unknown fields', () => {
+    const entry = { rank: 1, displayName: 'Ana', rating: 1220, games: 1, wins: 1, draws: 0, losses: 0 };
+    expect(INITIAL_RATING).toBe(1200);
+    expect(rankingResponseSchema.safeParse({ entries: [], gamesRated: 0 }).success).toBe(true);
+    const parsed = rankingResponseSchema.parse({ entries: [{ ...entry, guestId: 'g' }], gamesRated: 1, generatedAt: 'x' });
+    expect(parsed.entries[0]).toEqual(entry);
+    expect('generatedAt' in parsed).toBe(false);
+    expect(rankingEntrySchema.safeParse({ ...entry, rank: 0 }).success).toBe(false);
+    expect(rankingEntrySchema.safeParse({ ...entry, games: 0 }).success).toBe(false);
+    expect(rankingEntrySchema.safeParse({ ...entry, rating: 1220.5 }).success).toBe(false);
+    expect(rankingEntrySchema.safeParse({ ...entry, displayName: '' }).success).toBe(false);
+    expect(rankingResponseSchema.safeParse({ entries: [entry] }).success).toBe(false);
   });
 
   it('marks the reserved values', () => {

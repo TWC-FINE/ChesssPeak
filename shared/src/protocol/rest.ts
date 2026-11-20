@@ -18,3 +18,27 @@ export type CreateGameRequest = z.infer<typeof createGameRequestSchema>;
 
 export const createGameResponseSchema = z.object({ gameId: gameIdSchema });
 export type CreateGameResponse = z.infer<typeof createGameResponseSchema>;
+
+/** Elo every player starts with. */
+export const INITIAL_RATING = 1200;
+
+/** One row of GET /ranking. Players are grouped by display name, since guests get a new guestId at every sign-in. */
+export const rankingEntrySchema = z.object({
+  /** 1 for the best rating; players with the same rating share it. */
+  rank: z.number().int().min(1),
+  displayName: z.string().min(1).max(24),
+  rating: z.number().int(),
+  games: z.number().int().min(1),
+  wins: z.number().int().min(0),
+  draws: z.number().int().min(0),
+  losses: z.number().int().min(0),
+});
+export type RankingEntry = z.infer<typeof rankingEntrySchema>;
+
+/** Response of GET /ranking (public, no token): the top players, best first. */
+export const rankingResponseSchema = z.object({
+  entries: z.array(rankingEntrySchema),
+  /** Finished games the ratings come from. */
+  gamesRated: z.number().int().min(0),
+});
+export type RankingResponse = z.infer<typeof rankingResponseSchema>;
