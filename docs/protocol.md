@@ -46,16 +46,19 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 | `game:resign` | `{ gameId }` | `<mf-game>` | servidor | `not_found`, `unauthorized` |
 | `game:draw-offer` | `{ gameId }`; ofrece tablas. Si el rival ya las había ofrecido, las acepta | `<mf-game>` | servidor | `not_found`, `unauthorized` |
 | `game:draw-answer` | `{ gameId, accept }`; `accept` es booleano y responde a la oferta pendiente del rival | `<mf-game>` | servidor | `not_found`, `unauthorized` (también si no hay oferta del rival pendiente) |
+| `game:rematch-offer` | `{ gameId }`; con la partida terminada, ofrece una revancha con los colores invertidos. Si el rival ya la había ofrecido, la acepta | `<mf-game>` | servidor | `not_found`, `unauthorized` (también si la partida no ha terminado o la revancha ya empezó) |
+| `game:rematch-answer` | `{ gameId, accept }`; responde a la oferta de revancha pendiente del rival | `<mf-game>` | servidor | `not_found`, `unauthorized` (también si no hay oferta del rival) |
 | `voice:attempt` | `VoiceAttempt` sin `player` ni `createdAt`: `gameId, ply, fen, lang, recognizer, alternatives[], transcript, normalized, candidates[≤3], resolvedUci, expectedUci?, outcome, accepted, tryIndex, latency, session` | shell (reenvía `cs:voice-attempt`) | servidor (`voice_attempts`) | se descarta si no valida; no responde |
 
 ### Servidor → cliente (esquemas tolerantes)
 
 | Evento | Payload | Emite | Escucha | Cuándo |
 |---|---|---|---|---|
-| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor, drawOffer? }`; cada asiento es `{ displayName, connected }` o `null`; `drawOffer` es el color que ofreció tablas sin respuesta, y no viene si no hay oferta | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
+| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor, drawOffer?, rematchOffer?, nextGameId? }`; cada asiento es `{ displayName, connected }` o `null`; `drawOffer` es el color que ofreció tablas sin respuesta, y no viene si no hay oferta; `rematchOffer` es lo mismo para la revancha, y `nextGameId`, la partida de la revancha aceptada | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
 | `game:moved` | `{ gameId, ply, uci, san, fen }` | servidor | `<mf-game>` (los dos jugadores) | tras una jugada válida |
 | `game:end` | `{ gameId, result, termination }` | servidor | `<mf-game>` | fin de la partida |
 | `game:draw` | `{ gameId, offeredBy }`; `offeredBy` es `white`, `black` o `null` | servidor | `<mf-game>` (los dos jugadores) | al ofrecer tablas (el color) y al rechazarlas (`null`) |
+| `game:rematch` | `{ gameId, offeredBy, nextGameId? }`; `offeredBy` es `white`, `black` o `null`; `nextGameId` es la partida nueva, ya activa | servidor | `<mf-game>` (los dos jugadores) | al ofrecer la revancha (el color), al rechazarla (`null`) y al aceptarla (`null` y `nextGameId`) |
 | `game:error` | `{ code, message }` | servidor | `<mf-game>` | la petición se rechaza; el estado no cambia |
 
 **Valores:**
@@ -98,6 +101,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 | `cs:voice-status` | `{ v, state, message? }`; `state` = `idle` \| `listening` \| `processing` \| `awaiting-confirmation` \| `unavailable` \| `error` | `<mf-voice-input>` | shell |
 | `cs:voice-attempt` | `{ v, attempt }`, con `attempt` igual que `voice:attempt` | `<mf-voice-input>` | shell (lo reenvía como `voice:attempt`) |
 | `cs:game-ended` | `{ v, gameId, result, termination }` | `<mf-game>` | `<mf-voice-input>`, `<mf-history>` |
+| `cs:open-game` | `{ v, gameId }`; ir a otra partida, como la revancha aceptada | `<mf-game>` | shell (cambia la ruta a `#/game/:gameId`) |
 
 ## 5. Contextos (`el.context`, todos con `v: 1`)
 
@@ -174,6 +178,7 @@ Respuestas provisionales a las dudas de revisión del contrato v1. Quedan **marc
 | Tema | Decisión provisional en v1 |
 |---|---|
 | Tablas | Desde el 20 de noviembre: `game:draw-offer`, `game:draw-answer` y `game:draw`, con `termination: 'agreement'`. Hay una sola oferta pendiente a la vez. **Cualquier jugada la retira**, y no se anuncia con `game:draw`: quien recibe `game:moved` la descarta. Tampoco sobrevive a un reinicio del servidor, porque no se guarda. **Pendiente de la aprobación del responsable del repo** |
+| Revancha | Desde el 20 de noviembre: `game:rematch-offer`, `game:rematch-answer` y `game:rematch`, y `cs:open-game` en el navegador. Solo con la partida **terminada** (no cancelada), una oferta pendiente a la vez, y como mucho una revancha por partida. La partida nueva se crea ya activa, con los mismos jugadores y los colores invertidos. La oferta no sobrevive a un reinicio del servidor; `nextGameId`, tampoco. **Pendiente de la aprobación del responsable del repo** |
 | `game:leave`, acks | **No hay** en v1: ni salida explícita ni acks de Socket.IO. Las respuestas van por `game:moved`, `game:state` y `game:error`. Se pueden añadir después como eventos nuevos (cambio aditivo) |
 | `voice:attempt` | `fen` y `normalized` **se quedan** en el mensaje |
 | `cs:position` | `turn` y `yourColor` **se quedan** |
