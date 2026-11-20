@@ -43,21 +43,24 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 | `game:join` | `{ gameId }` | `<mf-game>` | servidor | `not_found`, `unauthorized` |
 | `game:move` | `{ gameId, uci, ply }`; `uci` cumple `^[a-h][1-8][a-h][1-8][qrbn]?$`; `ply` entero ≥ 1: la media jugada que se hace, que debe ser `plyCount + 1` | `<mf-game>`, tras `cs:move-confirmed` | servidor | `not_found`, `unauthorized`, `not_your_turn`, `stale_ply`, `illegal` |
 | `game:resign` | `{ gameId }` | `<mf-game>` | servidor | `not_found`, `unauthorized` |
+| `game:draw-offer` | `{ gameId }`; ofrece tablas. Si el rival ya las había ofrecido, las acepta | `<mf-game>` | servidor | `not_found`, `unauthorized` |
+| `game:draw-answer` | `{ gameId, accept }`; `accept` es booleano y responde a la oferta pendiente del rival | `<mf-game>` | servidor | `not_found`, `unauthorized` (también si no hay oferta del rival pendiente) |
 | `voice:attempt` | `VoiceAttempt` sin `player` ni `createdAt`: `gameId, ply, fen, lang, recognizer, alternatives[], transcript, normalized, candidates[≤3], resolvedUci, expectedUci?, outcome, accepted, tryIndex, latency, session` | shell (reenvía `cs:voice-attempt`) | servidor (`voice_attempts`) | se descarta si no valida; no responde |
 
 ### Servidor → cliente (esquemas tolerantes)
 
 | Evento | Payload | Emite | Escucha | Cuándo |
 |---|---|---|---|---|
-| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor }`; cada asiento es `{ displayName, connected }` o `null` | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
+| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor, drawOffer? }`; cada asiento es `{ displayName, connected }` o `null`; `drawOffer` es el color que ofreció tablas sin respuesta, y no viene si no hay oferta | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
 | `game:moved` | `{ gameId, ply, uci, san, fen }` | servidor | `<mf-game>` (los dos jugadores) | tras una jugada válida |
 | `game:end` | `{ gameId, result, termination }` | servidor | `<mf-game>` | fin de la partida |
+| `game:draw` | `{ gameId, offeredBy }`; `offeredBy` es `white`, `black` o `null` | servidor | `<mf-game>` (los dos jugadores) | al ofrecer tablas (el color) y al rechazarlas (`null`) |
 | `game:error` | `{ code, message }` | servidor | `<mf-game>` | la petición se rechaza; el estado no cambia |
 
 **Valores:**
 - `status`: `waiting` \| `active` \| `finished` \| `aborted` (los mismos que `games` en Postgres).
 - `result`: `1-0` \| `0-1` \| `1/2-1/2` \| `*` (`*` solo en `aborted`).
-- `termination`: `checkmate`, `stalemate`, `insufficient_material`, `resignation`, `abandonment`, `aborted`; **reservados en v1**: `threefold_repetition`, `fifty_moves`.
+- `termination`: `checkmate`, `stalemate`, `insufficient_material`, `resignation`, `abandonment`, `aborted`, `agreement` (tablas aceptadas por los dos, siempre `1/2-1/2`); **reservados en v1**: `threefold_repetition`, `fifty_moves`.
 - `game:error.code`:
   - `not_your_turn`: no te toca;
   - `illegal`: la jugada no es legal en la posición;
@@ -169,7 +172,8 @@ Respuestas provisionales a las dudas de revisión del contrato v1. Quedan **marc
 
 | Tema | Decisión provisional en v1 |
 |---|---|
-| Tablas, `game:leave`, acks | **No hay** en v1: ni ofrecer o aceptar tablas, ni salida explícita, ni acks de Socket.IO. Las respuestas van por `game:moved`, `game:state` y `game:error`. Se pueden añadir después como eventos nuevos (cambio aditivo) |
+| Tablas | Desde el 20 de noviembre: `game:draw-offer`, `game:draw-answer` y `game:draw`, con `termination: 'agreement'`. Hay una sola oferta pendiente a la vez. **Cualquier jugada la retira**, y no se anuncia con `game:draw`: quien recibe `game:moved` la descarta. Tampoco sobrevive a un reinicio del servidor, porque no se guarda. **Pendiente de la aprobación del responsable del repo** |
+| `game:leave`, acks | **No hay** en v1: ni salida explícita ni acks de Socket.IO. Las respuestas van por `game:moved`, `game:state` y `game:error`. Se pueden añadir después como eventos nuevos (cambio aditivo) |
 | `voice:attempt` | `fen` y `normalized` **se quedan** en el mensaje |
 | `cs:position` | `turn` y `yourColor` **se quedan** |
 | Asientos | La regla de la sección 2 (color reservado para quien crea la partida; el resto, primer asiento libre) es **correcta** |
