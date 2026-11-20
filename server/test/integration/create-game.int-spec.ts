@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { randomUUID } from 'node:crypto';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import type { GuestAuthResponse } from '@chessspeak/shared';
@@ -73,5 +74,21 @@ describe('POST /games (real Postgres)', () => {
   it('stores nothing without a valid token', async () => {
     await createGame({ color: 'white' }, 'not-a-token').expect(401);
     await expect(prisma.game.count()).resolves.toBe(0);
+  });
+});
+
+describe('GET /games/open (real Postgres)', () => {
+  it('lists the waiting games only, newest first, without the old ones', async () => {
+    const first = (await createGame({ color: 'white', clockMinutes: 5 }).expect(201)).body.gameId as string;
+    const second = (await createGame({ color: 'black' }).expect(201)).body.gameId as string;
+    const started = (await createGame({ color: 'white' }).expect(201)).body.gameId as string;
+    await prisma.game.update({ where: { id: started }, data: { status: 'active', blackGuestId: randomUUID(), blackName: 'Luis' } });
+    const old = (await createGame({ color: 'white' }).expect(201)).body.gameId as string;
+    await prisma.game.update({ where: { id: old }, data: { createdAt: new Date(Date.now() - 31 * 60_000) } });
+
+    const response = await request(app.getHttpServer()).get('/games/open').expect(200);
+    expect(response.body.games.map((game: { gameId: string }) => game.gameId)).toEqual([second, first]);
+    expect(response.body.games[0]).toMatchObject({ creator: 'Ana', creatorColor: 'black' });
+    expect(response.body.games[1]).toMatchObject({ creatorColor: 'white', clockMs: 300_000 });
   });
 });
