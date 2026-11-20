@@ -28,6 +28,7 @@ import {
   guestAuthResponseSchema,
   INITIAL_RATING,
   CLOCK_MINUTES,
+  CLOCK_INCREMENTS,
   PROFILE_GAMES,
   profileGameSchema,
   profileNameSchema,
@@ -314,6 +315,18 @@ describe('server → client (tolerant)', () => {
     expect(createGameRequest.safeParse({ clockMinutes: 4 }).success).toBe(false);
     expect(createGameRequest.safeParse({ clockMinutes: '5' }).success).toBe(false);
     expect(createGameRequest.safeParse({ clockMs: 300000 }).success).toBe(false);
+  });
+
+  it('accepts an increment of 0, 2, 3 or 5 seconds, and only with a clock', () => {
+    expect(CLOCK_INCREMENTS).toEqual([0, 2, 3, 5]);
+    for (const incrementSeconds of CLOCK_INCREMENTS) expect(createGameRequest.safeParse({ clockMinutes: 3, incrementSeconds }).success).toBe(true);
+    expect(createGameRequest.safeParse({ clockMinutes: 3, incrementSeconds: 4 }).success).toBe(false);
+    expect(createGameRequest.safeParse({ incrementSeconds: 2 }).success).toBe(false);
+    expect(createGameRequest.safeParse({ incrementSeconds: 0 }).success).toBe(false);
+    expect(createGameRequest.safeParse({ clockMinutes: 3, incrementMs: 2000 }).success).toBe(false);
+    const clock = { initialMs: 180000, whiteMs: 180000, blackMs: 180000, running: null };
+    expect(clockSchema.parse({ ...clock, incrementMs: 2000 }).incrementMs).toBe(2000);
+    expect(clockSchema.safeParse({ ...clock, incrementMs: 0 }).success).toBe(false);
   });
 
   it('validates the clocks, in game:state and in game:moved, and the timeout', () => {
