@@ -24,6 +24,7 @@ import baseCss from 'chessground/assets/chessground.base.css?inline';
 import brownCss from 'chessground/assets/chessground.brown.css?inline';
 import piecesCss from 'chessground/assets/chessground.cburnett.css?inline';
 import { fensAfter, turnOf } from './replay.js';
+import { saveSoundPreference, soundPreference, webAudioSound, type MoveSound } from './sound.js';
 import ownCss from './styles.css?inline';
 
 // Light DOM means the styles are global: inject them once.
@@ -137,6 +138,10 @@ export class MfGame extends LitElement {
   /** The last clock from the server and when it arrived; the running one counts down from there between messages. */
   private clock: { value: Clock; receivedAt: number } | undefined;
   private ticker: ReturnType<typeof setInterval> | undefined;
+  /** What plays the sounds; a test replaces it. */
+  sound: MoveSound = webAudioSound();
+  /** Kept in this browser, for every game. */
+  private soundOn = soundPreference();
 
   protected override createRenderRoot(): HTMLElement {
     return this;
@@ -184,6 +189,9 @@ export class MfGame extends LitElement {
       <div class="csg-toolbar">
         ${this.renderTurn(fen)}
         ${this.renderClocks()}
+        <button type="button" class="csg-sound" data-action="toggle-sound" aria-pressed=${String(this.soundOn)} @click=${this.toggleSound}>
+          ${this.soundOn ? 'Sonido: sí' : 'Sonido: no'}
+        </button>
         <button type="button" class="csg-flip" data-action="flip" aria-pressed=${String(this.flipped)} @click=${this.flip}>Girar tablero</button>
       </div>
       <div class="csg-card">
@@ -242,6 +250,16 @@ export class MfGame extends LitElement {
       </div>`;
     };
     return html`<div class="csg-trays">${tray('white', 'Capturadas por blancas')}${tray('black', 'Capturadas por negras')}</div>`;
+  }
+
+  private readonly toggleSound = (): void => {
+    this.soundOn = !this.soundOn;
+    saveSoundPreference(this.soundOn);
+    this.requestUpdate();
+  };
+
+  private beep(kind: 'move' | 'capture' | 'end'): void {
+    if (this.soundOn) this.sound.play(kind);
   }
 
   private readonly flip = (): void => {
@@ -415,7 +433,7 @@ export class MfGame extends LitElement {
   }
 
   private announcePosition(state: GameState): void {
-    this.emitEvent('cs:position', { v: 1, gameId: state.gameId, fen: state.fen, plyCount: state.plyCount, turn: state.turn, yourColor: state.yourColor });
+    this.emitEvent('cs:position', { v: 1, gameId: state.gameId, fen: state.fen, plyCount: state.plyCount, turn: state.turn, yourColor: state.yourColor, status: state.status });
   }
 
   private readonly onState = (state: GameState): void => {
@@ -459,11 +477,15 @@ export class MfGame extends LitElement {
     this.drawDeclined = false;
     this.emitEvent('cs:move-applied', { v: 1, gameId: moved.gameId, ply: moved.ply, uci: moved.uci, san: moved.san, fen: moved.fen });
     this.announcePosition(this.state);
+    // only a move that arrives live sounds: loading the state of a game is silent
+    this.beep(moved.san.includes('x') ? 'capture' : 'move');
     this.requestUpdate();
   };
 
   private readonly onEnd = (end: GameEnd): void => {
     if (end.gameId !== this.context?.gameId) return;
+    // whoever comes back to a finished game learns the result again: that is not news
+    if (this.end === undefined && this.state?.status === 'active') this.beep('end');
     this.end = end;
     this.arrow = undefined;
     this.freezeClock(end);

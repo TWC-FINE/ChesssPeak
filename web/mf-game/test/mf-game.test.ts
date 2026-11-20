@@ -1,8 +1,9 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { ClientToServerEvents, Clock, CsEventName, GameContext, GameSocket, GameState, ServerToClientEvents } from '@chessspeak/shared';
 import { fensAfter, turnOf } from '../src/replay.js';
+import type { MoveSound } from '../src/sound.js';
 
-type GameElement = HTMLElement & { context?: GameContext; updateComplete: Promise<boolean> };
+type GameElement = HTMLElement & { context?: GameContext; updateComplete: Promise<boolean>; sound: MoveSound };
 
 const AFTER_E4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1';
 const AFTER_E5 = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
@@ -131,7 +132,7 @@ describe('what the server says', () => {
     receive('game:state', state());
     await element.updateComplete;
 
-    expect(positions).toEqual([{ v: 1, gameId: 'g1', fen: state().fen, plyCount: 0, turn: 'white', yourColor: 'white' }]);
+    expect(positions).toEqual([{ v: 1, gameId: 'g1', fen: state().fen, plyCount: 0, turn: 'white', yourColor: 'white', status: 'active' }]);
     expect(element.textContent).toContain('Juegas con blancas');
     expect(element.textContent).toContain('Te toca');
     expect(element.textContent).toContain('negras: Luis');
@@ -595,5 +596,67 @@ describe('spectator', () => {
     receive('game:state', state());
     await element.updateComplete;
     expect(element.querySelector('.csg-players')?.textContent).not.toContain('espectador');
+  });
+});
+
+describe('sound', () => {
+  async function withSound() {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    const play = vi.fn();
+    element.sound = { play };
+    return { element, receive, play };
+  }
+
+  afterEach(() => {
+    try {
+      localStorage.clear();
+    } catch {
+      // no storage in this environment
+    }
+  });
+
+  it('sounds a live move, lower for a capture, and not the moves of a state', async () => {
+    const { element, receive, play } = await withSound();
+    receive('game:state', state({ fen: AFTER_E4, plyCount: 1, turn: 'black', moves: [{ ply: 1, uci: 'e2e4', san: 'e4' }] }));
+    expect(play).not.toHaveBeenCalled();
+    receive('game:moved', { gameId: 'g1', ply: 2, uci: 'd7d5', san: 'd5', fen: 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2' });
+    receive('game:moved', { gameId: 'g1', ply: 3, uci: 'e4d5', san: 'exd5', fen: 'rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2' });
+    expect(play.mock.calls).toEqual([['move'], ['capture']]);
+    await element.updateComplete;
+  });
+
+  it('sounds the end of a live game, but not a result learned on coming back', async () => {
+    const { receive, play } = await withSound();
+    receive('game:state', state());
+    receive('game:end', { gameId: 'g1', result: '0-1', termination: 'resignation' });
+    expect(play.mock.calls).toEqual([['end']]);
+    const again = await withSound();
+    again.receive('game:state', state({ status: 'finished' }));
+    again.receive('game:end', { gameId: 'g1', result: '0-1', termination: 'resignation' });
+    expect(again.play).not.toHaveBeenCalled();
+  });
+
+  it('can be turned off, and the choice is kept', async () => {
+    const { element, receive, play } = await withSound();
+    receive('game:state', state());
+    await element.updateComplete;
+    const toggle = element.querySelector<HTMLButtonElement>('[data-action=toggle-sound]')!;
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    toggle.click();
+    await element.updateComplete;
+    expect(toggle.textContent).toContain('Sonido: no');
+    receive('game:moved', { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: AFTER_E4 });
+    expect(play).not.toHaveBeenCalled();
+    const next = await withSound();
+    await next.element.updateComplete;
+    expect(next.element.querySelector('[data-action=toggle-sound]')?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('tells the page the status with the position', async () => {
+    const positions = listen('cs:position');
+    const { receive } = await withSound();
+    receive('game:state', state({ status: 'waiting' }));
+    expect(positions.at(-1)).toMatchObject({ status: 'waiting' });
   });
 });
