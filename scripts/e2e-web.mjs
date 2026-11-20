@@ -223,8 +223,9 @@ async function openTab(label, { speech = true } = {}) {
       await sleep(300);
       await waitFor(() => evaluate('document.documentElement.dataset.shellReady === "true"'), `${label}: recargar`);
     },
+    // scrolls first: a click at coordinates outside the viewport reaches nothing
     click: async (selector) => {
-      const box = await waitFor(() => evaluate(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); if (!el || el.disabled) return null; const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`), `${label}: ${selector}`);
+      const box = await waitFor(() => evaluate(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); if (!el || el.disabled) return null; el.scrollIntoView({ block: 'center' }); const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`), `${label}: ${selector}`);
       for (const type of ['mousePressed', 'mouseReleased']) await page.send('Input.dispatchMouseEvent', { type, x: box.x, y: box.y, button: 'left', clickCount: 1 });
     },
     type: async (selector, value) => {
@@ -419,6 +420,58 @@ try {
   await waitFor(async () => (await white.history()).includes('2. g4 Qh4'), 'el historial tras recargar');
   check('Tras recargar, el historial tiene las jugadas numeradas y sin repetir', (await white.history()).includes('1. f3 e5 2. g4 Qh4') && (await white.evaluate(`document.querySelectorAll('mf-history .csh-san').length`)) === 4);
   check('Los dos ven el mismo historial', (await black.history()).includes('1. f3 e5 2. g4 Qh4'));
+
+  // 11b. the spectator saw the end too, and the history exports the game as PGN
+  await third.until(STATUS, '0-1 (jaque mate)');
+  check('La espectadora también ve el resultado', true);
+  const pgn = await white.evaluate(`document.querySelector('mf-history').pgn()`);
+  check('El historial exporta la partida en PGN, con el resultado', pgn.includes('[Result "0-1"]') && pgn.includes('1. f3 e5 2. g4 Qh4# 0-1'), pgn.trim().split('\n').at(-1));
+  check('Hay botones para copiar y descargar el PGN', await white.evaluate(`document.querySelector('mf-history [data-action=copy-pgn]') !== null && document.querySelector('mf-history [data-action=download-pgn]') !== null`));
+
+  // 11c. rematch: a new game with the colors swapped, and the spectator follows it
+  await white.click('mf-game [data-action=offer-rematch]');
+  await black.click('mf-game [data-action=accept-rematch]');
+  await white.until(STATUS, 'Juegas con negras');
+  await black.until(STATUS, 'Juegas con blancas');
+  const rematchId = await white.evaluate('location.hash.split("/").pop()');
+  check('Revancha: los dos pasan solos a una partida nueva, con los colores cambiados', rematchId !== gameId && (await black.evaluate('location.hash')).endsWith(rematchId), `partida ${rematchId}`);
+  await third.until(STATUS, 'Miras la partida');
+  check('La espectadora pasa a mirar la revancha', (await third.evaluate('location.hash')).endsWith(rematchId));
+  check('El título de la pestaña avisa a quien le toca', (await black.evaluate('document.title')).startsWith('● Te toca') && (await white.evaluate('document.title')).startsWith('Turno del rival'));
+  await black.shot('09b-revancha');
+
+  // 11d. a draw by agreement
+  await black.click('mf-game [data-action=offer-draw]');
+  await white.click('mf-game [data-action=accept-draw]');
+  await white.until(STATUS, '1/2-1/2 (tablas de mutuo acuerdo)');
+  await black.until(STATUS, '1/2-1/2 (tablas de mutuo acuerdo)');
+  await third.until(STATUS, '1/2-1/2 (tablas de mutuo acuerdo)');
+  check('Tablas de mutuo acuerdo: lo ven los dos jugadores y la espectadora', true);
+  check('Con la partida terminada el título vuelve a ser el de siempre', (await black.evaluate('document.title')) === 'ChessSpeak');
+  await white.shot('09c-tablas');
+
+  // 11e. the lobby lists a game with a clock; joining it from there starts the game, and the clock runs after white
+  await white.open(`${web}/index.html#/`);
+  await white.evaluate(`(() => { document.querySelector('[data-clock]').value = '3'; return true; })()`);
+  await white.click('[data-action=create-white]');
+  await white.until(STATUS, 'Esperando al otro jugador');
+  const lobbyGameId = (await white.text('[data-invite]')).split('/').pop();
+  await black.open(`${web}/index.html#/`);
+  const lobbyRow = `#cs-lobby [data-open-game="${lobbyGameId}"]`;
+  await black.until(lobbyRow, '3 min');
+  check('El inicio lista la partida que espera rival, con su reloj', (await black.text(lobbyRow)).includes('Ana · juegas con negras · 3 min'));
+  await black.evaluate('scrollTo(0, 0)');
+  await black.shot('09d-partidas-abiertas');
+  await black.click(`${lobbyRow} [data-action=join-game]`);
+  await black.until(STATUS, 'Juegas con negras');
+  await white.until(STATUS, 'Te toca');
+  check('«Unirse» entra a la partida', (await black.evaluate('location.hash')).endsWith(lobbyGameId));
+  check('Los dos relojes empiezan en 3:00 y no corren antes de la primera jugada', (await white.text('mf-game .csg-clocks')).includes('3:00') && (await white.evaluate(`document.querySelector('mf-game .csg-clock[data-running]') === null`)));
+  await playMove(white, black, 'peón e cuatro', 'e4', 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1');
+  await waitFor(() => black.evaluate(`document.querySelector('mf-game .csg-clock[data-color=black]')?.hasAttribute('data-running') ?? false`), 'el reloj de negras en marcha');
+  check('Tras la primera jugada de blancas corre el reloj de negras', true);
+  check('Y el aviso del título cambia de lado', (await black.evaluate('document.title')).startsWith('● Te toca') && (await white.evaluate('document.title')).startsWith('Turno del rival'));
+  await black.shot('09e-reloj');
 
   // 12. a whole game by voice, with a fake SpeechRecognition: this shows the flow, not the recognition
   await white.open(`${web}/index.html#/`);
