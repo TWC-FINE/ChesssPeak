@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { identitySchema } from '../identity.js';
-import { gameIdSchema } from './common.js';
+import { colorSchema, gameIdSchema, terminationSchema } from './common.js';
 
 // REST. Requests (client → server) are .strict(); responses are not (see docs/contract-versioning.md).
 
@@ -42,3 +42,38 @@ export const rankingResponseSchema = z.object({
   gamesRated: z.number().int().min(0),
 });
 export type RankingResponse = z.infer<typeof rankingResponseSchema>;
+
+/** Most recent games GET /ranking/:displayName returns. */
+export const PROFILE_GAMES = 20;
+
+/** The `:displayName` of GET /ranking/:displayName, once decoded from the path. */
+export const profileNameSchema = z.string().trim().min(1).max(24);
+
+/** One game of a player profile, seen from that player. */
+export const profileGameSchema = z.object({
+  gameId: gameIdSchema,
+  color: colorSchema,
+  opponent: z.string().min(1).max(24),
+  /** From this player's side. */
+  outcome: z.enum(['win', 'draw', 'loss']),
+  termination: terminationSchema.nullable(),
+  /** ISO 8601; null for a game finished before the server saved the date. */
+  finishedAt: z.string().datetime({ offset: true }).nullable(),
+  /** Elo right after this game, and how much it moved. */
+  rating: z.number().int(),
+  ratingChange: z.number().int(),
+});
+export type ProfileGame = z.infer<typeof profileGameSchema>;
+
+/**
+ * Response of GET /ranking/:displayName (public, no token). 404 when that name has no rated game.
+ * `entry` is the player's row of the whole ranking, not only of the top shown by GET /ranking.
+ */
+export const profileResponseSchema = z.object({
+  entry: rankingEntrySchema,
+  /** Most recent first, at most PROFILE_GAMES. */
+  games: z.array(profileGameSchema),
+  /** Elo after each rated game, oldest first, from INITIAL_RATING before the first one. */
+  ratingHistory: z.array(z.number().int()).min(1),
+});
+export type ProfileResponse = z.infer<typeof profileResponseSchema>;
