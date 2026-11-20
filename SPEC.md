@@ -48,6 +48,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF23. Espectadores: quien abre el enlace de una partida sin asiento libre la mira en tiempo real, con el tablero, el historial y los relojes, pero no puede jugar, rendirse ni ofrecer tablas o revancha. Los jugadores ven cuántos miran. Si hay revancha, el espectador pasa a mirarla también.
 - RF24. Partidas abiertas: la página de inicio lista las partidas creadas en los últimos 30 minutos que esperan rival (quién la creó, con qué color juega quien se une, el reloj y hace cuánto), de la más nueva a la más vieja, y se actualiza sola cada 15 s. «Unirse» abre la partida.
 - RF25. Sonido y aviso de turno: `<mf-game>` suena con cada jugada que llega (más grave si es una captura) y al terminar la partida, con un botón para quitar el sonido que se recuerda en el navegador. El título de la pestaña dice «● Te toca» cuando le toca al jugador en una partida activa.
+- RF26. Lectura en voz alta: `<mf-game>` lee con la voz del navegador cada jugada del rival («caballo toma efe tres, jaque»); a un espectador le lee todas. Se quita con el botón «Leer jugadas», y la elección se recuerda en el navegador.
 
 **Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.2):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.

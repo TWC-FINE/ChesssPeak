@@ -40,7 +40,8 @@ mf-game { display: block; font-family: var(--cs-font); color: var(--cs-text); }
   mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12a8 8 0 0 1 14-5.3L20 9M20 12a8 8 0 0 1-14 5.3L4 15'/><path d='M20 4v5h-5M4 20v-5h5'/></svg>") center / contain no-repeat;
 }
 
-.csg-sound[aria-pressed='false'] { opacity: 0.7; }
+/* the switches of the toolbar: crossed out while off */
+.csg-toggle[aria-pressed='false'] { opacity: 0.65; text-decoration: line-through; }
 
 /* the clocks of a timed game, next to the turn */
 .csg-clocks { display: inline-flex; gap: 8px; margin-right: auto; }

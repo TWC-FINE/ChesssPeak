@@ -37,6 +37,7 @@ Para ser dos jugadores, abre dos pestañas: cada una tiene su propia sesión.
 | `shell/src/session-bar.ts` | Formulario de entrada, crear partida y enlace para invitar |
 | `mf-game/src/mf-game.ts` | Tablero. Es el único microfrontend con socket, y solo muestra lo que dice el servidor |
 | `mf-game/src/replay.ts` | FEN de cada jugada: `game:state` no los trae y `cs:move-applied` los necesita |
+| `mf-game/src/sound.ts` · `speech.ts` | Tonos de cada jugada (WebAudio) · lectura en voz alta de las jugadas del rival; los dos se quitan con un botón que se recuerda en el navegador |
 | `mf-voice-input/src/mf-voice-input.ts` | Voz o caja de texto → parser → candidata → confirmación, y selector de reconocedor |
 | `mf-voice-input/src/recognizers/` | `SpeechRecognizer` (ADR 5) y sus adaptadores: Web Speech, Whisper y falso |
 | `mf-voice-input/src/attempt.ts` | La telemetría de cada frase, sin audio |

@@ -62,21 +62,30 @@ export function webAudioSound(create: () => ToneContext = () => new AudioContext
 
 const PREFERENCE_KEY = 'chessspeak.sound';
 
-/** Whether sound is on in this browser; on unless the player turned it off. */
-export function soundPreference(storage: Pick<Storage, 'getItem'> | undefined = safeStorage()): boolean {
+/** A switch kept in this browser: on unless the player turned it off. */
+export function switchPreference(key: string, storage: Pick<Storage, 'getItem'> | undefined = safeStorage()): boolean {
   try {
-    return storage?.getItem(PREFERENCE_KEY) !== 'off';
+    return storage?.getItem(key) !== 'off';
   } catch {
     return true;
   }
 }
 
-export function saveSoundPreference(on: boolean, storage: Pick<Storage, 'setItem'> | undefined = safeStorage()): void {
+export function saveSwitchPreference(key: string, on: boolean, storage: Pick<Storage, 'setItem'> | undefined = safeStorage()): void {
   try {
-    storage?.setItem(PREFERENCE_KEY, on ? 'on' : 'off');
+    storage?.setItem(key, on ? 'on' : 'off');
   } catch {
     // private mode: the choice lasts until the page closes
   }
+}
+
+/** Whether sound is on in this browser; on unless the player turned it off. */
+export function soundPreference(storage: Pick<Storage, 'getItem'> | undefined = safeStorage()): boolean {
+  return switchPreference(PREFERENCE_KEY, storage);
+}
+
+export function saveSoundPreference(on: boolean, storage: Pick<Storage, 'setItem'> | undefined = safeStorage()): void {
+  saveSwitchPreference(PREFERENCE_KEY, on, storage);
 }
 
 function safeStorage(): Storage | undefined {

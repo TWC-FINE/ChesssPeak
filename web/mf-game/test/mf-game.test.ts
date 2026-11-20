@@ -2,8 +2,9 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { ClientToServerEvents, Clock, CsEventName, GameContext, GameSocket, GameState, ServerToClientEvents } from '@chessspeak/shared';
 import { fensAfter, turnOf } from '../src/replay.js';
 import type { MoveSound } from '../src/sound.js';
+import type { MoveSpeaker } from '../src/speech.js';
 
-type GameElement = HTMLElement & { context?: GameContext; updateComplete: Promise<boolean>; sound: MoveSound };
+type GameElement = HTMLElement & { context?: GameContext; updateComplete: Promise<boolean>; sound: MoveSound; speaker: MoveSpeaker };
 
 const AFTER_E4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1';
 const AFTER_E5 = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
@@ -645,7 +646,7 @@ describe('sound', () => {
     expect(toggle.getAttribute('aria-pressed')).toBe('true');
     toggle.click();
     await element.updateComplete;
-    expect(toggle.textContent).toContain('Sonido: no');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
     receive('game:moved', { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: AFTER_E4 });
     expect(play).not.toHaveBeenCalled();
     const next = await withSound();
@@ -658,5 +659,53 @@ describe('sound', () => {
     const { receive } = await withSound();
     receive('game:state', state({ status: 'waiting' }));
     expect(positions.at(-1)).toMatchObject({ status: 'waiting' });
+  });
+});
+
+describe('reading the moves aloud', () => {
+  async function withSpeaker(over: Partial<GameState> = {}) {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    element.sound = { play: vi.fn() };
+    const say = vi.fn();
+    element.speaker = { say };
+    receive('game:state', state(over));
+    await element.updateComplete;
+    return { element, receive, say };
+  }
+
+  afterEach(() => {
+    try {
+      localStorage.clear();
+    } catch {
+      // no storage in this environment
+    }
+  });
+
+  it('reads the move of the rival, and not the own one', async () => {
+    const { receive, say } = await withSpeaker({ yourColor: 'black' });
+    receive('game:moved', { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: AFTER_E4 });
+    receive('game:moved', { gameId: 'g1', ply: 2, uci: 'e7e5', san: 'e5', fen: AFTER_E5 });
+    expect(say.mock.calls).toEqual([['peón e cuatro']]);
+  });
+
+  it('reads every move to a spectator', async () => {
+    const { receive, say } = await withSpeaker({ yourColor: 'spectator' });
+    receive('game:moved', { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: AFTER_E4 });
+    receive('game:moved', { gameId: 'g1', ply: 2, uci: 'e7e5', san: 'e5', fen: AFTER_E5 });
+    expect(say).toHaveBeenCalledTimes(2);
+  });
+
+  it('can be turned off, and the choice is kept', async () => {
+    const { element, receive, say } = await withSpeaker({ yourColor: 'black' });
+    const toggle = element.querySelector<HTMLButtonElement>('[data-action=toggle-readout]')!;
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    toggle.click();
+    await element.updateComplete;
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+    receive('game:moved', { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: AFTER_E4 });
+    expect(say).not.toHaveBeenCalled();
+    const next = await withSpeaker();
+    expect(next.element.querySelector('[data-action=toggle-readout]')?.getAttribute('aria-pressed')).toBe('false');
   });
 });
