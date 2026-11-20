@@ -45,6 +45,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
   private readonly logger = new Logger(GameGateway.name);
   private readonly abandonMs = abandonTimeoutMs();
   private readonly abandonTimers = new Map<string, NodeJS.Timeout>();
+  /** One per game with a running clock: it fires when the player to move runs out of time. */
+  private readonly flagTimers = new Map<string, NodeJS.Timeout>();
 
   @WebSocketServer() private readonly server!: GameServer;
 
@@ -70,6 +72,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
   onModuleDestroy(): void {
     for (const timer of this.abandonTimers.values()) clearTimeout(timer);
     this.abandonTimers.clear();
+    for (const timer of this.flagTimers.values()) clearTimeout(timer);
+    this.flagTimers.clear();
   }
 
   @SubscribeMessage('game:join')
@@ -82,7 +86,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     const player = playerOf(socket.data.identity);
     // a repeated join from the same socket only asks for the state again: it is not a second connection
     if (socket.data.games.has(room.gameId)) {
-      socket.emit('game:state', room.stateFor(player.id));
+      socket.emit('game:state', room.stateFor(player.id, Date.now()));
       this.tellEnd(socket, room);
       return;
     }
@@ -94,6 +98,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     this.cancelAbandon(room.gameId, joined.color);
     if (joined.activated) this.queue.push(room.gameId, 'activate', () => this.store.activate(room.gameId, joined.color, player));
     this.watchAbsentRival(room, joined.color, player.id);
+    // after a restart no timer runs: the first join of the game starts it again
+    if (!this.flagTimers.has(room.gameId)) this.scheduleFlag(room);
     this.broadcastState(room);
     this.tellEnd(socket, room);
   }
@@ -105,12 +111,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     const room = await this.joinedRoomOrRefuse(socket, request.data.gameId);
     if (room === undefined) return;
 
-    const played = room.move(playerOf(socket.data.identity).id, request.data.uci, request.data.ply);
+    const now = Date.now();
+    // a move that arrives after the time ran out loses on time, even if the timer has not fired yet
+    const flagged = room.flag(now);
+    if (flagged.ok) return this.finish(room, flagged.end);
+    const played = room.move(playerOf(socket.data.identity).id, request.data.uci, request.data.ply, now);
     if (!played.ok) return this.refuse(socket, played.code, played.message);
 
-    this.saveMove(played.moved);
+    this.saveMove(played.moved, now);
     this.server.to(room.gameId).emit('game:moved', played.moved);
-    if (played.end !== undefined) this.finish(room, played.end);
+    if (played.end !== undefined) return this.finish(room, played.end);
+    this.scheduleFlag(room);
   }
 
   @SubscribeMessage('game:resign')
@@ -190,8 +201,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     }
   }
 
-  private saveMove(moved: GameMoved): void {
-    const stored = { ply: moved.ply, uci: moved.uci, san: moved.san, fen: moved.fen, at: new Date() };
+  /** `at` is the time the room used for the clock, so a restart rebuilds the same clock from it. */
+  private saveMove(moved: GameMoved, at: number): void {
+    const stored = { ply: moved.ply, uci: moved.uci, san: moved.san, fen: moved.fen, at: new Date(at) };
     this.queue.push(moved.gameId, `move ${moved.ply}`, async () => {
       await this.persistence.save(moved.gameId, stored);
     });
@@ -199,6 +211,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
 
   private finish(room: GameRoom, end: GameEnd): void {
     for (const color of ['white', 'black'] as const) this.cancelAbandon(room.gameId, color);
+    this.cancelFlag(room.gameId);
     this.queue.push(room.gameId, 'finish', () => this.store.finish(end, room.status));
     this.server.to(room.gameId).emit('game:end', end);
   }
@@ -210,7 +223,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
   private async startRematch(room: GameRoom, seats: Record<Color, RoomPlayer>): Promise<void> {
     let nextGameId: string;
     try {
-      nextGameId = await this.store.createActive(seats);
+      nextGameId = await this.store.createActive(seats, room.clockMs);
     } catch (error) {
       this.logger.error(`Could not create the rematch of ${room.gameId}: ${(error as Error).message}`);
       room.rematchFailed();
@@ -219,6 +232,26 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
     }
     room.rematchCreated(nextGameId);
     this.server.to(room.gameId).emit('game:rematch', { gameId: room.gameId, offeredBy: null, nextGameId });
+  }
+
+  /** Sets the timer of the clock that runs now, if any. GameRoom checks the time again when it fires. */
+  private scheduleFlag(room: GameRoom): void {
+    this.cancelFlag(room.gameId);
+    const ms = room.msToFlag(Date.now());
+    if (ms === undefined) return;
+    const timer = setTimeout(() => {
+      this.flagTimers.delete(room.gameId);
+      const flagged = room.flag(Date.now());
+      if (flagged.ok) this.finish(room, flagged.end);
+      else this.scheduleFlag(room);
+    }, ms + 1);
+    timer.unref();
+    this.flagTimers.set(room.gameId, timer);
+  }
+
+  private cancelFlag(gameId: string): void {
+    clearTimeout(this.flagTimers.get(gameId));
+    this.flagTimers.delete(gameId);
   }
 
   private scheduleAbandon(room: GameRoom, color: Color): void {
@@ -256,7 +289,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
   private broadcastState(room: GameRoom): void {
     for (const id of this.server.sockets.adapter.rooms.get(room.gameId) ?? []) {
       const socket = this.server.sockets.sockets.get(id);
-      socket?.emit('game:state', room.stateFor(playerOf(socket.data.identity).id));
+      socket?.emit('game:state', room.stateFor(playerOf(socket.data.identity).id, Date.now()));
     }
   }
 
