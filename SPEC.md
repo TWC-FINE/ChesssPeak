@@ -41,6 +41,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF16. Tablas por acuerdo: un jugador las ofrece desde `<mf-game>` y el rival las acepta o las rechaza. Hay una sola oferta pendiente a la vez, cualquier jugada la retira y, si los dos las ofrecen, la partida termina en tablas (`1/2-1/2`, `agreement`). Solo con botones: el parser de voz está congelado.
 - RF17. Exportar la partida en PGN desde `<mf-history>`: «Copiar PGN» y «Descargar .pgn», con las jugadas hasta ese momento y el resultado al terminar (`*` mientras sigue).
 - RF18. Ventaja de material en `<mf-game>`: junto a las piezas capturadas, «+N» en el lado que va ganando, contando las piezas que quedan en el tablero (dama 9, torre 5, alfil y caballo 3, peón 1).
+- RF19. Perfil del jugador (`GET /ranking/:displayName` y `<mf-ranking>`): al pulsar un nombre del ranking se ven su puesto, su Elo, su máximo, su balance, la evolución del Elo y sus 20 partidas más recientes. Sale de las mismas partidas que el ranking.
 
 **Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.2):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.

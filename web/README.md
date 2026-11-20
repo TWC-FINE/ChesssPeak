@@ -42,7 +42,7 @@ Para ser dos jugadores, abre dos pestañas: cada una tiene su propia sesión.
 | `mf-voice-input/src/attempt.ts` | La telemetría de cada frase, sin audio |
 | `mf-history/src/mf-history.ts` | Jugadas numeradas en SAN, sin repetir por `ply` |
 | `mf-history/src/pgn.ts` | La partida en PGN, para «Copiar PGN» y «Descargar .pgn» |
-| `mf-ranking/src/mf-ranking.ts` | Ranking Elo: pide `GET /ranking` cuando se abre `#/ranking` y valida la respuesta. Su página standalone usa un servidor simulado |
+| `mf-ranking/src/mf-ranking.ts` | Ranking Elo: pide `GET /ranking` cuando se abre `#/ranking` y valida la respuesta. Al pulsar un nombre abre su perfil con `GET /ranking/:displayName`. Su página standalone usa un servidor simulado |
 | `shell/src/telemetry.ts` | Reenvía `cs:voice-attempt` como `voice:attempt`, y lo descarta sin conexión |
 
 ## Reglas que conviene no romper
