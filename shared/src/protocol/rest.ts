@@ -12,8 +12,19 @@ export type GuestAuthRequest = z.infer<typeof guestAuthRequestSchema>;
 export const guestAuthResponseSchema = z.object({ token: z.string().min(1), identity: identitySchema });
 export type GuestAuthResponse = z.infer<typeof guestAuthResponseSchema>;
 
-/** POST /games (Authorization: Bearer <token>). `color` is the creator's seat; `random` is drawn by the server. */
-export const createGameRequestSchema = z.object({ color: z.enum(['white', 'black', 'random']).optional() }).strict();
+/** Minutes on each player's clock that a game can be created with. */
+export const CLOCK_MINUTES = [3, 5, 10] as const;
+
+/**
+ * POST /games (Authorization: Bearer <token>). `color` is the creator's seat; `random` is drawn by the server.
+ * `clockMinutes` gives each player that much time; without it the game has no clock.
+ */
+export const createGameRequestSchema = z
+  .object({
+    color: z.enum(['white', 'black', 'random']).optional(),
+    clockMinutes: z.union([z.literal(CLOCK_MINUTES[0]), z.literal(CLOCK_MINUTES[1]), z.literal(CLOCK_MINUTES[2])]).optional(),
+  })
+  .strict();
 export type CreateGameRequest = z.infer<typeof createGameRequestSchema>;
 
 export const createGameResponseSchema = z.object({ gameId: gameIdSchema });
