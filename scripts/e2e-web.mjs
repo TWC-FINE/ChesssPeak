@@ -428,6 +428,27 @@ try {
   check('El historial exporta la partida en PGN, con el resultado', pgn.includes('[Result "0-1"]') && pgn.includes('1. f3 e5 2. g4 Qh4# 0-1'), pgn.trim().split('\n').at(-1));
   check('Hay botones para copiar y descargar el PGN', await white.evaluate(`document.querySelector('mf-history [data-action=copy-pgn]') !== null && document.querySelector('mf-history [data-action=download-pgn]') !== null`));
 
+  // 11b2. the finished game is reviewed move by move, only in the tab that asks for it
+  await white.click('mf-history button[data-ply="2"]');
+  await white.until('mf-game .csg-review', 'Repasando la jugada 2 de 4');
+  check('Repaso: tocar una jugada del historial pone el tablero en esa posición', (await white.evaluate(`document.querySelector('mf-game .csg-turn')?.dataset.turn`)) === 'white');
+  await white.click('mf-history [data-action=review-back]');
+  await white.until('mf-game .csg-review', 'Repasando la jugada 1 de 4');
+  check('Las flechas del historial van de jugada en jugada', (await white.text('mf-history .csh-review-note')).includes('Jugada 1 de 4'));
+  check('El repaso es solo de quien lo pide', await black.evaluate(`document.querySelector('mf-game .csg-review') === null`));
+  await white.shot('09a-repaso');
+  await white.click('mf-history [data-action=review-end]');
+  await waitFor(() => white.evaluate(`document.querySelector('mf-game .csg-review') === null`), 'el tablero en la posición final');
+  check('«Ir al final» vuelve a la posición final', true);
+
+  // 11b3. quick reactions, with fixed texts: everybody in the game reads them
+  await black.click('mf-game [data-reaction=good-game]');
+  await white.until('mf-game .csg-reaction', 'Luis: ¡Buena partida!');
+  await third.until('mf-game .csg-reaction', 'Luis: ¡Buena partida!');
+  check('Reacción rápida: la leen el rival y la espectadora, con el nombre de quien la manda', (await black.text('mf-game .csg-reaction')).includes('Tú: ¡Buena partida!'));
+  check('La espectadora no tiene botones de reacción', await third.evaluate(`document.querySelector('mf-game [data-reaction]') === null`));
+  await white.shot('09a2-reaccion');
+
   // 11c. rematch: a new game with the colors swapped, and the spectator follows it
   await white.click('mf-game [data-action=offer-rematch]');
   await black.click('mf-game [data-action=accept-rematch]');
@@ -452,20 +473,27 @@ try {
 
   // 11e. the lobby lists a game with a clock; joining it from there starts the game, and the clock runs after white
   await white.open(`${web}/index.html#/`);
-  await white.evaluate(`(() => { document.querySelector('[data-clock]').value = '3'; return true; })()`);
+  await white.evaluate(`(() => {
+    const clock = document.querySelector('[data-clock]');
+    clock.value = '3';
+    clock.dispatchEvent(new Event('change'));
+    document.querySelector('[data-increment]').value = '2';
+    return true;
+  })()`);
   await white.click('[data-action=create-white]');
   await white.until(STATUS, 'Esperando al otro jugador');
   const lobbyGameId = (await white.text('[data-invite]')).split('/').pop();
   await black.open(`${web}/index.html#/`);
   const lobbyRow = `#cs-lobby [data-open-game="${lobbyGameId}"]`;
   await black.until(lobbyRow, '3 min');
-  check('El inicio lista la partida que espera rival, con su reloj', (await black.text(lobbyRow)).includes('Ana · juegas con negras · 3 min'));
+  check('El inicio lista la partida que espera rival, con su reloj y su incremento', (await black.text(lobbyRow)).includes('Ana · juegas con negras · 3 min + 2 s'));
   await black.evaluate('scrollTo(0, 0)');
   await black.shot('09d-partidas-abiertas');
   await black.click(`${lobbyRow} [data-action=join-game]`);
   await black.until(STATUS, 'Juegas con negras');
   await white.until(STATUS, 'Te toca');
   check('«Unirse» entra a la partida', (await black.evaluate('location.hash')).endsWith(lobbyGameId));
+  check('El tablero muestra el incremento', (await white.text('mf-game .csg-increment')).includes('+2 s'));
   check('Los dos relojes empiezan en 3:00 y no corren antes de la primera jugada', (await white.text('mf-game .csg-clocks')).includes('3:00') && (await white.evaluate(`document.querySelector('mf-game .csg-clock[data-running]') === null`)));
   await playMove(white, black, 'peón e cuatro', 'e4', 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1');
   await waitFor(() => black.evaluate(`document.querySelector('mf-game .csg-clock[data-color=black]')?.hasAttribute('data-running') ?? false`), 'el reloj de negras en marcha');
@@ -560,6 +588,14 @@ try {
   check('player lo pone el servidor: los dos invitados', new Set(documents.map((document) => document.player)).size === 2);
   check('Sin audio, en es-CO y con Web Speech', documents.every((document) => !('audio' in document) && document.lang === 'es-CO' && document.recognizer === 'webspeech' && document.session === 'play'));
   check('La latencia incluye los 400 ms', documents.filter((document) => document.transcript !== '').every((document) => document.latency.recognitionMs >= 399));
+
+  // 13b. the page #/voz sums up the telemetry, without transcripts
+  await third.open(`${web}/index.html#/voz`);
+  await third.until('#cs-voice [data-recognizer=webspeech]', 'Web Speech');
+  const voicePage = await third.text('#cs-voice');
+  check('La página #/voz resume los intentos por reconocedor, con su latencia', voicePage.includes('Reconocimiento p50 / p95') && /\d,\d\d \/ \d,\d\d s/.test(voicePage));
+  check('Dice que la tasa de confirmación no es precisión, y no muestra transcripciones', voicePage.includes('no es precisión') && !voicePage.includes('peón e cuatro'));
+  await third.shot('11b-telemetria-voz');
 
   // 14. a browser without Web Speech
   const noVoice = await openTab('Sin voz', { speech: false });
