@@ -11,6 +11,7 @@ import {
   type CsEventName,
   type GameContext,
   type GameDraw,
+  type GameRematch,
   type GameEnd,
   type GameError,
   type GameErrorCode,
@@ -118,6 +119,8 @@ export class MfGame extends LitElement {
   private error = '';
   /** Set when the rival declined this player's draw offer, until the next move. */
   private drawDeclined = false;
+  /** Set when the rival declined this player's rematch offer. */
+  private rematchDeclined = false;
   /** Only this browser's view: "Girar tablero" shows the other side, the game does not change. */
   private flipped = false;
 
@@ -180,6 +183,7 @@ export class MfGame extends LitElement {
       <p class="csg-info">partida: ${context?.gameId ?? 'sin partida'} · orientación: ${this.orientation()}</p>
       ${this.renderStatus()}
       ${this.renderDraw()}
+      ${this.renderRematch()}
       ${this.error === '' ? '' : html`<p class="csg-error" role="alert">${this.error}</p>`}
     </div>`;
   }
@@ -245,6 +249,41 @@ export class MfGame extends LitElement {
     </div>`;
   }
 
+  /** Once the game is finished: offer a rematch, wait, answer it, or go to the one both accepted. */
+  private renderRematch() {
+    const state = this.state;
+    if (state === undefined || this.end === undefined || state.status !== 'finished' || state.yourColor === 'spectator') return '';
+    const nextGameId = state.nextGameId;
+    if (nextGameId !== undefined) {
+      return html`<div class="csg-rematch">
+        <button type="button" data-action="open-rematch" @click=${() => this.openGame(nextGameId)}>Ir a la revancha</button>
+      </div>`;
+    }
+    if (state.rematchOffer === undefined) {
+      return html`<div class="csg-rematch">
+        <button type="button" data-action="offer-rematch" @click=${this.offerRematch}>Revancha</button>
+        ${this.rematchDeclined ? html`<span class="csg-draw-note">Tu rival rechazó la revancha.</span>` : ''}
+      </div>`;
+    }
+    if (state.rematchOffer === state.yourColor) {
+      return html`<div class="csg-rematch"><span class="csg-draw-note">Pediste la revancha. Esperando respuesta.</span></div>`;
+    }
+    return html`<div class="csg-rematch" role="status">
+      <span class="csg-draw-note">Tu rival quiere la revancha, con los colores invertidos.</span>
+      <button type="button" data-action="accept-rematch" @click=${this.acceptRematch}>Aceptar</button>
+      <button type="button" data-action="decline-rematch" @click=${this.declineRematch}>Rechazar</button>
+    </div>`;
+  }
+
+  private readonly offerRematch = (): void => this.sendDraw((socket, gameId) => socket.emit('game:rematch-offer', { gameId }));
+  private readonly acceptRematch = (): void => this.sendDraw((socket, gameId) => socket.emit('game:rematch-answer', { gameId, accept: true }));
+  private readonly declineRematch = (): void => this.sendDraw((socket, gameId) => socket.emit('game:rematch-answer', { gameId, accept: false }));
+
+  /** The shell owns the route: it opens the game and gives this element its new context. */
+  private openGame(gameId: string): void {
+    this.emitEvent('cs:open-game', { v: 1, gameId });
+  }
+
   private readonly offerDraw = (): void => this.sendDraw((socket, gameId) => socket.emit('game:draw-offer', { gameId }));
   private readonly acceptDraw = (): void => this.sendDraw((socket, gameId) => socket.emit('game:draw-answer', { gameId, accept: true }));
   private readonly declineDraw = (): void => this.sendDraw((socket, gameId) => socket.emit('game:draw-answer', { gameId, accept: false }));
@@ -303,6 +342,7 @@ export class MfGame extends LitElement {
     this.arrow = undefined;
     this.error = '';
     this.drawDeclined = false;
+    this.rematchDeclined = false;
     this.flipped = false;
   }
 
@@ -312,11 +352,13 @@ export class MfGame extends LitElement {
     this.socket?.off('game:moved', this.onMoved);
     this.socket?.off('game:end', this.onEnd);
     this.socket?.off('game:draw', this.onDraw);
+    this.socket?.off('game:rematch', this.onRematch);
     this.socket?.off('game:error', this.onError);
     socket?.on('game:state', this.onState);
     socket?.on('game:moved', this.onMoved);
     socket?.on('game:end', this.onEnd);
     socket?.on('game:draw', this.onDraw);
+    socket?.on('game:rematch', this.onRematch);
     socket?.on('game:error', this.onError);
     this.socket = socket;
   }
@@ -388,6 +430,22 @@ export class MfGame extends LitElement {
     this.state = draw.offeredBy === null ? rest : { ...rest, drawOffer: draw.offeredBy };
     this.error = '';
     this.requestUpdate();
+  };
+
+  /** A rematch both accepted opens right away for both players; an old one, found on rejoin, waits for the button. */
+  private readonly onRematch = (rematch: GameRematch): void => {
+    const state = this.state;
+    if (state === undefined || rematch.gameId !== state.gameId) return;
+    this.rematchDeclined = rematch.offeredBy === null && rematch.nextGameId === undefined && state.rematchOffer === state.yourColor;
+    const { rematchOffer: _previous, ...rest } = state;
+    this.state = {
+      ...rest,
+      ...(rematch.offeredBy === null ? {} : { rematchOffer: rematch.offeredBy }),
+      ...(rematch.nextGameId === undefined ? {} : { nextGameId: rematch.nextGameId }),
+    };
+    this.error = '';
+    this.requestUpdate();
+    if (rematch.nextGameId !== undefined) this.openGame(rematch.nextGameId);
   };
 
   private readonly onError = (error: GameError): void => {
