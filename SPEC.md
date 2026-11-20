@@ -19,7 +19,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 | R4 | Cámara o micrófono | Micrófono para la entrada de jugadas |
 | R5 | Mínimo 2 bases de datos | Postgres + Mongo |
 | R6 | 100% en GitHub | Repo público, PRs, CI |
-| R7 | Microfrontends | 3 custom elements que conviven en un index (`pnpm serve:web`, Live Server o Vercel) |
+| R7 | Microfrontends | 4 custom elements que conviven en un index (`pnpm serve:web`, Live Server o Vercel) |
 | R8 | Balanceo de carga sobre un proceso crítico | Whisper como servicio, balanceado por URLs desde `local-agent`, con dashboard y aislamiento de workers ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)). Se midió con 3 contenedores locales, y el pool por procesos ([ADR 10](docs/adr/0010-balanceo-de-carga-en-local-agent.md)) queda como salida. En AWS EC2, C1 no cumple con una instancia y C4 cumple con 2. El ADR 11 quedó sustituido. Cumplimiento sin confirmar: todo lo medido corre en un solo equipo |
 
 ## 4. Requisitos funcionales
@@ -37,11 +37,12 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF14. `pnpm serve:web` para servir la web en local sin VS Code.
 - RF11. Historial de jugadas de la partida (`<mf-history>`).
 - RF12. Telemetría de voz por intento (`voice_attempts`), sin audio.
+- RF15. Ranking de jugadores con Elo (`GET /ranking` y `<mf-ranking>` en `#/ranking`). Se calcula con las partidas terminadas de Postgres: todos empiezan en 1200, K = 40 en las 10 primeras partidas y K = 20 después. Agrupa por nombre visible, porque un invitado recibe un id nuevo en cada entrada.
 
 **Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.2):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.
 
-**Fuera de alcance:** login/registro, pestaña “Precisión”, alfabeto OTAN, `speechSynthesis` (los cuatro, recortados por la fecha de entrega); chat de voz entre jugadores (WebRTC/TURN), análisis con Stockfish, inglés, ranking/ELO, partidas contra computador. No hay autoconfirmación ni N-best (descartados por el spike).
+**Fuera de alcance:** login/registro, pestaña “Precisión”, alfabeto OTAN, `speechSynthesis` (los cuatro, recortados por la fecha de entrega); chat de voz entre jugadores (WebRTC/TURN), análisis con Stockfish, inglés, partidas contra computador. No hay autoconfirmación ni N-best (descartados por el spike).
 
 ## 5. Requisitos no funcionales
 | Atributo | Requisito |
