@@ -37,7 +37,7 @@ class World {
   saved: Array<{ gameId: string; move: StoredMove }> = [];
   ended: Array<{ end: GameEnd; status: string }> = [];
   activated: Array<{ gameId: string; color: Color; player: RoomPlayer }> = [];
-  created: Array<{ gameId: string; seats: Record<Color, RoomPlayer> }> = [];
+  created: Array<{ gameId: string; seats: Record<Color, RoomPlayer>; clockMs?: number }> = [];
   failCreates = 0;
   saveDelayMs = 0;
   failSaves = 0;
@@ -46,7 +46,7 @@ class World {
     load: async (gameId: string): Promise<RoomSnapshot | null> => {
       const snapshot = this.snapshots.get(gameId);
       if (snapshot === undefined) return null;
-      const moves = this.saved.filter((s) => s.gameId === gameId).map(({ move }) => ({ ply: move.ply, uci: move.uci }));
+      const moves = this.saved.filter((s) => s.gameId === gameId).map(({ move }) => ({ ply: move.ply, uci: move.uci, at: move.at.getTime() }));
       const end = this.ended.find((e) => e.end.gameId === gameId)?.end;
       const joined = this.activated.find((a) => a.gameId === gameId);
       return {
@@ -58,14 +58,14 @@ class World {
     },
     activate: async (gameId: string, color: Color, player: RoomPlayer) => void this.activated.push({ gameId, color, player }),
     finish: async (end: GameEnd, status: string) => void this.ended.push({ end, status }),
-    createActive: async (seats: Record<Color, RoomPlayer>): Promise<string> => {
+    createActive: async (seats: Record<Color, RoomPlayer>, clockMs?: number): Promise<string> => {
       if (this.failCreates > 0) {
         this.failCreates--;
         throw new Error('postgres down');
       }
       const gameId = randomUUID();
-      this.snapshots.set(gameId, { gameId, seats, moves: [] });
-      this.created.push({ gameId, seats });
+      this.snapshots.set(gameId, { gameId, seats, moves: [], ...(clockMs === undefined ? {} : { clockMs }) });
+      this.created.push({ gameId, seats, ...(clockMs === undefined ? {} : { clockMs }) });
       return gameId;
     },
   };
@@ -544,6 +544,64 @@ describe('rematch', () => {
     const error = errorOf(white);
     white.emit('game:rematch-answer', { gameId, accept: true, color: 'white' });
     expect((await error).code).toBe('unauthorized');
+  });
+});
+
+describe('clock', () => {
+  /** A game whose clock gives each player `clockMs`, with both players in. */
+  async function clockGame(server: Server, clockMs: number) {
+    const ana = server.guest('Ana');
+    const luis = server.guest('Luis');
+    const gameId = seedGame(ana);
+    world.snapshots.set(gameId, { ...world.snapshots.get(gameId)!, clockMs });
+    const white = await connected(server.url, ana.token);
+    const waiting = stateOf(white, (s) => s.status === 'waiting');
+    white.emit('game:join', { gameId });
+    await waiting;
+    const black = await connected(server.url, luis.token);
+    const active = stateOf(black, (s) => s.status === 'active');
+    black.emit('game:join', { gameId });
+    return { gameId, white, black, state: await active };
+  }
+
+  it('sends the clocks in game:state and in game:moved, and starts them with the first move', async () => {
+    const server = await start();
+    const { gameId, white, black, state } = await clockGame(server, 60_000);
+    expect(state.clock).toEqual({ initialMs: 60_000, whiteMs: 60_000, blackMs: 60_000, running: null });
+    const moved = await play(gameId, white, black, 'e2e4', 1);
+    expect(moved.clock).toMatchObject({ whiteMs: 60_000, running: 'black' });
+    expect(world.saved[0]?.move.at).toBeInstanceOf(Date);
+  });
+
+  it('ends the game on time when the player to move runs out', async () => {
+    const server = await start();
+    const { gameId, white, black } = await clockGame(server, 300);
+    const ended = next<GameEnd>(white, 'game:end', () => true, 3000);
+    await play(gameId, white, black, 'e2e4', 1);
+    const end = { gameId, result: '1-0', termination: 'timeout' };
+    expect(gameEndSchema.parse(await ended)).toEqual(end);
+    await server.queue.drained(gameId);
+    expect(world.ended).toEqual([{ end, status: 'finished' }]);
+  });
+
+  it('gives the clock to the rematch', async () => {
+    const server = await start();
+    const { gameId, white, black } = await clockGame(server, 60_000);
+    const ended = next(black, 'game:end');
+    black.emit('game:resign', { gameId });
+    await ended;
+    const created = next<{ nextGameId?: string }>(white, 'game:rematch', (r) => r.nextGameId !== undefined);
+    white.emit('game:rematch-offer', { gameId });
+    black.emit('game:rematch-offer', { gameId });
+    await created;
+    expect(world.created[0]?.clockMs).toBe(60_000);
+  });
+
+  it('has no clock in a game created without one', async () => {
+    const server = await start();
+    const { gameId, white, black } = await activeGame(server);
+    const moved = await play(gameId, white, black, 'e2e4', 1);
+    expect(moved.clock).toBeUndefined();
   });
 });
 
