@@ -391,13 +391,15 @@ try {
   await waitFor(async () => (await white.fen()) === afterG4 && (await black.fen()) === afterG4, 'la partida tras el reinicio');
   check('El servidor se reinicia y los dos vuelven solos a la misma partida', true);
 
-  // 9. a third identity gets no seat
+  // 9. a third identity watches: no seat, but the same board
   const third = await openTab('Eva');
   await third.open(invite);
   await third.type('#cs-session input', 'Eva');
-  await third.until('mf-game [role=alert]', 'No puedes hacer eso');
-  check('Una tercera persona no consigue asiento', (await third.inputEnabled()) === false);
-  await third.shot('07-tercera-persona');
+  await third.until(STATUS, 'Miras la partida');
+  check('Una tercera persona mira la partida sin asiento', (await third.inputEnabled()) === false && (await third.fen()) === afterG4);
+  await white.until(PLAYERS, '1 espectador');
+  check('Los jugadores ven que alguien mira', true);
+  await third.shot('07-espectador');
 
   // 10. checkmate
   await black.type(MOVE_BOX, 'dama hache cuatro');
