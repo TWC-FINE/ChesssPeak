@@ -173,6 +173,8 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
 .cs-nav a[data-nav='demo']::before { background: var(--cs-accent); }
 .cs-nav a[data-nav='ranking'] { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 21V10h6v11M3 21v-7h6M15 14h6v7M2 21h20'/><path d='M12 2.5l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z'/></svg>"); }
 .cs-nav a[data-nav='ranking']::before { background: var(--cs-accent); }
+.cs-nav a[data-nav='voice'] { --icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='9' y='3' width='6' height='11' rx='3'/><path d='M5 11a7 7 0 0 0 14 0M12 18v3'/></svg>"); }
+.cs-nav a[data-nav='voice']::before { background: var(--cs-accent); }
 .cs-nav a:hover { background: rgba(168, 94, 104, 0.16); border-color: rgba(121, 58, 73, 0.6); }
 .cs-nav a[aria-current='page'] {
   background: linear-gradient(180deg, rgba(168, 94, 104, 0.42), rgba(121, 58, 73, 0.38));
@@ -276,7 +278,8 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
 /* #/ranking: the ranking takes the place of the three zones, which stay mounted (and connected) underneath */
 .cs-ranking { max-width: 960px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 48px) 40px; }
 #cs-main:not([data-view='ranking']) .cs-ranking,
-#cs-main[data-view='ranking'] .cs-layout { display: none; }
+#cs-main[data-view='ranking'] .cs-layout,
+#cs-main[data-view='voice'] .cs-layout { display: none; }
 .cs-unavailable { margin: 0; padding: var(--cs-gap); border: 1px dashed var(--cs-warn); border-radius: 14px; color: var(--cs-warn); }
 
 @media (max-width: 1199px) {
@@ -317,3 +320,15 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
   border-radius: 10px;
 }
 .cs-lobby-join { font-weight: 600; white-space: nowrap; }
+
+/* the voice telemetry of the route #/voz */
+.cs-voice { max-width: 1180px; margin: 0 auto; padding: 16px clamp(16px, 3vw, 48px) 40px; }
+.cs-voice[hidden] { display: none; }
+.cs-voice-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cs-voice-title { margin: 0; font-size: 1.05rem; }
+.cs-voice-note { color: var(--cs-muted); }
+.cs-voice-wrap { overflow-x: auto; border: 1px solid var(--cs-border); border-radius: 12px; }
+.cs-voice-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.cs-voice-table th { padding: 9px 10px; text-align: left; font-size: 0.8rem; color: var(--cs-muted); border-bottom: 1px solid var(--cs-border); }
+.cs-voice-table td { padding: 9px 10px; white-space: nowrap; border-bottom: 1px solid rgba(121, 58, 73, 0.35); }
+.cs-voice-table tbody tr:last-child td { border-bottom: none; }

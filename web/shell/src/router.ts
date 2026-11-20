@@ -1,10 +1,11 @@
-export type Route = { name: 'home' } | { name: 'game'; id: string } | { name: 'ranking' } | { name: 'not-found'; hash: string };
+export type Route = { name: 'home' } | { name: 'game'; id: string } | { name: 'ranking' } | { name: 'voice' } | { name: 'not-found'; hash: string };
 
-/** Hash router: `#/`, `#/game/:id` and `#/ranking`. */
+/** Hash router: `#/`, `#/game/:id`, `#/ranking` and `#/voz`. */
 export function parseRoute(hash: string): Route {
   const path = hash.replace(/^#/, '');
   if (path === '' || path === '/') return { name: 'home' };
   if (/^\/ranking\/?$/.test(path)) return { name: 'ranking' };
+  if (/^\/voz\/?$/.test(path)) return { name: 'voice' };
   const game = /^\/game\/([A-Za-z0-9_-]+)\/?$/.exec(path);
   if (game !== null) return { name: 'game', id: game[1] as string };
   return { name: 'not-found', hash };
