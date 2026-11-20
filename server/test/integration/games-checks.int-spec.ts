@@ -110,3 +110,22 @@ describe('games CHECK constraints (real Postgres)', () => {
     });
   });
 });
+
+describe('games clock (real Postgres)', () => {
+  it('keeps the clock of a game, or none', async () => {
+    const timed = await create({ status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 300000 });
+    expect(timed.clockMs).toBe(300000);
+    const untimed = await create({ status: 'waiting', whiteGuestId: randomUUID(), blackName: null });
+    expect(untimed.clockMs).toBeNull();
+  });
+
+  it('rejects a clock of zero or longer than an hour', async () => {
+    await rejectedBy('games_clock_ms_range', { status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 0 });
+    await rejectedBy('games_clock_ms_range', { status: 'waiting', whiteGuestId: randomUUID(), blackName: null, clockMs: 3600001 });
+  });
+
+  it('accepts a game lost on time, and still a draw by agreement', async () => {
+    await expect(create({ status: 'finished', ...guests(), result: '0-1', termination: 'timeout', finishedAt: new Date() })).resolves.toBeDefined();
+    await expect(create({ status: 'finished', ...guests(), result: '1/2-1/2', termination: 'agreement', finishedAt: new Date() })).resolves.toBeDefined();
+  });
+});
