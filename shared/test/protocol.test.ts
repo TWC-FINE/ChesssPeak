@@ -276,7 +276,7 @@ describe('server → client (tolerant)', () => {
 
   it('marks the reserved values', () => {
     expect(RESERVED_IN_V1.playerView).toEqual(['spectator']);
-    expect(RESERVED_IN_V1.termination).toEqual(['threefold_repetition', 'fifty_moves']);
+    expect(RESERVED_IN_V1.termination).toEqual([]);
   });
 });
 

@@ -15,7 +15,7 @@ El contrato es todo lo que vive en `shared/`: el socket, el REST, los eventos `c
 | Campo nuevo **opcional** en un mensaje servidor → cliente, en un evento `cs:*` o en un contexto | Sí |
 | Evento nuevo (socket o `cs:*`) | Sí |
 | Campo nuevo **opcional** en un mensaje cliente → servidor | Sí, desplegando antes el servidor (que es estricto) |
-| Usar un valor de enum **ya marcado como reservado** (`spectator`, `threefold_repetition`, `fifty_moves`) | Sí |
+| Usar un valor de enum **ya marcado como reservado** (`spectator`, `threefold_repetition`, `fifty_moves`; ya se usan los tres) | Sí |
 | Valor de enum nuevo, no reservado, en un mensaje servidor → cliente | **No**: un cliente antiguo lo rechazaría |
 | Quitar o renombrar un campo, un evento o un valor; volver obligatorio un campo opcional; cambiar un tipo | **No** |
 
@@ -42,3 +42,4 @@ Lo que no está permitido exige **v: 2**: nueva constante, handshake con `v: 2` 
 | v1 | 20 de noviembre de 2026 | Aditivo, sigue en `v: 1`: `GET /ranking/:displayName` (`profileResponseSchema`, `profileGameSchema`, `profileNameSchema`, `PROFILE_GAMES`), el perfil de un jugador. Es un endpoint nuevo: ningún cliente antiguo lo llama. Pendiente de la aprobación del responsable del repo. |
 | v1 | 20 de noviembre de 2026 | Revancha. Aditivo, sigue en `v: 1`: los eventos `game:rematch-offer`, `game:rematch-answer` y `game:rematch`, los campos opcionales `rematchOffer` y `nextGameId` de `game:state`, y el evento `cs:open-game`. Los mensajes del cliente son eventos nuevos, así que el servidor se despliega antes o a la vez. Pendiente de la aprobación del responsable del repo. |
 | v1 | 20 de noviembre de 2026 | Reloj. Aditivo: `clockMinutes` opcional en `POST /games` (`CLOCK_MINUTES`), y `clock` opcional en `game:state` y `game:moved` (`clockSchema`). **No aditivo:** el valor `timeout` de `termination`, que no estaba reservado. Se queda en `v: 1` por lo mismo que `agreement`: el servidor y la web se despliegan juntos desde `main`. Pendiente de la aprobación del responsable del repo. |
+| v1 | 20 de noviembre de 2026 | Aditivo, sigue en `v: 1`: el servidor empieza a emitir `threefold_repetition` y `fifty_moves`, que estaban reservados. `RESERVED_IN_V1.termination` queda vacío. Pendiente de la aprobación del responsable del repo. |
