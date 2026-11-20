@@ -9,6 +9,7 @@ import { gameIdOf, parseRoute, type Route } from './router.js';
 import { renderSessionBar } from './session-bar.js';
 import { clearSession, loadSession, saveSession } from './session.js';
 import { forwardVoiceAttempts } from './telemetry.js';
+import { followTurn } from './turn-title.js';
 
 const TAGS = ['mf-game', 'mf-voice-input', 'mf-history', 'mf-ranking'] as const;
 /** How often the home route reads the open games again. */
@@ -60,6 +61,7 @@ function render(): void {
   if (main !== null) main.dataset.view = route.name === 'ranking' ? 'ranking' : 'game';
   const ranking = { apiUrl: config.PUBLIC_API_URL || null, active: route.name === 'ranking' };
   showLobby(route.name === 'home');
+  updateTitle();
 
   const bar = document.getElementById('cs-session');
   if (bar !== null) {
@@ -209,6 +211,9 @@ followGameRequests(document, (hash) => {
   location.hash = hash;
 });
 forwardVoiceAttempts(document, () => connection);
+const updateTitle = followTurn(document, () => gameIdOf(parseRoute(location.hash)), (title) => {
+  document.title = title;
+});
 render();
 // Each microfrontend loads on its own: one failing never blocks the others.
 void Promise.all(TAGS.map(mount)).then(() => {
