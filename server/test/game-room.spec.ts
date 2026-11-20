@@ -427,6 +427,89 @@ describe('rematch', () => {
   });
 });
 
+describe('clock', () => {
+  const MIN = 60_000;
+  /** Ana (white) against Beto (black), each with `ms` on the clock. */
+  const clockRoom = (ms = 5 * MIN) => {
+    const room = new GameRoom('g1', ana, 'white', ms);
+    room.join(ana);
+    room.join(beto);
+    return room;
+  };
+  const clockOf = (room: GameRoom, now?: number) => room.stateFor(ana.id, now).clock;
+
+  it('waits for the first move of white, which is free, and then runs for black', () => {
+    const room = clockRoom();
+    expect(clockOf(room, 99_000)).toEqual({ initialMs: 5 * MIN, whiteMs: 5 * MIN, blackMs: 5 * MIN, running: null });
+    expect(room.msToFlag(99_000)).toBeUndefined();
+    const played = room.move(ana.id, 'e2e4', 1, 1_000);
+    if (!played.ok) throw new Error(played.message);
+    expect(played.moved.clock).toEqual({ initialMs: 5 * MIN, whiteMs: 5 * MIN, blackMs: 5 * MIN, running: 'black' });
+    expect(clockOf(room, 4_000)).toMatchObject({ blackMs: 5 * MIN - 3_000, running: 'black' });
+    expect(room.msToFlag(4_000)).toBe(5 * MIN - 3_000);
+  });
+
+  it('charges each player the time they took', () => {
+    const room = clockRoom();
+    room.move(ana.id, 'e2e4', 1, 0);
+    room.move(beto.id, 'e7e5', 2, 10_000);
+    const third = room.move(ana.id, 'g1f3', 3, 14_000);
+    if (!third.ok) throw new Error(third.message);
+    expect(third.moved.clock).toEqual({ initialMs: 5 * MIN, whiteMs: 5 * MIN - 4_000, blackMs: 5 * MIN - 10_000, running: 'black' });
+  });
+
+  it('ends on time when the clock of the player to move reaches zero, and not a moment before', () => {
+    const room = clockRoom(MIN);
+    room.move(ana.id, 'e2e4', 1, 0);
+    expect(room.flag(MIN - 1)).toEqual(refusal('unauthorized'));
+    expect(room.status).toBe('active');
+    expect(room.flag(MIN)).toEqual({ ok: true, end: { gameId: 'g1', result: '1-0', termination: 'timeout' } });
+    expect(room.status).toBe('finished');
+    expect(clockOf(room, 2 * MIN)).toEqual({ initialMs: MIN, whiteMs: MIN, blackMs: 0, running: null });
+    expect(room.msToFlag(2 * MIN)).toBeUndefined();
+  });
+
+  it('does not play a move that arrives with no time left', () => {
+    const room = clockRoom(MIN);
+    room.move(ana.id, 'e2e4', 1, 0);
+    expect(room.move(beto.id, 'e7e5', 2, MIN + 5)).toEqual(refusal('unauthorized'));
+    expect(room.plyCount).toBe(1);
+  });
+
+  it('refuses to flag a game without a clock, before the first move, or once it ended', () => {
+    const plain = activeRoom();
+    play(plain, 'e2e4');
+    expect(plain.flag(10 * MIN)).toEqual(refusal('unauthorized'));
+    expect(plain.stateFor(ana.id).clock).toBeUndefined();
+    expect(clockRoom().flag(10 * MIN)).toEqual(refusal('unauthorized'));
+    const resigned = clockRoom(MIN);
+    resigned.move(ana.id, 'e2e4', 1, 0);
+    resigned.resign(beto.id);
+    expect(resigned.flag(10 * MIN)).toEqual(refusal('unauthorized'));
+    expect(clockOf(resigned, 10 * MIN)).toMatchObject({ blackMs: MIN, running: null });
+  });
+
+  it('rebuilds the clock after a restart from the time of each move', () => {
+    const room = clockRoom();
+    room.move(ana.id, 'e2e4', 1, 0);
+    room.move(beto.id, 'e7e5', 2, 7_000);
+    const back = GameRoom.rehydrate(room.snapshot());
+    expect(back.clockMs).toBe(5 * MIN);
+    expect(back.stateFor(ana.id, 9_000).clock).toEqual({ initialMs: 5 * MIN, whiteMs: 5 * MIN - 2_000, blackMs: 5 * MIN - 7_000, running: 'white' });
+  });
+
+  it('every message passes the schemas of @chessspeak/shared', () => {
+    const room = clockRoom(MIN);
+    const played = room.move(ana.id, 'e2e4', 1, 0);
+    if (!played.ok) throw new Error(played.message);
+    gameMovedSchema.parse(played.moved);
+    gameStateSchema.parse(room.stateFor(beto.id, 30_000));
+    const flagged = room.flag(MIN);
+    if (!flagged.ok) throw new Error(flagged.message);
+    gameEndSchema.parse(flagged.end);
+  });
+});
+
 describe('connections and abandonment', () => {
   it('shows the connection state of each seat', () => {
     const room = activeRoom();
