@@ -52,6 +52,7 @@ const END_TEXT: Record<GameEnd['termination'], string> = {
   aborted: 'partida cancelada',
   threefold_repetition: 'triple repetición',
   fifty_moves: 'regla de las 50 jugadas',
+  agreement: 'tablas de mutuo acuerdo',
 };
 
 const squares = (uci: string): [Key, Key] => [uci.slice(0, 2) as Key, uci.slice(2, 4) as Key];
