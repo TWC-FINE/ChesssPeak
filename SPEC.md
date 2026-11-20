@@ -38,6 +38,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF11. Historial de jugadas de la partida (`<mf-history>`).
 - RF12. Telemetría de voz por intento (`voice_attempts`), sin audio.
 - RF15. Ranking de jugadores con Elo (`GET /ranking` y `<mf-ranking>` en `#/ranking`). Se calcula con las partidas terminadas de Postgres: todos empiezan en 1200, K = 40 en las 10 primeras partidas y K = 20 después. Agrupa por nombre visible, porque un invitado recibe un id nuevo en cada entrada.
+- RF16. Tablas por acuerdo: un jugador las ofrece desde `<mf-game>` y el rival las acepta o las rechaza. Hay una sola oferta pendiente a la vez, cualquier jugada la retira y, si los dos las ofrecen, la partida termina en tablas (`1/2-1/2`, `agreement`). Solo con botones: el parser de voz está congelado.
 
 **Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.2):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.
