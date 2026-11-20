@@ -3,6 +3,8 @@ import type { z } from 'zod';
 import {
   PROTOCOL_VERSION,
   OPEN_GAME_MAX_AGE_MS,
+  VOICE_SUMMARY_LIMIT,
+  voiceSummaryResponseSchema,
   OPEN_GAMES_LIMIT,
   openGameSchema,
   openGamesResponseSchema,
@@ -237,6 +239,25 @@ describe('server → client (tolerant)', () => {
     expect(rematch.safeParse({ gameId: 'g1', offeredBy: null, nextGameId: 'g2' }).success).toBe(true);
     expect(rematch.safeParse({ gameId: 'g1', offeredBy: 'red' }).success).toBe(false);
     expect(rematch.parse({ gameId: 'g1', offeredBy: null, extra: 1 })).toEqual({ gameId: 'g1', offeredBy: null });
+  });
+
+  it('validates the voice summary of GET /voice-metrics/summary', () => {
+    const recognizer = {
+      recognizer: 'webspeech',
+      attempts: 10,
+      silences: 1,
+      outcomes: { move: 6, ambiguous: 1, nomatch: 2, command: 1 },
+      proposed: 6,
+      confirmed: 5,
+      confirmedRate: { value: 5 / 6, low: 0.44, high: 0.97 },
+      recognitionMs: { p50: 560, p95: 620 },
+      totalMs: { p50: 570, p95: 640 },
+    };
+    const summary = { attempts: 10, limit: VOICE_SUMMARY_LIMIT, since: '2026-11-20T10:00:00.000Z', until: '2026-11-20T11:00:00.000Z', recognizers: [recognizer] };
+    expect(voiceSummaryResponseSchema.parse(summary)).toEqual(summary);
+    expect(voiceSummaryResponseSchema.safeParse({ ...summary, since: null, until: null, recognizers: [] }).success).toBe(true);
+    expect(voiceSummaryResponseSchema.safeParse({ ...summary, recognizers: [{ ...recognizer, recognizer: 'siri' }] }).success).toBe(false);
+    expect(voiceSummaryResponseSchema.safeParse({ ...summary, recognizers: [{ ...recognizer, confirmedRate: { value: 1.2, low: 0, high: 1 } }] }).success).toBe(false);
   });
 
   it('validates the open games of GET /games/open', () => {

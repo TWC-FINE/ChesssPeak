@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { identitySchema } from '../identity.js';
+import { recognizerSchema } from './client.js';
 import { colorSchema, gameIdSchema, terminationSchema } from './common.js';
 
 // REST. Requests (client → server) are .strict(); responses are not (see docs/contract-versioning.md).
@@ -110,3 +111,42 @@ export const profileResponseSchema = z.object({
   ratingHistory: z.array(z.number().int()).min(1),
 });
 export type ProfileResponse = z.infer<typeof profileResponseSchema>;
+
+/** Most recent voice attempts GET /voice-metrics/summary reads: the summary is of these, not of the whole history. */
+export const VOICE_SUMMARY_LIMIT = 5000;
+
+const percentilesSchema = z.object({ p50: z.number().int().min(0), p95: z.number().int().min(0) });
+
+/** A share with its 95 % Wilson interval, all between 0 and 1. */
+export const rateSchema = z.object({ value: z.number().min(0).max(1), low: z.number().min(0).max(1), high: z.number().min(0).max(1) });
+export type Rate = z.infer<typeof rateSchema>;
+
+/** The attempts of one recognizer. */
+export const recognizerSummarySchema = z.object({
+  recognizer: recognizerSchema,
+  attempts: z.number().int().min(0),
+  /** Attempts that heard nothing (empty transcript). */
+  silences: z.number().int().min(0),
+  outcomes: z.object({ move: z.number().int().min(0), ambiguous: z.number().int().min(0), nomatch: z.number().int().min(0), command: z.number().int().min(0) }),
+  /** Attempts that proposed a move, and those the player confirmed. */
+  proposed: z.number().int().min(0),
+  confirmed: z.number().int().min(0),
+  /** confirmed / proposed; null without proposed moves. It is not accuracy: nobody knows what the player meant to say. */
+  confirmedRate: rateSchema.nullable(),
+  /** Milliseconds, nearest rank, over the attempts that heard something; null without them. */
+  recognitionMs: percentilesSchema.nullable(),
+  totalMs: percentilesSchema.nullable(),
+});
+export type RecognizerSummary = z.infer<typeof recognizerSummarySchema>;
+
+/** Response of GET /voice-metrics/summary (public, no token): only counts and times, never a transcript or a player. */
+export const voiceSummaryResponseSchema = z.object({
+  /** How many attempts were read, at most VOICE_SUMMARY_LIMIT. */
+  attempts: z.number().int().min(0),
+  limit: z.number().int().min(1),
+  /** ISO 8601 dates of the oldest and newest attempt read; null without attempts. */
+  since: z.string().datetime({ offset: true }).nullable(),
+  until: z.string().datetime({ offset: true }).nullable(),
+  recognizers: z.array(recognizerSummarySchema),
+});
+export type VoiceSummaryResponse = z.infer<typeof voiceSummaryResponseSchema>;
