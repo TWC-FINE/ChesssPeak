@@ -230,8 +230,11 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
 
 /* section title with a rule, like the "Partida demo" heading */
 .cs-section-head { display: flex; align-items: center; gap: 18px; padding: 0 clamp(16px, 3vw, 48px); }
-/* the rule stops where the board controls (turn, "Girar tablero") sit, at the right of this line */
-@media (min-width: 761px) { .cs-section-head { padding-right: calc(clamp(16px, 3vw, 48px) + 320px); } }
+/* the rule stops where the board controls (turn, sound, "Girar tablero" and the clocks, if any) sit, at the right of this line */
+@media (min-width: 761px) {
+  .cs-section-head { padding-right: calc(clamp(16px, 3vw, 48px) + 420px); }
+  #cs-main:has(.csg-clocks) .cs-section-head { padding-right: calc(clamp(16px, 3vw, 48px) + 680px); }
+}
 .cs-route {
   display: flex;
   align-items: center;
@@ -298,7 +301,7 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
 }
 
 /* the open games of the home route */
-.cs-lobby { max-width: 960px; margin: 0 auto 16px; padding: 16px clamp(16px, 3vw, 48px); }
+.cs-lobby { padding: 0 clamp(16px, 3vw, 48px) 18px; }
 .cs-lobby[hidden] { display: none; }
 .cs-lobby-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .cs-lobby-title { margin: 0; font-size: 1.05rem; }

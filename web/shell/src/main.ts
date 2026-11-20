@@ -37,7 +37,8 @@ let lobbyRequest = 0;
 
 function describeRoute(route: Route): string {
   if (route.name === 'home') return 'Inicio (sin partida)';
-  if (route.name === 'game') return `Partida ${route.id}`;
+  // the start of the id is enough to tell games apart; the whole link is in the session bar
+  if (route.name === 'game') return `Partida ${route.id.slice(0, 8)}`;
   if (route.name === 'ranking') return 'Ranking de jugadores';
   return `Ruta desconocida: ${route.hash}`;
 }
