@@ -24,6 +24,7 @@ describe('cs:* events (v1)', () => {
         'cs:move-confirmed',
         'cs:open-game',
         'cs:position',
+        'cs:review',
         'cs:voice-attempt',
         'cs:voice-status',
       ].sort(),
@@ -72,6 +73,13 @@ describe('contexts (v1)', () => {
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: null }).success).toBe(true);
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'no es url' }).success).toBe(false);
     expect(historyContextSchema.safeParse({ v: 1, gameId: 'g' }).success).toBe(true);
+  });
+
+  it('validates cs:review, where null goes back to the final position', () => {
+    expect(csEventSchemas['cs:review'].safeParse({ v: 1, gameId: 'g1', ply: 0 }).success).toBe(true);
+    expect(csEventSchemas['cs:review'].safeParse({ v: 1, gameId: 'g1', ply: null }).success).toBe(true);
+    expect(csEventSchemas['cs:review'].safeParse({ v: 1, gameId: 'g1', ply: -1 }).success).toBe(false);
+    expect(csEventSchemas['cs:review'].safeParse({ v: 1, gameId: 'g1' }).success).toBe(false);
   });
 
   it('validates cs:open-game', () => {

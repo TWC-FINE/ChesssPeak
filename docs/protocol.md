@@ -104,6 +104,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 | `cs:voice-attempt` | `{ v, attempt }`, con `attempt` igual que `voice:attempt` | `<mf-voice-input>` | shell (lo reenvía como `voice:attempt`) |
 | `cs:game-ended` | `{ v, gameId, result, termination }` | `<mf-game>` | `<mf-voice-input>`, `<mf-history>` |
 | `cs:open-game` | `{ v, gameId }`; ir a otra partida, como la revancha aceptada | `<mf-game>` | shell (cambia la ruta a `#/game/:gameId`) |
+| `cs:review` | `{ v, gameId, ply }`; `ply` = 0 (posición inicial) o la jugada tras la que se muestra el tablero, y `null` para volver a la posición final. Solo con la partida terminada | `<mf-history>` (al tocar una jugada o las flechas) | `<mf-game>` (muestra esa posición; la ignora si la partida sigue) |
 
 ## 5. Contextos (`el.context`, todos con `v: 1`)
 

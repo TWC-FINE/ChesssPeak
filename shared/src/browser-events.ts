@@ -64,6 +64,11 @@ export const csEventSchemas = {
   'cs:open-game': z.object({ v, gameId: gameIdSchema }),
   /** The game is over. Emitter: mf-game. */
   'cs:game-ended': z.object({ v, gameId: gameIdSchema, result: gameResultSchema, termination: terminationSchema }),
+  /**
+   * Show the position after this ply of a finished game: 0 is the start, null the final position again.
+   * Emitter: mf-history, only after cs:game-ended. mf-game ignores it in a game still being played.
+   */
+  'cs:review': z.object({ v, gameId: gameIdSchema, ply: z.number().int().min(0).nullable() }),
 } as const;
 
 export type CsEventName = keyof typeof csEventSchemas;
