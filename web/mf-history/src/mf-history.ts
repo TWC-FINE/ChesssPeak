@@ -1,5 +1,6 @@
 import { LitElement, html } from 'lit';
 import { CS_EVENT_INIT, type CsEventDetail, type HistoryContext } from '@chessspeak/shared';
+import { pgnFileName, toPgn } from './pgn.js';
 import ownCss from './styles.css?inline';
 
 // Light DOM means the styles are global: inject them once.
@@ -12,6 +13,7 @@ if (!document.getElementById(STYLE_ID)) {
 }
 
 type AppliedMove = CsEventDetail<'cs:move-applied'>;
+type GameEnded = CsEventDetail<'cs:game-ended'>;
 
 /**
  * The moves of the game, numbered and in SAN. It only hears cs:move-applied: <mf-game> announces each move as it is
@@ -23,12 +25,22 @@ export class MfHistory extends LitElement {
 
   private moves = new Map<number, AppliedMove>();
   private shownGame: string | null | undefined;
+  private result: GameEnded['result'] | undefined;
+  private copyNote = '';
 
   private readonly onMoveApplied = (event: Event): void => {
     const detail = (event as CustomEvent<AppliedMove>).detail;
     if (detail.gameId !== this.context?.gameId) return;
     this.forgetAnotherGame();
     this.moves.set(detail.ply, detail);
+    this.requestUpdate();
+  };
+
+  private readonly onGameEnded = (event: Event): void => {
+    const detail = (event as CustomEvent<GameEnded>).detail;
+    if (detail.gameId !== this.context?.gameId) return;
+    this.forgetAnotherGame();
+    this.result = detail.result;
     this.requestUpdate();
   };
 
@@ -39,12 +51,14 @@ export class MfHistory extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     document.addEventListener('cs:move-applied', this.onMoveApplied);
+    document.addEventListener('cs:game-ended', this.onGameEnded);
     const detail: CsEventDetail<'cs:mf-ready'> = { v: 1, name: 'mf-history' };
     this.dispatchEvent(new CustomEvent('cs:mf-ready', { ...CS_EVENT_INIT, detail }));
   }
 
   override disconnectedCallback(): void {
     document.removeEventListener('cs:move-applied', this.onMoveApplied);
+    document.removeEventListener('cs:game-ended', this.onGameEnded);
     super.disconnectedCallback();
   }
 
@@ -63,6 +77,35 @@ export class MfHistory extends LitElement {
     if (gameId === this.shownGame) return;
     this.shownGame = gameId;
     this.moves.clear();
+    this.result = undefined;
+    this.copyNote = '';
+  }
+
+  /** The game so far in PGN, up to the first ply that has not arrived yet. */
+  pgn(now = new Date()): string {
+    const sans: string[] = [];
+    for (let ply = 1; this.moves.has(ply); ply++) sans.push(this.moves.get(ply)!.san);
+    return toPgn(sans, this.result, now);
+  }
+
+  private async copyPgn(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(this.pgn());
+      this.copyNote = 'PGN copiado.';
+    } catch {
+      this.copyNote = 'No se pudo copiar: usa «Descargar».';
+    }
+    this.requestUpdate();
+  }
+
+  private downloadPgn(): void {
+    const now = new Date();
+    const url = URL.createObjectURL(new Blob([this.pgn(now)], { type: 'application/x-chess-pgn' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = pgnFileName(now);
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   private renderMove(ply: number, lastPly: number) {
@@ -93,7 +136,12 @@ export class MfHistory extends LitElement {
                 ${blackPly <= lastPly ? this.renderMove(blackPly, lastPly) : ''}
               </li>`;
             })}
-          </ol>`}
+          </ol>
+          <div class="csh-export">
+            <button type="button" data-action="copy-pgn" @click=${() => void this.copyPgn()}>Copiar PGN</button>
+            <button type="button" data-action="download-pgn" @click=${() => this.downloadPgn()}>Descargar .pgn</button>
+            ${this.copyNote === '' ? '' : html`<span class="csh-export-note" role="status">${this.copyNote}</span>`}
+          </div>`}
     </div>`;
   }
 }
