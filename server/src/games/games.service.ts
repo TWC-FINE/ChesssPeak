@@ -22,6 +22,7 @@ export interface WaitingRow {
   whiteName: string | null;
   blackName: string | null;
   clockMs: number | null;
+  clockIncrementMs?: number | null;
   createdAt: Date;
 }
 
@@ -34,6 +35,7 @@ export function openGameOf(row: WaitingRow): OpenGame | undefined {
     creator: (creatorColor === 'white' ? row.whiteName : row.blackName)!,
     creatorColor,
     ...(row.clockMs === null ? {} : { clockMs: row.clockMs }),
+    ...(row.clockIncrementMs == null ? {} : { incrementMs: row.clockIncrementMs }),
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -46,11 +48,20 @@ export class GamesService {
 
   /**
    * Creates a game in `waiting`, with the creator's seat reserved. The other seat stays empty until game:join.
-   * With `clockMinutes`, each player gets that much time.
+   * With `clockMinutes`, each player gets that much time, and with `incrementSeconds` too, that much more per move.
    */
-  async create(identity: Identity, requested: CreateGameRequest['color'], clockMinutes?: CreateGameRequest['clockMinutes']): Promise<string> {
+  async create(
+    identity: Identity,
+    requested: CreateGameRequest['color'],
+    clockMinutes?: CreateGameRequest['clockMinutes'],
+    incrementSeconds?: CreateGameRequest['incrementSeconds'],
+  ): Promise<string> {
     try {
-      const data = { ...seatFor(identity, pickColor(requested)), ...(clockMinutes === undefined ? {} : { clockMs: clockMinutes * 60_000 }) };
+      const clock =
+        clockMinutes === undefined
+          ? {}
+          : { clockMs: clockMinutes * 60_000, ...(incrementSeconds === undefined || incrementSeconds === 0 ? {} : { clockIncrementMs: incrementSeconds * 1000 }) };
+      const data = { ...seatFor(identity, pickColor(requested)), ...clock };
       const game = await this.prisma.game.create({ data, select: { id: true } });
       return game.id;
     } catch (error) {
@@ -66,7 +77,7 @@ export class GamesService {
         where: { status: 'waiting', createdAt: { gte: new Date(now - OPEN_GAME_MAX_AGE_MS) } },
         orderBy: { createdAt: 'desc' },
         take: OPEN_GAMES_LIMIT,
-        select: { id: true, whiteName: true, blackName: true, clockMs: true, createdAt: true },
+        select: { id: true, whiteName: true, blackName: true, clockMs: true, clockIncrementMs: true, createdAt: true },
       });
       return rows.flatMap((row) => openGameOf(row) ?? []);
     } catch (error) {

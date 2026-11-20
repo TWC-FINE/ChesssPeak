@@ -79,7 +79,7 @@ describe('POST /games (real Postgres)', () => {
 
 describe('GET /games/open (real Postgres)', () => {
   it('lists the waiting games only, newest first, without the old ones', async () => {
-    const first = (await createGame({ color: 'white', clockMinutes: 5 }).expect(201)).body.gameId as string;
+    const first = (await createGame({ color: 'white', clockMinutes: 5, incrementSeconds: 3 }).expect(201)).body.gameId as string;
     const second = (await createGame({ color: 'black' }).expect(201)).body.gameId as string;
     const started = (await createGame({ color: 'white' }).expect(201)).body.gameId as string;
     await prisma.game.update({ where: { id: started }, data: { status: 'active', blackGuestId: randomUUID(), blackName: 'Luis' } });
@@ -89,6 +89,7 @@ describe('GET /games/open (real Postgres)', () => {
     const response = await request(app.getHttpServer()).get('/games/open').expect(200);
     expect(response.body.games.map((game: { gameId: string }) => game.gameId)).toEqual([second, first]);
     expect(response.body.games[0]).toMatchObject({ creator: 'Ana', creatorColor: 'black' });
-    expect(response.body.games[1]).toMatchObject({ creatorColor: 'white', clockMs: 300_000 });
+    expect(response.body.games[1]).toMatchObject({ creatorColor: 'white', clockMs: 300_000, incrementMs: 3_000 });
+    expect(response.body.games[0]).not.toHaveProperty('incrementMs');
   });
 });

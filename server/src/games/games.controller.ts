@@ -13,7 +13,7 @@ export class GamesController {
   async create(@CurrentIdentity() identity: Identity, @Body() body: unknown): Promise<CreateGameResponse> {
     const request = createGameRequestSchema.safeParse(body ?? {});
     if (!request.success) throw new BadRequestException('Invalid body');
-    return { gameId: await this.games.create(identity, request.data.color, request.data.clockMinutes) };
+    return { gameId: await this.games.create(identity, request.data.color, request.data.clockMinutes, request.data.incrementSeconds) };
   }
 
   /** Public, like the ranking: the name of each creator is what their rival would see anyway. */

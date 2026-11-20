@@ -232,7 +232,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect, OnModule
   private async startRematch(room: GameRoom, seats: Record<Color, RoomPlayer>): Promise<void> {
     let nextGameId: string;
     try {
-      nextGameId = await this.store.createActive(seats, room.clockMs);
+      nextGameId = await this.store.createActive(seats, room.clockMs, room.incrementMs);
     } catch (error) {
       this.logger.error(`Could not create the rematch of ${room.gameId}: ${(error as Error).message}`);
       room.rematchFailed();

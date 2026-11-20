@@ -80,6 +80,16 @@ describe('POST /games', () => {
     expect(savedData().clockMs).toBe(clockMinutes * 60_000);
   });
 
+  it.each([2, 3, 5])('adds %i seconds per move when asked', async (incrementSeconds) => {
+    await post({ color: 'white', clockMinutes: 3, incrementSeconds }).expect(201);
+    expect(savedData()).toMatchObject({ clockMs: 180_000, clockIncrementMs: incrementSeconds * 1000 });
+  });
+
+  it('stores no increment for 0 seconds', async () => {
+    await post({ color: 'white', clockMinutes: 3, incrementSeconds: 0 }).expect(201);
+    expect('clockIncrementMs' in savedData()).toBe(false);
+  });
+
   it('creates a game without a clock when none is asked for', async () => {
     await post({ color: 'white' }).expect(201);
     expect('clockMs' in savedData()).toBe(false);
@@ -102,6 +112,8 @@ describe('POST /games', () => {
     ['a user id sent by the client', { userId: 'someone-else' }],
     ['a clock the contract does not offer', { clockMinutes: 7 }],
     ['a clock in milliseconds', { clockMs: 1 }],
+    ['an increment without a clock', { incrementSeconds: 2 }],
+    ['an increment the contract does not offer', { clockMinutes: 3, incrementSeconds: 4 }],
   ])('rejects %s with 400 and saves nothing', async (_case, body) => {
     await post(body).expect(400);
     expect(create).not.toHaveBeenCalled();
