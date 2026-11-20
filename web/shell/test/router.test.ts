@@ -20,6 +20,12 @@ describe('parseRoute', () => {
     expect(parseRoute('#/ranking/ana')).toMatchObject({ name: 'not-found' });
   });
 
+  it('parses the voice route, which has no game', () => {
+    expect(parseRoute('#/voz')).toEqual({ name: 'voice' });
+    expect(parseRoute('#/voz/')).toEqual({ name: 'voice' });
+    expect(gameIdOf(parseRoute('#/voz'))).toBeNull();
+  });
+
   it('flags anything else as not found', () => {
     expect(parseRoute('#/nope')).toEqual({ name: 'not-found', hash: '#/nope' });
     expect(parseRoute('#/game/')).toMatchObject({ name: 'not-found' });

@@ -10,6 +10,7 @@ import { renderSessionBar } from './session-bar.js';
 import { clearSession, loadSession, saveSession } from './session.js';
 import { forwardVoiceAttempts } from './telemetry.js';
 import { followTurn } from './turn-title.js';
+import { fetchVoiceSummary, renderVoiceSummary, type VoiceSummaryState } from './voice-summary.js';
 
 const TAGS = ['mf-game', 'mf-voice-input', 'mf-history', 'mf-ranking'] as const;
 /** How often the home route reads the open games again. */
@@ -34,12 +35,15 @@ let lobby: LobbyState = { games: null, error: '' };
 let lobbyTimer: ReturnType<typeof setInterval> | undefined;
 /** Answers that arrive after a newer request are dropped. */
 let lobbyRequest = 0;
+let voiceSummary: VoiceSummaryState = { summary: null, error: '' };
+let voiceRequest = 0;
 
 function describeRoute(route: Route): string {
   if (route.name === 'home') return 'Inicio (sin partida)';
   // the start of the id is enough to tell games apart; the whole link is in the session bar
   if (route.name === 'game') return `Partida ${route.id.slice(0, 8)}`;
   if (route.name === 'ranking') return 'Ranking de jugadores';
+  if (route.name === 'voice') return 'Telemetría de voz';
   return `Ruta desconocida: ${route.hash}`;
 }
 
@@ -59,9 +63,10 @@ function render(): void {
   const gameId = gameIdOf(route);
   // the ranking takes the place of the board; the game microfrontends stay mounted underneath
   const main = document.getElementById('cs-main');
-  if (main !== null) main.dataset.view = route.name === 'ranking' ? 'ranking' : 'game';
+  if (main !== null) main.dataset.view = route.name === 'ranking' || route.name === 'voice' ? route.name : 'game';
   const ranking = { apiUrl: config.PUBLIC_API_URL || null, active: route.name === 'ranking' };
   showLobby(route.name === 'home');
+  showVoiceSummary(route.name === 'voice');
   updateTitle();
 
   const bar = document.getElementById('cs-session');
@@ -116,6 +121,42 @@ function showLobby(visible: boolean): void {
     lobbyTimer = setInterval(refreshLobby, LOBBY_REFRESH_MS);
   }
   drawLobby();
+}
+
+function refreshVoiceSummary(): void {
+  if (config.PUBLIC_API_URL === '') {
+    voiceSummary = { summary: null, error: 'Falta PUBLIC_API_URL en la configuración de la web.' };
+    drawVoiceSummary();
+    return;
+  }
+  const request = ++voiceRequest;
+  fetchVoiceSummary(config.PUBLIC_API_URL).then(
+    (summary) => {
+      if (request !== voiceRequest) return;
+      voiceSummary = { summary, error: '' };
+      drawVoiceSummary();
+    },
+    (error: unknown) => {
+      if (request !== voiceRequest) return;
+      voiceSummary = { summary: voiceSummary.summary, error: failure(error) };
+      drawVoiceSummary();
+    },
+  );
+}
+
+function drawVoiceSummary(): void {
+  const host = document.getElementById('cs-voice');
+  if (host !== null && !host.hidden) renderVoiceSummary(host, voiceSummary, refreshVoiceSummary);
+}
+
+/** The route #/voz reads the summary each time it opens; nothing polls it. */
+function showVoiceSummary(visible: boolean): void {
+  const host = document.getElementById('cs-voice');
+  if (host === null) return;
+  const opening = visible && host.hidden;
+  host.hidden = !visible;
+  if (opening) refreshVoiceSummary();
+  if (visible) drawVoiceSummary();
 }
 
 function openConnection(): void {
