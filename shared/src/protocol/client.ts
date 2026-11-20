@@ -69,12 +69,25 @@ export const voiceAttemptSchema = z
   .strict();
 export type VoiceAttemptPayload = z.infer<typeof voiceAttemptSchema>;
 
+/**
+ * Offers a rematch once the game is finished: a new game with the colors swapped. Sent while the rival's offer is
+ * pending, it accepts that offer instead.
+ */
+export const gameRematchOfferSchema = z.object({ gameId: gameIdSchema }).strict();
+export type GameRematchOffer = z.infer<typeof gameRematchOfferSchema>;
+
+/** Answers the rival's pending rematch offer: `accept: true` creates the new game. */
+export const gameRematchAnswerSchema = z.object({ gameId: gameIdSchema, accept: z.boolean() }).strict();
+export type GameRematchAnswer = z.infer<typeof gameRematchAnswerSchema>;
+
 export const clientEventSchemas = {
   'game:join': gameJoinSchema,
   'game:move': gameMoveSchema,
   'game:resign': gameResignSchema,
   'game:draw-offer': gameDrawOfferSchema,
   'game:draw-answer': gameDrawAnswerSchema,
+  'game:rematch-offer': gameRematchOfferSchema,
+  'game:rematch-answer': gameRematchAnswerSchema,
   'voice:attempt': voiceAttemptSchema,
 } as const;
 export type ClientEventName = keyof typeof clientEventSchemas;

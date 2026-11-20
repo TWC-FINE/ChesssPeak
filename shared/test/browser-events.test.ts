@@ -22,6 +22,7 @@ describe('cs:* events (v1)', () => {
         'cs:move-cancelled',
         'cs:move-candidate',
         'cs:move-confirmed',
+        'cs:open-game',
         'cs:position',
         'cs:voice-attempt',
         'cs:voice-status',
@@ -71,6 +72,12 @@ describe('contexts (v1)', () => {
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: null }).success).toBe(true);
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'no es url' }).success).toBe(false);
     expect(historyContextSchema.safeParse({ v: 1, gameId: 'g' }).success).toBe(true);
+  });
+
+  it('validates cs:open-game', () => {
+    expect(csEventSchemas['cs:open-game'].safeParse({ v: 1, gameId: 'g2' }).success).toBe(true);
+    expect(csEventSchemas['cs:open-game'].safeParse({ v: 1, gameId: '' }).success).toBe(false);
+    expect(csEventSchemas['cs:open-game'].safeParse({ v: 1 }).success).toBe(false);
   });
 
   it('validates the ranking context and its microfrontend name', () => {

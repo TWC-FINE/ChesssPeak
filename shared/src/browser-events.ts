@@ -57,6 +57,8 @@ export const csEventSchemas = {
   }),
   /** Telemetry of one attempt; the shell forwards it as voice:attempt. Emitter: mf-voice-input. */
   'cs:voice-attempt': z.object({ v, attempt: voiceAttemptSchema }),
+  /** Go to another game, such as the rematch both players accepted. Emitter: mf-game. The shell changes the route. */
+  'cs:open-game': z.object({ v, gameId: gameIdSchema }),
   /** The game is over. Emitter: mf-game. */
   'cs:game-ended': z.object({ v, gameId: gameIdSchema, result: gameResultSchema, termination: terminationSchema }),
 } as const;
