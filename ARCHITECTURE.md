@@ -165,6 +165,6 @@ Media página cada una, escritas cuando se toma la decisión:
 - estado en memoria + write-behind;
 - invitados con token firmado;
 - balanceo de Whisper: por procesos (ADR 10) y como servicio por URLs (ADR 12, que sustituye al 11);
-- GPL-3.0 (ADR 9, sin escribir).
+- GPL-3.0 ([ADR 9](docs/adr/0009-licencia-gpl-3.md), propuesto).
 
 El orden de trabajo está en [PLAN.md](PLAN.md).

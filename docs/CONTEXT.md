@@ -78,7 +78,7 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [url-pool-criteria.md](url-pool-criteria.md) · [whisper-cloud-criteria.md](whisper-cloud-criteria.md) | Criterios y medición del pool por URLs · criterios del experimento en la nube (EC2: C1 no cumple; C4 cumple) |
 | [demo-script.md](demo-script.md) | Guion de la demo de unos 10 minutos, con plan de respaldo |
 | [c4.md](c4.md) | C4 niveles 1 y 2 (contexto y contenedores), en Mermaid |
-| [adr/](adr/) | ADR 1 a 8, 10 y 12 aceptados; el 11, sustituido por el 12; falta el ADR 9 |
+| [adr/](adr/) | ADR 1 a 8, 10 y 12 aceptados; el 11, sustituido por el 12; el 9, propuesto el 20 de noviembre |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) | Ramas, commits, PR · reglas para asistentes de IA |
 
 ## CI (GitHub Actions)
@@ -96,7 +96,7 @@ Para reproducirlo en local: `pnpm install --frozen-lockfile && pnpm verify && pn
 Orden de trabajo y recortes en [PLAN.md](../PLAN.md), sección 9. **Tareas, supuestos, dominio y balanceo: [proximos-pasos.md](proximos-pasos.md).**
 1. ✅ **Hecho:** la cadena de PR, el despliegue, la voz de punta a punta, el adaptador de Whisper local, el balanceo del ADR 12 con contenedores locales y el [C4](c4.md), niveles 1 y 2.
 2. **Validación** con otra voz (sin otra voz, con la del responsable del repo, declarado) y `docs/quality.md` con las cifras medidas.
-3. **Documentos:** el ADR 9.
+3. **Documentos:** aceptar el [ADR 9](adr/0009-licencia-gpl-3.md), ya escrito.
 4. **Cierre:** README probado en una máquina limpia, ensayo con el [guion](demo-script.md), video de respaldo y tag.
 5. **Hecho:** EC2, medido el 14 de noviembre. C1 no cumple con una instancia, y C4 cumple con 2.
 - Tareas del spike por área (agente local, producto, CI y entrega): [spike-notes.md](spike-notes.md), sección 7.

@@ -14,7 +14,7 @@
   - **AWS EC2: preparado en #46 (`whisper-cloud/aws/`) y medido el 14 de noviembre.** Con una instancia, C1 no cumple: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s. C2 y C3 cumplen ([evidencia](evidence/whisper-cloud-ec2/README.md)). Tras reabrirlo, C4 cumple con 2 instancias: el balanceo entre 2 máquinas, con 0 peticiones perdidas al aislar una a mitad de carga ([evidencia](evidence/whisper-cloud-ec2-c4/README.md)).
   - El pool de `move-workers` no se construyó.
 - **Hecho también:** el C4, niveles 1 y 2 ([c4.md](c4.md), #49).
-- **Falta:** `docs/quality.md` con la validación, el ADR 9, el README probado en una máquina limpia, el ensayo, el video de respaldo y el tag. La lista ordenada está en [proximos-pasos.md](proximos-pasos.md).
+- **Falta:** `docs/quality.md` con la validación, aceptar el ADR 9 (escrito el 20 de noviembre), el README probado en una máquina limpia, el ensayo, el video de respaldo y el tag. La lista ordenada está en [proximos-pasos.md](proximos-pasos.md).
 
 **Añadido el 7 de noviembre:** el responsable del repo hizo a mano la prueba de voz con Web Speech `es-CO` en Edge, con el servidor local. Dictó los dos lados desde dos pestañas y jugó una partida completa sin fallos: se aplicaron las jugadas legales, se rechazaron las ilegales y se detectó el mate. Hubo una sola voz, la suya, así que **no sustituye la validación con otra persona.** La prueba corrió sobre `5ed174b`. Desde entonces #28 y #29 cambiaron `<mf-voice-input>`, así que el responsable del repo repetirá una pasada corta de Web Speech sobre el código actual, junto con la prueba de Whisper. También se cambió el puerto de Postgres en el `.env` local (ver «Notas para el README»). El resto del documento sigue con su estado del 6 de noviembre.
 
@@ -102,7 +102,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | **Sockets** | **Hecho, verificado y desplegado** | #13 y #14, en `main`: integración con bases reales (`game-flow.int-spec.ts`) y `pnpm e2e:web`. Probado contra la API desplegada el 8 de noviembre, con un script desde fuera, por `wss` |
 | **Micrófono** | **Hecho. Probado a mano con voz real, Web Speech el 7 y el 8 de noviembre y Whisper el 8,** con una sola voz | Web Speech en #27 y captura de audio en #29. El e2e usa un `SpeechRecognition` falso y el micrófono falso del navegador |
 | **Dos bases de datos** | **Hecho en local; Neon y Atlas, desplegados el 8 de noviembre** y en `up` según `/health` | Partidas y jugadas en #12 y #13. `voice_attempts` en #25, con integración contra Mongo real |
-| **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 no está escrito y el repo se llama `ChesssPeak`, no `chessspeak` |
+| **GitHub** | **Hecho y verificado** | Repo público, PR, CI y `LICENSE` GPL-3.0. Matices: el ADR 9 está escrito pero sin aceptar, y el repo se llama `ChesssPeak`, no `chessspeak` |
 | **Microfrontends** | **Hecho en local** | Los 3 son reales: `<mf-game>` (#14), `<mf-voice-input>` (#26, #27 y #29) y `<mf-history>` (#28). `smoke:web` y `e2e:web` |
 | **Balanceo** | **Whisper como servicio por URLs (ADR 12): hecho y medido con 3 contenedores locales. Cumplimiento sin confirmar. AWS EC2: C1 no cumple con una instancia; C4 cumple con 2** | Pool por procesos y dashboard (#6, ADR 10). Pool por URLs con aislar y devolver (#41), criterio y medición (#43, #44), ADR 12 (#45), experimento EC2 preparado (#46) y medido el 14 de noviembre. El ADR 11 quedó sustituido, y el pool de `move-workers` no se construyó |
 | **Dominio** | **Registrado y delegado; aún no funciona. En espera del profesor** | `chessspeak.dpdns.org` está delegado a `ns1` y `ns2.magicsolutions.co`, que rechazan las consultas (*lame delegation*, `REFUSED`, comprobado el 6 de noviembre). Mínimo garantizado: la URL `vercel.app`, publicada desde el 8 de noviembre |
@@ -117,7 +117,7 @@ Hecha desde fuera, sin acceso a los paneles ni a las bases, sobre `2c48755`. Seg
 | 4 | Una frase ambigua o ilegible no mueve piezas | Verificado por texto y con reconocedor falso; **falta con voz real** |
 | 5 | `voice_attempts`, `game_moves` y Postgres | Verificado en local, con bases reales |
 | 6 | Backend en la nube, repo público y CI en verde | Backend en Render desde el 8 de noviembre, sobre `2c48755`, cuya CI quedó en verde por trabajo. El límite de `/auth/guest` se corrigió en #37; falta probarlo desde otra red |
-| 7 | `quality.md`, ADR y README probado con un clon nuevo | ADR 1 a 8 y 10 a 12 escritos. **Faltan** `docs/quality.md`, el ADR 9 y el README probado con un clon nuevo |
+| 7 | `quality.md`, ADR y README probado con un clon nuevo | ADR 1 a 12 escritos; el 9, sin aceptar. **Faltan** `docs/quality.md` y el README probado con un clon nuevo |
 
 ## 2. Estado por fase del `PLAN.md`
 
