@@ -53,13 +53,33 @@ function standardUci(position: Chess, move: Move): string {
   return makeUci({ from: move.from, to: squareRank(move.from) * 8 + (side === 'h' ? 6 : 2) });
 }
 
-/** How the position ends the game, if it does. Repetition and the fifty-move rule are reserved in v1. */
-export function terminationOf(position: Chess): Pick<GameEnd, 'result' | 'termination'> | undefined {
+/** Half-moves without a capture or a pawn move that draw the game: fifty moves of each side. */
+export const FIFTY_MOVES_PLIES = 100;
+
+/**
+ * What makes two positions the same for the repetition rule: the pieces, the turn, the castling rights and a capture
+ * en passant that can really be played (chessops leaves out the square when it cannot). The move counters are not.
+ */
+export function repetitionKey(position: Chess): string {
+  return makeFen(position.toSetup()).split(' ').slice(0, 4).join(' ');
+}
+
+/**
+ * How the position ends the game, if it does. `repetitions` is how many times this position has been on the board,
+ * this time included. Mate comes first: a mate on the hundredth half-move is still a mate. The draws by repetition and
+ * by fifty moves are automatic: with voice there is no claim to make.
+ */
+export function terminationOf(position: Chess, repetitions = 1): Pick<GameEnd, 'result' | 'termination'> | undefined {
   if (position.isCheckmate()) return { result: winnerResult(opposite(position.turn)), termination: 'checkmate' };
   if (position.isStalemate()) return { result: '1/2-1/2', termination: 'stalemate' };
   if (position.isInsufficientMaterial()) return { result: '1/2-1/2', termination: 'insufficient_material' };
+  if (repetitions >= 3) return { result: '1/2-1/2', termination: 'threefold_repetition' };
+  if (position.halfmoves >= FIFTY_MOVES_PLIES) return { result: '1/2-1/2', termination: 'fifty_moves' };
   return undefined;
 }
+
+/** Endings that games stored before v1 detected them could play past. */
+const LATE_RULES: ReadonlySet<GameEnd['termination']> = new Set(['threefold_repetition', 'fifty_moves']);
 
 export class GameRoom {
   private readonly position = Chess.default();
@@ -75,6 +95,8 @@ export class GameRoom {
   /** `creating` from the moment both want the rematch until the store answers; then the new game. One per game. */
   private rematch: 'creating' | { nextGameId: string } | undefined;
   private readonly clock: ClockState | undefined;
+  /** How many times each position has been on the board, by `repetitionKey`. */
+  private readonly seen = new Map<string, number>();
 
   /** The creator's color is already decided: `random` is drawn by whoever creates the room. */
   constructor(
@@ -84,6 +106,7 @@ export class GameRoom {
     clockMs?: number,
   ) {
     this.seats[creatorColor] = { ...creator, connections: 0 };
+    this.seen.set(repetitionKey(this.position), 1);
     if (clockMs !== undefined) this.clock = { initialMs: clockMs, left: { white: clockMs, black: clockMs }, lastMoveAt: undefined };
   }
 
@@ -102,6 +125,8 @@ export class GameRoom {
 
     for (const [index, { ply, uci, at }] of snapshot.moves.entries()) {
       if (ply !== index + 1) throw new Error(`Game ${snapshot.gameId}: expected ply ${index + 1}, found ${ply}`);
+      // a game stored before these rules existed went on after the repetition: it is kept as it was played
+      if (room.end !== undefined && LATE_RULES.has(room.end.termination)) room.end = undefined;
       if (room.end !== undefined) throw new Error(`Game ${snapshot.gameId}: ply ${ply} comes after the end of the game`);
       const mover = room.position.turn;
       if (!room.apply(uci)) throw new Error(`Game ${snapshot.gameId}: illegal move ${uci} at ply ${ply}`);
@@ -109,7 +134,7 @@ export class GameRoom {
     }
 
     if (snapshot.end !== undefined) {
-      if (room.end !== undefined && room.end.termination !== snapshot.end.termination) {
+      if (room.end !== undefined && !LATE_RULES.has(room.end.termination) && room.end.termination !== snapshot.end.termination) {
         throw new Error(`Game ${snapshot.gameId}: the moves end in ${room.end.termination}, but it is recorded as ${snapshot.end.termination}`);
       }
       room.end = { ...snapshot.end };
@@ -377,7 +402,10 @@ export class GameRoom {
     this.moves.push(record);
     // a move withdraws any offer: the one who offered moved on, or the rival declined it by playing
     this.drawOffer = undefined;
-    const ending = terminationOf(this.position);
+    const key = repetitionKey(this.position);
+    const repetitions = (this.seen.get(key) ?? 0) + 1;
+    this.seen.set(key, repetitions);
+    const ending = terminationOf(this.position, repetitions);
     if (ending !== undefined) this.finish(ending.result, ending.termination);
     return record;
   }
