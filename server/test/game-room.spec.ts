@@ -240,6 +240,78 @@ describe('end of the game', () => {
   });
 });
 
+describe('draws by repetition and by fifty moves', () => {
+  const KNIGHTS_OUT_AND_BACK = 'g1f3 g8f6 f3g1 f6g8';
+
+  it('draws when the same position is on the board for the third time', () => {
+    const room = activeRoom();
+    play(room, KNIGHTS_OUT_AND_BACK);
+    expect(room.status).toBe('active');
+    const last = play(room, KNIGHTS_OUT_AND_BACK);
+    expect(last).toMatchObject({ end: { gameId: 'g1', result: '1/2-1/2', termination: 'threefold_repetition' } });
+    expect(room.status).toBe('finished');
+    expect(room.move(ana.id, 'e2e4', 9)).toEqual(refusal('unauthorized'));
+  });
+
+  it('needs the third time: twice is not a draw', () => {
+    const room = activeRoom();
+    // each position of the knights' trip is on the board twice, then the line changes
+    play(room, 'g1f3 g8f6 f3g1 f6g8 g1f3 g8f6 f3g5 f6g8');
+    expect(room.status).toBe('active');
+  });
+
+  it('does not count the starting position again once castling rights are lost', () => {
+    const room = activeRoom();
+    // the kings step out and back: the pieces repeat, but the rights to castle are gone
+    play(room, 'e2e4 e7e5 e1e2 e8e7 e2e1 e7e8 e1e2 e8e7 e2e1 e7e8');
+    expect(room.status).toBe('active');
+    expect(play(room, 'e1e2 e8e7')).toMatchObject({ end: { termination: 'threefold_repetition' } });
+  });
+
+  it.each([
+    ['a hundred half-moves without a capture or a pawn move', '8/8/4k3/8/8/4K3/R7/8 w - - 100 80', { result: '1/2-1/2', termination: 'fifty_moves' }],
+    ['ninety-nine are not enough', '8/8/4k3/8/8/4K3/R7/8 w - - 99 80', undefined],
+  ])('terminationOf: %s', (_name, fen, expected) => {
+    const position = Chess.fromSetup(parseFen(fen).unwrap()).unwrap();
+    expect(terminationOf(position)).toEqual(expected);
+  });
+
+  it('mate wins over the fifty-move rule', () => {
+    const mated = Chess.fromSetup(parseFen('4k2R/R7/4K3/8/8/8/8/8 b - - 100 80').unwrap()).unwrap();
+    expect(terminationOf(mated)).toEqual({ result: '1-0', termination: 'checkmate' });
+  });
+
+  it('keeps the ending after a restart', () => {
+    const room = activeRoom();
+    play(room, `${KNIGHTS_OUT_AND_BACK} ${KNIGHTS_OUT_AND_BACK}`);
+    const { end: _end, ...withoutEnd } = room.snapshot();
+    expect(GameRoom.rehydrate(withoutEnd).result).toMatchObject({ termination: 'threefold_repetition' });
+    expect(GameRoom.rehydrate(room.snapshot()).status).toBe('finished');
+  });
+
+  it('serves a game stored before the rule that went on after a repetition', () => {
+    const line = `${KNIGHTS_OUT_AND_BACK} ${KNIGHTS_OUT_AND_BACK} e2e4`.split(' ');
+    const moves = line.map((uci, index) => ({ ply: index + 1, uci }));
+    const rebuilt = GameRoom.rehydrate({ gameId: 'g1', seats: { white: ana, black: beto }, moves });
+    expect(rebuilt.status).toBe('active');
+    expect(rebuilt.plyCount).toBe(9);
+    const resigned = GameRoom.rehydrate({
+      gameId: 'g1',
+      seats: { white: ana, black: beto },
+      moves: moves.slice(0, 8),
+      end: { gameId: 'g1', result: '1-0', termination: 'resignation' },
+    });
+    expect(resigned.result?.termination).toBe('resignation');
+  });
+
+  it('every ending passes the schema of @chessspeak/shared', () => {
+    const room = activeRoom();
+    const last = play(room, `${KNIGHTS_OUT_AND_BACK} ${KNIGHTS_OUT_AND_BACK}`);
+    if (!last.ok || last.end === undefined) throw new Error('no end');
+    gameEndSchema.parse(last.end);
+  });
+});
+
 describe('draw offers', () => {
   const agreement = { gameId: 'g1', result: '1/2-1/2', termination: 'agreement' };
 
