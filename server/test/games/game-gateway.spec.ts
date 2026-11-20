@@ -5,7 +5,7 @@ import { Global, Logger, Module } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
-import { gameDrawSchema, gameEndSchema, gameErrorSchema, gameMovedSchema, gameStateSchema, type Color, type GameEnd, type GameState, type GuestAuthResponse } from '@chessspeak/shared';
+import { gameDrawSchema, gameEndSchema, gameRematchSchema, gameErrorSchema, gameMovedSchema, gameStateSchema, type Color, type GameEnd, type GameState, type GuestAuthResponse } from '@chessspeak/shared';
 import { io, type Socket } from 'socket.io-client';
 import { GuestTokenService } from '../../src/auth/guest-token.service';
 import { GameMovesRepository } from '../../src/database/mongo/game-moves.repository';
@@ -37,6 +37,8 @@ class World {
   saved: Array<{ gameId: string; move: StoredMove }> = [];
   ended: Array<{ end: GameEnd; status: string }> = [];
   activated: Array<{ gameId: string; color: Color; player: RoomPlayer }> = [];
+  created: Array<{ gameId: string; seats: Record<Color, RoomPlayer> }> = [];
+  failCreates = 0;
   saveDelayMs = 0;
   failSaves = 0;
 
@@ -56,6 +58,16 @@ class World {
     },
     activate: async (gameId: string, color: Color, player: RoomPlayer) => void this.activated.push({ gameId, color, player }),
     finish: async (end: GameEnd, status: string) => void this.ended.push({ end, status }),
+    createActive: async (seats: Record<Color, RoomPlayer>): Promise<string> => {
+      if (this.failCreates > 0) {
+        this.failCreates--;
+        throw new Error('postgres down');
+      }
+      const gameId = randomUUID();
+      this.snapshots.set(gameId, { gameId, seats, moves: [] });
+      this.created.push({ gameId, seats });
+      return gameId;
+    },
   };
 
   persistence = {
@@ -437,6 +449,100 @@ describe('draw offers', () => {
     const { gameId, white } = await activeGame(server);
     const error = errorOf(white);
     white.emit('game:draw-offer', { gameId, color: 'black' });
+    expect((await error).code).toBe('unauthorized');
+  });
+});
+
+describe('rematch', () => {
+  async function finishedGame(server: Server) {
+    const game = await activeGame(server);
+    const ended = next(game.black, 'game:end');
+    game.black.emit('game:resign', { gameId: game.gameId });
+    await ended;
+    return game;
+  }
+
+  it('creates the new game with the colors swapped when the rival accepts, and tells both', async () => {
+    const server = await start();
+    const { gameId, ana, luis, white, black } = await finishedGame(server);
+    const offered = next(black, 'game:rematch');
+    white.emit('game:rematch-offer', { gameId });
+    expect(gameRematchSchema.parse(await offered)).toEqual({ gameId, offeredBy: 'white' });
+
+    const whiteSees = next<{ nextGameId?: string }>(white, 'game:rematch', (r) => r.nextGameId !== undefined);
+    const blackSees = next<{ nextGameId?: string }>(black, 'game:rematch', (r) => r.nextGameId !== undefined);
+    black.emit('game:rematch-answer', { gameId, accept: true });
+    const { nextGameId } = gameRematchSchema.parse(await whiteSees);
+    expect((await blackSees).nextGameId).toBe(nextGameId);
+    expect(world.created).toEqual([
+      {
+        gameId: nextGameId,
+        seats: {
+          white: { id: (luis.identity as { guestId: string }).guestId, displayName: 'Luis' },
+          black: { id: (ana.identity as { guestId: string }).guestId, displayName: 'Ana' },
+        },
+      },
+    ]);
+
+    const anaNext = await connected(server.url, ana.token);
+    const anaState = stateOf(anaNext);
+    anaNext.emit('game:join', { gameId: nextGameId });
+    expect(await anaState).toMatchObject({ gameId: nextGameId, status: 'active', yourColor: 'black', plyCount: 0 });
+  });
+
+  it('gives the new game to whoever joins the old one again', async () => {
+    const server = await start();
+    const { gameId, white, black } = await finishedGame(server);
+    const created = next<{ nextGameId?: string }>(white, 'game:rematch', (r) => r.nextGameId !== undefined);
+    white.emit('game:rematch-offer', { gameId });
+    black.emit('game:rematch-offer', { gameId });
+    const { nextGameId } = await created;
+    const state = stateOf(white);
+    white.emit('game:join', { gameId });
+    expect((await state).nextGameId).toBe(nextGameId);
+  });
+
+  it('tells both players when the rematch is declined', async () => {
+    const server = await start();
+    const { gameId, white, black } = await finishedGame(server);
+    const offered = next(white, 'game:rematch');
+    black.emit('game:rematch-offer', { gameId });
+    await offered;
+    const declined = next<{ offeredBy: Color | null }>(black, 'game:rematch', (r) => r.offeredBy === null);
+    white.emit('game:rematch-answer', { gameId, accept: false });
+    expect(await declined).toEqual({ gameId, offeredBy: null });
+    expect(world.created).toEqual([]);
+  });
+
+  it('withdraws the offer, and lets them try again, when the new game cannot be created', async () => {
+    const server = await start();
+    const { gameId, white, black } = await finishedGame(server);
+    world.failCreates = 1;
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    const offered = next(black, 'game:rematch');
+    white.emit('game:rematch-offer', { gameId });
+    await offered;
+    const withdrawn = next<{ offeredBy: Color | null; nextGameId?: string }>(white, 'game:rematch', (r) => r.offeredBy === null);
+    black.emit('game:rematch-answer', { gameId, accept: true });
+    expect(await withdrawn).toEqual({ gameId, offeredBy: null });
+    const again = next(black, 'game:rematch', (r: { offeredBy: Color | null }) => r.offeredBy === 'white');
+    white.emit('game:rematch-offer', { gameId });
+    await again;
+  });
+
+  it('refuses a rematch while the game goes on', async () => {
+    const server = await start();
+    const { gameId, white } = await activeGame(server);
+    const error = errorOf(white);
+    white.emit('game:rematch-offer', { gameId });
+    expect((await error).code).toBe('unauthorized');
+  });
+
+  it('rejects a payload with an extra field', async () => {
+    const server = await start();
+    const { gameId, white } = await finishedGame(server);
+    const error = errorOf(white);
+    white.emit('game:rematch-answer', { gameId, accept: true, color: 'white' });
     expect((await error).code).toBe('unauthorized');
   });
 });
