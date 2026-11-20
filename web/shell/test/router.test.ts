@@ -13,6 +13,13 @@ describe('parseRoute', () => {
     expect(gameIdOf(parseRoute('#/'))).toBeNull();
   });
 
+  it('parses the ranking route, which has no game', () => {
+    expect(parseRoute('#/ranking')).toEqual({ name: 'ranking' });
+    expect(parseRoute('#/ranking/')).toEqual({ name: 'ranking' });
+    expect(gameIdOf(parseRoute('#/ranking'))).toBeNull();
+    expect(parseRoute('#/ranking/ana')).toMatchObject({ name: 'not-found' });
+  });
+
   it('flags anything else as not found', () => {
     expect(parseRoute('#/nope')).toEqual({ name: 'not-found', hash: '#/nope' });
     expect(parseRoute('#/game/')).toMatchObject({ name: 'not-found' });
@@ -34,6 +41,17 @@ describe('contexts and config', () => {
     expect(contextFor('mf-game', 'x', null, socket)).toMatchObject({ socket });
     expect(contextFor('mf-voice-input', 'x', null, socket)).not.toHaveProperty('socket');
     expect(contextFor('mf-history', 'x', null, socket)).not.toHaveProperty('socket');
+    expect(contextFor('mf-ranking', 'x', null, socket, { apiUrl: 'http://127.0.0.1:3000', active: true })).not.toHaveProperty('socket');
+  });
+
+  it('tells <mf-ranking> where the server is and whether its route is on screen, and nothing else', () => {
+    expect(contextFor('mf-ranking', 'x', 'http://127.0.0.1:8765', null, { apiUrl: 'http://127.0.0.1:3000', active: true })).toEqual({
+      v: 1,
+      apiUrl: 'http://127.0.0.1:3000',
+      active: true,
+    });
+    // without a ranking view the element stays idle and asks nothing
+    expect(contextFor('mf-ranking', null, null, null)).toEqual({ v: 1, apiUrl: null, active: false });
   });
 
   it('reads the public config with safe defaults', () => {
