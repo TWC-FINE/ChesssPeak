@@ -51,6 +51,8 @@ export const gameStateSchema = z.object({
   nextGameId: gameIdSchema.optional(),
   /** Only in a game created with a clock. Optional: added later in v1. */
   clock: clockSchema.optional(),
+  /** Identities watching without a seat; absent when there is none. Optional: added later in v1. */
+  spectators: z.number().int().min(1).optional(),
 });
 export type GameState = z.infer<typeof gameStateSchema>;
 

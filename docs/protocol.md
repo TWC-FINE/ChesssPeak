@@ -32,7 +32,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
    1. si la identidad ya tiene asiento en esa partida, recupera el mismo (reconexión);
    2. si es quien creó la partida, ocupa su asiento reservado;
    3. si no, **ocupa el primer asiento libre** (blancas y luego negras), sin contar el asiento reservado para quien creó la partida;
-   4. si no queda asiento, `game:error { code: 'unauthorized' }`. Los espectadores (`yourColor: 'spectator'`) están **reservados** y no existen en v1.
+   4. si no queda asiento (la partida está activa, terminada o cancelada), **entra como espectador** (`yourColor: 'spectator'`, desde el 20 de noviembre de 2026): recibe el estado, las jugadas y el final como un jugador, pero jugar, rendirse u ofrecer y responder tablas o revancha le devuelve `game:error { code: 'unauthorized' }`. Su telemetría de voz se descarta. Un espectador no ocupa asiento y su desconexión no cuenta como abandono.
 3. Con los dos asientos ocupados, la partida pasa a `active`.
 
 ## 3. Socket.IO
@@ -54,7 +54,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 
 | Evento | Payload | Emite | Escucha | Cuándo |
 |---|---|---|---|---|
-| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor, drawOffer?, rematchOffer?, nextGameId?, clock? }`; cada asiento es `{ displayName, connected }` o `null`; `drawOffer` es el color que ofreció tablas sin respuesta, y no viene si no hay oferta; `rematchOffer` es lo mismo para la revancha, y `nextGameId`, la partida de la revancha aceptada; `clock` = `{ initialMs, whiteMs, blackMs, running }` solo en una partida con reloj, con los milisegundos que le quedan a cada uno cuando el servidor envió el mensaje, y `running` = el color cuyo tiempo corre, o `null` | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
+| `game:state` | `{ gameId, fen, moves[{ ply, uci, san }], plyCount, status, turn, seats{ white, black }, yourColor, drawOffer?, rematchOffer?, nextGameId?, clock?, spectators? }`; cada asiento es `{ displayName, connected }` o `null`; `drawOffer` es el color que ofreció tablas sin respuesta, y no viene si no hay oferta; `rematchOffer` es lo mismo para la revancha, y `nextGameId`, la partida de la revancha aceptada; `clock` = `{ initialMs, whiteMs, blackMs, running }` solo en una partida con reloj, con los milisegundos que le quedan a cada uno cuando el servidor envió el mensaje, y `running` = el color cuyo tiempo corre, o `null`; `spectators` = cuántas identidades miran sin asiento, y no viene si no hay ninguna | servidor | `<mf-game>` | tras `game:join` y al reconectar; `yourColor` es distinto para cada receptor |
 | `game:moved` | `{ gameId, ply, uci, san, fen, clock? }`; `clock` es el reloj tras la jugada, en una partida con reloj | servidor | `<mf-game>` (los dos jugadores) | tras una jugada válida |
 | `game:end` | `{ gameId, result, termination }` | servidor | `<mf-game>` | fin de la partida |
 | `game:draw` | `{ gameId, offeredBy }`; `offeredBy` es `white`, `black` o `null` | servidor | `<mf-game>` (los dos jugadores) | al ofrecer tablas (el color) y al rechazarlas (`null`) |
@@ -169,7 +169,7 @@ La telemetría es una medición, así que **nunca interrumpe la partida**. El se
 - **Si no se entiende una frase mientras hay una jugada por confirmar, la jugada se mantiene,** para que un «sí» mal oído no la pierda. El intento se registra igual.
 - **Lo escrito en la caja de texto no se registra:** la colección mide la voz.
 - **Se puede perder un intento** si se cierra la página antes de confirmar o cancelar, o si no hay conexión, porque no se guarda para enviarlo después.
-- **Límite conocido: no distingue jugador de espectador.** Solo exige que el socket se haya unido a la partida, así que un espectador también puede enviar telemetría. Queda acotada por los límites de tamaño y frecuencia.
+- **Solo los jugadores:** exige que el socket se haya unido a la partida con un asiento. Lo que envía un espectador se descarta, porque no dice jugadas.
 
 ## 7. Decisiones provisionales (pendientes de validar por el responsable del repo)
 
