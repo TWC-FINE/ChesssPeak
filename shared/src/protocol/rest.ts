@@ -16,16 +16,27 @@ export type GuestAuthResponse = z.infer<typeof guestAuthResponseSchema>;
 /** Minutes on each player's clock that a game can be created with. */
 export const CLOCK_MINUTES = [3, 5, 10] as const;
 
+/** Seconds added to a clock after each move of its player (the first move of white, which is free, adds nothing). */
+export const CLOCK_INCREMENTS = [0, 2, 3, 5] as const;
+
 /**
  * POST /games (Authorization: Bearer <token>). `color` is the creator's seat; `random` is drawn by the server.
- * `clockMinutes` gives each player that much time; without it the game has no clock.
+ * `clockMinutes` gives each player that much time; without it the game has no clock. `incrementSeconds` only goes
+ * with `clockMinutes`; without it, or with 0, the clock has no increment.
  */
 export const createGameRequestSchema = z
   .object({
     color: z.enum(['white', 'black', 'random']).optional(),
     clockMinutes: z.union([z.literal(CLOCK_MINUTES[0]), z.literal(CLOCK_MINUTES[1]), z.literal(CLOCK_MINUTES[2])]).optional(),
+    incrementSeconds: z
+      .union([z.literal(CLOCK_INCREMENTS[0]), z.literal(CLOCK_INCREMENTS[1]), z.literal(CLOCK_INCREMENTS[2]), z.literal(CLOCK_INCREMENTS[3])])
+      .optional(),
   })
-  .strict();
+  .strict()
+  .refine((request) => request.incrementSeconds === undefined || request.clockMinutes !== undefined, {
+    message: 'An increment needs a clock',
+    path: ['incrementSeconds'],
+  });
 export type CreateGameRequest = z.infer<typeof createGameRequestSchema>;
 
 export const createGameResponseSchema = z.object({ gameId: gameIdSchema });
@@ -44,6 +55,8 @@ export const openGameSchema = z.object({
   creatorColor: colorSchema,
   /** Milliseconds on each clock; absent for a game without a clock. */
   clockMs: z.number().int().min(1).optional(),
+  /** Milliseconds added after each move; absent without a clock or without an increment. */
+  incrementMs: z.number().int().min(1).optional(),
   /** ISO 8601. */
   createdAt: z.string().datetime({ offset: true }),
 });

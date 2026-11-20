@@ -20,9 +20,11 @@ export type MoveRecord = z.infer<typeof moveRecordSchema>;
 /**
  * The clocks of a game that has them, in milliseconds left, as the server counted them when it sent the message.
  * `running` is the color whose time is going down: null before the first move of white and once the game is over.
+ * `incrementMs` is what each move adds to the clock of whoever played it; absent for a clock without an increment.
  */
 export const clockSchema = z.object({
   initialMs: z.number().int().positive(),
+  incrementMs: z.number().int().positive().optional(),
   whiteMs: z.number().int().min(0),
   blackMs: z.number().int().min(0),
   running: colorSchema.nullable(),
