@@ -1,6 +1,6 @@
 # Web: guía para seguir trabajando
 
-Estado actual: dos invitados juegan una partida, por escrito o por voz, y `<mf-history>` muestra las jugadas. **La voz solo se ha probado con un reconocedor y un agente falsos:** falta probarla con voz real y con el Whisper real.
+Estado actual: dos invitados juegan una partida, por escrito o por voz, y `<mf-history>` muestra las jugadas. `<mf-ranking>` muestra el ranking Elo en `#/ranking`. **La voz solo se ha probado con un reconocedor y un agente falsos:** falta probarla con voz real y con el Whisper real.
 
 ## Cómo ejecutarla
 
@@ -41,6 +41,7 @@ Para ser dos jugadores, abre dos pestañas: cada una tiene su propia sesión.
 | `mf-voice-input/src/recognizers/` | `SpeechRecognizer` (ADR 5) y sus adaptadores: Web Speech, Whisper y falso |
 | `mf-voice-input/src/attempt.ts` | La telemetría de cada frase, sin audio |
 | `mf-history/src/mf-history.ts` | Jugadas numeradas en SAN, sin repetir por `ply` |
+| `mf-ranking/src/mf-ranking.ts` | Ranking Elo: pide `GET /ranking` cuando se abre `#/ranking` y valida la respuesta. Su página standalone usa un servidor simulado |
 | `shell/src/telemetry.ts` | Reenvía `cs:voice-attempt` como `voice:attempt`, y lo descarta sin conexión |
 
 ## Reglas que conviene no romper
@@ -48,7 +49,7 @@ Para ser dos jugadores, abre dos pestañas: cada una tiene su propia sesión.
 - **Confirmación obligatoria con texto y con voz (RF8):** una jugada se propone con `cs:move-candidate` y solo se envía tras `cs:move-confirmed`.
   - **Texto:** escribir, ver la flecha, confirmar.
   - **Voz:** hablar, ver la flecha, confirmar.
-- **Mínimo privilegio:** solo `<mf-game>` recibe el socket. Los demás hablan con eventos `cs:*`.
+- **Mínimo privilegio:** solo `<mf-game>` recibe el socket. `<mf-ranking>` usa HTTP, no el socket. Los demás hablan con eventos `cs:*`.
 - **Importa `shared/` en el shell solo como tipos.** Un valor en tiempo de ejecución arrastra todo `zod`: `shell.js` pasó de 48 KB a 502 KB.
 - **El socket llega en el contexto solo cuando está conectado.** Cada objeto de contexto nuevo hace que `<mf-game>` pida el estado, y así se recupera una reconexión.
 - **Los textos de error salen de `code`,** no de `game:error.message`. Los códigos provisionales de `docs/protocol.md` §7 aún hay que revisarlos.
