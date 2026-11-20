@@ -236,13 +236,55 @@ describe('game:join', () => {
     expect(world.activated).toEqual([{ gameId, color: 'black', player: { id: (luis.identity as { guestId: string }).guestId, displayName: 'Luis' } }]);
   });
 
-  it('refuses a third identity', async () => {
+  it('lets a third identity watch, and tells the players how many watch', async () => {
     const server = await start();
-    const { gameId } = await activeGame(server);
+    const { gameId, white, black } = await activeGame(server);
     const third = await connected(server.url, server.guest('Eva').token);
-    const error = errorOf(third);
+    const watching = stateOf(third);
+    const whiteSees = stateOf(white, (s) => s.spectators === 1);
     third.emit('game:join', { gameId });
-    expect((await error).code).toBe('unauthorized');
+    expect(await watching).toMatchObject({ yourColor: 'spectator', status: 'active', spectators: 1 });
+    expect((await whiteSees).yourColor).toBe('white');
+
+    const moved = next<{ ply: number }>(third, 'game:moved', (m) => m.ply === 1);
+    await play(gameId, white, black, 'e2e4', 1);
+    expect(gameMovedSchema.parse(await moved).ply).toBe(1);
+  });
+
+  it('refuses the moves and offers of a spectator', async () => {
+    const server = await start();
+    const { gameId, white } = await activeGame(server);
+    const third = await connected(server.url, server.guest('Eva').token);
+    const watching = stateOf(third);
+    third.emit('game:join', { gameId });
+    await watching;
+    for (const [event, payload] of [
+      ['game:move', { gameId, uci: 'e2e4', ply: 1 }],
+      ['game:resign', { gameId }],
+      ['game:draw-offer', { gameId }],
+    ] as const) {
+      const error = errorOf(third);
+      third.emit(event, payload);
+      expect((await error).code).toBe('unauthorized');
+    }
+    const state = stateOf(white);
+    white.emit('game:join', { gameId });
+    expect(await state).toMatchObject({ status: 'active', plyCount: 0 });
+  });
+
+  it('a spectator who leaves abandons nothing, and the players see one fewer', async () => {
+    process.env.ABANDON_TIMEOUT_MS = '50';
+    const server = await start();
+    const { gameId, white } = await activeGame(server);
+    const third = await connected(server.url, server.guest('Eva').token);
+    const watching = stateOf(white, (s) => s.spectators === 1);
+    third.emit('game:join', { gameId });
+    await watching;
+    const gone = stateOf(white, (s) => s.spectators === undefined);
+    third.disconnect();
+    expect((await gone).status).toBe('active');
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    expect(world.ended).toEqual([]);
   });
 
   it.each([['an unknown game', randomUUID()], ['an id that is not a game', 'nope']])('answers not_found for %s', async (_case, gameId) => {

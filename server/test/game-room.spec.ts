@@ -59,14 +59,23 @@ describe('seats (docs/protocol.md §2)', () => {
     expect(room.join(beto)).toEqual({ ok: true, color: 'white', activated: true });
   });
 
-  it('refuses a third identity', () => {
-    expect(activeRoom().join(carla)).toEqual(refusal('unauthorized'));
+  it('lets a third identity watch without a seat', () => {
+    const room = activeRoom();
+    expect(room.join(carla)).toEqual({ ok: true, color: 'spectator', activated: false });
+    expect(room.colorOf(carla.id)).toBeUndefined();
+    expect(room.stateFor(carla.id)).toMatchObject({ yourColor: 'spectator', status: 'active', spectators: 1 });
+    expect(room.stateFor(ana.id)).toMatchObject({ yourColor: 'white', spectators: 1 });
   });
 
-  it('refuses a newcomer in a game that was aborted with a free seat', () => {
+  it('gives no seat to a newcomer in a game that was aborted with a free seat', () => {
     const room = new GameRoom('g1', ana, 'white');
     room.abort();
-    expect(room.join(beto)).toEqual(refusal('unauthorized'));
+    expect(room.join(beto)).toEqual({ ok: true, color: 'spectator', activated: false });
+    expect(room.stateFor(ana.id).seats.black).toBeNull();
+  });
+
+  it('leaves the spectators out of the state when there are none', () => {
+    expect('spectators' in activeRoom().stateFor(ana.id)).toBe(false);
   });
 
   it('gives the same seat back on reconnection, even once the game is over', () => {
@@ -582,6 +591,55 @@ describe('clock', () => {
   });
 });
 
+describe('spectators', () => {
+  const dana: RoomPlayer = { id: 'guest:dana', displayName: 'Dana' };
+
+  it('counts each identity once, however many tabs it has open', () => {
+    const room = activeRoom();
+    room.join(carla);
+    room.join(carla);
+    room.join(dana);
+    expect(room.spectators).toBe(2);
+    expect(room.disconnect(carla.id)).toBeUndefined();
+    expect(room.spectators).toBe(2);
+    expect(room.disconnect(carla.id)).toBe('spectator');
+    expect(room.spectators).toBe(1);
+    expect(room.disconnect(carla.id)).toBeUndefined();
+  });
+
+  it('refuses every action of a spectator, and the game goes on', () => {
+    const room = activeRoom();
+    room.join(carla);
+    expect(room.move(carla.id, 'e2e4', 1)).toEqual(refusal('unauthorized'));
+    expect(room.resign(carla.id)).toEqual(refusal('unauthorized'));
+    expect(room.offerDraw(carla.id)).toEqual(refusal('unauthorized'));
+    play(room, 'e2e4');
+    expect(room.stateFor(carla.id)).toMatchObject({ plyCount: 1, turn: 'black', yourColor: 'spectator' });
+    room.resign(beto.id);
+    expect(room.offerRematch(carla.id)).toEqual(refusal('unauthorized'));
+  });
+
+  it('does not keep the spectators after a restart', () => {
+    const room = activeRoom();
+    room.join(carla);
+    expect(GameRoom.rehydrate(room.snapshot()).spectators).toBe(0);
+  });
+
+  it('a spectator who leaves is not an abandonment', () => {
+    const room = activeRoom();
+    room.join(carla);
+    room.disconnect(carla.id);
+    expect(room.abandon('white')).toEqual(refusal('unauthorized'));
+    expect(room.status).toBe('active');
+  });
+
+  it('every state of a spectator passes the schema of @chessspeak/shared', () => {
+    const room = activeRoom();
+    room.join(carla);
+    gameStateSchema.parse(room.stateFor(carla.id));
+  });
+});
+
 describe('connections and abandonment', () => {
   it('shows the connection state of each seat', () => {
     const room = activeRoom();
@@ -646,7 +704,7 @@ describe('rehydrate', () => {
     const rebuilt = GameRoom.rehydrate(room.snapshot());
     expect(rebuilt.stateFor(ana.id).seats.white?.connected).toBe(false);
     expect(rebuilt.join(beto)).toEqual({ ok: true, color: 'black', activated: false });
-    expect(rebuilt.join(carla)).toEqual(refusal('unauthorized'));
+    expect(rebuilt.join(carla)).toEqual({ ok: true, color: 'spectator', activated: false });
   });
 
   it('rebuilds a waiting game whose creator took black', () => {

@@ -33,6 +33,8 @@ export class VoiceMetricsGateway {
     const attempt = voiceAttemptSchema.safeParse(payload);
     if (!attempt.success) return this.drop('invalid payload');
     if (!socket.data.games.has(attempt.data.gameId)) return this.drop('game not joined');
+    // a spectator plays no moves, so what it says measures nothing
+    if (socket.data.watching?.has(attempt.data.gameId) === true) return this.drop('spectator');
 
     try {
       await this.attempts.save(attempt.data, playerOf(socket.data.identity).id);
