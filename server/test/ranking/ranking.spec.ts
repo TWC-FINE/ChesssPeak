@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { Global, Logger, Module } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
-import { rankingResponseSchema } from '@chessspeak/shared';
+import { profileResponseSchema, rankingResponseSchema } from '@chessspeak/shared';
 import request from 'supertest';
 import { PrismaService } from '../../src/database/prisma.service';
 import { RankingModule } from '../../src/ranking/ranking.module';
@@ -14,8 +14,16 @@ const findMany = jest.fn();
 @Module({ providers: [{ provide: PrismaService, useValue: { game: { findMany } } }], exports: [PrismaService] })
 class FakeInfraModule {}
 
-type Row = { whiteName: string | null; blackName: string | null; result: string | null };
-const row = (whiteName: string | null, blackName: string | null, result: string | null): Row => ({ whiteName, blackName, result });
+type Row = { id: string; whiteName: string | null; blackName: string | null; result: string | null; termination: string | null; finishedAt: Date | null };
+let ids = 0;
+const row = (whiteName: string | null, blackName: string | null, result: string | null): Row => ({
+  id: `game-${++ids}`,
+  whiteName,
+  blackName,
+  result,
+  termination: result === '*' ? 'aborted' : 'checkmate',
+  finishedAt: new Date(Date.UTC(2026, 10, 20, 18, ids)),
+});
 
 let app: NestExpressApplication;
 const get = () => request(app.getHttpServer()).get('/ranking');
@@ -61,7 +69,7 @@ describe('GET /ranking', () => {
       blackName: { not: null },
     });
     expect(query.orderBy).toEqual([{ finishedAt: 'asc' }, { createdAt: 'asc' }]);
-    expect(query.select).toEqual({ whiteName: true, blackName: true, result: true });
+    expect(query.select).toEqual({ id: true, whiteName: true, blackName: true, result: true, termination: true, finishedAt: true });
   });
 
   it('ignores rows that slip through without a name or with an aborted result', async () => {
@@ -83,6 +91,56 @@ describe('GET /ranking', () => {
     const error = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     findMany.mockRejectedValue(new Error('connection refused'));
     await get().expect(503);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('connection refused'));
+  });
+});
+
+describe('GET /ranking/:displayName', () => {
+  const profile = (name: string) => request(app.getHttpServer()).get(`/ranking/${encodeURIComponent(name)}`);
+
+  it('answers what the shared contract says, with no token', async () => {
+    const first = row('Ana', 'Luis', '1-0');
+    findMany.mockResolvedValue([first, row('Eva', 'Luis', '0-1')]);
+    const response = await profile('Ana').expect(200);
+    expect(profileResponseSchema.parse(response.body)).toEqual({
+      entry: { rank: 1, displayName: 'Ana', rating: 1220, games: 1, wins: 1, draws: 0, losses: 0 },
+      games: [
+        {
+          gameId: first.id,
+          color: 'white',
+          opponent: 'Luis',
+          outcome: 'win',
+          termination: 'checkmate',
+          finishedAt: first.finishedAt!.toISOString(),
+          rating: 1220,
+          ratingChange: 20,
+        },
+      ],
+      ratingHistory: [1200, 1220],
+    });
+  });
+
+  it('finds a name with spaces, accents and other case', async () => {
+    findMany.mockResolvedValue([row('José Luis', 'Ana', '1-0')]);
+    const response = await profile('josé luis').expect(200);
+    expect(response.body.entry.displayName).toBe('José Luis');
+  });
+
+  it('answers 404 for a name with no rated game', async () => {
+    findMany.mockResolvedValue([row('Ana', 'Luis', '1-0')]);
+    await profile('Eva').expect(404);
+  });
+
+  it('answers 400 for a name that no player can have', async () => {
+    await profile('   ').expect(400);
+    await profile('x'.repeat(25)).expect(400);
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it('answers 503 and logs when the database fails', async () => {
+    const error = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    findMany.mockRejectedValue(new Error('connection refused'));
+    await profile('Ana').expect(503);
     expect(error).toHaveBeenCalledWith(expect.stringContaining('connection refused'));
   });
 });
