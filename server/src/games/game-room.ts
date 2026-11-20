@@ -56,6 +56,10 @@ export class GameRoom {
   private end: GameEnd | undefined;
   /** Who offered a draw the rival has not answered. Not in the snapshot: an offer does not survive a restart. */
   private drawOffer: Color | undefined;
+  /** The same for a rematch, once the game is finished. Not in the snapshot either. */
+  private rematchOffer: Color | undefined;
+  /** `creating` from the moment both want the rematch until the store answers; then the new game. One per game. */
+  private rematch: 'creating' | { nextGameId: string } | undefined;
 
   /** The creator's color is already decided: `random` is drawn by whoever creates the room. */
   constructor(
@@ -184,6 +188,42 @@ export class GameRoom {
     return { ok: true };
   }
 
+  /**
+   * Offers a rematch of a finished game. While the rival's offer is pending, offering accepts it. Accepting returns
+   * the seats of the new game, colors swapped; the caller creates it and then calls `rematchCreated` or `rematchFailed`.
+   */
+  offerRematch(playerId: string): RoomResult<{ offeredBy: Color } | { seats: Record<Color, RoomPlayer> }> {
+    const color = this.colorOf(playerId);
+    if (color === undefined) return refuse('unauthorized', 'You have no seat in this game');
+    const closed = this.rematchClosed();
+    if (closed !== undefined) return closed;
+    if (this.rematchOffer === opposite(color)) return { ok: true, seats: this.startRematch() };
+    this.rematchOffer = color;
+    return { ok: true, offeredBy: color };
+  }
+
+  /** Answers the rival's pending rematch offer. */
+  answerRematch(playerId: string, accept: boolean): RoomResult<{ seats?: Record<Color, RoomPlayer> }> {
+    const color = this.colorOf(playerId);
+    if (color === undefined) return refuse('unauthorized', 'You have no seat in this game');
+    const closed = this.rematchClosed();
+    if (closed !== undefined) return closed;
+    if (this.rematchOffer !== opposite(color)) return refuse('unauthorized', 'There is no rematch offer from your rival');
+    if (accept) return { ok: true, seats: this.startRematch() };
+    this.rematchOffer = undefined;
+    return { ok: true };
+  }
+
+  /** The store created the game of the rematch. */
+  rematchCreated(nextGameId: string): void {
+    this.rematch = { nextGameId };
+  }
+
+  /** The store could not create it: the players can offer again. */
+  rematchFailed(): void {
+    this.rematch = undefined;
+  }
+
   resign(playerId: string): RoomResult<{ end: GameEnd }> {
     const color = this.colorOf(playerId);
     if (color === undefined) return refuse('unauthorized', 'You have no seat in this game');
@@ -224,6 +264,8 @@ export class GameRoom {
       seats: { white: seat('white'), black: seat('black') },
       yourColor: view,
       ...(this.drawOffer === undefined ? {} : { drawOffer: this.drawOffer }),
+      ...(this.rematchOffer === undefined ? {} : { rematchOffer: this.rematchOffer }),
+      ...(this.rematch === undefined || this.rematch === 'creating' ? {} : { nextGameId: this.rematch.nextGameId }),
     };
   }
 
@@ -258,6 +300,20 @@ export class GameRoom {
     const ending = terminationOf(this.position);
     if (ending !== undefined) this.finish(ending.result, ending.termination);
     return record;
+  }
+
+  /** Why no rematch can be offered or answered now, if that is the case. */
+  private rematchClosed(): { ok: false; code: GameErrorCode; message: string } | undefined {
+    if (this.status !== 'finished') return refuse('unauthorized', `The game is ${this.status}`);
+    if (this.rematch !== undefined) return refuse('unauthorized', 'The rematch already started');
+    return undefined;
+  }
+
+  private startRematch(): Record<Color, RoomPlayer> {
+    this.rematchOffer = undefined;
+    this.rematch = 'creating';
+    const player = (color: Color): RoomPlayer => ({ id: this.seats[color]!.id, displayName: this.seats[color]!.displayName });
+    return { white: player('black'), black: player('white') };
   }
 
   private finish(result: GameEnd['result'], termination: GameEnd['termination']): GameEnd {

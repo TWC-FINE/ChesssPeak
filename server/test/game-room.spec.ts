@@ -339,6 +339,94 @@ describe('draw offers', () => {
   });
 });
 
+describe('rematch', () => {
+  const finishedRoom = () => {
+    const room = activeRoom();
+    room.resign(beto.id);
+    return room;
+  };
+  const swapped = { white: { id: beto.id, displayName: 'Beto' }, black: { id: ana.id, displayName: 'Ana' } };
+
+  it('shows the pending offer to both players once the game is finished', () => {
+    const room = finishedRoom();
+    expect(room.offerRematch(beto.id)).toEqual({ ok: true, offeredBy: 'black' });
+    expect(room.stateFor(ana.id).rematchOffer).toBe('black');
+    expect(room.stateFor(beto.id).rematchOffer).toBe('black');
+  });
+
+  it('gives the seats of the new game, colors swapped, when the rival accepts', () => {
+    const room = finishedRoom();
+    room.offerRematch(ana.id);
+    expect(room.answerRematch(beto.id, true)).toEqual({ ok: true, seats: swapped });
+    expect(room.stateFor(ana.id).rematchOffer).toBeUndefined();
+  });
+
+  it('takes an offer back from the rival as accepting it', () => {
+    const room = finishedRoom();
+    room.offerRematch(beto.id);
+    expect(room.offerRematch(ana.id)).toEqual({ ok: true, seats: swapped });
+  });
+
+  it('goes back to no offer when the rival declines', () => {
+    const room = finishedRoom();
+    room.offerRematch(ana.id);
+    expect(room.answerRematch(beto.id, false)).toEqual({ ok: true });
+    expect(room.stateFor(ana.id).rematchOffer).toBeUndefined();
+    expect(room.offerRematch(beto.id)).toEqual({ ok: true, offeredBy: 'black' });
+  });
+
+  it('starts one rematch per game, and shows it once it exists', () => {
+    const room = finishedRoom();
+    room.offerRematch(ana.id);
+    room.answerRematch(beto.id, true);
+    expect(room.offerRematch(ana.id)).toEqual(refusal('unauthorized'));
+    expect(room.stateFor(ana.id).nextGameId).toBeUndefined();
+    room.rematchCreated('g2');
+    expect(room.stateFor(beto.id).nextGameId).toBe('g2');
+    expect(room.offerRematch(beto.id)).toEqual(refusal('unauthorized'));
+    expect(room.answerRematch(beto.id, true)).toEqual(refusal('unauthorized'));
+  });
+
+  it('lets them offer again when the new game could not be created', () => {
+    const room = finishedRoom();
+    room.offerRematch(ana.id);
+    room.answerRematch(beto.id, true);
+    room.rematchFailed();
+    expect(room.offerRematch(ana.id)).toEqual({ ok: true, offeredBy: 'white' });
+  });
+
+  it('refuses a rematch while the game goes on, in a cancelled game, and from outside', () => {
+    expect(activeRoom().offerRematch(ana.id)).toEqual(refusal('unauthorized'));
+    const waiting = new GameRoom('g1', ana, 'white');
+    waiting.abort();
+    expect(waiting.offerRematch(ana.id)).toEqual(refusal('unauthorized'));
+    expect(finishedRoom().offerRematch(carla.id)).toEqual(refusal('unauthorized'));
+    expect(finishedRoom().answerRematch(carla.id, true)).toEqual(refusal('unauthorized'));
+  });
+
+  it('refuses to answer an offer that does not exist or is your own', () => {
+    const room = finishedRoom();
+    expect(room.answerRematch(beto.id, true)).toEqual(refusal('unauthorized'));
+    room.offerRematch(ana.id);
+    expect(room.answerRematch(ana.id, true)).toEqual(refusal('unauthorized'));
+  });
+
+  it('does not keep the offer through a restart', () => {
+    const room = finishedRoom();
+    room.offerRematch(ana.id);
+    expect(GameRoom.rehydrate(room.snapshot()).stateFor(ana.id).rematchOffer).toBeUndefined();
+  });
+
+  it('every message passes the schemas of @chessspeak/shared', () => {
+    const room = finishedRoom();
+    room.offerRematch(ana.id);
+    gameStateSchema.parse(room.stateFor(beto.id));
+    room.answerRematch(beto.id, true);
+    room.rematchCreated('g2');
+    expect(gameStateSchema.parse(room.stateFor(beto.id)).nextGameId).toBe('g2');
+  });
+});
+
 describe('connections and abandonment', () => {
   it('shows the connection state of each seat', () => {
     const room = activeRoom();
