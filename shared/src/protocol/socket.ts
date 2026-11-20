@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { GameDrawAnswer, GameDrawOffer, GameJoin, GameMove, GameResign, VoiceAttemptPayload } from './client.js';
-import type { GameDraw, GameEnd, GameError, GameMoved, GameState } from './server.js';
+import type { GameDrawAnswer, GameDrawOffer, GameJoin, GameMove, GameRematchAnswer, GameRematchOffer, GameResign, VoiceAttemptPayload } from './client.js';
+import type { GameDraw, GameEnd, GameError, GameMoved, GameRematch, GameState } from './server.js';
 
 /**
  * Socket.IO handshake: `io(url, { auth: { token, v: 1 } })`.
@@ -16,6 +16,8 @@ export interface ClientToServerEvents {
   'game:resign': (payload: GameResign) => void;
   'game:draw-offer': (payload: GameDrawOffer) => void;
   'game:draw-answer': (payload: GameDrawAnswer) => void;
+  'game:rematch-offer': (payload: GameRematchOffer) => void;
+  'game:rematch-answer': (payload: GameRematchAnswer) => void;
   'voice:attempt': (payload: VoiceAttemptPayload) => void;
 }
 
@@ -24,6 +26,7 @@ export interface ServerToClientEvents {
   'game:moved': (payload: GameMoved) => void;
   'game:end': (payload: GameEnd) => void;
   'game:draw': (payload: GameDraw) => void;
+  'game:rematch': (payload: GameRematch) => void;
   'game:error': (payload: GameError) => void;
 }
 

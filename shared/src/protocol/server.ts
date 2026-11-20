@@ -33,6 +33,10 @@ export const gameStateSchema = z.object({
   yourColor: playerViewSchema,
   /** Who offered a draw that is still unanswered; absent when there is none. Optional: added later in v1. */
   drawOffer: colorSchema.optional(),
+  /** Once the game is finished: who offered a rematch that is still unanswered. Optional: added later in v1. */
+  rematchOffer: colorSchema.optional(),
+  /** The game of the rematch both players accepted. Optional: added later in v1. */
+  nextGameId: gameIdSchema.optional(),
 });
 export type GameState = z.infer<typeof gameStateSchema>;
 
@@ -59,6 +63,13 @@ export type GameEnd = z.infer<typeof gameEndSchema>;
 export const gameDrawSchema = z.object({ gameId: gameIdSchema, offeredBy: colorSchema.nullable() });
 export type GameDraw = z.infer<typeof gameDrawSchema>;
 
+/**
+ * The rematch offer of a finished game changed: `offeredBy` is who offered, or null once it was declined or accepted.
+ * `nextGameId` comes when both accepted: the new game, already active, with the colors swapped.
+ */
+export const gameRematchSchema = z.object({ gameId: gameIdSchema, offeredBy: colorSchema.nullable(), nextGameId: gameIdSchema.optional() });
+export type GameRematch = z.infer<typeof gameRematchSchema>;
+
 export const gameErrorCodeSchema = z.enum(['not_your_turn', 'illegal', 'stale_ply', 'unauthorized', 'not_found']);
 export type GameErrorCode = z.infer<typeof gameErrorCodeSchema>;
 
@@ -70,6 +81,7 @@ export const serverEventSchemas = {
   'game:moved': gameMovedSchema,
   'game:end': gameEndSchema,
   'game:draw': gameDrawSchema,
+  'game:rematch': gameRematchSchema,
   'game:error': gameErrorSchema,
 } as const;
 export type ServerEventName = keyof typeof serverEventSchemas;
