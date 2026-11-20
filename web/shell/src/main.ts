@@ -2,6 +2,7 @@ import { ApiError, createGame, signIn } from './api.js';
 import { readConfig, timeoutMs } from './config.js';
 import { connect, type GameConnection } from './connection.js';
 import { contextFor } from './contexts.js';
+import { fetchOpenGames, renderLobby, type LobbyState } from './lobby.js';
 import { loadMicrofrontend } from './loader.js';
 import { followGameRequests } from './navigation.js';
 import { gameIdOf, parseRoute, type Route } from './router.js';
@@ -10,6 +11,8 @@ import { clearSession, loadSession, saveSession } from './session.js';
 import { forwardVoiceAttempts } from './telemetry.js';
 
 const TAGS = ['mf-game', 'mf-voice-input', 'mf-history', 'mf-ranking'] as const;
+/** How often the home route reads the open games again. */
+const LOBBY_REFRESH_MS = 15_000;
 const config = readConfig();
 const mounted = new Map<string, HTMLElement>();
 
@@ -26,6 +29,10 @@ let session = loadSession(storage);
 let connection: GameConnection | null = null;
 let online = false;
 let message = '';
+let lobby: LobbyState = { games: null, error: '' };
+let lobbyTimer: ReturnType<typeof setInterval> | undefined;
+/** Answers that arrive after a newer request are dropped. */
+let lobbyRequest = 0;
 
 function describeRoute(route: Route): string {
   if (route.name === 'home') return 'Inicio (sin partida)';
@@ -52,6 +59,7 @@ function render(): void {
   const main = document.getElementById('cs-main');
   if (main !== null) main.dataset.view = route.name === 'ranking' ? 'ranking' : 'game';
   const ranking = { apiUrl: config.PUBLIC_API_URL || null, active: route.name === 'ranking' };
+  showLobby(route.name === 'home');
 
   const bar = document.getElementById('cs-session');
   if (bar !== null) {
@@ -61,6 +69,50 @@ function render(): void {
     // every new context object makes <mf-game> ask the server for the state, which a reconnection needs
     (element as HTMLElement & { context?: unknown }).context = contextFor(tag, gameId, config.PUBLIC_AGENT_URL || null, online ? connection : null, ranking);
   }
+}
+
+function refreshLobby(): void {
+  if (config.PUBLIC_API_URL === '') {
+    lobby = { games: null, error: 'Falta PUBLIC_API_URL en la configuración de la web.' };
+    drawLobby();
+    return;
+  }
+  const request = ++lobbyRequest;
+  fetchOpenGames(config.PUBLIC_API_URL).then(
+    (games) => {
+      if (request !== lobbyRequest) return;
+      lobby = { games, error: '' };
+      drawLobby();
+    },
+    (error: unknown) => {
+      if (request !== lobbyRequest) return;
+      lobby = { games: lobby.games, error: failure(error) };
+      drawLobby();
+    },
+  );
+}
+
+function drawLobby(): void {
+  const host = document.getElementById('cs-lobby');
+  if (host !== null && !host.hidden) renderLobby(host, lobby, refreshLobby);
+}
+
+/** The lobby is only on the home route; it reads the list when the route opens and then every LOBBY_REFRESH_MS. */
+function showLobby(visible: boolean): void {
+  const host = document.getElementById('cs-lobby');
+  if (host === null) return;
+  const opening = visible && host.hidden;
+  host.hidden = !visible;
+  if (!visible) {
+    clearInterval(lobbyTimer);
+    lobbyTimer = undefined;
+    return;
+  }
+  if (opening) {
+    refreshLobby();
+    lobbyTimer = setInterval(refreshLobby, LOBBY_REFRESH_MS);
+  }
+  drawLobby();
 }
 
 function openConnection(): void {

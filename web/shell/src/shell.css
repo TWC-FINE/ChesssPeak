@@ -296,3 +296,21 @@ body :focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 2px; 
   .cs-form label { flex: 1 1 200px; }
   .cs-decor-knight, .cs-decor-king, .cs-decor-fallen { display: none; }
 }
+
+/* the open games of the home route */
+.cs-lobby { max-width: 960px; margin: 0 auto 16px; padding: 16px clamp(16px, 3vw, 48px); }
+.cs-lobby[hidden] { display: none; }
+.cs-lobby-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cs-lobby-title { margin: 0; font-size: 1.05rem; }
+.cs-lobby-note { color: var(--cs-muted); }
+.cs-lobby-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.cs-lobby-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--cs-border);
+  border-radius: 10px;
+}
+.cs-lobby-join { font-weight: 600; white-space: nowrap; }
