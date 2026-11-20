@@ -1,4 +1,4 @@
-import { INITIAL_RATING, type GameResult, type RankingEntry } from '@chessspeak/shared';
+import { INITIAL_RATING, PROFILE_GAMES, type GameResult, type ProfileGame, type ProfileResponse, type RankingEntry, type Termination } from '@chessspeak/shared';
 
 /** Higher K while a player is new, so the rating reaches their level quickly; lower once it is settled. */
 export const K_PROVISIONAL = 40;
@@ -12,6 +12,13 @@ export interface RatedGame {
   whiteName: string;
   blackName: string;
   result: DecisiveResult;
+}
+
+/** A rated game with what a profile shows of it. */
+export interface ProfiledGame extends RatedGame {
+  gameId: string;
+  termination: Termination | null;
+  finishedAt: Date | null;
 }
 
 interface PlayerRecord {
@@ -60,11 +67,24 @@ function compare(a: PlayerRecord, b: PlayerRecord): number {
   return b.rating - a.rating || b.wins - a.wins || gamesOf(a) - gamesOf(b) || playerKey(a.displayName).localeCompare(playerKey(b.displayName));
 }
 
+/** What a game did to one of its players: the new rating comes with the rating before it. */
+interface RatedSide {
+  key: string;
+  displayName: string;
+  score: 0 | 0.5 | 1;
+  before: number;
+  after: number;
+}
+
 /**
  * Replays the games in the order given (oldest first) and returns every player, best first.
  * A game between two names that are the same player, or with an empty name, does not count.
+ * `onRated` sees each game that counted, with both of its sides.
  */
-export function buildRanking(games: Iterable<RatedGame>): { entries: RankingEntry[]; gamesRated: number } {
+export function buildRanking<G extends RatedGame>(
+  games: Iterable<G>,
+  onRated?: (game: G, white: RatedSide, black: RatedSide) => void,
+): { entries: RankingEntry[]; gamesRated: number } {
   const players = new Map<string, PlayerRecord>();
   const playerFor = (displayName: string): PlayerRecord => {
     const key = playerKey(displayName);
@@ -91,6 +111,11 @@ export function buildRanking(games: Iterable<RatedGame>): { entries: RankingEntr
     // both new ratings come from the ratings before the game
     const whiteRating = nextRating(white.rating, black.rating, whiteScore, gamesOf(white));
     const blackRating = nextRating(black.rating, white.rating, blackScore, gamesOf(black));
+    onRated?.(
+      game,
+      { key: whiteKey, displayName: game.whiteName.trim(), score: whiteScore, before: white.rating, after: whiteRating },
+      { key: blackKey, displayName: game.blackName.trim(), score: blackScore, before: black.rating, after: blackRating },
+    );
     white.rating = whiteRating;
     black.rating = blackRating;
     record(whiteScore, white);
@@ -107,4 +132,35 @@ export function buildRanking(games: Iterable<RatedGame>): { entries: RankingEntr
     entries.push({ rank, displayName: player.displayName, rating: player.rating, games: gamesOf(player), wins: player.wins, draws: player.draws, losses: player.losses });
   });
   return { entries, gamesRated };
+}
+
+const OUTCOME = { 1: 'win', 0.5: 'draw', 0: 'loss' } as const;
+
+/**
+ * The profile of one player (found by name, like the ranking), from the same replay as the ranking.
+ * Undefined when that name has no rated game.
+ */
+export function buildProfile(games: Iterable<ProfiledGame>, displayName: string): ProfileResponse | undefined {
+  const key = playerKey(displayName);
+  const played: ProfileGame[] = [];
+  const ratingHistory = [INITIAL_RATING];
+  const { entries } = buildRanking(games, (game, white, black) => {
+    if (white.key !== key && black.key !== key) return;
+    const color = white.key === key ? 'white' : 'black';
+    const [me, rival] = color === 'white' ? [white, black] : [black, white];
+    ratingHistory.push(me.after);
+    played.push({
+      gameId: game.gameId,
+      color,
+      opponent: rival.displayName,
+      outcome: OUTCOME[me.score],
+      termination: game.termination,
+      finishedAt: game.finishedAt?.toISOString() ?? null,
+      rating: me.after,
+      ratingChange: me.after - me.before,
+    });
+  });
+  const entry = entries.find((candidate) => playerKey(candidate.displayName) === key);
+  if (entry === undefined) return undefined;
+  return { entry, games: played.slice(-PROFILE_GAMES).reverse(), ratingHistory };
 }

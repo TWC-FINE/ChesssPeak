@@ -3,11 +3,13 @@ import {
   K_ESTABLISHED,
   K_PROVISIONAL,
   PROVISIONAL_GAMES,
+  buildProfile,
   buildRanking,
   expectedScore,
   kFactor,
   nextRating,
   playerKey,
+  type ProfiledGame,
   type RatedGame,
 } from '../../src/ranking/elo';
 
@@ -160,5 +162,62 @@ describe('buildRanking', () => {
   it('gives the same result for the same games', () => {
     const games = [game('Ana', 'Luis', '1-0'), game('Luis', 'Marta', '1/2-1/2'), game('Marta', 'Ana', '0-1')];
     expect(buildRanking(games)).toEqual(buildRanking([...games]));
+  });
+});
+
+describe('buildProfile', () => {
+  const at = (day: number) => new Date(Date.UTC(2026, 10, day, 18));
+  const played = (gameId: string, whiteName: string, blackName: string, result: RatedGame['result'], day: number): ProfiledGame => ({
+    gameId,
+    whiteName,
+    blackName,
+    result,
+    termination: result === '1/2-1/2' ? 'agreement' : 'checkmate',
+    finishedAt: at(day),
+  });
+
+  it('shows the games of the player from their side, most recent first', () => {
+    const profile = buildProfile([played('g1', 'Ana', 'Luis', '1-0', 1), played('g2', 'Luis', 'Ana', '1/2-1/2', 2)], 'Ana');
+    expect(profile?.games).toEqual([
+      { gameId: 'g2', color: 'black', opponent: 'Luis', outcome: 'draw', termination: 'agreement', finishedAt: at(2).toISOString(), rating: 1218, ratingChange: -2 },
+      { gameId: 'g1', color: 'white', opponent: 'Luis', outcome: 'win', termination: 'checkmate', finishedAt: at(1).toISOString(), rating: 1220, ratingChange: 20 },
+    ]);
+    expect(profile?.ratingHistory).toEqual([INITIAL_RATING, 1220, 1218]);
+  });
+
+  it('gives the same row and rating as the ranking', () => {
+    const games = [played('g1', 'Ana', 'Luis', '0-1', 1), played('g2', 'Luis', 'Eva', '1-0', 2), played('g3', 'Eva', 'Ana', '0-1', 3)];
+    const ranking = buildRanking(games).entries;
+    for (const name of ['Ana', 'Luis', 'Eva']) {
+      const profile = buildProfile(games, name)!;
+      expect(profile.entry).toEqual(ranking.find((entry) => entry.displayName === name));
+      expect(profile.ratingHistory.at(-1)).toBe(profile.entry.rating);
+      expect(profile.games).toHaveLength(profile.entry.games);
+    }
+  });
+
+  it('finds the player by name without spaces or case, and names the opponent as written in that game', () => {
+    const profile = buildProfile([played('g1', ' Ana ', 'luis', '1-0', 1)], '  ANA');
+    expect(profile?.entry.displayName).toBe('Ana');
+    expect(profile?.games[0]?.opponent).toBe('luis');
+  });
+
+  it('keeps only the most recent games, but the whole rating history', () => {
+    const games = Array.from({ length: 25 }, (_, index) => played(`g${index}`, 'Ana', `Rival ${index}`, '1-0', index + 1));
+    const profile = buildProfile(games, 'Ana')!;
+    expect(profile.games).toHaveLength(20);
+    expect(profile.games[0]?.gameId).toBe('g24');
+    expect(profile.ratingHistory).toHaveLength(26);
+  });
+
+  it('is undefined for a name with no rated game, and skips the games against oneself', () => {
+    expect(buildProfile([played('g1', 'Ana', 'Luis', '1-0', 1)], 'Eva')).toBeUndefined();
+    expect(buildProfile([played('g1', 'Ana', 'ana', '1-0', 1)], 'Ana')).toBeUndefined();
+    expect(buildProfile([], 'Ana')).toBeUndefined();
+  });
+
+  it('keeps a game with no date or termination', () => {
+    const profile = buildProfile([{ ...played('g1', 'Ana', 'Luis', '1-0', 1), termination: null, finishedAt: null }], 'Luis');
+    expect(profile?.games[0]).toMatchObject({ outcome: 'loss', termination: null, finishedAt: null, ratingChange: -20 });
   });
 });
