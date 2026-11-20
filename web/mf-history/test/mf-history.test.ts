@@ -213,3 +213,74 @@ describe('<mf-history> PGN export', () => {
     expect(names[0]).toMatch(/^chessspeak-\d{4}-\d{2}-\d{2}\.pgn$/);
   });
 });
+
+describe('<mf-history> review of a finished game', () => {
+  const ended = async (element: HistoryElement) => {
+    document.dispatchEvent(new CustomEvent('cs:game-ended', { detail: { v: 1, gameId: 'g1', result: '1-0', termination: 'resignation' } }));
+    await element.updateComplete;
+  };
+  const press = async (element: HistoryElement, selector: string) => {
+    element.querySelector<HTMLButtonElement>(selector)!.click();
+    await element.updateComplete;
+  };
+  const reviews: unknown[] = [];
+  const onReview = (event: Event) => void reviews.push((event as CustomEvent).detail);
+
+  afterEach(() => {
+    document.removeEventListener('cs:review', onReview);
+    reviews.length = 0;
+  });
+
+  async function finished(): Promise<HistoryElement> {
+    document.addEventListener('cs:review', onReview);
+    const element = await mount();
+    for (const [ply, san] of [[1, 'e4'], [2, 'e5'], [3, 'Nf3']] as const) await applied(element, ply, san);
+    return element;
+  }
+
+  it('offers nothing while the game is being played', async () => {
+    const element = await finished();
+    expect(element.querySelector('[data-action="review-back"]')).toBeNull();
+    expect(element.querySelector('button.csh-san')).toBeNull();
+  });
+
+  it('opens the position of a move, and of the one before or after it', async () => {
+    const element = await finished();
+    await ended(element);
+    expect(element.querySelector('.csh-review-note')?.textContent).toContain('Toca una jugada');
+    await press(element, 'button[data-ply="1"]');
+    expect(element.querySelector('[data-current]')?.textContent).toBe('e4');
+    expect(element.querySelector('[data-last]')).toBeNull();
+    expect(element.querySelector('.csh-review-note')?.textContent).toBe('Jugada 1 de 3');
+    await press(element, '[data-action="review-back"]');
+    expect(element.querySelector<HTMLButtonElement>('[data-action="review-start"]')?.disabled).toBe(true);
+    await press(element, '[data-action="review-forward"]');
+    await press(element, '[data-action="review-forward"]');
+    await press(element, '[data-action="review-forward"]');
+    expect(reviews).toEqual([1, 0, 1, 2, null].map((ply) => ({ v: 1, gameId: 'g1', ply })));
+    expect(element.querySelector('[data-last]')?.textContent).toBe('Nf3');
+    expect(element.querySelector<HTMLButtonElement>('[data-action="review-end"]')?.disabled).toBe(true);
+  });
+
+  it('goes back to the final position from the last move or the end button', async () => {
+    const element = await finished();
+    await ended(element);
+    await press(element, '[data-action="review-start"]');
+    await press(element, '[data-action="review-end"]');
+    await press(element, 'button[data-ply="2"]');
+    await press(element, 'button[data-ply="3"]');
+    expect(reviews.map((detail) => (detail as { ply: number | null }).ply)).toEqual([0, null, 2, null]);
+  });
+
+  it('starts at the final position again in another game', async () => {
+    const element = await finished();
+    await ended(element);
+    await press(element, 'button[data-ply="1"]');
+    element.context = { v: 1, gameId: 'g2' };
+    await element.updateComplete;
+    element.context = { v: 1, gameId: 'g1' };
+    await element.updateComplete;
+    expect(element.querySelector('[data-current]')).toBeNull();
+    expect(element.querySelector('.csh-review')).toBeNull();
+  });
+});

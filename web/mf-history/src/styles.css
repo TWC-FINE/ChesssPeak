@@ -81,8 +81,15 @@ mf-history { display: block; font-family: var(--cs-font); color: var(--cs-text);
   border: 1px solid rgba(245, 232, 210, 0.1);
 }
 .csh-san + .csh-san { background: rgba(20, 5, 10, 0.35); border-color: rgba(121, 58, 73, 0.55); }
-.csh-san[data-last] { font-weight: 700; color: #2a0e16; background: var(--cs-accent); border-color: var(--cs-accent); }
+.csh-san[data-last], .csh-san[data-current] { font-weight: 700; color: #2a0e16; background: var(--cs-accent); border-color: var(--cs-accent); }
+button.csh-san { width: 100%; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+button.csh-san:hover:not([data-last], [data-current]) { border-color: var(--cs-accent); }
 
 /* export the game: copy or download the PGN */
 .csh-export { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 0 24px; }
 .csh-export-note { font-size: 0.85rem; color: var(--cs-muted); }
+
+/* review of a finished game, move by move */
+.csh-review { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 24px; }
+.csh-review button { min-width: 40px; }
+.csh-review-note { font-size: 0.85rem; color: var(--cs-muted); }

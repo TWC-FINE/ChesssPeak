@@ -27,6 +27,8 @@ export class MfHistory extends LitElement {
   private shownGame: string | null | undefined;
   private result: GameEnded['result'] | undefined;
   private copyNote = '';
+  /** The ply on the board while a finished game is reviewed; null is the final position. */
+  private reviewPly: number | null = null;
 
   private readonly onMoveApplied = (event: Event): void => {
     const detail = (event as CustomEvent<AppliedMove>).detail;
@@ -67,9 +69,9 @@ export class MfHistory extends LitElement {
   }
 
   protected override updated(): void {
-    // the last move stays in sight in a long game
+    // the last move stays in sight in a long game, unless the player is going back over it
     const list = this.querySelector('.csh-moves');
-    if (list !== null) list.scrollTop = list.scrollHeight;
+    if (list !== null && this.reviewPly === null) list.scrollTop = list.scrollHeight;
   }
 
   private forgetAnotherGame(): void {
@@ -79,6 +81,23 @@ export class MfHistory extends LitElement {
     this.moves.clear();
     this.result = undefined;
     this.copyNote = '';
+    this.reviewPly = null;
+  }
+
+  private lastPly(): number {
+    return Math.max(0, ...this.moves.keys());
+  }
+
+  /** Puts the board after `ply` (null or the last move: the final position) and tells <mf-game>. */
+  private review(ply: number | null): void {
+    const gameId = this.context?.gameId;
+    if (gameId == null || this.result === undefined) return;
+    const next = ply === null || ply >= this.lastPly() ? null : Math.max(0, ply);
+    if (next === this.reviewPly) return;
+    this.reviewPly = next;
+    const detail: CsEventDetail<'cs:review'> = { v: 1, gameId, ply: next };
+    this.dispatchEvent(new CustomEvent('cs:review', { ...CS_EVENT_INIT, detail }));
+    this.requestUpdate();
   }
 
   /** The game so far in PGN, up to the first ply that has not arrived yet. */
@@ -111,11 +130,31 @@ export class MfHistory extends LitElement {
   private renderMove(ply: number, lastPly: number) {
     const move = this.moves.get(ply);
     if (move === undefined) return html`<span class="csh-san">…</span>`;
-    return html`<span class="csh-san" data-ply=${ply} ?data-last=${ply === lastPly}>${move.san}</span>`;
+    const last = ply === lastPly && this.reviewPly === null;
+    // once the game is over, each move opens its position
+    if (this.result !== undefined) {
+      return html`<button type="button" class="csh-san" data-ply=${ply} ?data-last=${last} ?data-current=${ply === this.reviewPly}
+        aria-current=${ply === this.reviewPly ? 'step' : 'false'} @click=${() => this.review(ply)}>${move.san}</button>`;
+    }
+    return html`<span class="csh-san" data-ply=${ply} ?data-last=${last}>${move.san}</span>`;
+  }
+
+  private renderReview(lastPly: number) {
+    if (this.result === undefined) return '';
+    const shown = this.reviewPly ?? lastPly;
+    const step = (action: string, label: string, text: string, ply: number | null, disabled: boolean) =>
+      html`<button type="button" data-action=${action} aria-label=${label} title=${label} ?disabled=${disabled} @click=${() => this.review(ply)}>${text}</button>`;
+    return html`<div class="csh-review">
+      ${step('review-start', 'Ir al inicio', '⏮', 0, shown === 0)}
+      ${step('review-back', 'Jugada anterior', '◀', shown - 1, shown === 0)}
+      ${step('review-forward', 'Jugada siguiente', '▶', shown + 1, this.reviewPly === null)}
+      ${step('review-end', 'Ir al final', '⏭', null, this.reviewPly === null)}
+      <span class="csh-review-note" role="status">${this.reviewPly === null ? 'Toca una jugada para repasarla.' : `Jugada ${shown} de ${lastPly}`}</span>
+    </div>`;
   }
 
   protected override render() {
-    const lastPly = Math.max(0, ...this.moves.keys());
+    const lastPly = this.lastPly();
     const rows = Array.from({ length: Math.ceil(lastPly / 2) }, (_, index) => index + 1);
     return html`<div class="csh-root">
       <h2 class="csh-title">Jugadas</h2>
@@ -137,6 +176,7 @@ export class MfHistory extends LitElement {
               </li>`;
             })}
           </ol>
+          ${this.renderReview(lastPly)}
           <div class="csh-export">
             <button type="button" data-action="copy-pgn" @click=${() => void this.copyPgn()}>Copiar PGN</button>
             <button type="button" data-action="download-pgn" @click=${() => this.downloadPgn()}>Descargar .pgn</button>
