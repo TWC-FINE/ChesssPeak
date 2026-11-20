@@ -28,6 +28,16 @@ export type GameDrawOffer = z.infer<typeof gameDrawOfferSchema>;
 export const gameDrawAnswerSchema = z.object({ gameId: gameIdSchema, accept: z.boolean() }).strict();
 export type GameDrawAnswer = z.infer<typeof gameDrawAnswerSchema>;
 
+/** The fixed texts a player can send to the room: no free text, so there is nothing to moderate. */
+export const reactionSchema = z.enum(['hello', 'good-luck', 'well-played', 'oops', 'thanks', 'good-game']);
+export type Reaction = z.infer<typeof reactionSchema>;
+/** A socket sends at most one reaction in this time; the server drops the rest without an answer. */
+export const REACTION_COOLDOWN_MS = 1500;
+
+/** A quick reaction, for the players of an active or finished game. */
+export const gameReactSchema = z.object({ gameId: gameIdSchema, reaction: reactionSchema }).strict();
+export type GameReact = z.infer<typeof gameReactSchema>;
+
 export const recognizerSchema = z.enum(['webspeech', 'whisper', 'text', 'fake']);
 export type Recognizer = z.infer<typeof recognizerSchema>;
 
@@ -88,6 +98,7 @@ export const clientEventSchemas = {
   'game:draw-answer': gameDrawAnswerSchema,
   'game:rematch-offer': gameRematchOfferSchema,
   'game:rematch-answer': gameRematchAnswerSchema,
+  'game:react': gameReactSchema,
   'voice:attempt': voiceAttemptSchema,
 } as const;
 export type ClientEventName = keyof typeof clientEventSchemas;

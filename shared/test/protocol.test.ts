@@ -348,6 +348,17 @@ describe('server → client (tolerant)', () => {
   });
 });
 
+describe('quick reactions', () => {
+  it('only takes the fixed reactions, and no free text', () => {
+    const react = clientEventSchemas['game:react'];
+    expect(react.safeParse({ gameId: 'g1', reaction: 'good-game' }).success).toBe(true);
+    expect(react.safeParse({ gameId: 'g1', reaction: 'any text' }).success).toBe(false);
+    expect(react.safeParse({ gameId: 'g1', reaction: 'thanks', text: 'hola' }).success).toBe(false);
+    expect(serverEventSchemas['game:reaction'].safeParse({ gameId: 'g1', from: 'white', reaction: 'oops' }).success).toBe(true);
+    expect(serverEventSchemas['game:reaction'].safeParse({ gameId: 'g1', from: 'spectator', reaction: 'oops' }).success).toBe(false);
+  });
+});
+
 describe('types match the schemas', () => {
   it('Socket.IO generics take exactly the payloads of the schemas', () => {
     type ClientPayload<E extends keyof ClientToServerEvents> = Parameters<ClientToServerEvents[E]>[0];
@@ -359,19 +370,21 @@ describe('types match the schemas', () => {
     expectTypeOf<ClientPayload<'game:draw-answer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:draw-answer']>>();
     expectTypeOf<ClientPayload<'game:rematch-offer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:rematch-offer']>>();
     expectTypeOf<ClientPayload<'game:rematch-answer'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:rematch-answer']>>();
+    expectTypeOf<ClientPayload<'game:react'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['game:react']>>();
     expectTypeOf<ClientPayload<'voice:attempt'>>().toEqualTypeOf<z.infer<(typeof clientEventSchemas)['voice:attempt']>>();
     expectTypeOf<ServerPayload<'game:state'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:state']>>();
     expectTypeOf<ServerPayload<'game:moved'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:moved']>>();
     expectTypeOf<ServerPayload<'game:end'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:end']>>();
     expectTypeOf<ServerPayload<'game:draw'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:draw']>>();
     expectTypeOf<ServerPayload<'game:rematch'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:rematch']>>();
+    expectTypeOf<ServerPayload<'game:reaction'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:reaction']>>();
     expectTypeOf<ServerPayload<'game:error'>>().toEqualTypeOf<z.infer<(typeof serverEventSchemas)['game:error']>>();
   });
 
   it('every event of the generics has a schema and vice versa', () => {
     expectTypeOf<keyof ClientToServerEvents>().toEqualTypeOf<keyof typeof clientEventSchemas>();
     expectTypeOf<keyof ServerToClientEvents>().toEqualTypeOf<keyof typeof serverEventSchemas>();
-    expect(Object.keys(clientEventSchemas).sort()).toEqual(['game:draw-answer', 'game:draw-offer', 'game:join', 'game:move', 'game:rematch-answer', 'game:rematch-offer', 'game:resign', 'voice:attempt']);
-    expect(Object.keys(serverEventSchemas).sort()).toEqual(['game:draw', 'game:end', 'game:error', 'game:moved', 'game:rematch', 'game:state']);
+    expect(Object.keys(clientEventSchemas).sort()).toEqual(['game:draw-answer', 'game:draw-offer', 'game:join', 'game:move', 'game:react', 'game:rematch-answer', 'game:rematch-offer', 'game:resign', 'voice:attempt']);
+    expect(Object.keys(serverEventSchemas).sort()).toEqual(['game:draw', 'game:end', 'game:error', 'game:moved', 'game:reaction', 'game:rematch', 'game:state']);
   });
 });

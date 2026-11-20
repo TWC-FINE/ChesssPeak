@@ -50,6 +50,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 | `game:draw-answer` | `{ gameId, accept }`; `accept` es booleano y responde a la oferta pendiente del rival | `<mf-game>` | servidor | `not_found`, `unauthorized` (también si no hay oferta del rival pendiente) |
 | `game:rematch-offer` | `{ gameId }`; con la partida terminada, ofrece una revancha con los colores invertidos. Si el rival ya la había ofrecido, la acepta | `<mf-game>` | servidor | `not_found`, `unauthorized` (también si la partida no ha terminado o la revancha ya empezó) |
 | `game:rematch-answer` | `{ gameId, accept }`; responde a la oferta de revancha pendiente del rival | `<mf-game>` | servidor | `not_found`, `unauthorized` (también si no hay oferta del rival) |
+| `game:react` | `{ gameId, reaction }`; `reaction` = `hello` \| `good-luck` \| `well-played` \| `oops` \| `thanks` \| `good-game`, una reacción rápida con texto fijo (no hay texto libre). Solo un jugador con asiento, con la partida activa o terminada. Como mucho una cada 1,5 s por socket (`REACTION_COOLDOWN_MS`): el servidor descarta las demás sin responder | `<mf-game>` | servidor | `not_found`, `unauthorized` (espectador, partida en espera o cancelada) |
 | `voice:attempt` | `VoiceAttempt` sin `player` ni `createdAt`: `gameId, ply, fen, lang, recognizer, alternatives[], transcript, normalized, candidates[≤3], resolvedUci, expectedUci?, outcome, accepted, tryIndex, latency, session` | shell (reenvía `cs:voice-attempt`) | servidor (`voice_attempts`) | se descarta si no valida; no responde |
 
 ### Servidor → cliente (esquemas tolerantes)
@@ -61,6 +62,7 @@ Fuente de verdad: los esquemas zod de `shared/src/` (`protocol/`, `browser-event
 | `game:end` | `{ gameId, result, termination }` | servidor | `<mf-game>` | fin de la partida |
 | `game:draw` | `{ gameId, offeredBy }`; `offeredBy` es `white`, `black` o `null` | servidor | `<mf-game>` (los dos jugadores) | al ofrecer tablas (el color) y al rechazarlas (`null`) |
 | `game:rematch` | `{ gameId, offeredBy, nextGameId? }`; `offeredBy` es `white`, `black` o `null`; `nextGameId` es la partida nueva, ya activa | servidor | `<mf-game>` (los dos jugadores) | al ofrecer la revancha (el color), al rechazarla (`null`) y al aceptarla (`null` y `nextGameId`) |
+| `game:reaction` | `{ gameId, from, reaction }`; `from` es `white` o `black`. No se guarda | servidor | `<mf-game>` (jugadores y espectadores) | tras un `game:react` aceptado |
 | `game:error` | `{ code, message }` | servidor | `<mf-game>` | la petición se rechaza; el estado no cambia |
 
 **Valores:**
