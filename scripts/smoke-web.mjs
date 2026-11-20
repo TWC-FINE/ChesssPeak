@@ -166,8 +166,8 @@ try {
   // 1. the shell with all three microfrontends
   await open(`${base}/index.html#/game/demo`);
   await waitFor(() => evaluate('document.documentElement.dataset.shellReady === "true"'), 'el shell listo');
-  const tags = await evaluate('["mf-game","mf-voice-input","mf-history"].map((t) => !!customElements.get(t))');
-  check('el shell registra <mf-game>, <mf-voice-input> y <mf-history>', tags.every(Boolean), JSON.stringify(tags));
+  const tags = await evaluate('["mf-game","mf-voice-input","mf-history","mf-ranking"].map((t) => !!customElements.get(t))');
+  check('el shell registra <mf-game>, <mf-voice-input>, <mf-history> y <mf-ranking>', tags.every(Boolean), JSON.stringify(tags));
   await waitFor(() => evaluate(`document.querySelectorAll('mf-game cg-board piece').length > 0`), 'el tablero');
   const board = await evaluate(boardOf('mf-game'));
   check('<mf-game> pinta un tablero chessground con 32 piezas', board?.pieces === 32, `piezas: ${board?.pieces}`);
@@ -178,12 +178,19 @@ try {
   await evaluate(`location.hash = '#/'`);
   await waitFor(() => evaluate(`document.querySelector('mf-game').textContent.includes('sin partida')`), 'el cambio de ruta');
   check('el router por hash actualiza el contexto (#/ sin partida)', true);
+  const visible = (selector) => `(() => { const el = document.querySelector('${selector}'); return !!el && getComputedStyle(el).display !== 'none'; })()`;
+  check('fuera de #/ranking el ranking no se ve ni está activo', (await evaluate(visible('.cs-ranking'))) === false && (await evaluate(`document.querySelector('mf-ranking').context?.active`)) === false);
+  await evaluate(`location.hash = '#/ranking'`);
+  await waitFor(() => evaluate(visible('.cs-ranking')), 'la ruta #/ranking');
+  const rankingView = await evaluate(`({ layout: ${visible('.cs-layout')}, active: document.querySelector('mf-ranking').context?.active, socket: 'socket' in (document.querySelector('mf-ranking').context ?? {}), title: document.querySelector('mf-ranking .csr-title')?.textContent })`);
+  check('#/ranking muestra <mf-ranking> en lugar del tablero, activo y sin socket', rankingView.layout === false && rankingView.active === true && rankingView.socket === false && rankingView.title === 'Ranking', JSON.stringify(rankingView));
 
   // 2. each standalone page works on its own
   const standalone = [
     ['mf-game', async () => (await evaluate(boardOf('mf-game')))?.pieces === 32],
     ['mf-voice-input', async () => evaluate(`document.querySelector('mf-voice-input').textContent.includes('es-CO')`)],
     ['mf-history', async () => evaluate(`document.querySelector('mf-history').textContent.replace(/\\s+/g, ' ').includes('1. e4 e5')`)],
+    ['mf-ranking', async () => evaluate(`document.querySelectorAll('mf-ranking tbody tr').length === 4`)],
   ];
   for (const [tag, ready] of standalone) {
     await open(`${base}/standalone/${tag}/index.html`);
