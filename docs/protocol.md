@@ -102,7 +102,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 | `<mf-game>` | `{ v, gameId, orientation, socket }`. `socket` cumple `GameSocket` (el `Socket` de socket.io-client) o es `null` |
 | `<mf-voice-input>` | `{ v, gameId, lang, recognizer, releaseDelayMs?, agentUrl }`. Sin `releaseDelayMs` usa `DEFAULT_RELEASE_DELAY_MS = 400` de `shared` ([ADR 5](adr/0005-strategy-y-reconocedor-por-defecto.md)) |
 | `<mf-history>` | `{ v, gameId }`. Las jugadas llegan por `cs:move-applied` |
-| `<mf-ranking>` | `{ v, apiUrl }`. Lee él mismo `GET /ranking`, que es público: no recibe socket ni token. `apiUrl` es `null` si la web no tiene servidor configurado |
+| `<mf-ranking>` | `{ v, apiUrl, active }`. Lee él mismo `GET /ranking`, que es público: no recibe socket ni token. `apiUrl` es `null` si la web no tiene servidor configurado. `active` es `true` mientras se ve la ruta `#/ranking`; el ranking se recarga cada vez que pasa a `true`, no con cada contexto nuevo |
 
 ## 6. Una jugada por voz, de punta a punta
 
