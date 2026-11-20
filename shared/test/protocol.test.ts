@@ -19,6 +19,10 @@ import {
   guestAuthRequestSchema,
   guestAuthResponseSchema,
   INITIAL_RATING,
+  PROFILE_GAMES,
+  profileGameSchema,
+  profileNameSchema,
+  profileResponseSchema,
   rankingEntrySchema,
   rankingResponseSchema,
   serverEventSchemas,
@@ -184,6 +188,34 @@ describe('server → client (tolerant)', () => {
     expect(rankingEntrySchema.safeParse({ ...entry, rating: 1220.5 }).success).toBe(false);
     expect(rankingEntrySchema.safeParse({ ...entry, displayName: '' }).success).toBe(false);
     expect(rankingResponseSchema.safeParse({ entries: [entry] }).success).toBe(false);
+  });
+
+  it('validates a player profile and drops unknown fields', () => {
+    const entry = { rank: 2, displayName: 'Ana', rating: 1220, games: 1, wins: 1, draws: 0, losses: 0 };
+    const game = {
+      gameId: 'g1',
+      color: 'white',
+      opponent: 'Luis',
+      outcome: 'win',
+      termination: 'checkmate',
+      finishedAt: '2026-11-20T18:00:00.000Z',
+      rating: 1220,
+      ratingChange: 20,
+    };
+    expect(PROFILE_GAMES).toBe(20);
+    const parsed = profileResponseSchema.parse({ entry, games: [{ ...game, whiteGuestId: 'x' }], ratingHistory: [1200, 1220], extra: 1 });
+    expect(parsed).toEqual({ entry, games: [game], ratingHistory: [1200, 1220] });
+    expect(profileGameSchema.safeParse({ ...game, finishedAt: null, termination: null }).success).toBe(true);
+    expect(profileGameSchema.safeParse({ ...game, outcome: 'won' }).success).toBe(false);
+    expect(profileGameSchema.safeParse({ ...game, finishedAt: 'ayer' }).success).toBe(false);
+    expect(profileGameSchema.safeParse({ ...game, ratingChange: 0.5 }).success).toBe(false);
+    expect(profileResponseSchema.safeParse({ entry, games: [], ratingHistory: [] }).success).toBe(false);
+  });
+
+  it('trims the profile name and keeps it within the display name limits', () => {
+    expect(profileNameSchema.parse('  Ana ')).toBe('Ana');
+    expect(profileNameSchema.safeParse('   ').success).toBe(false);
+    expect(profileNameSchema.safeParse('x'.repeat(25)).success).toBe(false);
   });
 
   it('marks the reserved values', () => {
