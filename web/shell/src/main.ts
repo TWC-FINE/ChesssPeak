@@ -1,3 +1,4 @@
+import type { CreateGameRequest } from '@chessspeak/shared';
 import { ApiError, createGame, signIn } from './api.js';
 import { readConfig, timeoutMs } from './config.js';
 import { connect, type GameConnection } from './connection.js';
@@ -208,9 +209,12 @@ function enter(displayName: string): void {
   );
 }
 
-function startGame(color: 'white' | 'black' | 'random', clockMinutes: 3 | 5 | 10 | undefined): void {
+function startGame(color: 'white' | 'black' | 'random', clockMinutes: CreateGameRequest['clockMinutes'], incrementSeconds?: CreateGameRequest['incrementSeconds']): void {
   if (session === null) return;
-  createGame(config.PUBLIC_API_URL, session.token, clockMinutes === undefined ? { color } : { color, clockMinutes }).then(
+  const request: CreateGameRequest = { color };
+  if (clockMinutes !== undefined) request.clockMinutes = clockMinutes;
+  if (clockMinutes !== undefined && incrementSeconds !== undefined) request.incrementSeconds = incrementSeconds;
+  createGame(config.PUBLIC_API_URL, session.token, request).then(
     (gameId) => {
       message = '';
       location.hash = `#/game/${gameId}`;

@@ -30,6 +30,7 @@ describe('describeOpenGame', () => {
   it('says who waits, the color of whoever joins, the clock and the age', () => {
     expect(describeOpenGame(game(), NOW)).toBe('Ana · juegas con negras · sin reloj · hace 12 min');
     expect(describeOpenGame(game({ creatorColor: 'black', clockMs: 180_000 }), NOW)).toBe('Ana · juegas con blancas · 3 min · hace 12 min');
+    expect(describeOpenGame(game({ clockMs: 180_000, incrementMs: 2_000 }), NOW)).toContain('· 3 min + 2 s ·');
   });
 
   it('says "hace un momento" during the first minute', () => {

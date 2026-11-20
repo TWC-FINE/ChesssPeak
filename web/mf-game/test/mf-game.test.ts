@@ -524,6 +524,17 @@ describe('clock', () => {
     expect(LOW_TIME_MS).toBe(20_000);
   });
 
+  it('shows the increment of a clock that has one', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ clock: clock() }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-increment')).toBeNull();
+    receive('game:state', state({ clock: clock({ incrementMs: 2_000 }) }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-increment')?.textContent).toBe('+2 s');
+  });
+
   it('shows no clock in a game without one', async () => {
     const { socket, receive } = fakeSocket();
     const element = await mountGame(socket);
