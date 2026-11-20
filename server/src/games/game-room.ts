@@ -27,11 +27,15 @@ export interface RoomSnapshot {
   end?: GameEnd;
   /** Milliseconds each player starts with; absent for a game without a clock. */
   clockMs?: number;
+  /** Milliseconds each move adds to the clock of its player; absent without an increment. */
+  incrementMs?: number;
 }
 
 /** What is left on each clock, counted up to the last move. */
 interface ClockState {
   initialMs: number;
+  /** 0 without an increment. */
+  incrementMs: number;
   left: Record<Color, number>;
   /** When the last move was played: the time of the player to move runs from here. Undefined before the first one. */
   lastMoveAt: number | undefined;
@@ -109,10 +113,11 @@ export class GameRoom {
     creator: RoomPlayer,
     creatorColor: Color,
     clockMs?: number,
+    incrementMs = 0,
   ) {
     this.seats[creatorColor] = { ...creator, connections: 0 };
     this.seen.set(repetitionKey(this.position), 1);
-    if (clockMs !== undefined) this.clock = { initialMs: clockMs, left: { white: clockMs, black: clockMs }, lastMoveAt: undefined };
+    if (clockMs !== undefined) this.clock = { initialMs: clockMs, incrementMs, left: { white: clockMs, black: clockMs }, lastMoveAt: undefined };
   }
 
   /**
@@ -124,7 +129,7 @@ export class GameRoom {
     const { white, black } = snapshot.seats;
     const creator = white ?? black;
     if (creator === null) throw new Error(`Game ${snapshot.gameId} has no players`);
-    const room = new GameRoom(snapshot.gameId, creator, white === null ? 'black' : 'white', snapshot.clockMs);
+    const room = new GameRoom(snapshot.gameId, creator, white === null ? 'black' : 'white', snapshot.clockMs, snapshot.incrementMs);
     if (white !== null && black !== null) room.seats.black = { ...black, connections: 0 };
     if (snapshot.moves.length > 0 && (white === null || black === null)) throw new Error(`Game ${snapshot.gameId} has moves but an empty seat`);
 
@@ -163,6 +168,11 @@ export class GameRoom {
   /** Milliseconds each player started with, for the rematch; undefined without a clock. */
   get clockMs(): number | undefined {
     return this.clock?.initialMs;
+  }
+
+  /** Milliseconds each move adds, for the rematch; undefined without a clock or without an increment. */
+  get incrementMs(): number | undefined {
+    return this.clock === undefined || this.clock.incrementMs === 0 ? undefined : this.clock.incrementMs;
   }
 
   get result(): GameEnd | undefined {
@@ -382,6 +392,7 @@ export class GameRoom {
       moves: this.moves.map(({ ply, uci }, index) => ({ ply, uci, ...(this.moveTimes[index] === undefined ? {} : { at: this.moveTimes[index] }) })),
       ...(this.end === undefined ? {} : { end: { ...this.end } }),
       ...(this.clock === undefined ? {} : { clockMs: this.clock.initialMs }),
+      ...(this.incrementMs === undefined ? {} : { incrementMs: this.incrementMs }),
     };
   }
 
@@ -394,18 +405,24 @@ export class GameRoom {
     const left = { ...clock.left };
     const running = this.status === 'active' && clock.lastMoveAt !== undefined ? this.position.turn : null;
     if (running !== null && now !== undefined) left[running] = Math.max(0, left[running] - (now - clock.lastMoveAt!));
-    return { initialMs: clock.initialMs, whiteMs: Math.round(left.white), blackMs: Math.round(left.black), running };
+    return {
+      initialMs: clock.initialMs,
+      ...(clock.incrementMs === 0 ? {} : { incrementMs: clock.incrementMs }),
+      whiteMs: Math.round(left.white),
+      blackMs: Math.round(left.black),
+      running,
+    };
   }
 
   /**
    * The player who just moved pays the time since the previous move. The first move of white is free: the clock
-   * starts with it. Without `at` (a move stored before the clock existed) nothing is paid.
+   * starts with it, and so it earns no increment. Without `at` (a move stored before the clock existed) nothing is paid.
    */
   private spend(mover: Color, at: number | undefined): void {
     this.moveTimes.push(at);
     const clock = this.clock;
     if (clock === undefined || at === undefined) return;
-    if (clock.lastMoveAt !== undefined) clock.left[mover] = Math.max(0, clock.left[mover] - (at - clock.lastMoveAt));
+    if (clock.lastMoveAt !== undefined) clock.left[mover] = Math.max(0, clock.left[mover] - (at - clock.lastMoveAt)) + clock.incrementMs;
     clock.lastMoveAt = at;
   }
 
