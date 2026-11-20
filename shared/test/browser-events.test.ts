@@ -74,10 +74,11 @@ describe('contexts (v1)', () => {
   });
 
   it('validates the ranking context and its microfrontend name', () => {
-    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: 'http://127.0.0.1:3000' }).success).toBe(true);
-    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: null }).success).toBe(true);
-    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: 'no es url' }).success).toBe(false);
-    expect(rankingContextSchema.safeParse({ v: 1 }).success).toBe(false);
+    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: 'http://127.0.0.1:3000', active: true }).success).toBe(true);
+    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: null, active: false }).success).toBe(true);
+    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: 'no es url', active: true }).success).toBe(false);
+    expect(rankingContextSchema.safeParse({ v: 1, apiUrl: null }).success).toBe(false);
+    expect(rankingContextSchema.safeParse({ v: 1, active: true }).success).toBe(false);
     expect(csEventSchemas['cs:mf-ready'].safeParse({ v: 1, name: 'mf-ranking' }).success).toBe(true);
   });
 

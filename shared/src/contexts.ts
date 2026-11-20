@@ -39,6 +39,8 @@ export const rankingContextSchema = z.object({
   v: z.literal(1),
   /** Server base URL, e.g. https://api.example.com; null when the web has none configured. */
   apiUrl: z.string().url().nullable(),
+  /** True while the ranking is on screen. The element reloads it each time this turns true, not on every new context. */
+  active: z.boolean(),
 });
 /** <mf-ranking> reads the public GET /ranking itself: it needs no socket and no token. */
 export type RankingContext = z.infer<typeof rankingContextSchema>;
