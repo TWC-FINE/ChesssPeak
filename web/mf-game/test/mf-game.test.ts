@@ -774,3 +774,63 @@ describe('review of a finished game', () => {
     expect(element.querySelector('.csg-review')).toBeNull();
   });
 });
+
+describe('quick reactions', () => {
+  const pick = (element: GameElement, reaction: string) => element.querySelector<HTMLButtonElement>(`[data-reaction=${reaction}]`);
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('sends a fixed reaction, and rests the buttons for a moment', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] });
+    const { REACTION_TEXT } = await import('../src/mf-game.js');
+    const { socket, sent, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state());
+    await element.updateComplete;
+    expect([...element.querySelectorAll('[data-reaction]')].map((button) => button.textContent)).toEqual(Object.values(REACTION_TEXT));
+    pick(element, 'good-luck')!.click();
+    await element.updateComplete;
+    expect(sent.filter(([event]) => event === 'game:react')).toEqual([['game:react', { gameId: 'g1', reaction: 'good-luck' }]]);
+    expect(pick(element, 'thanks')!.disabled).toBe(true);
+    vi.advanceTimersByTime(1500);
+    await element.updateComplete;
+    expect(pick(element, 'thanks')!.disabled).toBe(false);
+  });
+
+  it('shows a reaction with the name of who sent it, for a while', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state());
+    receive('game:reaction', { gameId: 'g1', from: 'black', reaction: 'good-game' });
+    await element.updateComplete;
+    expect(element.querySelector('.csg-reaction')?.textContent).toBe('Luis: ¡Buena partida!');
+    receive('game:reaction', { gameId: 'g1', from: 'white', reaction: 'thanks' });
+    await element.updateComplete;
+    expect(element.querySelector('.csg-reaction')?.textContent).toBe('Tú: ¡Gracias!');
+    receive('game:reaction', { gameId: 'g2', from: 'black', reaction: 'oops' });
+    vi.advanceTimersByTime(4000);
+    await element.updateComplete;
+    expect(element.querySelector('.csg-reaction')).toBeNull();
+  });
+
+  it('lets a spectator read the reactions but not send them', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ yourColor: 'spectator' }));
+    receive('game:reaction', { gameId: 'g1', from: 'white', reaction: 'hello' });
+    await element.updateComplete;
+    expect(element.querySelector('[data-reaction]')).toBeNull();
+    expect(element.querySelector('.csg-reaction')?.textContent).toBe('Ana: ¡Hola!');
+  });
+
+  it('offers nothing while waiting for the second player', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ status: 'waiting', seats: { white: { displayName: 'Ana', connected: true }, black: null } }));
+    await element.updateComplete;
+    expect(element.querySelector('[data-reaction]')).toBeNull();
+  });
+});
