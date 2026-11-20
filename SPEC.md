@@ -50,6 +50,7 @@ Jugar ajedrez en línea exige el mouse. ChessSpeak permite jugar **diciendo las 
 - RF25. Sonido y aviso de turno: `<mf-game>` suena con cada jugada que llega (más grave si es una captura) y al terminar la partida, con un botón para quitar el sonido que se recuerda en el navegador. El título de la pestaña dice «● Te toca» cuando le toca al jugador en una partida activa.
 - RF26. Lectura en voz alta: `<mf-game>` lee con la voz del navegador cada jugada del rival («caballo toma efe tres, jaque»); a un espectador le lee todas. Se quita con el botón «Leer jugadas», y la elección se recuerda en el navegador.
 - RF27. Telemetría de voz: la página `#/voz` resume los últimos 5000 intentos de voz de partidas, por reconocedor: intentos, silencios, jugadas propuestas y confirmadas (con su IC95), ambiguas, no entendidas, comandos y latencia p50/p95. Los números salen de `voice_attempts` y se calculan en el servidor, en Node. Sirven de fuente para `docs/quality.md`, pero la tasa de confirmación no es precisión.
+- RF28. Repaso de una partida terminada: en el historial, cada jugada y las flechas (inicio, anterior, siguiente, final) ponen el tablero en esa posición, con un aviso de qué jugada se ve. Solo con la partida terminada; durante la partida el tablero muestra siempre la posición real.
 
 **Opcionales (solo si todo lo anterior está en verde; primeros en recortarse, ver PLAN.md, 9.2):**
 - RF13. Aviso en navegadores sin Web Speech (Firefox), con Whisper local o la caja de texto como alternativa.
