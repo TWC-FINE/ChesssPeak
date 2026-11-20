@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { terminationSchema } from '@chessspeak/shared';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../src/generated/prisma/client';
 
@@ -52,6 +53,12 @@ describe('games CHECK constraints (real Postgres)', () => {
     it('finished with a real result and a termination', async () => {
       for (const [result, termination] of [['1-0', 'checkmate'], ['0-1', 'resignation'], ['1/2-1/2', 'stalemate']]) {
         await expect(create({ status: 'finished', ...guests(), result, termination, finishedAt: new Date() })).resolves.toBeDefined();
+      }
+    });
+
+    it('finished with every termination of the contract but aborted', async () => {
+      for (const termination of terminationSchema.options.filter((value) => value !== 'aborted')) {
+        await expect(create({ status: 'finished', ...guests(), result: '1/2-1/2', termination, finishedAt: new Date() })).resolves.toBeDefined();
       }
     });
 
