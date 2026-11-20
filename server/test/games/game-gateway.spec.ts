@@ -37,7 +37,7 @@ class World {
   saved: Array<{ gameId: string; move: StoredMove }> = [];
   ended: Array<{ end: GameEnd; status: string }> = [];
   activated: Array<{ gameId: string; color: Color; player: RoomPlayer }> = [];
-  created: Array<{ gameId: string; seats: Record<Color, RoomPlayer>; clockMs?: number }> = [];
+  created: Array<{ gameId: string; seats: Record<Color, RoomPlayer>; clockMs?: number; incrementMs?: number }> = [];
   failCreates = 0;
   saveDelayMs = 0;
   failSaves = 0;
@@ -58,14 +58,14 @@ class World {
     },
     activate: async (gameId: string, color: Color, player: RoomPlayer) => void this.activated.push({ gameId, color, player }),
     finish: async (end: GameEnd, status: string) => void this.ended.push({ end, status }),
-    createActive: async (seats: Record<Color, RoomPlayer>, clockMs?: number): Promise<string> => {
+    createActive: async (seats: Record<Color, RoomPlayer>, clockMs?: number, incrementMs?: number): Promise<string> => {
       if (this.failCreates > 0) {
         this.failCreates--;
         throw new Error('postgres down');
       }
       const gameId = randomUUID();
       this.snapshots.set(gameId, { gameId, seats, moves: [], ...(clockMs === undefined ? {} : { clockMs }) });
-      this.created.push({ gameId, seats, ...(clockMs === undefined ? {} : { clockMs }) });
+      this.created.push({ gameId, seats, ...(clockMs === undefined ? {} : { clockMs }), ...(incrementMs === undefined ? {} : { incrementMs }) });
       return gameId;
     },
   };
@@ -591,11 +591,11 @@ describe('rematch', () => {
 
 describe('clock', () => {
   /** A game whose clock gives each player `clockMs`, with both players in. */
-  async function clockGame(server: Server, clockMs: number) {
+  async function clockGame(server: Server, clockMs: number, incrementMs?: number) {
     const ana = server.guest('Ana');
     const luis = server.guest('Luis');
     const gameId = seedGame(ana);
-    world.snapshots.set(gameId, { ...world.snapshots.get(gameId)!, clockMs });
+    world.snapshots.set(gameId, { ...world.snapshots.get(gameId)!, clockMs, ...(incrementMs === undefined ? {} : { incrementMs }) });
     const white = await connected(server.url, ana.token);
     const waiting = stateOf(white, (s) => s.status === 'waiting');
     white.emit('game:join', { gameId });
@@ -637,6 +637,25 @@ describe('clock', () => {
     black.emit('game:rematch-offer', { gameId });
     await created;
     expect(world.created[0]?.clockMs).toBe(60_000);
+    expect(world.created[0]).not.toHaveProperty('incrementMs');
+  });
+
+  it('sends the increment with the clocks, and gives it to the rematch', async () => {
+    const server = await start();
+    const { gameId, white, black, state } = await clockGame(server, 60_000, 3_000);
+    expect(state.clock).toMatchObject({ initialMs: 60_000, incrementMs: 3_000 });
+    await play(gameId, white, black, 'e2e4', 1);
+    const second = await play(gameId, black, white, 'e7e5', 2);
+    // black paid a few milliseconds and earned 3 s
+    expect(second.clock!.blackMs).toBeGreaterThan(60_000);
+    const ended = next(black, 'game:end');
+    black.emit('game:resign', { gameId });
+    await ended;
+    const created = next<{ nextGameId?: string }>(white, 'game:rematch', (r) => r.nextGameId !== undefined);
+    white.emit('game:rematch-offer', { gameId });
+    black.emit('game:rematch-offer', { gameId });
+    await created;
+    expect(world.created[0]).toMatchObject({ clockMs: 60_000, incrementMs: 3_000 });
   });
 
   it('has no clock in a game created without one', async () => {

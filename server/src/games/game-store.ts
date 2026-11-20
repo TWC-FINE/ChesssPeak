@@ -37,6 +37,7 @@ export class GameStore {
         ? { end: { gameId, result: game.result, termination: game.termination } as GameEnd }
         : {}),
       ...(game.clockMs === null ? {} : { clockMs: game.clockMs }),
+      ...(game.clockIncrementMs === null ? {} : { incrementMs: game.clockIncrementMs }),
     };
   }
 
@@ -48,11 +49,12 @@ export class GameStore {
   }
 
   /** A new game with both seats taken, already active: the rematch, with the same clock. Returns its id. */
-  async createActive(seats: Record<Color, RoomPlayer>, clockMs?: number): Promise<string> {
+  async createActive(seats: Record<Color, RoomPlayer>, clockMs?: number, incrementMs?: number): Promise<string> {
     const game = await this.prisma.game.create({
       data: {
         status: 'active',
         clockMs: clockMs ?? null,
+        clockIncrementMs: incrementMs ?? null,
         whiteGuestId: seats.white.id,
         whiteName: seats.white.displayName,
         blackGuestId: seats.black.id,

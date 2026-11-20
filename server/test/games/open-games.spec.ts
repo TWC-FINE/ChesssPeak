@@ -56,6 +56,8 @@ describe('openGameOf', () => {
   it('names the creator and the seat they took', () => {
     expect(openGameOf(row())).toEqual({ gameId: row().id, creator: 'Ana', creatorColor: 'white', createdAt: '2026-11-20T10:00:00.000Z' });
     expect(openGameOf(row({ whiteName: null, blackName: 'Luis', clockMs: 180_000 }))).toMatchObject({ creator: 'Luis', creatorColor: 'black', clockMs: 180_000 });
+    expect(openGameOf(row({ clockMs: 180_000, clockIncrementMs: 2_000 }))).toMatchObject({ clockMs: 180_000, incrementMs: 2_000 });
+    expect(openGameOf(row({ clockMs: 180_000, clockIncrementMs: null }))).not.toHaveProperty('incrementMs');
   });
 
   it('leaves out a row with no creator', () => {
@@ -81,7 +83,7 @@ describe('GET /games/open', () => {
     expect(since).toBeGreaterThanOrEqual(before - OPEN_GAME_MAX_AGE_MS);
     expect(since).toBeLessThanOrEqual(Date.now() - OPEN_GAME_MAX_AGE_MS);
     // the ids of the seats never leave the server
-    expect(Object.keys(query.select)).toEqual(['id', 'whiteName', 'blackName', 'clockMs', 'createdAt']);
+    expect(Object.keys(query.select)).toEqual(['id', 'whiteName', 'blackName', 'clockMs', 'clockIncrementMs', 'createdAt']);
   });
 
   it('answers 503 when Postgres fails', async () => {
