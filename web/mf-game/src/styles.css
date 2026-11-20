@@ -149,7 +149,7 @@ mf-game .csg-tray piece {
 }
 .csg-error { color: var(--cs-warn); }
 
-/* draw offer: offer, wait, or accept and decline */
-.csg-draw { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+/* draw offer and rematch: offer, wait, or accept and decline */
+.csg-draw, .csg-rematch { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .csg-draw-note { font-size: 0.9rem; color: var(--cs-muted); }
-.csg-draw[role='status'] .csg-draw-note { color: var(--cs-text); font-weight: 600; }
+.csg-draw[role='status'] .csg-draw-note, .csg-rematch[role='status'] .csg-draw-note { color: var(--cs-text); font-weight: 600; }
