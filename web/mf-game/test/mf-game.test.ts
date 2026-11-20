@@ -1,5 +1,5 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import type { ClientToServerEvents, CsEventName, GameContext, GameSocket, GameState, ServerToClientEvents } from '@chessspeak/shared';
+import type { ClientToServerEvents, Clock, CsEventName, GameContext, GameSocket, GameState, ServerToClientEvents } from '@chessspeak/shared';
 import { fensAfter, turnOf } from '../src/replay.js';
 
 type GameElement = HTMLElement & { context?: GameContext; updateComplete: Promise<boolean> };
@@ -503,3 +503,74 @@ describe('rematch', () => {
   });
 });
 
+describe('clock', () => {
+  const clock = (over: Partial<Clock> = {}): Clock => ({ initialMs: 300_000, whiteMs: 300_000, blackMs: 300_000, running: null, ...over });
+  const shown = (element: GameElement) => [...element.querySelectorAll('.csg-clock b')].map((chip) => chip.textContent);
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('formats the time left, rounding up, and marks low time', async () => {
+    const { formatClock, LOW_TIME_MS } = await import('../src/mf-game.js');
+    expect(formatClock(300_000)).toBe('5:00');
+    expect(formatClock(59_001)).toBe('1:00');
+    expect(formatClock(9_100)).toBe('0:10');
+    expect(formatClock(1)).toBe('0:01');
+    expect(formatClock(0)).toBe('0:00');
+    expect(formatClock(-50)).toBe('0:00');
+    expect(LOW_TIME_MS).toBe(20_000);
+  });
+
+  it('shows no clock in a game without one', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state());
+    await element.updateComplete;
+    expect(element.querySelector('.csg-clocks')).toBeNull();
+  });
+
+  it('counts the running clock down between messages, and follows each move', async () => {
+    vi.useFakeTimers();
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ clock: clock({ running: 'black' }) }));
+    await element.updateComplete;
+    expect(shown(element)).toEqual(['5:00', '5:00']);
+    expect(element.querySelector('.csg-clock[data-color=black]')?.hasAttribute('data-running')).toBe(true);
+
+    await vi.advanceTimersByTimeAsync(3_000);
+    await element.updateComplete;
+    expect(shown(element)).toEqual(['5:00', '4:57']);
+
+    receive('game:moved', { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: AFTER_E4, clock: clock({ blackMs: 15_000, running: 'white' }) });
+    await element.updateComplete;
+    expect(shown(element)).toEqual(['5:00', '0:15']);
+    expect(element.querySelector('.csg-clock[data-color=black]')?.hasAttribute('data-low')).toBe(true);
+    expect(element.querySelector('.csg-clock[data-color=white]')?.hasAttribute('data-running')).toBe(true);
+  });
+
+  it('stops the clocks when the game ends, at zero for the one who ran out', async () => {
+    vi.useFakeTimers();
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ clock: clock({ blackMs: 2_000, running: 'black' }) }));
+    receive('game:end', { gameId: 'g1', result: '1-0', termination: 'timeout' });
+    await element.updateComplete;
+    expect(shown(element)).toEqual(['5:00', '0:00']);
+    expect(element.querySelector('[data-running]')).toBeNull();
+    expect(element.textContent).toContain('1-0 (se acabó el tiempo)');
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(shown(element)).toEqual(['5:00', '0:00']);
+  });
+
+  it('forgets the clock with the game', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ clock: clock() }));
+    await element.updateComplete;
+    element.context = { v: 1, gameId: 'g2', orientation: 'white', socket };
+    await element.updateComplete;
+    expect(element.querySelector('.csg-clocks')).toBeNull();
+  });
+});
