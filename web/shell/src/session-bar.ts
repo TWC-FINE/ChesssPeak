@@ -1,4 +1,4 @@
-import { CLOCK_MINUTES, type CreateGameRequest } from '@chessspeak/shared';
+import { CLOCK_INCREMENTS, CLOCK_MINUTES, type CreateGameRequest } from '@chessspeak/shared';
 
 export interface SessionBarState {
   displayName: string | null;
@@ -11,8 +11,12 @@ export interface SessionBarState {
 
 export interface SessionBarActions {
   signIn(displayName: string): void;
-  /** `clockMinutes` is undefined for a game without a clock. */
-  createGame(color: NonNullable<CreateGameRequest['color']>, clockMinutes: CreateGameRequest['clockMinutes']): void;
+  /** `clockMinutes` is undefined for a game without a clock, and `incrementSeconds` for a clock without an increment. */
+  createGame(
+    color: NonNullable<CreateGameRequest['color']>,
+    clockMinutes: CreateGameRequest['clockMinutes'],
+    incrementSeconds?: CreateGameRequest['incrementSeconds'],
+  ): void;
   signOut(): void;
 }
 
@@ -25,20 +29,40 @@ function button(label: string, onClick: () => void, name: string): HTMLButtonEle
   return element;
 }
 
+function option(value: string, text: string): HTMLOptionElement {
+  const element = document.createElement('option');
+  element.value = value;
+  element.textContent = text;
+  return element;
+}
+
 /** "Sin reloj" or the minutes of the contract; the value is read when a color is chosen. */
 function clockSelect(): HTMLSelectElement {
   const select = document.createElement('select');
   select.name = 'clock';
   select.dataset.clock = '';
   select.setAttribute('aria-label', 'Reloj');
-  const option = (value: string, text: string) => {
-    const element = document.createElement('option');
-    element.value = value;
-    element.textContent = text;
-    return element;
-  };
   select.append(option('', 'Sin reloj'), ...CLOCK_MINUTES.map((minutes) => option(String(minutes), `${minutes} min`)));
   return select;
+}
+
+/** The seconds added per move; only used with a clock, so it is off without one. */
+function incrementSelect(clock: HTMLSelectElement): HTMLSelectElement {
+  const select = document.createElement('select');
+  select.name = 'increment';
+  select.dataset.increment = '';
+  select.setAttribute('aria-label', 'Incremento por jugada');
+  select.append(...CLOCK_INCREMENTS.map((seconds) => option(String(seconds), `+${seconds} s`)));
+  const follow = () => (select.disabled = clock.value === '');
+  clock.addEventListener('change', follow);
+  follow();
+  return select;
+}
+
+/** The seconds of an option of the increment select, or undefined for +0 s and anything the contract does not offer. */
+export function incrementSecondsOf(value: string): CreateGameRequest['incrementSeconds'] {
+  const seconds = Number(value);
+  return CLOCK_INCREMENTS.find((offered) => offered !== 0 && offered === seconds);
 }
 
 /** The minutes of an option of the clock select, or undefined for "Sin reloj" and anything the contract does not offer. */
@@ -86,9 +110,15 @@ export function renderSessionBar(host: HTMLElement, state: SessionBarState, acti
       start.className = 'cs-start';
       start.textContent = 'Crear partida con: ';
       const clock = clockSelect();
-      const create = (color: NonNullable<CreateGameRequest['color']>) => () => actions.createGame(color, clockMinutesOf(clock.value));
+      const increment = incrementSelect(clock);
+      const create = (color: NonNullable<CreateGameRequest['color']>) => () => {
+        const minutes = clockMinutesOf(clock.value);
+        actions.createGame(color, minutes, minutes === undefined ? undefined : incrementSecondsOf(increment.value));
+      };
       start.append(
         clock,
+        ' ',
+        increment,
         ' ',
         button('Blancas', create('white'), 'create-white'),
         ' ',

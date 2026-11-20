@@ -244,7 +244,8 @@ export class MfGame extends LitElement {
         ${COLOR_TEXT[color]} <b>${formatClock(ms)}</b>
       </span>`;
     };
-    return html`<span class="csg-clocks" role="timer" aria-label="Reloj">${chip('white')}${chip('black')}</span>`;
+    const increment = value.incrementMs === undefined ? '' : html`<span class="csg-increment" title="Incremento por jugada">+${Math.round(value.incrementMs / 1000)} s</span>`;
+    return html`<span class="csg-clocks" role="timer" aria-label="Reloj">${chip('white')}${chip('black')}${increment}</span>`;
   }
 
   /** The pieces are drawn by chessground's piece set, which only applies inside .cg-wrap. */

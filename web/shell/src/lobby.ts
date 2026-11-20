@@ -29,7 +29,8 @@ export function ageText(createdAt: string, now: number): string {
 /** One line of the lobby, from the side of whoever would join. */
 export function describeOpenGame(game: OpenGame, now: number): string {
   const yours = game.creatorColor === 'white' ? 'black' : 'white';
-  const clock = game.clockMs === undefined ? 'sin reloj' : `${Math.round(game.clockMs / 60_000)} min`;
+  const increment = game.incrementMs === undefined ? '' : ` + ${Math.round(game.incrementMs / 1000)} s`;
+  const clock = game.clockMs === undefined ? 'sin reloj' : `${Math.round(game.clockMs / 60_000)} min${increment}`;
   return `${game.creator} · juegas con ${COLOR_TEXT[yours]} · ${clock} · ${ageText(game.createdAt, now)}`;
 }
 
