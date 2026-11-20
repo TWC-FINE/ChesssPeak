@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import type { HistoryContext } from '@chessspeak/shared';
 
-type HistoryElement = HTMLElement & { context?: HistoryContext; updateComplete: Promise<boolean> };
+type HistoryElement = HTMLElement & { context?: HistoryContext; updateComplete: Promise<boolean>; pgn(now?: Date): string };
 
 const elements: HistoryElement[] = [];
 
@@ -130,5 +130,86 @@ describe('<mf-history>', () => {
     element.remove();
     await applied(element, 1, 'e4');
     expect(rows(element)).toEqual([]);
+  });
+});
+
+describe('<mf-history> PGN export', () => {
+  const ended = async (element: HistoryElement, result: string, gameId = 'g1') => {
+    document.dispatchEvent(new CustomEvent('cs:game-ended', { detail: { v: 1, gameId, result, termination: 'checkmate' } }));
+    await element.updateComplete;
+  };
+  const movetext = (element: HistoryElement) => element.pgn(new Date(2026, 10, 20)).split('\n\n')[1]!.trim();
+  const button = (element: HistoryElement, action: string) => element.querySelector<HTMLButtonElement>(`[data-action="${action}"]`);
+
+  it('offers the export only once there are moves', async () => {
+    const element = await mount();
+    expect(button(element, 'copy-pgn')).toBeNull();
+    await applied(element, 1, 'e4');
+    expect(button(element, 'copy-pgn')?.textContent).toBe('Copiar PGN');
+    expect(button(element, 'download-pgn')?.textContent).toBe('Descargar .pgn');
+  });
+
+  it('writes the moves so far and the result once the game ends', async () => {
+    const element = await mount();
+    await applied(element, 1, 'f3');
+    await applied(element, 2, 'e5');
+    expect(movetext(element)).toBe('1. f3 e5 *');
+    await applied(element, 3, 'g4');
+    await applied(element, 4, 'Qh4#');
+    await ended(element, '0-1');
+    expect(movetext(element)).toBe('1. f3 e5 2. g4 Qh4# 0-1');
+  });
+
+  it('stops at the first move that has not arrived', async () => {
+    const element = await mount();
+    await applied(element, 1, 'e4');
+    await applied(element, 3, 'Nf3');
+    expect(movetext(element)).toBe('1. e4 *');
+  });
+
+  it('ignores the end of another game, and forgets the result with the game', async () => {
+    const element = await mount();
+    await applied(element, 1, 'e4');
+    await ended(element, '1-0', 'other');
+    expect(movetext(element)).toBe('1. e4 *');
+    await ended(element, '1-0');
+    element.context = { v: 1, gameId: 'g2' };
+    await applied(element, 1, 'd4', 'g2');
+    expect(movetext(element)).toBe('1. d4 *');
+  });
+
+  it('copies the PGN and says so, or points to the download when it cannot', async () => {
+    const element = await mount();
+    await applied(element, 1, 'e4');
+    const copied: string[] = [];
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (text: string) => void copied.push(text) } });
+    button(element, 'copy-pgn')!.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await element.updateComplete;
+    expect(copied[0]).toContain('1. e4 *');
+    expect(element.querySelector('[role="status"]')?.textContent).toBe('PGN copiado.');
+
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => Promise.reject(new Error('denied')) } });
+    button(element, 'copy-pgn')!.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await element.updateComplete;
+    expect(element.querySelector('[role="status"]')?.textContent).toContain('No se pudo copiar');
+  });
+
+  it('downloads a .pgn file named after the date', async () => {
+    const element = await mount();
+    await applied(element, 1, 'e4');
+    const names: string[] = [];
+    const click = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+      names.push(this.download);
+    };
+    try {
+      button(element, 'download-pgn')!.click();
+    } finally {
+      HTMLAnchorElement.prototype.click = click;
+    }
+    expect(names).toHaveLength(1);
+    expect(names[0]).toMatch(/^chessspeak-\d{4}-\d{2}-\d{2}\.pgn$/);
   });
 });
