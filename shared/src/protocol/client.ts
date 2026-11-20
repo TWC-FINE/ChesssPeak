@@ -20,6 +20,14 @@ export type GameMove = z.infer<typeof gameMoveSchema>;
 export const gameResignSchema = z.object({ gameId: gameIdSchema }).strict();
 export type GameResign = z.infer<typeof gameResignSchema>;
 
+/** Offers a draw. Sent while the rival's offer is pending, it accepts that offer instead. */
+export const gameDrawOfferSchema = z.object({ gameId: gameIdSchema }).strict();
+export type GameDrawOffer = z.infer<typeof gameDrawOfferSchema>;
+
+/** Answers the rival's pending offer: `accept: true` ends the game in a draw by agreement. */
+export const gameDrawAnswerSchema = z.object({ gameId: gameIdSchema, accept: z.boolean() }).strict();
+export type GameDrawAnswer = z.infer<typeof gameDrawAnswerSchema>;
+
 export const recognizerSchema = z.enum(['webspeech', 'whisper', 'text', 'fake']);
 export type Recognizer = z.infer<typeof recognizerSchema>;
 
@@ -65,6 +73,8 @@ export const clientEventSchemas = {
   'game:join': gameJoinSchema,
   'game:move': gameMoveSchema,
   'game:resign': gameResignSchema,
+  'game:draw-offer': gameDrawOfferSchema,
+  'game:draw-answer': gameDrawAnswerSchema,
   'voice:attempt': voiceAttemptSchema,
 } as const;
 export type ClientEventName = keyof typeof clientEventSchemas;

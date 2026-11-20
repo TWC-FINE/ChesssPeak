@@ -31,6 +31,8 @@ export const gameStateSchema = z.object({
   seats: z.object({ white: seatSchema.nullable(), black: seatSchema.nullable() }),
   /** Seat of the receiver, decided by the server. */
   yourColor: playerViewSchema,
+  /** Who offered a draw that is still unanswered; absent when there is none. Optional: added later in v1. */
+  drawOffer: colorSchema.optional(),
 });
 export type GameState = z.infer<typeof gameStateSchema>;
 
@@ -50,6 +52,13 @@ export const gameEndSchema = z.object({
 });
 export type GameEnd = z.infer<typeof gameEndSchema>;
 
+/**
+ * The pending draw offer changed: `offeredBy` is who offered, or null once it was declined. A move also withdraws it,
+ * but that is not announced here: whoever receives `game:moved` drops the offer on their own.
+ */
+export const gameDrawSchema = z.object({ gameId: gameIdSchema, offeredBy: colorSchema.nullable() });
+export type GameDraw = z.infer<typeof gameDrawSchema>;
+
 export const gameErrorCodeSchema = z.enum(['not_your_turn', 'illegal', 'stale_ply', 'unauthorized', 'not_found']);
 export type GameErrorCode = z.infer<typeof gameErrorCodeSchema>;
 
@@ -60,6 +69,7 @@ export const serverEventSchemas = {
   'game:state': gameStateSchema,
   'game:moved': gameMovedSchema,
   'game:end': gameEndSchema,
+  'game:draw': gameDrawSchema,
   'game:error': gameErrorSchema,
 } as const;
 export type ServerEventName = keyof typeof serverEventSchemas;
