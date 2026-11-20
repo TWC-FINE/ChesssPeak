@@ -44,6 +44,7 @@ Para ser dos jugadores, abre dos pestañas: cada una tiene su propia sesión.
 | `mf-history/src/pgn.ts` | La partida en PGN, para «Copiar PGN» y «Descargar .pgn» |
 | `mf-ranking/src/mf-ranking.ts` | Ranking Elo: pide `GET /ranking` cuando se abre `#/ranking` y valida la respuesta. Al pulsar un nombre abre su perfil con `GET /ranking/:displayName`. Su página standalone usa un servidor simulado |
 | `shell/src/navigation.ts` | Sigue `cs:open-game`: abre la partida que pide un microfrontend, como la revancha |
+| `shell/src/turn-title.ts` | Aviso de turno en el título de la pestaña («● Te toca»), a partir de `cs:position` y `cs:game-ended` |
 | `shell/src/lobby.ts` | Partidas que esperan rival en la página de inicio (`GET /games/open`), con «Unirse»; se actualiza cada 15 s |
 | `shell/src/telemetry.ts` | Reenvía `cs:voice-attempt` como `voice:attempt`, y lo descarta sin conexión |
 
