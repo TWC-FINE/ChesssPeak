@@ -10,6 +10,7 @@ import {
   type CsEventDetail,
   type CsEventName,
   type GameContext,
+  type GameDraw,
   type GameEnd,
   type GameError,
   type GameErrorCode,
@@ -99,6 +100,8 @@ export class MfGame extends LitElement {
   private end: GameEnd | undefined;
   private arrow: string | undefined;
   private error = '';
+  /** Set when the rival declined this player's draw offer, until the next move. */
+  private drawDeclined = false;
   /** Only this browser's view: "Girar tablero" shows the other side, the game does not change. */
   private flipped = false;
 
@@ -160,6 +163,7 @@ export class MfGame extends LitElement {
       ${this.renderTrays(fen)}
       <p class="csg-info">partida: ${context?.gameId ?? 'sin partida'} · orientación: ${this.orientation()}</p>
       ${this.renderStatus()}
+      ${this.renderDraw()}
       ${this.error === '' ? '' : html`<p class="csg-error" role="alert">${this.error}</p>`}
     </div>`;
   }
@@ -204,6 +208,39 @@ export class MfGame extends LitElement {
       <p class="csg-status" data-status=${state.status}>${this.statusText(state)}</p>`;
   }
 
+  /** Offer, wait or answer: only a seated player of an active game sees it. */
+  private renderDraw() {
+    const state = this.state;
+    if (state === undefined || this.end !== undefined || state.status !== 'active' || state.yourColor === 'spectator') return '';
+    if (state.drawOffer === undefined) {
+      return html`<div class="csg-draw">
+        <button type="button" data-action="offer-draw" @click=${this.offerDraw}>Ofrecer tablas</button>
+        ${this.drawDeclined ? html`<span class="csg-draw-note">Tu rival rechazó las tablas.</span>` : ''}
+      </div>`;
+    }
+    if (state.drawOffer === state.yourColor) return html`<div class="csg-draw"><span class="csg-draw-note">Ofreciste tablas. Esperando respuesta.</span></div>`;
+    return html`<div class="csg-draw" role="status">
+      <span class="csg-draw-note">Tu rival ofrece tablas.</span>
+      <button type="button" data-action="accept-draw" @click=${this.acceptDraw}>Aceptar</button>
+      <button type="button" data-action="decline-draw" @click=${this.declineDraw}>Rechazar</button>
+    </div>`;
+  }
+
+  private readonly offerDraw = (): void => this.sendDraw((socket, gameId) => socket.emit('game:draw-offer', { gameId }));
+  private readonly acceptDraw = (): void => this.sendDraw((socket, gameId) => socket.emit('game:draw-answer', { gameId, accept: true }));
+  private readonly declineDraw = (): void => this.sendDraw((socket, gameId) => socket.emit('game:draw-answer', { gameId, accept: false }));
+
+  private sendDraw(send: (socket: GameSocket, gameId: string) => void): void {
+    const gameId = this.state?.gameId;
+    if (gameId === undefined) return;
+    if (this.socket === null) {
+      this.error = 'Sin conexión: no se envió.';
+      this.requestUpdate();
+      return;
+    }
+    send(this.socket, gameId);
+  }
+
   private statusText(state: GameState): string {
     if (this.end !== undefined) return `Partida terminada: ${this.end.result} (${END_TEXT[this.end.termination]}).`;
     if (state.status === 'waiting') return 'Esperando al otro jugador.';
@@ -246,6 +283,7 @@ export class MfGame extends LitElement {
     this.end = undefined;
     this.arrow = undefined;
     this.error = '';
+    this.drawDeclined = false;
     this.flipped = false;
   }
 
@@ -254,10 +292,12 @@ export class MfGame extends LitElement {
     this.socket?.off('game:state', this.onState);
     this.socket?.off('game:moved', this.onMoved);
     this.socket?.off('game:end', this.onEnd);
+    this.socket?.off('game:draw', this.onDraw);
     this.socket?.off('game:error', this.onError);
     socket?.on('game:state', this.onState);
     socket?.on('game:moved', this.onMoved);
     socket?.on('game:end', this.onEnd);
+    socket?.on('game:draw', this.onDraw);
     socket?.on('game:error', this.onError);
     this.socket = socket;
   }
@@ -294,8 +334,10 @@ export class MfGame extends LitElement {
       this.socket?.emit('game:join', { gameId: state.gameId });
       return;
     }
+    // a move withdraws the pending draw offer (docs/protocol.md §7)
+    const { drawOffer: _withdrawn, ...rest } = state;
     this.state = {
-      ...state,
+      ...rest,
       fen: moved.fen,
       plyCount: moved.ply,
       turn: turnOf(moved.fen),
@@ -304,6 +346,7 @@ export class MfGame extends LitElement {
     this.lastUci = moved.uci;
     this.arrow = undefined;
     this.error = '';
+    this.drawDeclined = false;
     this.emitEvent('cs:move-applied', { v: 1, gameId: moved.gameId, ply: moved.ply, uci: moved.uci, san: moved.san, fen: moved.fen });
     this.announcePosition(this.state);
     this.requestUpdate();
@@ -315,6 +358,16 @@ export class MfGame extends LitElement {
     this.arrow = undefined;
     if (this.state !== undefined) this.state = { ...this.state, status: end.termination === 'aborted' ? 'aborted' : 'finished' };
     this.emitEvent('cs:game-ended', { v: 1, gameId: end.gameId, result: end.result, termination: end.termination });
+    this.requestUpdate();
+  };
+
+  private readonly onDraw = (draw: GameDraw): void => {
+    const state = this.state;
+    if (state === undefined || draw.gameId !== state.gameId) return;
+    this.drawDeclined = draw.offeredBy === null && state.drawOffer === state.yourColor;
+    const { drawOffer: _previous, ...rest } = state;
+    this.state = draw.offeredBy === null ? rest : { ...rest, drawOffer: draw.offeredBy };
+    this.error = '';
     this.requestUpdate();
   };
 

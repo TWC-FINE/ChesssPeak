@@ -325,3 +325,71 @@ describe('board extras: turn, check, captures and flip', () => {
     expect(element.querySelector('.orientation-white')).not.toBeNull();
   });
 });
+
+describe('draw offers', () => {
+  const button = (element: GameElement, action: string) => element.querySelector<HTMLButtonElement>(`[data-action=${action}]`);
+
+  it('offers a draw from the button', async () => {
+    const { socket, sent, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state());
+    await element.updateComplete;
+    button(element, 'offer-draw')!.click();
+    expect(sent.at(-1)).toEqual(['game:draw-offer', { gameId: 'g1' }]);
+  });
+
+  it('waits for the answer after offering, and says when the rival declined', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state());
+    receive('game:draw', { gameId: 'g1', offeredBy: 'white' });
+    await element.updateComplete;
+    expect(element.textContent).toContain('Esperando respuesta');
+    expect(button(element, 'offer-draw')).toBeNull();
+
+    receive('game:draw', { gameId: 'g1', offeredBy: null });
+    await element.updateComplete;
+    expect(element.textContent).toContain('Tu rival rechazó las tablas');
+    expect(button(element, 'offer-draw')).not.toBeNull();
+  });
+
+  it('lets the rival accept or decline', async () => {
+    const { socket, sent, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ yourColor: 'black', drawOffer: 'white' }));
+    await element.updateComplete;
+    expect(element.textContent).toContain('Tu rival ofrece tablas');
+    button(element, 'accept-draw')!.click();
+    expect(sent.at(-1)).toEqual(['game:draw-answer', { gameId: 'g1', accept: true }]);
+    button(element, 'decline-draw')!.click();
+    expect(sent.at(-1)).toEqual(['game:draw-answer', { gameId: 'g1', accept: false }]);
+  });
+
+  it('drops the offer when a move arrives', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ yourColor: 'black', drawOffer: 'white' }));
+    receive('game:moved', { gameId: 'g1', ply: 1, uci: 'e2e4', san: 'e4', fen: AFTER_E4 });
+    await element.updateComplete;
+    expect(element.textContent).not.toContain('Tu rival ofrece tablas');
+    expect(button(element, 'offer-draw')).not.toBeNull();
+  });
+
+  it('hides the draw controls once the game ends, and names the agreement', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ drawOffer: 'black' }));
+    receive('game:end', { gameId: 'g1', result: '1/2-1/2', termination: 'agreement' });
+    await element.updateComplete;
+    expect(element.querySelector('.csg-draw')).toBeNull();
+    expect(element.textContent).toContain('1/2-1/2 (tablas de mutuo acuerdo)');
+  });
+
+  it('does not offer a draw while waiting for the second player', async () => {
+    const { socket, receive } = fakeSocket();
+    const element = await mountGame(socket);
+    receive('game:state', state({ status: 'waiting', seats: { white: { displayName: 'Ana', connected: true }, black: null } }));
+    await element.updateComplete;
+    expect(element.querySelector('.csg-draw')).toBeNull();
+  });
+});

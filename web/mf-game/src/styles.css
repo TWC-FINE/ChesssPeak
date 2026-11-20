@@ -138,3 +138,8 @@ mf-game .csg-tray piece {
   border: 1px solid var(--cs-border);
 }
 .csg-error { color: var(--cs-warn); }
+
+/* draw offer: offer, wait, or accept and decline */
+.csg-draw { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.csg-draw-note { font-size: 0.9rem; color: var(--cs-muted); }
+.csg-draw[role='status'] .csg-draw-note { color: var(--cs-text); font-weight: 600; }
