@@ -13,6 +13,7 @@ Guía para lanzar **un** worker de Whisper en AWS EC2 y medir C1, C2, C3 y C5 de
 | [`measure-c1-c3.ps1`](measure-c1-c3.ps1) | C1 y C3: 3 repeticiones de los 78 clips a través del túnel |
 | [`summarize-c1-c3.mjs`](summarize-c1-c3.mjs) | Aplica C1 (p95 de la peor repetición) y C3 (top-1 ≥ 68 en cada repetición) a los registros. Probado con los de la fase A |
 | [`cleanup-local.ps1`](cleanup-local.ps1) | Cierra túneles y limpia `known_hosts`, y recuerda los pasos de limpieza en la consola |
+| [`tstop-ec2.ps1`](tstop-ec2.ps1) | T-stop en EC2 (sección 10): comprueba el agente, abre `tstop-watch.ps1` en modo manual y lanza la carga. Avisa de cuándo pulsar Detener e Iniciar; no llama a AWS |
 
 ## 0. Antes de empezar
 

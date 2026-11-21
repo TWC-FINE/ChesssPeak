@@ -444,3 +444,71 @@ La fase 2 se mide con el código del PR que cancela y reencola lo que tenía en 
 |---|---|
 | F1–F4 se cumplen en las 3 repeticiones válidas de las 4 variantes | Se pasa a `ec2` (sección 8), con las IP elásticas |
 | Alguna variante no cumple o queda no concluyente | Se para, se publica tal cual y decide el responsable del repo |
+
+## 10. Adenda del 21 de noviembre (3): T-stop en EC2
+
+La añade el responsable del repo el 21 de noviembre, **antes de medir nada en EC2**. Concreta la variante `ec2` de la sección 8.
+
+**No cambia nada de lo anterior:**
+- los umbrales F1–F4 de la sección 8;
+- la validez de las variantes «ocupado» de la sección 9;
+- la evidencia local ([`evidence/t-stop-local`](evidence/t-stop-local/README.md)).
+
+### Motivo
+
+En la presentación del 24 de noviembre se detendrá una instancia de verdad. En local, las 4 variantes cumplieron con el cambio del pool (fase 2), pero:
+- un `docker stop` o un `docker pause` no es lo mismo que detener una instancia;
+- un túnel SSH que cae tampoco es lo mismo que un puerto local.
+
+### Variantes
+
+| Variante | Orden | Qué ejercita |
+|---|---|---|
+| `ec2` | `whisper-cloud/aws/tstop-ec2.ps1` | La instancia de w2 se detiene en la consola con w2 libre. Lo que reciba durante la detección debe reintentarse |
+| `ec2-ocupado` | La misma, con `-WhenBusy` | La instancia de w2 se detiene con una petición en curso: la que más se parece a la prueba de la presentación |
+
+Cada variante se repite 3 veces.
+- **Validez de `ec2-ocupado`:** la misma regla de la sección 9. La instantánea A debe mostrar w2 con 1 petición en curso, y hay como mucho 5 intentos.
+- **Informativo, sin umbral:** una corrida de `ec2` con `-Steps 2`.
+
+### Montaje
+
+- **Las 2 instancias de la sección 7, cada una con una IP elástica.** La asocia el responsable del repo en la consola.
+  - Sin IP fija, la IP cambia al arrancar y el túnel no puede volver solo.
+  - Así, F4 no se cumpliría sin intervención.
+- **Grupo de seguridad:** la regla del puerto 22, solo desde la IP del responsable con `/32`.
+- **Túneles y agente** con `demo-up.ps1`:
+  - túneles con keepalive de 5 s × 2 y reconexión;
+  - agente en modo URLs, con `LB_PROBE_INTERVAL_MS=2000` y `LB_TIMEOUT_MS=45000`.
+  - `tstop-ec2.ps1` comprueba esos valores antes de empezar y se niega si no coinciden.
+- **Carga:** `--steps 1 --requests 60 --warmup 2`. Con unos 11–12 s por clip en EC2, la carga dura unos 12 min. Hay tiempo para detener la instancia, arrancarla y ver a w2 volver.
+- **Devolución:** el script avisa de pulsar «Iniciar» 120 s después de «Detener».
+  - Si en ese momento la instancia aún no figura como «Detenida», el responsable espera a que lo esté, pulsa «Iniciar» y anota la hora.
+  - F4 se cuenta desde esa hora.
+- **Clip:** el WAV por defecto de `load.ts`, una grabación del responsable del repo. Se envía solo con su OK explícito: el script lo exige con `-ConfirmoQueSonMisGrabacionesYAutorizoEnviarlas`.
+- **Equipo:** VPN apagada (`-VpnApagada`). Docker local no hace falta, y su estado se anota.
+
+### Qué se espera, antes de medir
+
+Todo lo marcado `[S]` no está comprobado.
+
+- **Detener hace un apagado ordenado**, y si no termina en unos minutos AWS fuerza el apagado. Lo dice [How EC2 instance stop and start works](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/how-ec2-instance-stop-start-works.html), consultado el 21 de noviembre de 2026. Si `sshd` cierra la conexión, `ssh` sale y el puerto local se cierra: el agente lo ve como una conexión rechazada `[S]`.
+- **Si la red cae antes de cerrar,** el keepalive cierra el túnel en unos 10 s `[S]`. Antes de eso, los sondeos sacan a w2 de la rotación en unos 4–7 s, y el agente cancela y reintenta lo que w2 tenía (#80).
+- **La latencia sube:** una petición reintentada espera la detección y después se transcribe en w1. Pueden ser unos 20–25 s, por encima de los ~12 s de la fase 2 local, pero por debajo de los 30 s de F3 `[S]`.
+- **Al arrancar, la instancia vuelve con la misma IP elástica.** El contenedor arranca solo (C2: unos 19 s de Start a `/health`), y el túnel reconecta en su siguiente intento, cada 5 s.
+  - Si tarda más de unos 10 min, `tunnel.ps1` se rinde, el agente deja de reconectar y F4 no se cumple.
+
+### Coste y tope
+
+- **Las 3 repeticiones de cada variante,** más la informativa, son unas 2 instancias × 2 h encendidas, ≈ 0,37 USD con los precios de la sección 6 `[S]`.
+- **Las 2 IP elásticas** cuestan 0,005 USD por hora cada una, en uso o inactivas ([Amazon VPC pricing](https://aws.amazon.com/vpc/pricing/), consultado el 21 de noviembre de 2026): 0,24 USD al día las dos, también con las instancias paradas.
+- **Al terminar la sesión,** `demo-down.ps1` y «Detener» las 2 instancias. El responsable comprueba en la consola que figuran como «Detenida».
+- **Después de la entrega,** se liberan las IP elásticas y se terminan las instancias.
+- **La cuenta sigue en el plan gratuito:** no se pasa al de pago.
+
+### Decisión
+
+| Resultado | Qué se hace |
+|---|---|
+| F1–F4 se cumplen en las 3 repeticiones de `ec2` y en las 3 válidas de `ec2-ocupado` | En la presentación se puede detener una instancia en vivo, y el ADR 12 lo registra |
+| No se cumplen, o EC2 no está listo a tiempo | En la presentación se detiene un contenedor local (evidencia de la fase 2), y se dice que todo corre en un solo equipo |
