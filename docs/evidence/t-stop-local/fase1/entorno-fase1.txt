@@ -1,0 +1,8 @@
+Fase: 1 (línea base, sin el cambio de código)
+Fecha: 2026-11-21 13:10:14 -05:00
+Código: main en c0834211e66eee3fee75f87a8bc94a4495d788cc
+Docker local: encendido desde 2026-11-21 13:07:39 -05:00; bases paradas a las 13:09:22
+Contenedores en marcha: chessspeak-whisper-w1-1, chessspeak-whisper-w2-1
+Agente: modo URLs, WHISPER_URLS=http://127.0.0.1:18101,http://127.0.0.1:18102, LB_PROBE_INTERVAL_MS=2000, LB_TIMEOUT_MS=45000
+RAM libre: 3052 MB
+Equipo: el responsable cierra lo pesado y no lo usa durante la medición (indicado por él)
