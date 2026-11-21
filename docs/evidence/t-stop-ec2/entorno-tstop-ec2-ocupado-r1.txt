@@ -1,0 +1,8 @@
+Corrida: tstop-ec2-ocupado-r1
+Fecha: 2026-11-21 16:24:54 -05:00
+Código: 86f3d486337cbc85efb1ed2f94054e7faf4215ac
+Destino: 2 instancias EC2 (us-east-2) a través de túneles SSH en 127.0.0.1:18201 (w1) y 127.0.0.1:18202 (w2)
+Agente: modo URLs, LB_TIMEOUT_MS=45000, LB_PROBE_INTERVAL_MS=2000; variante ocupado (-WhenBusy)
+VPN: apagada (confirmado por el responsable)
+Docker local: apagado
+RAM libre: 6936 MB
