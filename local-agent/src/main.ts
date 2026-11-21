@@ -31,6 +31,7 @@ const common = {
   strategy: strategyFromName(env.LB_STRATEGY),
   timeoutMs: integer(env.LB_TIMEOUT_MS, 15_000),
   healthIntervalMs: integer(env.LB_PROBE_INTERVAL_MS, 1000),
+  failuresToDown: integer(env.LB_FAILURES_TO_DOWN, 3),
   probe: (url: string) => probeHealth(url, isLoopback(url) ? 800 : 5000),
 };
 
@@ -46,8 +47,9 @@ if (urls !== undefined) {
     queueMax: integer(env.LB_QUEUE_MAX, urls.length * 4),
     reconnectMax: integer(env.LB_RECONNECT_MAX, 10),
     connect: (url) => connectUrlWorker(url, { probe: common.probe, readyTimeoutMs: integer(env.LB_CONNECT_TIMEOUT_MS, 60_000) }),
-    // twice the gateway timeout: the client already got its 504, this only frees the slot of a worker that hangs
-    send: (url, wav) => transcribeWith(url, wav, '/inference', AbortSignal.timeout(timeoutMs * 2)),
+    // the pool aborts the signal when it takes the worker down. Twice the gateway timeout: the client already got
+    // its 504, this only frees the slot of a worker that hangs and still answers its probes
+    send: (url, wav, signal) => transcribeWith(url, wav, '/inference', AbortSignal.any([signal, AbortSignal.timeout(timeoutMs * 2)])),
   };
 } else {
   const modelPath = env.WHISPER_MODEL_SMALL;
