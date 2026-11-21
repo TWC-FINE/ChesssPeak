@@ -7,7 +7,8 @@ Guía para lanzar **un** worker de Whisper en AWS EC2 y medir C1, C2, C3 y C5 de
 | Archivo | Qué hace |
 |---|---|
 | [`user-data.sh`](user-data.sh) | Primer arranque de la instancia: instala Docker, construye la imagen de la fase A desde el `Dockerfile` fijado (comprobado con SHA-256) y la arranca publicada **solo en `127.0.0.1`** |
-| [`tunnel.ps1`](tunnel.ps1) | Túnel SSH `127.0.0.1:18201` → instancia → `127.0.0.1:8080` |
+| [`tunnel.ps1`](tunnel.ps1) | Túnel SSH `127.0.0.1:18201` → instancia → `127.0.0.1:8080`. Desde la sección 8 de los criterios, con keepalive de 5 s y reconexión con tope |
+| [`tstop-watch.ps1`](tstop-watch.ps1) | T-stop (sección 8): lee `/lb/stats` cada segundo, falla w2 a mitad de la carga y lo devuelve. En local ejecuta la orden de Docker; en EC2 avisa de cuándo pulsar Detener e Iniciar |
 | [`measure-c2.ps1`](measure-c2.ps1) | C2: primer clip en una instancia recién arrancada |
 | [`measure-c1-c3.ps1`](measure-c1-c3.ps1) | C1 y C3: 3 repeticiones de los 78 clips a través del túnel |
 | [`summarize-c1-c3.mjs`](summarize-c1-c3.mjs) | Aplica C1 (p95 de la peor repetición) y C3 (top-1 ≥ 68 en cada repetición) a los registros. Probado con los de la fase A |

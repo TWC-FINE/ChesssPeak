@@ -74,9 +74,10 @@ pnpm --filter @chessspeak/local-agent start
 .\whisper-cloud\aws\tunnel.ps1 -HostIp <IP-1> -KeyPath <ruta del .pem> -LocalPort 18201
 .\whisper-cloud\aws\tunnel.ps1 -HostIp <IP-2> -KeyPath <ruta del .pem> -LocalPort 18202
 
-# Minuto 6:45: Ctrl+C en el agente y arrancarlo apuntando a EC2 (los mismos valores que en C4)
+# Minuto 6:45: Ctrl+C en el agente y arrancarlo apuntando a EC2 (los valores de C4, con el sondeo cada 2 s
+# de la sección 8 de docs/whisper-cloud-criteria.md)
 $env:WHISPER_URLS = "http://127.0.0.1:18201,http://127.0.0.1:18202"
-$env:LB_TIMEOUT_MS = "45000"; $env:LB_PROBE_INTERVAL_MS = "15000"
+$env:LB_TIMEOUT_MS = "45000"; $env:LB_PROBE_INTERVAL_MS = "2000"
 pnpm --filter @chessspeak/local-agent start
 
 # Carga para el dashboard, en otra terminal. Usa un WAV de spike/recordings, que no está en el repo.

@@ -302,3 +302,97 @@ Son 3 repeticiones. En cada una:
 |---|---|
 | I1–I3 se cumplen en las 3 repeticiones | El ADR 12 registra el balanceo entre 2 instancias EC2 detrás del agente, como demostración, con C1 «no cumple» declarado |
 | No se cumplen, o se llega al tope | Se terminan las instancias. El balanceo se demuestra con los 3 contenedores locales, y el ADR 12 lo dice tal cual |
+
+## 8. Adenda del 21 de noviembre: T-stop, detener un worker en pleno uso
+
+La añade el responsable del repo el 21 de noviembre, **antes de medir T-stop**.
+
+**No cambia nada de lo anterior:**
+- el texto de la v1;
+- las adendas de las secciones 6 y 7, ni sus umbrales;
+- sus resultados: C1 sigue **«no cumple»** y C4, **«cumple»**.
+
+### Motivo
+
+En la presentación del martes 24 de noviembre se detendrá una de las instancias de Whisper mientras se usa, para comprobar que el sistema sigue funcionando sin que nadie intervenga.
+
+- **C4** sacaba un worker de la rotación desde el gateway (`isolate`), con el worker todavía vivo.
+- **T-stop** lo detiene de verdad: el contenedor o la instancia.
+
+### Qué cambia frente a las secciones 6 y 7
+
+- **Sondeos cada 2 s en los túneles:** `LB_PROBE_INTERVAL_MS=2000`, en lugar de los 15 000 ms que pedía la sección 6. El responsable del repo lo acepta el 21 de noviembre.
+  - Con 3 sondeos fallidos seguidos, un número fijo en el código, un worker que no responde sale de la rotación en unos 4–7 s, en vez de 30–45 s.
+  - **Coste:** despreciable. Cada sondeo es un `GET /health` de pocos cientos de bytes `[S]`, y la salida a internet tiene 100 GB gratis al mes (sección 6).
+  - El mínimo de 15 s que el código aplica a las URL que salen del equipo no cambia. Los túneles son `127.0.0.1` y no les afecta.
+- **Túnel:** [`tunnel.ps1`](../whisper-cloud/aws/tunnel.ps1) pasa a keepalives cada 5 s, y `ssh` sale tras 2 sin respuesta. Antes eran 30 s × 3.
+  - Así, una conexión muerta cierra el puerto local en unos 10 s `[S]`, y el agente lo ve como una conexión rechazada.
+  - Si `ssh` sale, el script lo vuelve a lanzar cada 5 s. Se rinde tras 40 intentos seguidos fallidos, unos 10 min.
+- **No cambian:** `LB_TIMEOUT_MS=45000`, la cola, la estrategia y el código del agente.
+
+### Qué se espera, antes de medir
+
+Según el código actual de `local-agent`:
+
+| Fallo | Qué ve el agente | La petición que estaba en ese worker |
+|---|---|---|
+| El worker **cierra la conexión**: `docker stop`, el contenedor muere, el túnel cae o la instancia se apaga limpiamente | Conexión rechazada o cerrada | Se reintenta una vez en el otro worker |
+| El worker **deja de responder sin cerrarla**: `docker pause` en local, o la red de la instancia cae antes de cerrar | Nada, hasta que fallan 3 sondeos | **Se queda colgada** hasta el 504, a los 45 s. En EC2, el keepalive cierra el túnel hacia los 10 s, y la petición se reintenta `[S]`. En local no hay túnel que lo haga |
+
+**Consecuencia:** se espera que `docker pause` en local **pierda la petición que tenía en curso** w2. Lo resolvería un cambio de código aparte: al sacar un worker de la rotación, el agente cancelaría sus peticiones en curso y las reencolaría.
+
+### Montaje
+
+- **Local:**
+  - 2 contenedores, `w1` y `w2` de `compose.local.yml`: `docker compose -f whisper-cloud/compose.local.yml up -d --no-build w1 w2`;
+  - el agente con `WHISPER_URLS=http://127.0.0.1:18101,http://127.0.0.1:18102`, `LB_PROBE_INTERVAL_MS=2000` y `LB_TIMEOUT_MS=45000`;
+  - Docker encendido, solo con esos 2 contenedores en marcha y las bases de datos paradas. Se anota con los resultados.
+- **EC2:**
+  - las 2 instancias de la sección 7, con `tunnel.ps1` en 18201 y 18202, y el mismo agente con esos puertos;
+  - **solo cuando cada instancia tenga una IP elástica.** Sin ella, la IP cambia al arrancar y el túnel no puede volver solo.
+- **Clip:** el WAV por defecto de `load.ts`, una grabación del responsable del repo. En EC2, con su OK explícito antes de enviarlo, como en C4.
+
+### Prueba (criterio)
+
+Hay 3 variantes:
+- `stop`: `docker compose stop w2`, en local;
+- `pause`: `docker compose pause w2`, en local;
+- `ec2`: la instancia de w2, detenida en la consola.
+
+Cada variante se repite 3 veces. En cada repetición:
+
+1. **Muestreo:** en una ventana, `.\whisper-cloud\aws\tstop-watch.ps1 -Label tstop-<variante>-r<n> -OutDir <carpeta-de-salida> -Fail <DockerStop|DockerPause|Manual>`. Guarda la **instantánea 0** y lee `/lb/stats` cada segundo.
+2. **Carga:** en otra ventana, `pnpm --filter @chessspeak/local-agent load --steps 1 --requests 40 --warmup 2 --label tstop-<variante>-r<n> --out-dir <carpeta-de-salida>`. Con concurrencia 1, como un jugador. En EC2, `--requests 60`.
+3. **Fallo:** al llegar a 12 respuestas 200 nuevas, el script falla w2 y guarda la **instantánea A**.
+   - En local, el propio script ejecuta la orden de Docker.
+   - En EC2 avisa con un pitido, y el responsable pulsa «Detener».
+4. **Devolución:** pasados 60 s, el script devuelve w2 con `start` o `unpause`. En EC2 son 120 s, y avisa para pulsar «Iniciar».
+5. **Final:** cuando el agente lleva 15 s sin trabajo, el script guarda la **instantánea B** y un resumen.
+
+| | Qué | Umbral |
+|---|---|---|
+| **F1** | Respuestas 200 del escalón, según el JSON de `load.ts` | **40 de 40** en local y **60 de 60** en EC2. Cualquier 502, 503, 504 o error de red cuenta como perdida |
+| **F2** | Desde que termina la orden de fallo hasta que el agente saca a w2 de la rotación, según el resumen de `tstop-watch.ps1` | ≤ **10 s** en local. En EC2 se anota sin umbral: entre pulsar «Detener» y que la instancia deje de responder pasa un tiempo que no depende del agente |
+| **F3** | Latencia máxima de las respuestas 200: `latencyMs.max` del JSON de `load.ts` | ≤ **30 s**, el límite del navegador para una transcripción |
+| **F4** | w2 vuelve a `up` y atiende al menos una petición nueva antes de que termine la carga, **sin ninguna acción en el agente ni en el dashboard** | En local, `up` en ≤ **60 s** desde la devolución. En EC2, en ≤ **3 min** desde «Iniciar» |
+
+- **Informativo, sin umbral:** una corrida por variante con `--steps 2`. Se anotan los 502, 503 y 504 y la latencia.
+- **Cuándo se mide:**
+  - **Fase 1**, con esta adenda fusionada en `main`: `stop` y `pause` en local. Se espera que `pause` no cumpla F1, por lo dicho arriba. Si pierde solo la petición que w2 tenía en curso, se registra como línea base y la sesión sigue.
+  - **Fase 2**, con el cambio de código fusionado: `stop` y `pause` en local otra vez y, con las IP elásticas, `ec2`.
+- **Si falla algo más,** se para y no se repite a ciegas. Por ejemplo: el agente se cae, una orden de Docker falla, `stop` pierde una petición o `pause` pierde más de una.
+
+### Coste y tope (EC2)
+
+- **Las 3 repeticiones de `ec2`:** unas 2 instancias × 1 h encendidas, ≈ 0,18 USD con los precios de la sección 6 `[S]`.
+- **IP elásticas:** cada una cuesta 0,005 USD por hora, en uso o inactiva, así que se cobra también con la instancia parada. Precio consultado el 21 de noviembre de 2026 en [Amazon VPC pricing](https://aws.amazon.com/vpc/pricing/).
+- **Al terminar,** las 2 instancias se paran, y se comprueba en la consola que figuran como «Detenida».
+- **La cuenta sigue en el plan gratuito:** no se pasa al de pago.
+
+### Decisión
+
+| Resultado | Qué se hace |
+|---|---|
+| F1–F4 se cumplen en las 3 repeticiones de `stop` y `pause` (fase 2) y de `ec2` | En la demo se detiene una instancia en vivo, y el ADR 12 lo registra |
+| Se cumplen en local, pero no en EC2 o EC2 no llega a tiempo | En la demo se detiene un contenedor local, y se dice que todo corre en un solo equipo |
+| No se cumplen en local | Se queda «Aislar» en el dashboard, como en C4, y se dice tal cual |
