@@ -282,7 +282,7 @@ Desde el 14 de noviembre, el mismo `local-agent` puede balancear workers que ya 
 |---|---|
 | Instancias | Contenedores de la imagen [`whisper-cloud/Dockerfile`](../whisper-cloud/Dockerfile) (`small`, whisper.cpp `d1be6fd`), 3 en [`compose.local.yml`](../whisper-cloud/compose.local.yml), con 2 CPU y 2 GB cada uno, en `127.0.0.1:18101-18103` |
 | Conexión | `WHISPER_URLS`. «Arrancar» un worker es sondear su `/health` hasta que responda, con un plazo (`LB_CONNECT_TIMEOUT_MS`) |
-| Fallos | Un worker caído se detecta con los sondeos o con una petición fallida, que se reintenta una vez en otro worker. Tras `LB_RECONNECT_MAX` conexiones fallidas seguidas, deja de intentarlo |
+| Fallos | Un worker caído se detecta con los sondeos (`LB_FAILURES_TO_DOWN` fallidos seguidos, 3 por defecto) o con una petición fallida, que se reintenta una vez en otro worker. Al sacarlo de la rotación, el agente cancela lo que tenía en curso y lo reintenta una vez en otro worker: un worker que se congela sin cerrar la conexión ya no deja la petición colgada hasta el 504. Tras `LB_RECONNECT_MAX` conexiones fallidas seguidas, deja de intentarlo |
 | Demo de fallo | Aislar y devolver, desde el dashboard o con `POST /lb/workers/:id/isolate` y `/restore`. Devolver da otra ronda completa de reconexiones. «Matar» responde 409, porque no hay proceso propio |
 | Fuera del equipo | Sondeo y reconexión como mucho cada 15 s, y solo https |
 

@@ -33,7 +33,8 @@ export interface PoolOptions {
   /** URL mode: consecutive failed connections before the pool stops trying; restoring the worker starts again. */
   reconnectMax?: number;
   probe(url: string): Promise<boolean>;
-  send(url: string, wav: Uint8Array): Promise<Transcription>;
+  /** The pool aborts `signal` when it takes the worker out of rotation, and then retries the request elsewhere. */
+  send(url: string, wav: Uint8Array, signal: AbortSignal): Promise<Transcription>;
   /** Requests in flight per worker; whisper-server runs one inference at a time. */
   workerConcurrency?: number;
   /** Requests waiting for a free worker before the pool answers 503. */
@@ -135,6 +136,8 @@ interface Worker {
   restartTimer: NodeJS.Timeout | undefined;
   restartAt: number | undefined;
   latencies: number[];
+  /** One controller per request in flight, so taking the worker down can abort them. */
+  inFlight: Set<AbortController>;
 }
 
 interface Job {
@@ -182,6 +185,7 @@ export class WorkerPool {
     this.timeoutMs = options.timeoutMs ?? 15_000;
     this.healthIntervalMs = options.healthIntervalMs ?? 1000;
     this.failuresToDown = options.failuresToDown ?? 3;
+    if (!Number.isInteger(this.failuresToDown) || this.failuresToDown < 1) throw new Error('LB_FAILURES_TO_DOWN debe ser un entero ≥ 1');
     this.backoffMaxMs = options.backoffMaxMs ?? 30_000;
     this.reconnectMax = this.mode === 'url' ? (options.reconnectMax ?? 10) : Infinity;
     const backoffInitialMs = options.backoffInitialMs ?? 1000;
@@ -210,6 +214,7 @@ export class WorkerPool {
         restartTimer: undefined,
         restartAt: undefined,
         latencies: [],
+        inFlight: new Set<AbortController>(),
       };
     });
     for (const worker of this.workers) worker.restartDelayMs = worker.backoffInitialMs;
@@ -407,6 +412,8 @@ export class WorkerPool {
       return;
     }
     worker.state = 'down';
+    // a worker that stopped answering may never answer what it holds: abort it, and run() retries it elsewhere
+    for (const controller of worker.inFlight) controller.abort();
     void (handle?.stop() ?? Promise.resolve()).then(() => this.scheduleRestart(worker));
   }
 
@@ -459,8 +466,10 @@ export class WorkerPool {
     const url = worker.handle!.url;
     job.worker = worker.id;
     worker.active++;
+    const controller = new AbortController();
+    worker.inFlight.add(controller);
     this.options
-      .send(url, job.wav)
+      .send(url, job.wav, controller.signal)
       .then(
         (result) => {
           worker.served++;
@@ -470,8 +479,9 @@ export class WorkerPool {
         },
         (error: unknown) => {
           worker.failed++;
-          // fetch rejects with TypeError when it cannot reach the worker: take it out and retry once elsewhere
-          if (error instanceof TypeError) {
+          // fetch rejects with TypeError when it cannot reach the worker, and the pool aborts what a worker it took
+          // down still held: either way, take it out and retry once elsewhere
+          if (error instanceof TypeError || controller.signal.aborted) {
             this.markDown(worker);
             if (!job.retried && !job.settled) {
               job.retried = true;
@@ -484,6 +494,7 @@ export class WorkerPool {
       )
       .finally(() => {
         // the slot is freed when the worker really finishes, even if the client already got a 504
+        worker.inFlight.delete(controller);
         worker.active--;
         this.drain();
       });

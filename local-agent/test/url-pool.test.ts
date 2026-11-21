@@ -82,7 +82,8 @@ function urlPool(urls: string[], overrides: Partial<PoolOptions> = {}): WorkerPo
     strategy: new LeastConnections(),
     connect: (url) => connectUrlWorker(url, { probe, readyTimeoutMs: 2000, intervalMs: 20 }),
     probe,
-    send: (url, body) => transcribeWith(url, body),
+    // as main.ts does in URL mode: the pool's signal reaches the request
+    send: (url, body, signal) => transcribeWith(url, body, '/inference', signal),
     healthIntervalMs: 20,
     backoffInitialMs: 20,
     ...overrides,
@@ -134,6 +135,28 @@ describe('URL mode of the pool', () => {
     expect(state(pool, 'w1').state).toBe('down');
     expect(state(pool, 'w1').failed).toBe(1);
     expect(pool.stats().totals).toEqual({ 200: 2, 502: 0, 503: 0, 504: 0 });
+  });
+
+  it('aborts the request a worker still holds when it stops answering, and retries it on another', async () => {
+    const [a, b] = await Promise.all([fakeWhisper(), fakeWhisper()]);
+    const pool = urlPool([a!.url, b!.url], { failuresToDown: 2, backoffInitialMs: 10_000, timeoutMs: 5000 });
+    await pool.start();
+    // w1 freezes, as a paused container: the connection stays open and nothing comes back
+    a!.delayMs = 3000;
+    const started = Date.now();
+    const pending = [pool.transcribe(wav), pool.transcribe(wav)];
+    await vi.waitFor(() => expect(state(pool, 'w1').active).toBe(1), { timeout: 2000, interval: 5 });
+    a!.healthy = false;
+    const results = await Promise.all(pending);
+    expect(results.map((r) => r.worker)).toEqual(['w2', 'w2']);
+    // long before w1 would have answered, and long before the 5 s timeout
+    expect(Date.now() - started).toBeLessThan(1500);
+    expect(state(pool, 'w1')).toMatchObject({ state: 'down', active: 0, failed: 1 });
+    expect(pool.stats().totals).toEqual({ 200: 2, 502: 0, 503: 0, 504: 0 });
+  });
+
+  it('refuses failuresToDown below 1, which would take a healthy worker down', () => {
+    expect(() => urlPool(['http://127.0.0.1:1'], { failuresToDown: 0 })).toThrow(/LB_FAILURES_TO_DOWN/);
   });
 
   it('takes out a worker that stops answering /health, and reconnects it when it answers again', async () => {
