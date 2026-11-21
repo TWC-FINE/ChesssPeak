@@ -396,3 +396,51 @@ Cada variante se repite 3 veces. En cada repetición:
 | F1–F4 se cumplen en las 3 repeticiones de `stop` y `pause` (fase 2) y de `ec2` | En la demo se detiene una instancia en vivo, y el ADR 12 lo registra |
 | Se cumplen en local, pero no en EC2 o EC2 no llega a tiempo | En la demo se detiene un contenedor local, y se dice que todo corre en un solo equipo |
 | No se cumplen en local | Se queda «Aislar» en el dashboard, como en C4, y se dice tal cual |
+
+## 9. Adenda del 21 de noviembre (2): w2 ocupado y peticiones enviadas durante la detección
+
+La añade el responsable del repo el 21 de noviembre, **después de la fase 1 y antes de la fase 2**.
+
+**No cambia nada de lo anterior:**
+- la sección 8, sus umbrales F1–F4 y su tabla de decisión;
+- los resultados de la fase 1, que se publican tal cual.
+
+### Motivo
+
+La fase 1 dejó dos cosas al descubierto:
+
+- **El caso «en curso» no se ejercitó.** En las 5 instantáneas A de `stop` y `pause`, w2 tenía 0 peticiones en curso. El umbral de 12 respuestas se alcanza justo después de una respuesta, y en ese momento w2 siempre estaba libre.
+- **Lo que perdió `pause` (r2 y r3) fue otra petición.**
+  - No era la que w2 tenía en curso, porque no tenía ninguna.
+  - Era una nueva que el agente le envió durante los ~6 s que tardó en detectar que no respondía. Quedó colgada hasta el 504, a los 45 s.
+  - Es lo que la sección 8 preveía para un worker congelado, pero con otra petición.
+
+### Variantes de la fase 2
+
+La fase 2 se mide con el código del PR que cancela y reencola lo que tenía en curso un worker al sacarlo de la rotación.
+
+| Variante | Orden de `tstop-watch.ps1` | Qué ejercita |
+|---|---|---|
+| `stop` y `pause` | Las de la sección 8 | **Enviada durante la detección:** w2 está libre al fallar, y lo que reciba antes de la detección debe reintentarse |
+| `stop-ocupado` y `pause-ocupado` | Las mismas, con `-WhenBusy` | **En curso al fallar:** pasado el umbral, el script espera hasta 30 s a una muestra con w2 ocupado y lo falla entonces |
+
+### Criterio
+
+- **Umbrales:** los mismos F1–F4 de la sección 8, para las 4 variantes, con 3 repeticiones válidas de cada una.
+- **Validez de las variantes «ocupado»:**
+  - una repetición es válida si la instantánea A muestra w2 con 1 petición en curso;
+  - si muestra 0, porque la petición terminó entre la muestra y la orden, se anota como **no válida** y no cuenta;
+  - como mucho 5 intentos por variante; con menos de 3 válidos, la variante queda **no concluyente**.
+- **Si el caso «enviada durante la detección» se ejercitó**, en `stop` y `pause`:
+  - lo dice el resumen de `tstop-watch.ps1`, cuando alguna muestra entre el fallo y la detección muestra w2 `up` con peticiones en curso;
+  - se anota, pero no es umbral;
+  - una petición que entre y salga en menos de 1 s, el intervalo de muestreo, no se ve.
+- **Informativo, sin umbral:** una corrida de `stop` y otra de `pause` con `--steps 2`, como en la sección 8.
+- **Si falla algo,** se para y no se repite. Por ejemplo: el agente se cae, una orden de Docker falla o una repetición válida pierde una petición. Lo medido se publica tal cual.
+
+### Decisión
+
+| Resultado | Qué se hace |
+|---|---|
+| F1–F4 se cumplen en las 3 repeticiones válidas de las 4 variantes | Se pasa a `ec2` (sección 8), con las IP elásticas |
+| Alguna variante no cumple o queda no concluyente | Se para, se publica tal cual y decide el responsable del repo |
