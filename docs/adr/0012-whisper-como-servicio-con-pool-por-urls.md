@@ -94,7 +94,11 @@ Criterios en las secciones 8, 9 y 10 de [`whisper-cloud-criteria.md`](../whisper
   - **0 peticiones perdidas en las 7 corridas (F1).** Eso incluye las 3 en que w2 tenía una petición en curso.
   - `ec2` cumple F1–F4 en 3 de 3.
   - `ec2-ocupado` cumple en 2 de 3. En la tercera, w2 volvió a `up` 187,8 s después del aviso de «Iniciar», con el umbral en 180 s desde la pulsación. Al no conocerse la hora de la pulsación, F4 queda **no verificable: no cumple**.
-  - **Por la tabla de decisión de la sección 10, el resultado en EC2 es «no se cumplen».** Esa misma tabla fija que, en la presentación, «Detener» se demuestra con un contenedor local, diciendo que todo corre en un solo equipo.
+  - **En cifras, sobre las 7 corridas en AWS** (las 6 con umbral y la informativa):
+    - **F1 y F3 se cumplen en 7 de 7:** 0 peticiones perdidas, 60 de 60 en cada una, y una latencia máxima ≤ 25,2 s, con el umbral en 30 s;
+    - **F2** se anota sin umbral en EC2: entre 2 y 59 s;
+    - **F4 se cumple en 6 de 7:** w2 volvió a `up` en 21–27 s desde el aviso de «Iniciar». La séptima (`ec2-ocupado` r3, 187,8 s desde el aviso) no es verificable.
+  - **Por la tabla de decisión de la sección 10, el resultado en EC2 es «no se cumplen».** La causa es el F4 no verificable de `ec2-ocupado` r3. Esa misma tabla fija que, en la presentación, «Detener» se demuestra con un contenedor local, diciendo que todo corre en un solo equipo.
 
 ## Qué no está probado
 
@@ -121,5 +125,5 @@ Criterios en las secciones 8, 9 y 10 de [`whisper-cloud-criteria.md`](../whisper
 - (+) C4 mostró el balanceo entre 2 máquinas reales en la nube, con 0 peticiones perdidas al aislar una instancia a mitad de carga.
 - (−) EC2 no cumplió C1: cada clip tarda el doble que en local, y Whisper en la nube no sirve para jugar por voz.
 - (+) Detener una instancia EC2 de verdad, en pleno uso, no perdió ninguna petición en 7 de 7 corridas. En local, el cambio del pool cerró el caso que perdía una petición.
-- (−) T-stop en EC2 queda «no se cumplen» por una repetición de `ec2-ocupado` cuya vuelta no se pudo verificar en tiempo. Las IP elásticas cuestan 0,005 USD por hora cada una, también con las instancias paradas, hasta liberarlas.
+- (−) T-stop en EC2 queda «no se cumplen» por el F4 no verificable de `ec2-ocupado` r3, aunque F1 y F3 se cumplieron en 7 de 7 corridas y F4 en 6 de 7. Las IP elásticas cuestan 0,005 USD por hora cada una, también con las instancias paradas, hasta liberarlas.
 - (−) La reapertura cuesta dinero y tiempo antes de la entrega. Depende de 2 túneles SSH y de la IP `/32` del responsable, y en EC2 cada clip tarda el doble que en local.
