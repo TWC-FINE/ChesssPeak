@@ -1,0 +1,11 @@
+Corrida: tstop-pause-r2
+Fecha: 2026-11-21 13:27:50 -05:00
+Fallo: DockerPause sobre w2 al llegar a 12 respuestas 200 nuevas; devolución 60 s después
+Agente: modo url, estrategia least-connections, timeoutMs 45000, sondeo de w2 cada 2000 ms, reconnectMax 10
+Contenedores en marcha al empezar: chessspeak-whisper-w1-1, chessspeak-whisper-w2-1
+Orden de fallo: de 13:28:53.677 a 13:28:53.822
+F2 detección: w2 salió de la rotación (down) a los 6 s del fin de la orden de fallo
+Devolución: 13:29:54.179
+F4 recuperación: w2 volvió a up a los 1 s de devolverlo; primera respuesta 200 nueva a los 14.3 s de devolverlo
+Totales del agente desde la instantánea 0: 200 +41, 502 +0, 503 +0, 504 +1
+Lecturas fallidas de /lb/stats: 0 · fin: el agente quedó sin trabajo
