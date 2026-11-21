@@ -43,6 +43,12 @@
    - El puerto de Whisper no se abre a internet.
 7. **El navegador, el contrato y el servidor no cambian.** No se añaden el campo `whisperHost` ni un tercer reconocedor.
 8. **El pool de `move-workers` no se construye.** El puerto `MovePersistence` se queda con `MOVE_WORKERS=0`, es decir, con escritura directa.
+9. **Detener un worker de verdad (T-stop, 21 de noviembre),** para la prueba anunciada para la presentación:
+   - **El pool cancela y reintenta lo que tenía en curso un worker al sacarlo de la rotación.** Lo reintenta una vez en otro worker (#80). Aislar no cancela nada. `LB_FAILURES_TO_DOWN` fija los sondeos fallidos seguidos, 3 por defecto.
+   - **En EC2, los túneles se sondean cada 2 s** (`LB_PROBE_INTERVAL_MS=2000`, sección 8 de los criterios). Sustituye a los 15 s del punto 6.
+   - **Los túneles tienen keepalive de 5 s × 2 y se reconectan solos,** con tope.
+   - **Cada instancia lleva una IP elástica,** para que su túnel vuelva solo tras arrancarla.
+   - **`demo-up.ps1` y `demo-down.ps1`** arrancan y cierran túneles, agente y plan B.
 
 ## Qué se midió
 
@@ -75,8 +81,28 @@
   - **El agente no se reinició entre repeticiones.** El umbral de 12 respuestas y las cuentas de I3 se calculan respecto a una instantánea tomada al empezar cada repetición.
   - **Latencia, informativa:** p50 de unos 22,4 s y p95 de unos 22,7 s, porque tras aislar w2, w1 atiende las 2 peticiones en serie. No es cifra de rendimiento y no cambia C1.
 
+### T-stop: detener un worker en pleno uso (21 de noviembre)
+
+Criterios en las secciones 8, 9 y 10 de [`whisper-cloud-criteria.md`](../whisper-cloud-criteria.md), cada una fusionada antes de su medición. **Los umbrales no se cambiaron después de medir.**
+
+- **Local, fase 1, sin el cambio del pool** ([evidencia](../evidence/t-stop-local/README.md)):
+  - `stop` cumple en 3 de 3;
+  - **`pause` no cumple F1 en 2 de 3:** perdió una petición enviada a w2 congelado durante los ~6 s que tardó en detectarlo;
+  - el caso «en curso» no se ejercitó, porque w2 siempre estaba libre al fallar.
+- **Local, fase 2, con el cambio:** `stop`, `pause`, `stop-ocupado` y `pause-ocupado` cumplen F1–F4 en 3 repeticiones válidas cada una, con 0 peticiones perdidas.
+- **EC2, deteniendo la instancia de w2 desde la consola** ([evidencia](../evidence/t-stop-ec2/README.md)):
+  - **0 peticiones perdidas en las 7 corridas (F1).** Eso incluye las 3 en que w2 tenía una petición en curso.
+  - `ec2` cumple F1–F4 en 3 de 3.
+  - `ec2-ocupado` cumple en 2 de 3. En la tercera, w2 volvió a `up` 187,8 s después del aviso de «Iniciar», con el umbral en 180 s desde la pulsación. Al no conocerse la hora de la pulsación, F4 queda **no verificable: no cumple**.
+  - **En cifras, sobre las 7 corridas en AWS** (las 6 con umbral y la informativa):
+    - **F1 y F3 se cumplen en 7 de 7:** 0 peticiones perdidas, 60 de 60 en cada una, y una latencia máxima ≤ 25,2 s, con el umbral en 30 s;
+    - **F2** se anota sin umbral en EC2: entre 2 y 59 s;
+    - **F4 se cumple en 6 de 7:** w2 volvió a `up` en 21–27 s desde el aviso de «Iniciar». La séptima (`ec2-ocupado` r3, 187,8 s desde el aviso) no es verificable.
+  - **Por la tabla de decisión de la sección 10, el resultado en EC2 es «no se cumplen».** La causa es el F4 no verificable de `ec2-ocupado` r3. Esa misma tabla fija que, en la presentación, «Detener» se demuestra con un contenedor local, diciendo que todo corre en un solo equipo.
+
 ## Qué no está probado
 
+- **La vuelta tras arrancar una instancia** no tiene una cifra verificada en todas las repeticiones. En 5 de 6, w2 volvió en 21–27 s desde el aviso de «Iniciar». En la sexta, la hora de la pulsación no se conoce.
 - **C5, el gasto:** lo comprueba el responsable del repo en la consola de facturación de AWS.
 - **Varias máquinas:** C4 mostró el reparto y el aislamiento entre 2 instancias EC2, pero **no demuestra escalado ni velocidad**, porque C1 no cumple. Lo medido en local corrió en un solo equipo, y la objeción del profesor sobre los procesos locales vale también para contenedores en una sola máquina. Hay que decirlo al presentar.
 - **La demo depende de Docker Desktop,** que el ADR 10 había descartado precisamente por eso. El modo por procesos sigue disponible como salida.
@@ -98,4 +124,6 @@
 - (−) La demo con contenedores necesita Docker Desktop encendido. Además, 3 contenedores pueden usar hasta 6 de los 12 hilos y unos 2–3 GB de RAM.
 - (+) C4 mostró el balanceo entre 2 máquinas reales en la nube, con 0 peticiones perdidas al aislar una instancia a mitad de carga.
 - (−) EC2 no cumplió C1: cada clip tarda el doble que en local, y Whisper en la nube no sirve para jugar por voz.
+- (+) Detener una instancia EC2 de verdad, en pleno uso, no perdió ninguna petición en 7 de 7 corridas. En local, el cambio del pool cerró el caso que perdía una petición.
+- (−) T-stop en EC2 queda «no se cumplen» por el F4 no verificable de `ec2-ocupado` r3, aunque F1 y F3 se cumplieron en 7 de 7 corridas y F4 en 6 de 7. Las IP elásticas cuestan 0,005 USD por hora cada una, también con las instancias paradas, hasta liberarlas.
 - (−) La reapertura cuesta dinero y tiempo antes de la entrega. Depende de 2 túneles SSH y de la IP `/32` del responsable, y en EC2 cada clip tarda el doble que en local.
