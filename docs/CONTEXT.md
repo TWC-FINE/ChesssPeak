@@ -1,6 +1,6 @@
 # ChessSpeak — contexto para ponerse al día
 
-Una página. Estado a **14 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md).
+Una página. Estado a **22 de noviembre de 2026**. El detalle está en [PLAN.md](../PLAN.md). **Presentación: martes 24 de noviembre a las 19:00** ([checklist](rehearsal-checklist.md)).
 
 ## Qué es
 Ajedrez en línea donde las jugadas **se dicen en voz alta** en español (“caballo efe tres”). El sistema reconoce la frase, la resuelve contra las jugadas legales de la posición, pide **confirmación explícita** y la aplica en tiempo real entre dos jugadores. Proyecto final de Arquitectura de Software. **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** **Con demo en vivo**, en Edge, con la web en local (`pnpm serve:web`) y el backend en la nube.
@@ -27,13 +27,15 @@ Las cifras son de la versión del parser de la etiqueta `spike-parser-freeze`; e
 2. Los microfrontends se hablan con eventos `cs:*` y reciben su contexto por propiedad; los tipos y el protocolo viven en `shared/`.
 3. **Servidor NestJS** (monolito modular, una instancia en Render): `auth` de invitados, `games`, `voice-metrics`, `health`; estado de partida en memoria (`GameRoom` pura).
 4. **Datos:** Postgres (`games`) y Mongo (`game_moves`, `voice_attempts`; nunca audio), con escritura diferida e idempotente.
-5. **`local-agent`** (Node) atiende en `http://127.0.0.1:8765` y reparte la transcripción entre varios `whisper-server`: procesos propios (ADR 10) o URLs de servicios ya en marcha, como contenedores (ADR 12). El navegador lo llama con CORS y la cabecera de red privada. `voice-parser` es TypeScript puro sin DOM.
+5. **`local-agent`** (Node) atiende en `http://127.0.0.1:8765` y reparte la transcripción entre varios `whisper-server`: procesos propios (ADR 10) o URLs de servicios ya en marcha, como contenedores (ADR 12). El navegador lo llama con CORS y la cabecera de red privada. Con #87–#89, un segundo agente en `127.0.0.1:8766` lleva «Whisper en la nube (EC2)» a 2 instancias por túneles SSH. `voice-parser` es TypeScript puro sin DOM.
 
 ## Estado
 - **Desplegado desde el 8 de noviembre** en Render, Neon, Atlas y Vercel (<https://chessspeak.vercel.app>). Dos invitados juegan una partida en tiempo real, por escrito o por voz, en local y en la URL pública.
 - **Probado a mano con voz real, con una sola voz:** Web Speech el 7 y el 8 de noviembre, y Whisper local desde el navegador el 8, en la web local y en la pública. **Pendiente:** la validación con otra voz.
 - **Balanceo ([ADR 12](adr/0012-whisper-como-servicio-con-pool-por-urls.md)):** medido con 3 contenedores locales el 14 de noviembre; aislar un worker no perdió ninguna petición en 3 de 3 repeticiones. **AWS EC2, el 14 de noviembre:** con una instancia, C1 no cumple: el p95 de la peor repetición fue de 13,59 s, y el umbral es 7,5 s ([evidencia](evidence/whisper-cloud-ec2/README.md)). Con 2, C4 cumple con 2 instancias: el balanceo entre 2 máquinas, con 0 peticiones perdidas al aislar una a mitad de carga ([evidencia](evidence/whisper-cloud-ec2-c4/README.md)). El pool de `move-workers` (ADR 11) no se construyó y ese ADR quedó sustituido.
-- **Sin probar:** Chrome, el dominio propio y el límite por IP desde otra red.
+- **T-stop en EC2, el 21 de noviembre:** al detener una instancia en pleno uso, 0 peticiones perdidas en 7 de 7 (F1). F4 se cumple en 6 de 7, y la séptima no es verificable, así que el resultado formal es «no se cumplen» ([evidencia](evidence/t-stop-ec2/README.md)).
+- **Whisper elegido en la página (#87–#89, abiertos):** la opción «Whisper en la nube (EC2)» va al agente del 8766. **La telemetría no distingue local de EC2.**
+- **Sin probar:** Chrome, el dominio propio, el límite por IP desde otra red, los túneles reales leídos de `demo.json` y el plan B con contenedores en el 8766.
 
 Detalle en [HANDOFF.md](HANDOFF.md).
 
@@ -76,7 +78,7 @@ Los resultados de una corrida se pasan siempre por separado de los de otra, y si
 | [deploy.md](deploy.md) | Despliegue en Render, Neon, Atlas y Vercel, paso a paso |
 | [load-balancing.md](load-balancing.md) · [analysis-gate.md](analysis-gate.md) | Prueba de carga de Whisper · prueba del análisis con Stockfish |
 | [url-pool-criteria.md](url-pool-criteria.md) · [whisper-cloud-criteria.md](whisper-cloud-criteria.md) | Criterios y medición del pool por URLs · criterios del experimento en la nube (EC2: C1 no cumple; C4 cumple) |
-| [demo-script.md](demo-script.md) | Guion de la demo de unos 10 minutos, con plan de respaldo |
+| [demo-script.md](demo-script.md) · [rehearsal-checklist.md](rehearsal-checklist.md) | Guion de la demo de unos 10 minutos, con plan de respaldo · checklist del ensayo y de la presentación |
 | [c4.md](c4.md) | C4 niveles 1 y 2 (contexto y contenedores), en Mermaid |
 | [adr/](adr/) | ADR 1 a 8, 10 y 12 aceptados; el 11, sustituido por el 12; el 9, propuesto el 20 de noviembre |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) | Ramas, commits, PR · reglas para asistentes de IA |

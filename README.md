@@ -6,10 +6,12 @@ Ajedrez en línea donde las jugadas **se dicen en voz alta** en notación algebr
 
 Proyecto final de Arquitectura de Software.
 
-> **Estado (14 de noviembre de 2026):**
+> **Estado (22 de noviembre de 2026):**
 > - Desplegado en <https://chessspeak.vercel.app>. Dos invitados juegan una partida en tiempo real, por escrito o por voz.
 > - Web Speech y Whisper local se probaron a mano en la web local y en la pública, **con una sola voz**, así que eso no sustituye la validación con otra persona.
 > - El balanceo de Whisper por URLs se midió con 3 contenedores locales ([ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)). En AWS EC2, una instancia no cumplió el umbral de latencia (C1), y **con 2 instancias el balanceo se demostró** (C4): 0 peticiones perdidas al aislar una a mitad de carga, el 14 de noviembre.
+> - **Detener una instancia EC2 en pleno uso (T-stop, 21 de noviembre):** 0 peticiones perdidas en 7 de 7 corridas (F1). La instancia volvió sola en 6 de 7 (F4); en la séptima no se puede verificar, así que el resultado formal es «no se cumplen» ([evidencia](docs/evidence/t-stop-ec2/README.md)).
+> - **Con #87–#89, la página ofrece «Whisper en la nube (EC2)»,** que va a un segundo agente local en `127.0.0.1:8766`, al lado de «Whisper local» en el 8765. **Sin probar todavía:** los túneles reales leídos de `demo.json` y el plan B con contenedores en el 8766. La telemetría no distingue local de EC2.
 > - El límite de `/auth/guest` se corrigió en #37; falta probarlo desde otra red (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)).
 >
 > Para ponerte al día, empieza por [docs/CONTEXT.md](docs/CONTEXT.md) y [docs/HANDOFF.md](docs/HANDOFF.md).
@@ -86,11 +88,13 @@ docker compose -f whisper-cloud/compose.local.yml down      # al terminar
 
 El dashboard (`/lb/dashboard`) permite aislar y devolver cada worker. Detalle en [docs/load-balancing.md](docs/load-balancing.md), sección 9.
 
+**Demo del balanceo con 2 instancias EC2 (opcional):** `whisper-cloud/aws/demo-up.cmd`, con doble clic, arranca el agente de «Whisper local» en el 8765 y el de EC2 en el 8766, por 2 túneles SSH. Si EC2 no responde, pasa a los 3 contenedores. Necesita las instancias propias del responsable del repo, una configuración local fuera del repo y `PUBLIC_CLOUD_AGENT_URL` en `web/shell/.env`. Pasos en [docs/demo-script.md](docs/demo-script.md) y [docs/rehearsal-checklist.md](docs/rehearsal-checklist.md).
+
 **Pruebas:** `pnpm verify` no necesita Docker. `pnpm smoke:web` comprueba que los microfrontends cargan. `pnpm e2e:web` juega partidas completas en Edge o Chrome, con un reconocedor y un agente falsos: demuestra el flujo, no el reconocimiento.
 
 Cada microfrontend tiene además su página standalone con contexto simulado, para trabajar en uno sin levantar los demás.
 
-**Despliegue:** los pasos están en [docs/deploy.md](docs/deploy.md). **Aún no se ha desplegado.**
+**Despliegue:** los pasos están en [docs/deploy.md](docs/deploy.md). Desplegado desde el 8 de noviembre de 2026 (ver [Qué está probado y qué no](#qué-está-probado-y-qué-no)).
 
 ### Bases de datos locales (Docker)
 
@@ -137,6 +141,8 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 | Whisper real desde el navegador | **Prueba manual el 8 de noviembre de 2026,** con una sola voz, en la web local y en la pública. El agente corría en `127.0.0.1:8765`, con la URL de Vercel en `AGENT_ALLOWED_ORIGINS`: funciona. El dashboard mostró 24 peticiones con 200 y sin errores, por ejemplo de 1,87 a 1,97 s por transcripción en el equipo del responsable del repo. Esos tiempos son orientativos, no una medición formal, y se tomaron con Docker encendido. Se nota más retraso que con Web Speech, como se esperaba. **No consta** si Edge mostró el aviso de permiso de red local |
 | Balanceo de Whisper por URLs con 3 contenedores locales | **Medido el 14 de noviembre de 2026** con un criterio fijado antes de medir: aislar un worker con concurrencia 2 no perdió ninguna petición en 3 de 3 repeticiones. Todo en un solo equipo. Al aislarlo, el worker no tenía peticiones en curso ([evidencia](docs/evidence/url-pool-phase-c/README.md), [ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md)) |
 | Whisper en AWS EC2 | **Medido el 14 de noviembre de 2026 y recortado.** Con una instancia `c7i-flex.large` y el criterio fijado antes de medir ([adenda](docs/whisper-cloud-criteria.md)), el primer clip tras arrancar tardó 11,52 s (C2, cumple) y acertó 68/78 en cada repetición (C3, cumple). El p95 de la peor repetición fue de 13,59 s frente a 7,5 s (C1, **no cumple**) ([evidencia](docs/evidence/whisper-cloud-ec2/README.md)). **Balanceo con 2 instancias (C4), el mismo día:** se aisló una a mitad de carga, con concurrencia 2, y se perdieron 0 de 40 peticiones en 3 de 3 repeticiones ([evidencia](docs/evidence/whisper-cloud-ec2-c4/README.md)). Es una demostración del reparto entre 2 máquinas, no de velocidad |
+| Detener una instancia EC2 en pleno uso (T-stop) | **Medido el 21 de noviembre de 2026,** con el criterio fijado antes de medir (secciones 8–10 de la [adenda](docs/whisper-cloud-criteria.md)). Se detuvo la instancia de w2 desde la consola, con w2 libre y con w2 ocupado. **F1 y F3 se cumplen en 7 de 7:** 0 peticiones perdidas, 60 de 60, y una latencia máxima de 25,2 s. **F4 se cumple en 6 de 7:** w2 volvió solo en unos 21–27 s desde el aviso de «Iniciar». La séptima no es verificable, y por eso el resultado formal es «no se cumplen» ([evidencia](docs/evidence/t-stop-ec2/README.md)) |
+| «Whisper en la nube (EC2)» elegido en la página, con dos agentes (#87–#89) | Probado con tests y con workers falsos en local: los dos agentes arrancan y el 8766 reparte entre sus workers. **Sin probar:** los túneles reales leídos de `demo.json` y el plan B con contenedores en el 8766; se comprueban en la prueba de humo de la sección 11 de la adenda. **La telemetría no distingue local de EC2:** `voice_attempts.recognizer` es `whisper` en los dos casos |
 | Despliegue en Render, Neon, Atlas y Vercel | **Desplegado.** Web en <https://chessspeak.vercel.app> y API en <https://chessspeak-server.onrender.com>, las dos sobre `2c48755`. Verificado desde fuera el 8 de noviembre de 2026: `/health` con las dos bases en `up`, HTTPS válido en las dos URL, CORS solo para el origen de Vercel, y la web carga sus tres microfrontends sin pedir nada a otros hosts |
 | Partida por la API desplegada | **Probado el 8 de noviembre** con un script desde fuera: dos invitados, `POST /games` y Socket.IO por `wss`. Cuatro jugadas llegaron a los dos lados. En Edge sin interfaz, la web publicada entra como invitado y conecta por `wss`. Tras dormirse Render, al volver a entrar la partida se reconstruyó con sus jugadas (Mongo) y su resultado (Postgres) |
 | Dos navegadores reales contra la nube | **Sin probar** |
@@ -155,6 +161,7 @@ Test-NetConnection 127.0.0.1 -Port 15432                   # TcpTestSucceeded de
 - **Nunca se guarda audio.** En `voice_attempts` se guarda el texto reconocido, con los datos del intento.
 - **Web Speech envía el audio a la nube del navegador.**
 - **Whisper local no saca el audio de tu equipo.**
+- **«Whisper en la nube (EC2)» sí lo saca:** el audio va por un túnel SSH a las instancias del responsable del repo, se transcribe en memoria y no se guarda en ninguna parte.
 
 ## Documentación
 

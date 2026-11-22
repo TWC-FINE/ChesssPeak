@@ -2,7 +2,20 @@
 
 **Estado a 2026-11-06, 05:22 (UTC−5).** Reconstruido desde git, los PR, la CI y los documentos. Este documento no actualiza nada: si contradice a `git` o a GitHub, manda lo segundo.
 
-**Estado a 14 de noviembre de 2026, con `main` en `39f5d65`.** Este bloque manda sobre los bloques antiguos de abajo.
+**Estado a 22 de noviembre de 2026, con `main` en `eb56bba` y #87–#90 abiertos.** Este bloque manda sobre los de abajo.
+- **Presentación:** martes 24 de noviembre a las 19:00, con ensayo el lunes 23. El checklist cronometrado está en [rehearsal-checklist.md](rehearsal-checklist.md) (#90).
+- **T-stop, detener un worker en pleno uso, medido el 21 de noviembre** (secciones 8–10 de los [criterios](whisper-cloud-criteria.md)):
+  - **local:** con el cambio del pool (#80), 0 peticiones perdidas en 12 de 12 ([evidencia](evidence/t-stop-local/README.md));
+  - **EC2, deteniendo la instancia de w2 desde la consola:** F1 y F3 se cumplen en 7 de 7 (0 perdidas, máximo de 25,2 s). F4 se cumple en 6 de 7: w2 volvió en unos 21–27 s desde el aviso de «Iniciar», y la séptima no es verificable. El resultado formal es «no se cumplen» ([evidencia](evidence/t-stop-ec2/README.md), #85 y #86).
+- **Whisper elegido en la página (abierto, sin fusionar):**
+  - **#88:** `cloudAgentUrl` opcional en `shared` y la opción «Whisper en la nube (EC2)» en el selector. Sin el campo, la web queda como antes;
+  - **#89:** `AGENT_PORT` desde el entorno y `demo-up.cmd`, que arranca el agente de «Whisper local» en el 8765 y el de EC2 en el 8766, por los túneles, o con el plan B de 3 contenedores. La configuración local queda fuera del repo. La revisión por lectura de los scripts está en un comentario del PR;
+  - **#87:** el criterio de la prueba de humo (sección 11), que se fusiona antes de hacerla.
+- **Sin probar:** los túneles reales leídos de `demo.json` y el plan B con contenedores en el 8766. Son S3 y S4 de la prueba de humo, el lunes.
+- **La telemetría no distingue local de EC2:** `voice_attempts.recognizer` es `whisper` en los dos casos.
+- **AWS:** las 2 instancias se dejan **detenidas** entre sesiones, cada una con su IP elástica, y el responsable del repo lo comprueba en la consola. Las IP cuestan 0,005 USD/h cada una hasta liberarlas, después de la entrega.
+
+**Estado a 14 de noviembre de 2026, con `main` en `39f5d65`.** Sustituido por el bloque del 22 de noviembre, de arriba.
 - **Hecho en `main` y desplegado:**
   - la partida entre invitados, la voz (Web Speech con 400 ms y Whisper local), la telemetría y el historial;
   - Render, Neon, Atlas y Vercel, desde el 8 de noviembre.
