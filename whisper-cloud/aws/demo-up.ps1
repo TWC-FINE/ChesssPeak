@@ -178,4 +178,4 @@ if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$cloudAgentPort/lb/dashbo
 Write-Host ''
 Write-Host "Whisper en la nube (EC2): $(if ($mode -eq 'ec2') { '2 instancias EC2 por túnel SSH' } else { 'plan B, 3 contenedores en este equipo' }). Dashboard: http://127.0.0.1:$cloudAgentPort/lb/dashboard"
 Write-Host "Whisper local: $(if ($NoLocalAgent) { 'no arrancado (-NoLocalAgent)' } elseif ($localReady) { "listo en http://127.0.0.1:$localAgentPort" } else { 'no está listo' })"
-Write-Host 'En la página: «Reconocedor» y elegir la opción. Al terminar: demo-down.cmd o .\whisper-cloud\aws\demo-down.ps1'
+Write-Host 'En la página, abre «Reconocedor» y elige una opción. Al terminar: demo-down.cmd o .\whisper-cloud\aws\demo-down.ps1'
