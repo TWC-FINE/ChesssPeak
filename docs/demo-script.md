@@ -11,11 +11,11 @@ Para la demo en vivo de la entrega del 19 de noviembre de 2026, en **Edge**, con
 | Paso | Cómo | Comprobación |
 |---|---|---|
 | Despertar Render | Abrir <https://chessspeak-server.onrender.com/health> | Responde 200, con las dos bases en `up`. Tras dormir, la primera respuesta tardó 52,5 s el 8 de noviembre |
-| Web en local contra Render | En `web/shell/.env`: `PUBLIC_API_URL=https://chessspeak-server.onrender.com`. Después, `pnpm build:web` y `pnpm serve:web` | <http://127.0.0.1:5500> carga los tres microfrontends |
+| Web en local contra Render | En `web/shell/.env`: `PUBLIC_API_URL=https://chessspeak-server.onrender.com` y `PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:8766`. Después, `pnpm build:web` y `pnpm serve:web` | <http://127.0.0.1:5500> carga los tres microfrontends |
 | Dos jugadores | Dos ventanas de Edge, normal e InPrivate, o dos laptops. La sesión vive en `sessionStorage`, así que cada pestaña es un jugador | Cada ventana entra como invitado con un nombre distinto |
 | Micrófonos | Diademas. Probar «e cuatro» en cada ventana | La flecha aparece y se cancela con «Cancelar» |
-| Whisper local | Arrancar el agente **en modo procesos**, sin `WHISPER_URLS` (sección 5). Hasta el minuto 6:45 la demo usa este agente, así que el audio de Whisper no sale del equipo | <http://127.0.0.1:8765/lb/dashboard> muestra los workers locales activos |
-| Balanceo en EC2, **unos 15 minutos antes** | En la consola de EC2 (`us-east-2`), **Iniciar** las 2 instancias. **Copiar sus IP públicas nuevas:** cambian cada vez que arrancan. Si la red no es la de casa (la sala o los datos del celular), cambiar antes la regla del puerto 22 a «Mi IP», que debe terminar en `/32`; nunca `0.0.0.0/0`. Abrir los 2 túneles con `demo-up.ps1 -TunnelsOnly`, que pide las IP (sección 5) | Los 2 túneles abiertos. `http://127.0.0.1:18201/health` y `http://127.0.0.1:18202/health` responden 200. El contenedor arranca solo con la instancia |
+| Configuración local, **una sola vez** | Copiar `whisper-cloud/aws/demo.example.json` a `%LOCALAPPDATA%\ChessSpeak\demo.json`, fuera del repo, y escribir en ella la ruta de la `.pem` y las 2 IP elásticas. Con barras `/` en la ruta no hay que escapar nada | `demo-up` dice «Clave e IP leídas de la configuración local» |
+| Balanceo en EC2, **unos 15 minutos antes** | En la consola de EC2 (`us-east-2`), **Iniciar** las 2 instancias. Las IP elásticas no cambian. Si la red no es la de casa (la sala o los datos del celular), cambiar antes la regla del puerto 22 a «Mi IP», que debe terminar en `/32`; nunca `0.0.0.0/0`. Después, **doble clic en `whisper-cloud/aws/demo-up.cmd`** (sección 5) | Arrancan los dos agentes, cada uno en su ventana: el del **8765**, en modo procesos, para «Whisper local» (el audio no sale del equipo), y el del **8766**, por los 2 túneles, para «Whisper en la nube (EC2)». Se abre <http://127.0.0.1:8766/lb/dashboard> con w1 y w2 activos |
 | Plan B del balanceo | Docker Desktop encendido y la imagen de los 3 contenedores ya construida, **sin arrancarlos** | `docker images` muestra `chessspeak-whisper:small-d1be6fd` |
 | Datos | Pestañas ya abiertas y con sesión iniciada: Data Explorer de Atlas (`voice_attempts` y `game_moves`) y SQL Editor de Neon (`games`) | **No mostrar ninguna cadena de conexión ni contraseña en pantalla** |
 | Respaldo | El video de respaldo, a mano y probado | Se reproduce sin conexión |
@@ -31,7 +31,7 @@ Para la demo en vivo de la entrega del 19 de noviembre de 2026, en **Edge**, con
 | 4:00–5:00 | **Recargar la ventana A** a mitad de partida | La partida se reconstruye desde Mongo, con las jugadas y el turno | Criterio 3 |
 | 5:00–6:00 | A cambia el reconocedor a **Whisper local** y dice **«ge cuatro»** → confirmar | Whisper corre en el equipo, en `local-agent` (`127.0.0.1:8765`), y el audio no sale de la máquina. Tarda más que Web Speech | R2, criterio 2 |
 | 6:00–6:45 | B, con Web Speech: **«dama hache cuatro»** → confirmar. **Mate** | El servidor valida cada jugada en UCI y detecta el fin de partida. **El servidor no sabe nada de voz** | Criterio 1 |
-| 6:45–8:45 | Parar el agente (Ctrl+C) y ejecutar `demo-up.ps1` (sección 5): arranca el agente **apuntando a EC2** y abre `/lb/dashboard`, con w1 y w2 activos. En otra terminal, lanzar la carga. Con la carga en marcha, pulsar **«Aislar»** en w2. Mostrar que w1 sigue atendiendo y que no hay 502, 503 ni 504. Después, **«Devolver»** w2 | Whisper como servicio en 2 instancias EC2 de `us-east-2`, una por worker. El agente reparte por conexiones mínimas a través de 2 túneles SSH (ADR 12). Aislar una instancia no pierde peticiones: C4 se midió con 0 perdidas en 3 de 3 repeticiones. **Es una demostración del reparto entre 2 máquinas, no de velocidad:** cada clip tarda unos 11 s en EC2 y C1 no se cumple | R8 |
+| 6:45–8:45 | Pasar al dashboard del agente **que apunta a EC2**, <http://127.0.0.1:8766/lb/dashboard>, que `demo-up` dejó abierto con w1 y w2 activos. El del 8765 sigue en marcha. En otra terminal, lanzar la carga contra el 8766 (sección 5). Con la carga en marcha, pulsar **«Aislar»** en w2. Mostrar que w1 sigue atendiendo y que no hay 502, 503 ni 504. Después, **«Devolver»** w2 | Whisper como servicio en 2 instancias EC2 de `us-east-2`, una por worker. El agente reparte por conexiones mínimas a través de 2 túneles SSH (ADR 12). Aislar una instancia no pierde peticiones: C4 se midió con 0 perdidas en 3 de 3 repeticiones. **Es una demostración del reparto entre 2 máquinas, no de velocidad:** cada clip tarda unos 11 s en EC2 y C1 no se cumple | R8 |
 | 8:45–9:30 | Atlas: los últimos `voice_attempts` (`recognizer`, `transcript`, `outcome`, `accepted`, `latency.totalMs`) y `game_moves` de la partida. Neon: la consulta de la sección 5 | Telemetría por intento, sin audio; `player` lo pone el servidor. Dos bases: partidas en Postgres, y jugadas y telemetría en Mongo | R5, criterio 5 |
 | 9:30–10:00 | Cierre: repo público con CI en verde, ADR y limitaciones | Limitaciones, sin rodeos: una sola voz, y EC2 con el balanceo demostrado (C4) pero la latencia por encima del umbral (C1) | R6 |
 
@@ -56,8 +56,8 @@ Si el reconocedor falla en una frase, se repite. La confirmación evita que se j
 | **Render no despierta o va lento** | Esperar a `/health` hasta 1 minuto. Si no responde, pasar a todo en local, como en la fila anterior |
 | **El micrófono** | La caja de texto («Enviar») sigue el mismo camino: parser, flecha y «Sí, jugar» |
 | **Web Speech** (sin reconocer, o el navegador lo bloquea) | Cambiar el reconocedor a Whisper local o usar la caja de texto |
-| **Edge bloquea `127.0.0.1:8765`** (aviso de red local) | Aceptar el permiso. La demo usa la web en local precisamente para evitarlo |
-| **EC2** (una instancia no arranca, el túnel no conecta, la red bloquea SSH o `/health` no responde) | **Balanceo con los 3 contenedores locales:** `demo-up.ps1` pasa solo a ellos si EC2 no responde en 90 s; si no, `demo-down.ps1` y `demo-up.ps1 -LocalOnly` (sección 5). Decir que corre en un solo equipo. No reintentar EC2 en vivo |
+| **Edge bloquea `127.0.0.1:8765` o `:8766`** (aviso de red local) | Aceptar el permiso. La demo usa la web en local precisamente para evitarlo |
+| **EC2** (una instancia no arranca, el túnel no conecta, la red bloquea SSH o `/health` no responde) | **Balanceo con los 3 contenedores locales:** `demo-up.ps1` pasa solo a ellos, detrás del agente del 8766, si EC2 no responde en 90 s; si no, `demo-down.ps1` y `demo-up.ps1 -LocalOnly` (sección 5). Decir que corre en un solo equipo. No reintentar EC2 en vivo |
 | **Docker Desktop** | Balanceo con el pool por procesos: `LB_WORKERS=3`, que necesita Whisper descargado. El dashboard ofrece «Aislar» y también «Matar», que mata el proceso y deja que el pool lo relance |
 | **Un worker de Whisper** (instancia o contenedor) | Es justo lo que se demuestra: el pool lo saca de la rotación, y «Devolver» le da otra ronda de reconexiones |
 | **El profesor detiene una instancia EC2 en pleno uso** | **No tocar nada:** ni el agente ni los túneles. El dashboard muestra a ese worker fuera de rotación en unos segundos, y w1 sigue atendiendo. Al volver a «Iniciar» la instancia, el túnel y el worker vuelven solos gracias a la IP elástica. Qué se puede decir: en la [evidencia](evidence/t-stop-ec2/README.md), **0 peticiones perdidas en 7 de 7** al detener una instancia, con la petición en curso reintentada en w1. En las 7 corridas en AWS, F1 y F3 se cumplieron en 7 de 7: 0 perdidas y latencia máxima ≤ 25,2 s. F2 se anota sin umbral. F4 se cumplió en 6 de 7: w2 volvió en 21–27 s tras el aviso de «Iniciar», y la séptima no es verificable. Por esa séptima, T-stop en EC2 quedó «no se cumplen» (sección 10 de los criterios) |
@@ -67,30 +67,30 @@ Si el reconocedor falla en una frase, se repite. La confirmación evita que se j
 ## 5. Comandos
 
 ```powershell
-# Hasta el minuto 6:45: el agente en modo procesos (Whisper local; el audio no sale del equipo)
-Remove-Item Env:WHISPER_URLS -ErrorAction SilentlyContinue
-pnpm --filter @chessspeak/local-agent start
+# Unos 15 minutos antes, con las 2 instancias iniciadas: doble clic en whisper-cloud\aws\demo-up.cmd, o desde
+# PowerShell lo mismo, sin cambiar la política de ejecución del equipo:
+powershell -NoProfile -ExecutionPolicy Bypass -File .\whisper-cloud\aws\demo-up.ps1
+# Lee la .pem y las 2 IP elásticas de %LOCALAPPDATA%\ChessSpeak\demo.json (o de -KeyPath y -HostIps) y arranca,
+# cada uno en su ventana:
+# - el agente del 8765, en modo procesos: «Whisper local», el audio no sale del equipo. Si ya hay uno, lo reutiliza;
+# - un túnel con reconexión por instancia, y comprueba /health. La .pem nunca se muestra en pantalla;
+# - el agente del 8766, apuntando a EC2, con los valores de C4 y el sondeo cada 2 s de la sección 8 de
+#   docs/whisper-cloud-criteria.md: «Whisper en la nube (EC2)». Si EC2 no responde en 90 s, pasa solo al plan B local.
+# Avisa si web\dist se compiló sin PUBLIC_CLOUD_AGENT_URL, y abre el dashboard del 8766.
+# Solo los túneles, para comprobarlos antes: añadir -TunnelsOnly. Sin el agente del 8765: -NoLocalAgent
 
-# EC2, unos 15 minutos antes: pide las 2 IP nuevas, abre un túnel con reconexión por instancia, cada uno en su
-# ventana, y comprueba /health. La clave .pem está fuera del repo; nunca se muestra en pantalla
-.\whisper-cloud\aws\demo-up.ps1 -KeyPath <ruta del .pem> -TunnelsOnly
+# Carga para el dashboard, en otra terminal, contra el agente del 8766. Usa un WAV de spike/recordings, que no está
+# en el repo. Con unos 11 s por clip en EC2, 10 peticiones caben en el tiempo del guion
+pnpm --filter @chessspeak/local-agent load --url http://127.0.0.1:8766/transcribe --steps 2 --requests 10 --label demo
 
-# Minuto 6:45: Ctrl+C en el agente en modo procesos y otra vez demo-up.ps1. Reutiliza los túneles, arranca el
-# agente apuntando a EC2 (los valores de C4, con el sondeo cada 2 s de la sección 8 de
-# docs/whisper-cloud-criteria.md) y abre el dashboard. Si EC2 no responde en 90 s, pasa solo al plan B local
-.\whisper-cloud\aws\demo-up.ps1 -KeyPath <ruta del .pem>
-
-# Carga para el dashboard, en otra terminal. Usa un WAV de spike/recordings, que no está en el repo.
-# Con unos 11 s por clip en EC2, 10 peticiones caben en el tiempo del guion
-pnpm --filter @chessspeak/local-agent load --steps 2 --requests 10 --label demo
-
-# Al terminar: cierra el agente, los túneles y, si los arrancó, los contenedores. Después, en la consola de EC2,
-# «Detener» (no «Terminar») las 2 instancias
+# Al terminar: doble clic en whisper-cloud\aws\demo-down.cmd. Cierra los dos agentes (el del 8765 solo si lo arrancó
+# demo-up), los túneles y, si los arrancó, los contenedores. Después, en la consola de EC2, «Detener» (no «Terminar»)
+# las 2 instancias
 .\whisper-cloud\aws\demo-down.ps1
 
-# Plan B directamente: los 3 contenedores locales (compose up --no-build), el agente y el dashboard
+# Plan B directamente: los 3 contenedores locales (compose up --no-build) detrás del agente del 8766, y el dashboard
 .\whisper-cloud\aws\demo-up.ps1 -LocalOnly
-pnpm --filter @chessspeak/local-agent load --steps 2 --requests 20 --label demo
+pnpm --filter @chessspeak/local-agent load --url http://127.0.0.1:8766/transcribe --steps 2 --requests 20 --label demo
 
 # Salida si falla Docker: pool por procesos
 $env:LB_WORKERS = "3"; Remove-Item Env:WHISPER_URLS -ErrorAction SilentlyContinue

@@ -32,6 +32,18 @@ export function loadEnv(file: string = join(repoRoot(), '.env')): Record<string,
   return merged;
 }
 
+/** Keys read from the environment even when .env does not have them: the pool, the worker URLs and the agent port. */
+const RUNTIME_KEYS = /^(LB_[A-Z0-9_]+|WHISPER_URLS|AGENT_PORT)$/;
+
+/**
+ * The .env values plus the runtime keys of the environment, which win. AGENT_PORT is one of them so that a second
+ * agent (the EC2 one of whisper-cloud/aws/demo-up.ps1, on 8766) can run next to the first one with the same .env.
+ */
+export function agentEnv(fromFile: Record<string, string>, source: NodeJS.ProcessEnv): Record<string, string> {
+  const runtime = Object.entries(source).filter((entry): entry is [string, string] => RUNTIME_KEYS.test(entry[0]) && entry[1] !== undefined);
+  return { ...fromFile, ...Object.fromEntries(runtime) };
+}
+
 /** Set keys in a .env file, keeping every other line as it is. */
 export function updateEnvFile(file: string, entries: Record<string, string>): void {
   const lines = existsSync(file) ? readFileSync(file, 'utf8').split(/\r?\n/) : [];
