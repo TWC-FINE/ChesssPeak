@@ -10,14 +10,16 @@ Nombre correcto: **ChessSpeak**, paquetes `@chessspeak/*`. “ChessPeak” y “
 **Hay demo en vivo,** en Edge, con la web en local (`pnpm serve:web`) y el backend en Render. Guion y calendario en [PLAN.md](PLAN.md), secciones 3 y 9. No añadas funcionalidades fuera del núcleo: los opcionales salieron del plan por la fecha.
 
 ## Estado actual
-A 14 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y en `main` existen:
+**Presentación: martes 24 de noviembre de 2026 a las 19:00,** con ensayo el lunes 23 ([checklist](docs/rehearsal-checklist.md)).
+
+A 22 de noviembre de 2026, **el spike de voz está cerrado** (ADR 4 y 5) y en `main` existen:
 - `packages/voice-parser/`, `spike/` y CI;
 - `shared/` (contrato v1) y `server/`: `GameRoom`, invitados, `POST /games`, Socket.IO, guardado en Postgres y Mongo, y `voice_attempts`;
 - `web/`: el shell y los 3 microfrontends reales, con Web Speech (400 ms), Whisper local y caja de texto;
 - `local-agent/`: pool de Whisper por procesos (ADR 10) y por URLs (ADR 12);
 - `whisper-cloud/`: los contenedores locales y lo preparado para AWS EC2.
 
-**Desplegado** desde el 8 de noviembre en Render, Neon, Atlas y Vercel. **Probado a mano con voz real, con una sola voz:** Web Speech y Whisper local desde el navegador. **Hecho también:** el C4, niveles 1 y 2 ([docs/c4.md](docs/c4.md)). **Pendiente:** la validación con otra voz, `docs/quality.md`, aceptar el ADR 9 (escrito el 20 de noviembre) y el README probado en una máquina limpia. **AWS EC2, el 14 de noviembre:** con una instancia, C1 no cumple ([evidencia](docs/evidence/whisper-cloud-ec2/README.md)); con 2, C4 cumple, es decir, el balanceo entre 2 máquinas sin perder peticiones ([evidencia](docs/evidence/whisper-cloud-ec2-c4/README.md)). No lo presentes como apto para jugar por voz. Si se usa en la demo en vivo, lo decide el responsable del repo. El pool de `move-workers` (ADR 11) no existe y quedó sustituido por el ADR 12. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
+**Desplegado** desde el 8 de noviembre en Render, Neon, Atlas y Vercel. **Probado a mano con voz real, con una sola voz:** Web Speech y Whisper local desde el navegador. **Hecho también:** el C4, niveles 1 y 2 ([docs/c4.md](docs/c4.md)). **Pendiente:** la validación con otra voz, `docs/quality.md`, aceptar el ADR 9 (escrito el 20 de noviembre) y el README probado en una máquina limpia. **AWS EC2, el 14 de noviembre:** con una instancia, C1 no cumple ([evidencia](docs/evidence/whisper-cloud-ec2/README.md)); con 2, C4 cumple, es decir, el balanceo entre 2 máquinas sin perder peticiones ([evidencia](docs/evidence/whisper-cloud-ec2-c4/README.md)). No lo presentes como apto para jugar por voz. Si se usa en la demo en vivo, lo decide el responsable del repo. **T-stop en EC2, el 21 de noviembre:** al detener una instancia en pleno uso, 0 peticiones perdidas en 7 de 7 (F1), y F4 en 6 de 7 con la séptima no verificable, así que el resultado formal es «no se cumplen» ([evidencia](docs/evidence/t-stop-ec2/README.md)). **Con #87–#89,** la página ofrece «Whisper en la nube (EC2)», que va a un segundo agente en `127.0.0.1:8766`. Están **sin probar** los túneles reales leídos de `demo.json` y el plan B con contenedores en el 8766, y **la telemetría no distingue local de EC2**. El pool de `move-workers` (ADR 11) no existe y quedó sustituido por el ADR 12. No supongas que existen scripts, carpetas o dependencias; compruébalo antes. No escribas código si no te lo piden.
 
 **Análisis con Stockfish:** se midió y la prueba **no pasó** ([docs/analysis-gate.md](docs/analysis-gate.md)). Sigue fuera de alcance salvo que se decida una versión nueva del criterio.
 
@@ -67,7 +69,7 @@ pnpm serve:web                 # servidor estático de Node, sin dependencias, e
 pnpm --filter server test      # Jest
 pnpm lint
 ```
-Web en el puerto **5500** (fijo; Live Server o `pnpm serve:web`). `local-agent` en `127.0.0.1:8765`.
+Web en el puerto **5500** (fijo; Live Server o `pnpm serve:web`). `local-agent` en `127.0.0.1:8765`; en la demo del balanceo, un segundo agente en `127.0.0.1:8766` para EC2 (`whisper-cloud/aws/demo-up.cmd`).
 
 ## Convenciones
 - Código, comentarios, ramas y commits en **inglés** (Conventional Commits); interfaz y `*.md` en **español**.

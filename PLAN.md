@@ -1,6 +1,6 @@
 # ChessSpeak — Plan del proyecto
 
-> Última actualización: 14 de noviembre de 2026, con `main` en `39f5d65`.
+> Última actualización: 22 de noviembre de 2026, con `main` en `eb56bba` y #87–#90 abiertos. **Presentación: martes 24 de noviembre a las 19:00,** con ensayo el lunes 23 ([checklist](docs/rehearsal-checklist.md)).
 > **Fecha de entrega: 19 de noviembre de 2026 (indicada por el profesor).** Con demo en vivo. Orden de trabajo en la sección 9.
 > Equipo: **una persona trabaja sola, sin revisión de otra persona, y es la única que aprueba** (decisión del 6 de noviembre). Sigue sin definir quién aporta la otra voz, la segunda laptop de los ensayos y la máquina limpia del README.
 
@@ -24,6 +24,8 @@
 - **Balanceo de carga (requisito del profesor):** la decisión vigente es el [ADR 12](docs/adr/0012-whisper-como-servicio-con-pool-por-urls.md). Whisper es un servicio HTTP, balanceado por URLs desde `local-agent`.
   - **Medido** con 3 contenedores locales el 14 de noviembre: aislar un worker no perdió ninguna petición en 3 de 3 repeticiones. Todo corrió en un solo equipo.
   - **AWS EC2, medido el 14 de noviembre:** C1 no cumple con una instancia ([evidencia](docs/evidence/whisper-cloud-ec2/README.md)); con 2, C4 cumple con 2 instancias: el balanceo entre 2 máquinas, con 0 peticiones perdidas al aislar una a mitad de carga ([evidencia](docs/evidence/whisper-cloud-ec2-c4/README.md)).
+  - **T-stop, el 21 de noviembre:** detener la instancia de un worker en pleno uso perdió 0 peticiones en 7 de 7 corridas en EC2 (F1). F4 se cumplió en 6 de 7, y la séptima no es verificable, así que el resultado formal es «no se cumplen» ([evidencia](docs/evidence/t-stop-ec2/README.md)). En local, con el cambio del pool (#80), 0 perdidas en 12 de 12.
+  - **Whisper elegido en la página (#87–#89, abiertos el 22 de noviembre):** «Whisper en la nube (EC2)» va a un segundo agente en el 8766, al lado de «Whisper local» en el 8765, y `demo-up.cmd` arranca los dos. **Sin probar:** los túneles reales leídos de `demo.json` y el plan B con contenedores en el 8766; se prueban el lunes en la prueba de humo (sección 11 de los criterios). **La telemetría no distingue local de EC2.**
   - El pool de `move-workers` (ADR 11) no se construyó, y ese ADR quedó sustituido.
   - El análisis con Stockfish no pasó su prueba de viabilidad ([docs/analysis-gate.md](docs/analysis-gate.md)).
 - **Falta:**
@@ -51,7 +53,7 @@ Fuera del núcleo (“Futuro”): chat de voz entre jugadores (WebRTC/TURN/seña
   3. Decir una frase ambigua o ilegible y ver que ninguna pieza se mueve.
   4. Desconectar un jugador y ver que la partida continúa al volver.
   5. Hacer una jugada con Whisper local.
-  6. Mostrar el balanceo (ADR 12): los 3 contenedores con `WHISPER_URLS` y el dashboard (`/lb/dashboard`), aislando y devolviendo un worker. Si falla Docker, la salida es `LB_WORKERS=3` con el botón «Matar».
+  6. Mostrar el balanceo (ADR 12): con #87–#89, las 2 instancias EC2 detrás del agente del 8766 y su dashboard (`/lb/dashboard`), aislando y devolviendo un worker. Si falla EC2, los 3 contenedores; si falla también Docker, el pool por procesos. Detalle en el [guion](docs/demo-script.md) y en el [checklist](docs/rehearsal-checklist.md).
   7. Enseñar `game_moves` y `voice_attempts` en Mongo, y `games` en Postgres.
   8. Terminar la partida (se puede partir de una posición cercana al mate o usar el abandono).
 - **Respaldos:** la **caja de texto** si falla el micrófono o el reconocedor, datos del celular si falla la red de la sala y el **video de respaldo** si falla todo lo demás.
@@ -292,6 +294,8 @@ El proyecto se presenta en vivo, en la fecha de entrega. Los riesgos principales
 | Divergencia entre servidor y frontend | Contrato v0 de `shared/` versionado (`v: 1`); cambios solo por PR aprobado por el responsable del repo |
 | El profesor no acepta como balanceo real los contenedores en un solo equipo (ADR 12), igual que cuestionó los procesos locales (revisión del ADR 10) | Decirlo al presentar y mostrar lo medido. **En EC2, C4 demostró el balanceo entre 2 instancias, aunque C1 no cumple** |
 | La demo del balanceo depende de Docker Desktop | Arrancarlo antes de la demo. Si falla, usar el pool por procesos (`LB_WORKERS=3`), que no necesita Docker |
+| Los dos agentes (#87–#89) no están probados con los túneles reales ni con el plan B en el 8766 | La prueba de humo de la sección 11, el lunes 23. Si falla S3, la demo usa el plan B. Si fallan S1 o S2, se vuelve al procedimiento anterior |
+| El profesor detiene una instancia en vivo y no vuelve (F4 no verificable en 1 de 7; `tunnel.ps1` se rinde tras unos 10 min) | No tocar nada mientras tanto. Si se rinde, reabrir ese túnel y pulsar «Devolver» ([checklist](docs/rehearsal-checklist.md), sección 3) |
 
 ## 11. Recomendaciones y objeciones
 1. **Manda el orden de trabajo de 9.1.** Si un paso se atrasa, se recorta según 9.2 en ese momento, no al final.
