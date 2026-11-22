@@ -26,6 +26,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
       - run: pnpm build:web
+      # the checks of demo-up.ps1 (demo.json and the reused agent on 8765); pwsh comes with the runner image
+      - name: Test the demo script checks
+        run: pwsh -NoProfile -File whisper-cloud/aws/demo-checks.test.ps1
 
   integration:
     # mongo:8 does not start on kernels >= 6.19 (SERVER-121912), which ubuntu-latest now has
