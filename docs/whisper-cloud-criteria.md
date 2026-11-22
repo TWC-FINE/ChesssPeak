@@ -512,3 +512,90 @@ Todo lo marcado `[S]` no está comprobado.
 |---|---|
 | F1–F4 se cumplen en las 3 repeticiones de `ec2` y en las 3 válidas de `ec2-ocupado` | En la presentación se puede detener una instancia en vivo, y el ADR 12 lo registra |
 | No se cumplen, o EC2 no está listo a tiempo | En la presentación se detiene un contenedor local (evidencia de la fase 2), y se dice que todo corre en un solo equipo |
+
+## 11. Adenda del 22 de noviembre: prueba de humo de los dos agentes desde la página
+
+La añade el responsable del repo el 22 de noviembre, **antes de la prueba**. Sustituye los pasos de consola de la demo por una elección en la página: «Whisper local», en el agente del 8765, y «Whisper en la nube (EC2)», en un segundo agente en el 8766.
+
+**No cambia nada de lo anterior:**
+- los umbrales y resultados de C1–C5 y de las secciones 7–10;
+- la evidencia de C4 en EC2 y de T-stop, local y en EC2.
+
+**Por qué esa evidencia sigue valiendo:**
+- el agente del 8766 es el mismo código;
+- solo cambia que `AGENT_PORT` se lee del entorno: el pool, los sondeos y el reintento no cambian;
+- usa los mismos túneles y los mismos valores (`LB_TIMEOUT_MS=45000`, `LB_PROBE_INTERVAL_MS=2000`).
+
+**T-stop no se vuelve a medir.** Esta prueba solo comprueba el camino de la página hasta cada agente.
+
+### Motivo
+
+En la demo había que:
+- iniciar las instancias;
+- copiar IP;
+- abrir túneles con PowerShell y la política de ejecución;
+- parar un agente y arrancar otro.
+
+Con los cambios del 22 de noviembre basta con:
+- iniciar las 2 instancias;
+- la regla `/32` si cambia la red;
+- un doble clic en `whisper-cloud/aws/demo-up.cmd`;
+- elegir el reconocedor en la página.
+
+Hay que comprobar, desde la página y antes de la presentación, que eso funciona y que lo que ya funcionaba no se rompe.
+
+### Montaje
+
+- **Web:** en local, en **Edge**, con `pnpm serve:web`.
+  - Compilada con `PUBLIC_API_URL` de Render y `PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:8766`.
+  - Se anota la versión de Edge.
+- **Dos jugadores:** dos ventanas de Edge, normal e InPrivate, como en el [guion](demo-script.md).
+- **Agentes:** `demo-up.cmd`, con la configuración local fuera del repo. Se anota lo que imprime al terminar: el modo del 8766 y si el 8765 está listo.
+- **EC2:** las 2 instancias de la sección 10, con sus IP elásticas, y la regla del puerto 22 solo desde la IP del responsable con `/32`.
+- **Plan B:** Docker Desktop encendido solo para la prueba S4, con la imagen ya construida. Se anota su estado en cada prueba.
+- **Voz:** la del responsable del repo, en directo. En S3 su voz va a EC2. Se hace solo con su OK explícito, que se anota con la hora. El audio no se guarda en ninguna parte: ni la página, ni los agentes, ni `whisper-server` lo escriben en disco.
+- **Contadores:** antes y después de cada prueba se toma una instantánea de `/lb/stats` de los dos agentes, con los campos `served` y `failed` de cada worker:
+
+  ```powershell
+  foreach ($p in 8765, 8766) { try { $s = Invoke-RestMethod "http://127.0.0.1:$p/lb/stats" -TimeoutSec 3; "$p $($s.mode): " + (($s.workers | ForEach-Object { "$($_.id)=$($_.served)/$($_.failed)" }) -join ' ') } catch { "$p no responde" } }
+  ```
+
+### Prueba (criterio)
+
+**En cada prueba de S1 a S4 se juega una partida nueva de 3 medias jugadas:** «e cuatro», «e cinco» y «caballo efe tres». Las dos ventanas usan el reconocedor de esa prueba.
+
+**Cuándo se cumple una frase:**
+- aparece la flecha de la jugada correcta, «Sí, jugar» la juega y la otra ventana la ve;
+- hay como mucho 3 intentos por frase.
+
+**Cómo se cuentan los intentos:**
+- **No cuentan como fallo de la prueba,** y se anotan: un intento que el parser no entiende (`nomatch` o `ambiguous`) y una flecha equivocada que se cancela. Esta prueba no mide acierto.
+- **Sí son un fallo:** un error del agente (`no se pudo contactar`, `ocupado` u `otro`) y una petición que llega al agente equivocado.
+
+| | Qué se hace | Se cumple si |
+|---|---|---|
+| **S0** | Abrir el selector en las dos ventanas | Aparecen las 3 opciones. Web Speech está elegida por defecto. «Whisper local» y «Whisper en la nube (EC2)» dicen «(disponible)». Edge no muestra ningún aviso de red local |
+| **S1** | Web Speech | Las 3 frases se cumplen. Ningún contador de los dos agentes cambia |
+| **S2** | «Whisper local» | Las 3 frases se cumplen. `served` del 8765 sube tantas veces como intentos hubo, y el 8766 no cambia |
+| **S3** | «Whisper en la nube (EC2)», con `demo-up` en modo EC2 | Las 3 frases se cumplen. `served` del 8766 sube tantas veces como intentos hubo, el 8765 no cambia y `failed` no sube en ninguno |
+| **S4** | Plan B: `demo-down.cmd`, las 2 instancias en «Detenida», Docker encendido y `demo-up.cmd` | `demo-up` dice «plan B, 3 contenedores en este equipo». Con «Whisper en la nube (EC2)», las 3 frases se cumplen, y los workers del 8766 son `127.0.0.1:18101-18103` |
+| **S5** | Con S4 en marcha, cerrar solo la ventana del agente del 8766 y abrir el selector | «Whisper en la nube (EC2)» dice «(no responde)» y no se puede elegir. Una frase con «Whisper local» y otra con Web Speech se cumplen |
+
+**Sin umbral de latencia:** no se anotan tiempos como cifra de nada. La latencia de EC2 es la de C1, que no se cumple.
+
+**Una sola repetición:** es una prueba de humo, no una medición.
+
+### Coste y tope
+
+- **S3** necesita las 2 instancias encendidas unos 30 min: unas 2 × 0,5 h × 0,08479 USD ≈ 0,09 USD con los precios de la sección 6 `[S]`. A eso se suman las IP elásticas de la sección 10.
+- **S4 y S5** se hacen con las instancias detenidas.
+- **Al terminar,** `demo-down.cmd`, comprobar en la consola que las 2 instancias figuran como «Detenida», y apagar Docker.
+
+### Decisión
+
+| Resultado | Qué se hace |
+|---|---|
+| S0–S5 se cumplen | La demo elige el reconocedor en la página, y el guion y los ADR 6 y 12 lo registran |
+| S3 no se cumple, y S4 y S5 sí | La demo usa la opción de la página con el plan B (3 contenedores), diciendo que todo corre en un solo equipo. EC2 queda como en la sección 10 |
+| S1 o S2 no se cumplen | **Es una regresión.** Se para, se investiga y la demo vuelve al procedimiento anterior a esta sección. No se cambia la demo hasta resolverlo |
+| S0 muestra el aviso de red local | Se acepta el permiso y se anota. No cambia la decisión, pero se añade al guion |
