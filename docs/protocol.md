@@ -113,7 +113,7 @@ Se emiten desde el elemento con `CS_EVENT_INIT` (`bubbles` y `composed`) y se es
 | Microfrontend | Contexto |
 |---|---|
 | `<mf-game>` | `{ v, gameId, orientation, socket }`. `socket` cumple `GameSocket` (el `Socket` de socket.io-client) o es `null` |
-| `<mf-voice-input>` | `{ v, gameId, lang, recognizer, releaseDelayMs?, agentUrl }`. Sin `releaseDelayMs` usa `DEFAULT_RELEASE_DELAY_MS = 400` de `shared` ([ADR 5](adr/0005-strategy-y-reconocedor-por-defecto.md)) |
+| `<mf-voice-input>` | `{ v, gameId, lang, recognizer, releaseDelayMs?, agentUrl, cloudAgentUrl? }`. Sin `releaseDelayMs` usa `DEFAULT_RELEASE_DELAY_MS = 400` de `shared` ([ADR 5](adr/0005-strategy-y-reconocedor-por-defecto.md)). `cloudAgentUrl` es un segundo agente, el de Whisper en EC2 por túneles (`PUBLIC_CLOUD_AGENT_URL`, por ejemplo `http://127.0.0.1:8766`); si falta o es `null`, el selector no ofrece esa opción y todo queda como sin el campo |
 | `<mf-history>` | `{ v, gameId }`. Las jugadas llegan por `cs:move-applied` |
 | `<mf-ranking>` | `{ v, apiUrl, active }`. Lee él mismo `GET /ranking`, que es público: no recibe socket ni token. `apiUrl` es `null` si la web no tiene servidor configurado. `active` es `true` mientras se ve la ruta `#/ranking`; el ranking se recarga cada vez que pasa a `true`, no con cada contexto nuevo |
 

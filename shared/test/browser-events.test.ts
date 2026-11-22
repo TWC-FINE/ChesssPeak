@@ -72,6 +72,11 @@ describe('contexts (v1)', () => {
     expect(gameContextSchema.safeParse({ v: 1, gameId: null, orientation: 'green' }).success).toBe(false);
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: null }).success).toBe(true);
     expect(voiceInputContextSchema.safeParse({ v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'no es url' }).success).toBe(false);
+    // the second agent is optional: absent, null or a URL
+    const voice = { v: 1, gameId: 'g', lang: 'es-CO', recognizer: 'webspeech', agentUrl: 'http://127.0.0.1:8765' };
+    expect(voiceInputContextSchema.safeParse({ ...voice, cloudAgentUrl: null }).success).toBe(true);
+    expect(voiceInputContextSchema.safeParse({ ...voice, cloudAgentUrl: 'http://127.0.0.1:8766' }).success).toBe(true);
+    expect(voiceInputContextSchema.safeParse({ ...voice, cloudAgentUrl: 'no es url' }).success).toBe(false);
     expect(historyContextSchema.safeParse({ v: 1, gameId: 'g' }).success).toBe(true);
   });
 

@@ -10,7 +10,7 @@ pnpm --filter @chessspeak/server build
 pnpm --filter @chessspeak/server start      # en otra terminal: API en http://127.0.0.1:3000
 ```
 
-Copia `web/shell/.env.example` a `web/shell/.env` y pon en ella `PUBLIC_API_URL=http://127.0.0.1:3000`. No dejes solo esa línea: sin `PUBLIC_AGENT_URL` no aparece el selector de reconocedor. Después:
+Copia `web/shell/.env.example` a `web/shell/.env` y pon en ella `PUBLIC_API_URL=http://127.0.0.1:3000`. No dejes solo esa línea: sin `PUBLIC_AGENT_URL` no aparece el selector de reconocedor. Para la demo del balanceo, añade `PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:8766`: el selector ofrece entonces también «Whisper en la nube (EC2)», que va al segundo agente. Vacía, esa opción no aparece. Después:
 
 ```powershell
 pnpm build:web

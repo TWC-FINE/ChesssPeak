@@ -76,7 +76,7 @@ function render(): void {
   }
   for (const [tag, element] of mounted) {
     // every new context object makes <mf-game> ask the server for the state, which a reconnection needs
-    (element as HTMLElement & { context?: unknown }).context = contextFor(tag, gameId, config.PUBLIC_AGENT_URL || null, online ? connection : null, ranking);
+    (element as HTMLElement & { context?: unknown }).context = contextFor(tag, gameId, config.PUBLIC_AGENT_URL || null, online ? connection : null, ranking, config.PUBLIC_CLOUD_AGENT_URL || null);
   }
 }
 

@@ -29,6 +29,18 @@ const SILENCE: Resolution = { kind: 'nomatch', candidates: [] };
 /** ADR 5: measured in the spike, on an i5-12400F, without recording or transport. */
 const WHISPER_LATENCY = 'Whisper local es más lento: p50 de 2,91 s y p95 de 3,06 s solo de inferencia, en un i5-12400F; en tu equipo será distinto. El audio no sale de tu equipo.';
 
+/** ADR 12: measured on 2 c7i-flex.large of us-east-2 through SSH tunnels; C1 is not met. */
+const WHISPER_CLOUD_NOTICE =
+  'Whisper en la nube (EC2) demuestra el balanceo entre 2 instancias; no es apto para jugar: el p95 de la peor repetición fue de 13,59 s, y el umbral era de 7,5 s. El audio sale de tu equipo hacia las instancias y no se guarda en ninguna parte.';
+
+const CHOICE_LABELS = { webspeech: 'Web Speech', whisper: 'Whisper local', 'whisper-cloud': 'Whisper en la nube (EC2)' } as const;
+
+type AgentState = 'checking' | 'up' | 'down';
+
+function stateText(state: AgentState): string {
+  return state === 'checking' ? '(comprobando…)' : state === 'up' ? '(disponible)' : '(no responde)';
+}
+
 function failureMessage(outcome: RecognitionOutcome): string {
   switch (outcome.failure) {
     case 'not-allowed':
@@ -64,7 +76,8 @@ export class MfVoiceInput extends LitElement {
   private fromContext: { key: string; recognizer: SpeechRecognizer | undefined } = { key: '', recognizer: undefined };
   private choice: RecognizerChoice | undefined;
   private selectorOpen = false;
-  private agentState: 'checking' | 'up' | 'down' = 'checking';
+  private agentState: AgentState = 'checking';
+  private cloudState: AgentState = 'checking';
   private position: Position | undefined;
   private candidate: Candidate | undefined;
   /** The telemetry of the spoken candidate: `accepted` is only known when it is confirmed or dropped. */
@@ -111,7 +124,7 @@ export class MfVoiceInput extends LitElement {
   /** The shell sends a new context on every change, and a recognizer is only replaced when it would be different. */
   private chooseRecognizer(): void {
     const context = this.context;
-    const key = `${context?.recognizer}|${context?.lang}|${releaseDelayOf(context)}|${context?.agentUrl}|${this.choice}`;
+    const key = `${context?.recognizer}|${context?.lang}|${releaseDelayOf(context)}|${context?.agentUrl}|${context?.cloudAgentUrl}|${this.choice}`;
     if (key === this.fromContext.key) return;
     this.fromContext.recognizer?.dispose?.();
     this.fromContext = { key, recognizer: createRecognizer(context, this.choice) };
@@ -153,27 +166,48 @@ export class MfVoiceInput extends LitElement {
     </div>`;
   }
 
-  /** Only when the shell knows an agent. The agent is asked only here, on opening: from a public page that can trigger a browser prompt. */
+  /** Both are Whisper; which agent it goes to depends on what the player chose. */
+  private activeChoice(): RecognizerChoice {
+    if (this.fromContext.recognizer?.name !== 'whisper') return 'webspeech';
+    return this.choice === 'whisper-cloud' ? 'whisper-cloud' : 'whisper';
+  }
+
+  /**
+   * Only when the shell knows an agent. The agents are asked only here, on opening: from a public page that can trigger a
+   * browser prompt. The EC2 choice appears only when the context has a second agent.
+   */
   private renderSelector() {
     const agentUrl = this.context?.agentUrl;
-    if (agentUrl == null || this.context?.recognizer === 'text' || this.speech !== undefined) return '';
-    const active = this.fromContext.recognizer?.name;
+    const cloudAgentUrl = this.context?.cloudAgentUrl;
+    if ((agentUrl == null && cloudAgentUrl == null) || this.context?.recognizer === 'text' || this.speech !== undefined) return '';
+    const active = this.activeChoice();
     const busy = this.talk !== undefined || this.processing;
     return html`<div class="csv-selector">
       <button type="button" data-action="choose-recognizer" aria-expanded=${this.selectorOpen} ?disabled=${busy} @click=${this.toggleSelector}>
-        Reconocedor: ${active === 'whisper' ? 'Whisper local' : 'Web Speech'}
+        Reconocedor: ${CHOICE_LABELS[active]}
       </button>
       ${this.selectorOpen
         ? html`<fieldset class="csv-options">
             <legend>Elige el reconocedor</legend>
-            <label><input type="radio" name="recognizer" value="webspeech" .checked=${active !== 'whisper'} ?disabled=${busy} @change=${this.onChoose} /> Web Speech (por defecto)</label>
-            <label>
-              <input type="radio" name="recognizer" value="whisper" .checked=${active === 'whisper'} ?disabled=${busy || this.agentState !== 'up'} @change=${this.onChoose} />
-              Whisper local
-              <span data-agent-state=${this.agentState}>${this.agentState === 'checking' ? '(comprobando…)' : this.agentState === 'up' ? '(disponible)' : '(no responde)'}</span>
-            </label>
-            ${this.agentState === 'down' ? html`<p class="csv-notice" data-agent-down>No responde el agente local en ${agentUrl}. Arráncalo, o el navegador puede estar bloqueándolo desde una web pública.</p>` : ''}
-            <p class="csv-info" data-whisper-latency>${WHISPER_LATENCY}</p>
+            <label><input type="radio" name="recognizer" value="webspeech" .checked=${active === 'webspeech'} ?disabled=${busy} @change=${this.onChoose} /> Web Speech (por defecto)</label>
+            ${agentUrl == null
+              ? ''
+              : html`<label>
+                    <input type="radio" name="recognizer" value="whisper" .checked=${active === 'whisper'} ?disabled=${busy || this.agentState !== 'up'} @change=${this.onChoose} />
+                    Whisper local
+                    <span data-agent-state=${this.agentState}>${stateText(this.agentState)}</span>
+                  </label>
+                  ${this.agentState === 'down' ? html`<p class="csv-notice" data-agent-down>No responde el agente local en ${agentUrl}. Arráncalo, o el navegador puede estar bloqueándolo desde una web pública.</p>` : ''}
+                  <p class="csv-info" data-whisper-latency>${WHISPER_LATENCY}</p>`}
+            ${cloudAgentUrl == null
+              ? ''
+              : html`<label>
+                    <input type="radio" name="recognizer" value="whisper-cloud" .checked=${active === 'whisper-cloud'} ?disabled=${busy || this.cloudState !== 'up'} @change=${this.onChoose} />
+                    Whisper en la nube (EC2)
+                    <span data-cloud-state=${this.cloudState}>${stateText(this.cloudState)}</span>
+                  </label>
+                  ${this.cloudState === 'down' ? html`<p class="csv-notice" data-cloud-down>No responde el agente de EC2 en ${cloudAgentUrl}. Arráncalo con el lanzador de la demo, o el navegador puede estar bloqueándolo desde una web pública.</p>` : ''}
+                  <p class="csv-info" data-whisper-cloud-notice>${WHISPER_CLOUD_NOTICE}</p>`}
           </fieldset>`
         : ''}
     </div>`;
@@ -182,13 +216,23 @@ export class MfVoiceInput extends LitElement {
   private readonly toggleSelector = (): void => {
     this.selectorOpen = !this.selectorOpen;
     this.requestUpdate();
+    if (!this.selectorOpen) return;
     const agentUrl = this.context?.agentUrl;
-    if (!this.selectorOpen || agentUrl == null) return;
-    this.agentState = 'checking';
-    void agentAnswers(agentUrl).then((up) => {
-      this.agentState = up ? 'up' : 'down';
-      this.requestUpdate();
-    });
+    const cloudAgentUrl = this.context?.cloudAgentUrl;
+    if (agentUrl != null) {
+      this.agentState = 'checking';
+      void agentAnswers(agentUrl).then((up) => {
+        this.agentState = up ? 'up' : 'down';
+        this.requestUpdate();
+      });
+    }
+    if (cloudAgentUrl != null) {
+      this.cloudState = 'checking';
+      void agentAnswers(cloudAgentUrl).then((up) => {
+        this.cloudState = up ? 'up' : 'down';
+        this.requestUpdate();
+      });
+    }
   };
 
   private readonly onChoose = (event: Event): void => {

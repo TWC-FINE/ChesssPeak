@@ -157,6 +157,124 @@ describe('the recognizer selector', () => {
   });
 });
 
+describe('the EC2 choice, behind a second agent', () => {
+  const CLOUD = 'http://127.0.0.1:8766';
+  const cloudOption = (element: VoiceElement) => element.querySelector<HTMLInputElement>('input[value=whisper-cloud]');
+
+  async function mountWithCloud(agentUrl: string | null = AGENT): Promise<VoiceElement> {
+    const element = document.createElement('mf-voice-input') as VoiceElement;
+    element.context = { v: 1, gameId: 'g1', lang: 'es-CO', recognizer: 'webspeech', agentUrl, cloudAgentUrl: CLOUD };
+    document.body.append(element);
+    elements.push(element);
+    await element.updateComplete;
+    return element;
+  }
+
+  async function chooseCloud(element: VoiceElement): Promise<void> {
+    const option = cloudOption(element)!;
+    option.checked = true;
+    option.dispatchEvent(new Event('change', { bubbles: true }));
+    await element.updateComplete;
+  }
+
+  it('is not offered without cloudAgentUrl, and only the local agent is asked, as before', async () => {
+    const element = await mount();
+    await open(element);
+    expect(cloudOption(element)).toBeNull();
+    expect(element.querySelector('[data-whisper-cloud-notice]')).toBeNull();
+    expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([`${AGENT}/health`]);
+  });
+
+  it('is not offered with cloudAgentUrl null', async () => {
+    const element = document.createElement('mf-voice-input') as VoiceElement;
+    element.context = { v: 1, gameId: 'g1', lang: 'es-CO', recognizer: 'webspeech', agentUrl: AGENT, cloudAgentUrl: null };
+    document.body.append(element);
+    elements.push(element);
+    await element.updateComplete;
+    await open(element);
+    expect(cloudOption(element)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('asks both agents on opening, and neither before', async () => {
+    const element = await mountWithCloud();
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(fetchMock).not.toHaveBeenCalled();
+    await open(element);
+    expect(fetchMock.mock.calls.map((call) => call[0]).sort()).toEqual([`${AGENT}/health`, `${CLOUD}/health`]);
+  });
+
+  it('offers it when its agent answers, and declares that it is not fit to play and that the audio leaves the machine', async () => {
+    const element = await mountWithCloud();
+    await open(element);
+    expect(cloudOption(element)!.disabled).toBe(false);
+    expect(element.querySelector('[data-cloud-state]')!.textContent).toContain('disponible');
+    const notice = element.querySelector('[data-whisper-cloud-notice]')!.textContent;
+    expect(notice).toContain('13,59 s');
+    expect(notice).toContain('no es apto para jugar');
+    expect(notice).toContain('sale de tu equipo');
+  });
+
+  it('keeps each agent apart: the EC2 one down does not disable local Whisper', async () => {
+    fetchMock.mockImplementation((url: string) => (url.startsWith(CLOUD) ? Promise.reject(new TypeError('down')) : Promise.resolve(new Response('{"ok":true}'))));
+    const element = await mountWithCloud();
+    await open(element);
+    expect(cloudOption(element)!.disabled).toBe(true);
+    expect(element.querySelector('[data-cloud-down]')!.textContent).toContain(CLOUD);
+    expect(whisperOption(element)!.disabled).toBe(false);
+    expect(element.querySelector('[data-agent-down]')).toBeNull();
+  });
+
+  it('keeps each agent apart: the local one down does not disable EC2', async () => {
+    fetchMock.mockImplementation((url: string) => (url.startsWith(AGENT) ? Promise.reject(new TypeError('down')) : Promise.resolve(new Response('{"ok":true}'))));
+    const element = await mountWithCloud();
+    await open(element);
+    expect(whisperOption(element)!.disabled).toBe(true);
+    expect(cloudOption(element)!.disabled).toBe(false);
+    expect(element.querySelector('[data-cloud-down]')).toBeNull();
+  });
+
+  it('switches to Whisper on EC2 when chosen, and back to local Whisper', async () => {
+    const element = await mountWithCloud();
+    await open(element);
+    await chooseCloud(element);
+    expect(opener(element)!.textContent).toContain('Whisper en la nube (EC2)');
+    expect(element.querySelector('.csv-root > .csv-info')!.textContent).toContain('whisper');
+    expect(cloudOption(element)!.checked).toBe(true);
+    await chooseWhisper(element);
+    expect(opener(element)!.textContent).toContain('Whisper local');
+    expect(cloudOption(element)!.checked).toBe(false);
+  });
+
+  it('keeps the EC2 choice when the shell sends a new context', async () => {
+    const element = await mountWithCloud();
+    await open(element);
+    await chooseCloud(element);
+    element.context = { v: 1, gameId: 'g1', lang: 'es-CO', recognizer: 'webspeech', agentUrl: AGENT, cloudAgentUrl: CLOUD };
+    await element.updateComplete;
+    expect(opener(element)!.textContent).toContain('Whisper en la nube (EC2)');
+  });
+
+  it('falls back to Web Speech when a new context no longer has the second agent', async () => {
+    const element = await mountWithCloud();
+    await open(element);
+    await chooseCloud(element);
+    element.context = { v: 1, gameId: 'g1', lang: 'es-CO', recognizer: 'webspeech', agentUrl: AGENT };
+    await element.updateComplete;
+    expect(opener(element)!.textContent).toContain('Web Speech');
+    expect(element.querySelector('.csv-root > .csv-info')!.textContent).toContain('webspeech');
+  });
+
+  it('appears with only the second agent, without the local choice', async () => {
+    const element = await mountWithCloud(null);
+    await open(element);
+    expect(whisperOption(element)).toBeNull();
+    expect(element.querySelector('[data-whisper-latency]')).toBeNull();
+    expect(cloudOption(element)).not.toBeNull();
+    expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([`${CLOUD}/health`]);
+  });
+});
+
 describe('the messages of the local agent', () => {
   async function outcomeOf(prepare: (fake: FakeRecognizer) => void) {
     const fake = new FakeRecognizer();

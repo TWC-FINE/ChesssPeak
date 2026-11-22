@@ -25,6 +25,8 @@ export const voiceInputContextSchema = z.object({
   releaseDelayMs: z.number().int().nonnegative().optional(),
   /** Local Whisper agent, e.g. http://127.0.0.1:8765; null when not available. */
   agentUrl: z.string().url().nullable(),
+  /** Second agent, for Whisper on EC2 through SSH tunnels, e.g. http://127.0.0.1:8766. Absent or null: the choice is not offered. */
+  cloudAgentUrl: z.string().url().nullable().optional(),
 });
 export type VoiceInputContext = z.infer<typeof voiceInputContextSchema>;
 

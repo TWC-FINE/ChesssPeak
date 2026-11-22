@@ -16,12 +16,14 @@ export function contextFor(
   agentUrl: string | null,
   socket: GameSocket | null,
   ranking: RankingView = { apiUrl: null, active: false },
+  cloudAgentUrl: string | null = null,
 ): GameContext | VoiceInputContext | HistoryContext | RankingContext | undefined {
   switch (tag) {
     case 'mf-game':
       return { v: 1, gameId, orientation: 'white', socket };
     case 'mf-voice-input':
-      return { v: 1, gameId, lang: 'es-CO', recognizer: 'webspeech', agentUrl };
+      // without the second agent the context is the same as before it existed
+      return { v: 1, gameId, lang: 'es-CO', recognizer: 'webspeech', agentUrl, ...(cloudAgentUrl === null ? {} : { cloudAgentUrl }) };
     case 'mf-history':
       return { v: 1, gameId };
     case 'mf-ranking':
