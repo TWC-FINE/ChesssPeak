@@ -1,6 +1,7 @@
 export interface ShellConfig {
   PUBLIC_API_URL: string;
   PUBLIC_AGENT_URL: string;
+  PUBLIC_CLOUD_AGENT_URL: string;
   PUBLIC_MF_TIMEOUT_MS: string;
 }
 
@@ -10,6 +11,7 @@ export function readConfig(source: unknown = (globalThis as { CS_CONFIG?: unknow
   return {
     PUBLIC_API_URL: given.PUBLIC_API_URL ?? '',
     PUBLIC_AGENT_URL: given.PUBLIC_AGENT_URL ?? '',
+    PUBLIC_CLOUD_AGENT_URL: given.PUBLIC_CLOUD_AGENT_URL ?? '',
     PUBLIC_MF_TIMEOUT_MS: given.PUBLIC_MF_TIMEOUT_MS ?? '5000',
   };
 }

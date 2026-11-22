@@ -43,6 +43,24 @@ describe('contexts and config', () => {
     expect(contextFor('other', null, null, null)).toBeUndefined();
   });
 
+  it('adds the second agent (EC2) to <mf-voice-input> only when it is configured', () => {
+    // without it, the context has no such key, as before the field existed
+    expect(contextFor('mf-voice-input', null, 'http://127.0.0.1:8765', null)).not.toHaveProperty('cloudAgentUrl');
+    expect(contextFor('mf-voice-input', null, 'http://127.0.0.1:8765', null, undefined, null)).not.toHaveProperty('cloudAgentUrl');
+    expect(contextFor('mf-voice-input', 'x', 'http://127.0.0.1:8765', null, undefined, 'http://127.0.0.1:8766')).toEqual({
+      v: 1,
+      gameId: 'x',
+      lang: 'es-CO',
+      recognizer: 'webspeech',
+      agentUrl: 'http://127.0.0.1:8765',
+      cloudAgentUrl: 'http://127.0.0.1:8766',
+    });
+    // only <mf-voice-input> hears about it
+    expect(contextFor('mf-game', 'x', null, null, undefined, 'http://127.0.0.1:8766')).not.toHaveProperty('cloudAgentUrl');
+    expect(readConfig(undefined).PUBLIC_CLOUD_AGENT_URL).toBe('');
+    expect(readConfig({ PUBLIC_CLOUD_AGENT_URL: 'http://127.0.0.1:8766' }).PUBLIC_CLOUD_AGENT_URL).toBe('http://127.0.0.1:8766');
+  });
+
   it('gives the socket only to <mf-game> (least privilege)', () => {
     expect(contextFor('mf-game', 'x', null, socket)).toMatchObject({ socket });
     expect(contextFor('mf-voice-input', 'x', null, socket)).not.toHaveProperty('socket');
