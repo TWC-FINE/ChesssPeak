@@ -1,6 +1,6 @@
 import { availableParallelism } from 'node:os';
 import { basename } from 'node:path';
-import { loadEnv } from './env.js';
+import { agentEnv, loadEnv } from './env.js';
 import { createMonitor, readRss } from './monitor.js';
 import { PoolError, WorkerPool, type PoolOptions } from './pool.js';
 import { CHESS_PROMPT } from './prompt.js';
@@ -15,7 +15,7 @@ import { launchWhisperWorker, probeHealth, transcribeWith } from './whisper-proc
 //   or a tunnel to a cloud instance) and owns no process. Without it, nothing changes.
 // The product always uses the small model with the chess prompt (ADR 5); WHISPER_PROMPT only overrides the text.
 
-const env = { ...loadEnv(), ...pick(process.env, /^(LB_|WHISPER_URLS$)/) };
+const env = agentEnv(loadEnv(), process.env);
 const config = agentConfigFromEnv(env);
 const language = env.WHISPER_LANGUAGE || 'es';
 
@@ -140,9 +140,4 @@ console.log(`Dashboard: http://${config.host}:${config.port}/lb/dashboard`);
 function integer(value: string | undefined, fallback: number): number {
   const parsed = Number(value);
   return value === undefined || value === '' || !Number.isInteger(parsed) ? fallback : parsed;
-}
-
-/** loadEnv only lets the environment override keys present in .env; LB_* and WHISPER_URLS are read from the environment too. */
-function pick(source: NodeJS.ProcessEnv, pattern: RegExp): Record<string, string> {
-  return Object.fromEntries(Object.entries(source).filter((entry): entry is [string, string] => pattern.test(entry[0]) && entry[1] !== undefined));
 }

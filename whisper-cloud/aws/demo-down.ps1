@@ -1,5 +1,6 @@
-﻿# Closes what demo-up.ps1 started: the agent window, the tunnel windows and, if it started them, the 3 local
+﻿# Closes what demo-up.ps1 started: the agent windows, the tunnel windows and, if it started them, the 3 local
 # containers. Then it reminds you what is left in the EC2 console, which no script here touches.
+#   demo-down.cmd                         (double click)
 #   .\whisper-cloud\aws\demo-down.ps1
 #   .\whisper-cloud\aws\demo-down.ps1 -KeepContainers     (leaves the local containers running)
 param([switch]$KeepContainers)
@@ -13,7 +14,8 @@ $state = Get-Content $stateFile -Raw -Encoding UTF8 | ConvertFrom-Json
 
 # a pid is closed only while it is still a PowerShell window started after demo-up.ps1 began
 $since = [datetime]$state.startedAt
-foreach ($id in @(@($state.agentPid) + @($state.tunnelPids) | Where-Object { $null -ne $_ })) {
+# both agents (8766 and, if demo-up.ps1 started it, 8765) and the tunnels; an agent it reused is left running
+foreach ($id in @(@($state.agentPid) + @($state.localAgentPid) + @($state.tunnelPids) | Where-Object { $null -ne $_ })) {
   $process = Get-Process -Id $id -ErrorAction SilentlyContinue
   if ($null -eq $process) { Write-Host "pid $id ya no existe."; continue }
   if ($process.ProcessName -ne 'powershell' -or $process.StartTime -lt $since) { Write-Host "pid $id no es una ventana de la demo: no se toca."; continue }

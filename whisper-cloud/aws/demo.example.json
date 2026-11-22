@@ -1,0 +1,4 @@
+{
+  "keyPath": "C:/ruta/fuera/del/repo/chessspeak-ec2.pem",
+  "hostIps": ["IP elástica de w1", "IP elástica de w2"]
+}
