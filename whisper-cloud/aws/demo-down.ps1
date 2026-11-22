@@ -1,5 +1,5 @@
-﻿# Closes what demo-up.ps1 started: the agent windows, the tunnel windows and, if it started them, the 3 local
-# containers. Then it reminds you what is left in the EC2 console, which no script here touches.
+﻿# Closes what demo-up.ps1 started: the agent windows, the tunnel windows, the web on 5500 and, if it started them, the
+# 3 local containers. Then it reminds you what is left in the EC2 console, which no script here touches.
 #   demo-down.cmd                         (double click)
 #   .\whisper-cloud\aws\demo-down.ps1
 #   .\whisper-cloud\aws\demo-down.ps1 -KeepContainers     (leaves the local containers running)
@@ -22,6 +22,17 @@ foreach ($id in @(@($state.agentPid) + @($state.localAgentPid) + @($state.tunnel
   # /T closes what runs inside the window too: pnpm and node for the agent, ssh for a tunnel
   & taskkill /PID $id /T /F | Out-Null
   Write-Host "Cerrada la ventana $id."
+}
+# the web (node, with no window), if demo-up.ps1 started it, with the same guard; a web it reused is left running
+if ($null -ne $state.webPid) {
+  $id = $state.webPid
+  $process = Get-Process -Id $id -ErrorAction SilentlyContinue
+  if ($null -eq $process) { Write-Host "pid $id (web) ya no existe." }
+  elseif ($process.ProcessName -ne 'node' -or $process.StartTime -lt $since) { Write-Host "pid $id no es la web de la demo: no se toca." }
+  else {
+    & taskkill /PID $id /T /F | Out-Null
+    Write-Host "Cerrada la web del 5500 ($id)."
+  }
 }
 if ($state.composeStarted -and -not $KeepContainers) {
   & docker compose -f $compose down

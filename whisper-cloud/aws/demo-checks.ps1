@@ -35,3 +35,53 @@ function Assert-LocalAgentReusable($Health, [int]$Port = 8765) {
     throw "El agente del $Port está en modo $mode, no en modo procesos: «Whisper local» enviaría el audio fuera del equipo. Ciérralo (Ctrl+C en su ventana, o demo-down) y vuelve a ejecutar demo-up, que lo arranca en modo procesos."
   }
 }
+
+# The web of the demo (web/dist on 127.0.0.1:5500), which demo-up.ps1 serves unless -NoWeb. These checks run before any
+# tunnel or agent starts. Read-WebConfig stops when web/dist was never built: demo-up.ps1 does not build it on its own.
+function Read-WebConfig([string]$DistPath) {
+  foreach ($name in @('index.html', 'config.js')) {
+    if (-not (Test-Path -LiteralPath (Join-Path $DistPath $name) -PathType Leaf)) {
+      throw "Falta web\dist\${name}: ejecuta pnpm build:web y vuelve a ejecutar demo-up (o demo-up -NoWeb, sin la web)."
+    }
+  }
+  Get-Content -LiteralPath (Join-Path $DistPath 'config.js') -Raw -Encoding UTF8
+}
+
+# the values of config.js (window.CS_CONFIG = {...};), or $null when the text is not that
+function ConvertFrom-WebConfig([string]$Text) {
+  if ($Text -notmatch '^\s*window\.CS_CONFIG\s*=\s*(\{[\s\S]*\})\s*;?\s*$') { return $null }
+  try { $Matches[1] | ConvertFrom-Json } catch { $null }
+}
+
+# what in config.js would spoil the demo: no server, or no agent for one of the Whisper choices. Warnings, not stops.
+function Get-WebConfigWarnings([string]$Text, [int]$LocalAgentPort = 8765, [int]$CloudAgentPort = 8766) {
+  $config = ConvertFrom-WebConfig $Text
+  if ($null -eq $config) { return @('web\dist\config.js no tiene la forma window.CS_CONFIG = {...}: vuelve a ejecutar pnpm build:web.') }
+  $warnings = @()
+  $api = [string]$config.PUBLIC_API_URL
+  if ([string]::IsNullOrWhiteSpace($api)) {
+    $warnings += 'PUBLIC_API_URL está vacío: la página no puede crear partidas. Ponlo en web\shell\.env (https://chessspeak-server.onrender.com) y ejecuta pnpm build:web.'
+  } elseif ($api -match '^https?://(127\.0\.0\.1|localhost)(:|/|$)') {
+    $warnings += "PUBLIC_API_URL es $api, un servidor de este equipo, no Render. Si no es lo que quieres, cámbialo en web\shell\.env y ejecuta pnpm build:web."
+  }
+  if (-not ([string]$config.PUBLIC_AGENT_URL).Contains("127.0.0.1:$LocalAgentPort")) {
+    $warnings += "PUBLIC_AGENT_URL no es http://127.0.0.1:${LocalAgentPort}: «Whisper local» no llegará a su agente. Cámbialo en web\shell\.env y ejecuta pnpm build:web."
+  }
+  if (-not ([string]$config.PUBLIC_CLOUD_AGENT_URL).Contains("127.0.0.1:$CloudAgentPort")) {
+    $warnings += "web\dist no tiene PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:${CloudAgentPort}: la página no ofrecerá «Whisper en la nube (EC2)». Añádela en web\shell\.env y ejecuta pnpm build:web."
+  }
+  $warnings
+}
+
+# the sources changed after the build ($BuiltAt, the time of config.js): web/dist may be out of date
+function Get-NewerSources([datetime]$BuiltAt, $Items) {
+  @($Items | Where-Object { $null -ne $_ -and $_.LastWriteTime -gt $BuiltAt })
+}
+
+# a port 5500 already in use is reused only if it serves the config.js of a ChessSpeak build; $Served is what it answered
+# to /config.js, or $null when it did not answer
+function Assert-WebPortUsable($Served, [int]$Port = 5500) {
+  if ($null -eq (ConvertFrom-WebConfig ([string]$Served))) {
+    throw "El puerto $Port está ocupado por otra cosa (¿Live Server con otra carpeta?): no sirve la web de ChessSpeak. Ciérralo y vuelve a ejecutar demo-up (o demo-up -NoWeb, sin la web)."
+  }
+}

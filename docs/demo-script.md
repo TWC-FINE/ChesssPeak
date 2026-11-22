@@ -11,11 +11,11 @@ Para la demo en vivo de la entrega del 19 de noviembre de 2026, en **Edge**, con
 | Paso | Cómo | Comprobación |
 |---|---|---|
 | Despertar Render | Abrir <https://chessspeak-server.onrender.com/health> | Responde 200, con las dos bases en `up`. Tras dormir, la primera respuesta tardó 52,5 s el 8 de noviembre |
-| Web en local contra Render | En `web/shell/.env`: `PUBLIC_API_URL=https://chessspeak-server.onrender.com` y `PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:8766`. Después, `pnpm build:web` y `pnpm serve:web` | <http://127.0.0.1:5500> carga los tres microfrontends |
+| Web en local contra Render | En `web/shell/.env`: `PUBLIC_API_URL=https://chessspeak-server.onrender.com` y `PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:8766`. Después, `pnpm build:web`. La sirve en el 5500 `demo-up.cmd` (fila del balanceo); con `demo-up -NoWeb`, `pnpm serve:web` como antes | <http://127.0.0.1:5500> carga los tres microfrontends |
 | Dos jugadores | Dos ventanas de Edge, normal e InPrivate, o dos laptops. La sesión vive en `sessionStorage`, así que cada pestaña es un jugador | Cada ventana entra como invitado con un nombre distinto |
 | Micrófonos | Diademas. Probar «e cuatro» en cada ventana | La flecha aparece y se cancela con «Cancelar» |
 | Configuración local, **una sola vez** | Copiar `whisper-cloud/aws/demo.example.json` a `%LOCALAPPDATA%\ChessSpeak\demo.json`, fuera del repo, y escribir en ella la ruta de la `.pem` y las 2 IP elásticas. Con barras `/` en la ruta no hay que escapar nada | `demo-up` dice «Clave e IP leídas de la configuración local» |
-| Balanceo en EC2, **unos 15 minutos antes** | En la consola de EC2 (`us-east-2`), **Iniciar** las 2 instancias. Las IP elásticas no cambian. Si la red no es la de casa (la sala o los datos del celular), cambiar antes la regla del puerto 22 a «Mi IP», que debe terminar en `/32`; nunca `0.0.0.0/0`. Después, **doble clic en `whisper-cloud/aws/demo-up.cmd`** (sección 5) | Arrancan los dos agentes, cada uno en su ventana: el del **8765**, en modo procesos, para «Whisper local» (el audio no sale del equipo), y el del **8766**, por los 2 túneles, para «Whisper en la nube (EC2)». Se abre <http://127.0.0.1:8766/lb/dashboard> con w1 y w2 activos |
+| Balanceo en EC2, **unos 15 minutos antes** | En la consola de EC2 (`us-east-2`), **Iniciar** las 2 instancias. Las IP elásticas no cambian. Si la red no es la de casa (la sala o los datos del celular), cambiar antes la regla del puerto 22 a «Mi IP», que debe terminar en `/32`; nunca `0.0.0.0/0`. Después, **doble clic en `whisper-cloud/aws/demo-up.cmd`** (sección 5) | Arrancan los dos agentes, cada uno en su ventana: el del **8765**, en modo procesos, para «Whisper local» (el audio no sale del equipo), y el del **8766**, por los 2 túneles, para «Whisper en la nube (EC2)». Se abre <http://127.0.0.1:8766/lb/dashboard> con w1 y w2 activos. La web queda servida en el 5500, sin ventana, y Edge se abre en <http://127.0.0.1:5500> |
 | Plan B del balanceo | Docker Desktop encendido y la imagen de los 3 contenedores ya construida, **sin arrancarlos** | `docker images` muestra `chessspeak-whisper:small-d1be6fd` |
 | Datos | Pestañas ya abiertas y con sesión iniciada: Data Explorer de Atlas (`voice_attempts` y `game_moves`) y SQL Editor de Neon (`games`) | **No mostrar ninguna cadena de conexión ni contraseña en pantalla** |
 | Respaldo | El video de respaldo, a mano y probado | Se reproduce sin conexión |
@@ -76,15 +76,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\whisper-cloud\aws\demo-up.
 # - un túnel con reconexión por instancia, y comprueba /health. La .pem nunca se muestra en pantalla;
 # - el agente del 8766, apuntando a EC2, con los valores de C4 y el sondeo cada 2 s de la sección 8 de
 #   docs/whisper-cloud-criteria.md: «Whisper en la nube (EC2)». Si EC2 no responde en 90 s, pasa solo al plan B local.
-# Avisa si web\dist se compiló sin PUBLIC_CLOUD_AGENT_URL, y abre el dashboard del 8766.
-# Solo los túneles, para comprobarlos antes: añadir -TunnelsOnly. Sin el agente del 8765: -NoLocalAgent
+# Antes de abrir nada comprueba la web: para si falta web\dist\config.js (no compila: pnpm build:web) o si el 5500 está
+# ocupado por algo que no es esta web, y avisa si config.js no tiene PUBLIC_API_URL, PUBLIC_AGENT_URL o
+# PUBLIC_CLOUD_AGENT_URL, o si el build es anterior a los últimos cambios. Al final sirve web\dist en el 5500 con node,
+# sin ventana (log en %TEMP%\chessspeak-web.log), y abre el dashboard del 8766 y Edge en http://127.0.0.1:5500.
+# Solo los túneles, para comprobarlos antes: añadir -TunnelsOnly. Sin el agente del 8765: -NoLocalAgent. Sin la web,
+# como antes de servirla demo-up (con pnpm serve:web aparte): -NoWeb. Sin abrir el navegador: -NoBrowser
 
 # Carga para el dashboard, en otra terminal, contra el agente del 8766. Usa un WAV de spike/recordings, que no está
 # en el repo. Con unos 11 s por clip en EC2, 10 peticiones caben en el tiempo del guion
 pnpm --filter @chessspeak/local-agent load --url http://127.0.0.1:8766/transcribe --steps 2 --requests 10 --label demo
 
 # Al terminar: doble clic en whisper-cloud\aws\demo-down.cmd. Cierra los dos agentes (el del 8765 solo si lo arrancó
-# demo-up), los túneles y, si los arrancó, los contenedores. Después, en la consola de EC2, «Detener» (no «Terminar»)
+# demo-up), los túneles, la web del 5500 (solo si la arrancó demo-up) y, si los arrancó, los contenedores. Después, en la consola de EC2, «Detener» (no «Terminar»)
 # las 2 instancias
 .\whisper-cloud\aws\demo-down.ps1
 
