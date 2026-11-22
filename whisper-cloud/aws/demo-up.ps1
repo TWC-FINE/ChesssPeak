@@ -12,6 +12,10 @@
 # -AwsTimeoutSeconds; otherwise the tunnels it opened are closed and the 8766 agent uses the 3 containers instead.
 # Each process runs in its own window, and demo-down.ps1 closes everything this script started. Nothing here talks to
 # AWS except through the SSH tunnels.
+# It also serves web/dist on 127.0.0.1:5500 (as pnpm serve:web, with node straight away, in no window; log in %TEMP%)
+# and opens it in Edge. web/dist must be built already (pnpm build:web): it stops before any tunnel when web/dist has no
+# config.js or port 5500 holds something that is not this web, and it only warns about config.js or an old build.
+# -NoWeb leaves the web out, as before.
 param(
   [string]$KeyPath,
   [string[]]$HostIps,
@@ -20,7 +24,8 @@ param(
   [switch]$TunnelsOnly,
   [switch]$LocalOnly,
   [switch]$NoLocalAgent,
-  [switch]$NoBrowser
+  [switch]$NoBrowser,
+  [switch]$NoWeb
 )
 $ErrorActionPreference = 'Stop'
 # Read-DemoConfig and Assert-LocalAgentReusable, tested in demo-checks.test.ps1
@@ -33,6 +38,11 @@ $ec2Ports = @(18201, 18202)
 $localPorts = @(18101, 18102, 18103)
 $localAgentPort = 8765
 $cloudAgentPort = 8766
+$webPort = 5500
+$webUrl = "http://127.0.0.1:$webPort"
+$dist = Join-Path $repo 'web\dist'
+$webLog = Join-Path $env:TEMP 'chessspeak-web.log'
+$webErrorLog = Join-Path $env:TEMP 'chessspeak-web.err.log'
 
 function Write-Step([string]$Message) { Write-Host "$(Get-Date -Format 'HH:mm:ss') $Message" }
 function Test-Listening([int]$Port) { $null -ne (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue) }
@@ -69,20 +79,62 @@ function Start-Agent([string]$Environment) {
   $command = "$Environment pnpm --filter @chessspeak/local-agent start"
   Start-Process powershell -PassThru -WorkingDirectory $repo -ArgumentList @('-NoProfile', '-NoExit', '-ExecutionPolicy', 'Bypass', '-Command', $command)
 }
+# the body of a page as text: Windows PowerShell 5.1 gives bytes when it does not take the content type for text
+function Get-Text([string]$Uri) {
+  $content = (Invoke-WebRequest -UseBasicParsing -Uri $Uri -TimeoutSec 3).Content
+  if ($content -is [byte[]]) { [System.Text.Encoding]::UTF8.GetString($content) } else { [string]$content }
+}
+function Wait-Web($Process, [int]$Seconds) {
+  $deadline = (Get-Date).AddSeconds($Seconds)
+  while ($true) {
+    try { if ((Invoke-WebRequest -UseBasicParsing -Uri "$webUrl/config.js" -TimeoutSec 2).StatusCode -eq 200) { return $true } } catch { }
+    if ($Process.HasExited -or (Get-Date) -gt $deadline) { return $false }
+    Start-Sleep -Milliseconds 500
+  }
+}
 
 if ($TunnelsOnly -and $LocalOnly) { throw '-TunnelsOnly y -LocalOnly no van juntos.' }
 if (-not $TunnelsOnly -and (Test-Listening $cloudAgentPort)) { throw "El puerto $cloudAgentPort está ocupado: ¿ya hay un agente de EC2? Ejecuta demo-down.ps1 y vuelve a empezar." }
 # the local config holds the IPs and the key path: inside the repo they could end up in a commit
 if (Test-InRepo $ConfigPath) { throw 'La configuración local no puede estar dentro del repo.' }
 
+# the web, checked before any tunnel or agent starts; it is started at the end, once the agents are ready
+$useWeb = -not $TunnelsOnly -and -not $NoWeb
+$webReused = $false
+$webWarnings = @()
+if ($useWeb) {
+  $node = Get-Command node -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($null -eq $node) { throw 'No encuentro node en el PATH, y hace falta para servir la web. Instala Node, o usa demo-up -NoWeb.' }
+  $webConfig = Read-WebConfig $dist
+  $webWarnings = @(Get-WebConfigWarnings $webConfig $localAgentPort $cloudAgentPort)
+  $builtAt = (Get-Item -LiteralPath (Join-Path $dist 'config.js')).LastWriteTime
+  $sourcePaths = @('web\shell\.env', 'web\shell\index.html', 'web\shell\src', 'shared\src', 'packages\voice-parser\src') + @(Get-ChildItem -LiteralPath (Join-Path $repo 'web') -Directory -Filter 'mf-*' | ForEach-Object { "web\$($_.Name)\src" })
+  $sources = @($sourcePaths | ForEach-Object { Join-Path $repo $_ } | Where-Object { Test-Path -LiteralPath $_ } | ForEach-Object {
+    if (Test-Path -LiteralPath $_ -PathType Container) { Get-ChildItem -LiteralPath $_ -Recurse -File } else { Get-Item -LiteralPath $_ }
+  })
+  $newer = @(Get-NewerSources $builtAt $sources)
+  if ($newer.Count -gt 0) {
+    $webWarnings += "web\dist puede estar desactualizado: $($newer.Count) archivo(s) cambiaron después del build, como $($newer[0].FullName.Substring($repo.Length + 1)). Si hace falta, ejecuta pnpm build:web."
+  }
+  if (Test-Listening $webPort) {
+    # reused only if it serves a ChessSpeak config.js; Live Server on another folder, or anything else, stops here
+    $served = try { Get-Text "$webUrl/config.js" } catch { $null }
+    Assert-WebPortUsable $served $webPort
+    $webReused = $true
+    if ($served.Trim() -ne $webConfig.Trim()) { $webWarnings += "Lo que sirve el $webPort no es el config.js de este web\dist: ¿otro build u otra carpeta? Ciérralo y vuelve a ejecutar demo-up." }
+  }
+  foreach ($warning in $webWarnings) { Write-Step "AVISO: $warning" }
+}
+
 # what this script starts, so that demo-down.ps1 can close it, even after a failure halfway
-$state = [ordered]@{ startedAt = (Get-Date).ToString('o'); mode = $null; tunnelPids = @(); agentPid = $null; localAgentPid = $null; composeStarted = $false }
+$state = [ordered]@{ startedAt = (Get-Date).ToString('o'); mode = $null; tunnelPids = @(); agentPid = $null; localAgentPid = $null; webPid = $null; composeStarted = $false }
 if (Test-Path $stateFile) {
   $previous = Get-Content $stateFile -Raw -Encoding UTF8 | ConvertFrom-Json
   # the first call of the session dates every window, so demo-down.ps1 still recognises the tunnels it opened
   $state.startedAt = [string]$previous.startedAt
   $state.tunnelPids = @($previous.tunnelPids | Where-Object { $null -ne $_ })
   $state.localAgentPid = $previous.localAgentPid
+  $state.webPid = $previous.webPid
   $state.composeStarted = [bool]$previous.composeStarted
 }
 
@@ -175,14 +227,36 @@ Write-Step "Agente del $cloudAgentPort listo: $(@($stats.workers | ForEach-Objec
 $localReady = $NoLocalAgent -or ($null -ne (Wait-Agent $localAgentPort 'process' 90))
 if (-not $localReady) { Write-Step "AVISO: el agente del $localAgentPort no está listo. La página mostrará «Whisper local» como «no responde»; mira su ventana." }
 
-# the page only offers the EC2 choice if web/dist was built with the second agent
-$webConfig = Join-Path $repo 'web\dist\config.js'
-if (-not ((Test-Path $webConfig) -and (Select-String -Path $webConfig -SimpleMatch "127.0.0.1:$cloudAgentPort" -Quiet))) {
-  Write-Step "AVISO: web\dist no tiene PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:$cloudAgentPort. Añádela en web\shell\.env y ejecuta pnpm build:web."
+if ($NoWeb) {
+  # as before: the page only offers the EC2 choice if web/dist was built with the second agent
+  $webConfigPath = Join-Path $repo 'web\dist\config.js'
+  if (-not ((Test-Path $webConfigPath) -and (Select-String -Path $webConfigPath -SimpleMatch "127.0.0.1:$cloudAgentPort" -Quiet))) {
+    Write-Step "AVISO: web\dist no tiene PUBLIC_CLOUD_AGENT_URL=http://127.0.0.1:$cloudAgentPort. Añádela en web\shell\.env y ejecuta pnpm build:web."
+  }
+} elseif ($webReused) {
+  Write-Step "Ya hay una web de ChessSpeak en el ${webPort}: se reutiliza."
+} else {
+  # node straight away, not pnpm (its .ps1 shim needs the execution policy), and hidden: demo-down.ps1 closes it
+  $web = Start-Process $node.Source -PassThru -WindowStyle Hidden -WorkingDirectory $repo -ArgumentList @('scripts\serve-web.mjs') -RedirectStandardOutput $webLog -RedirectStandardError $webErrorLog
+  $state.webPid = $web.Id
+  Save-State $state
+  if (-not (Wait-Web $web 15)) {
+    $detail = if (Test-Path $webErrorLog) { (Get-Content $webErrorLog -Raw -Encoding UTF8) } else { '' }
+    throw "La web no responde en $webUrl en 15 s. $detail Log: $webLog. demo-down.ps1 cierra lo arrancado."
+  }
+  Write-Step "Web servida en $webUrl, sin ventana (log: $webLog)."
 }
 
-if (-not $NoBrowser) { Start-Process "http://127.0.0.1:$cloudAgentPort/lb/dashboard" }
+if (-not $NoBrowser) {
+  Start-Process "http://127.0.0.1:$cloudAgentPort/lb/dashboard"
+  # the demo runs in Edge; the default browser if Edge is not there
+  if (-not $NoWeb) { try { Start-Process msedge "$webUrl/" } catch { Start-Process "$webUrl/" } }
+}
 Write-Host ''
 Write-Host "Whisper en la nube (EC2): $(if ($mode -eq 'ec2') { '2 instancias EC2 por túnel SSH' } else { 'plan B, 3 contenedores en este equipo' }). Dashboard: http://127.0.0.1:$cloudAgentPort/lb/dashboard"
 Write-Host "Whisper local: $(if ($NoLocalAgent) { 'no arrancado (-NoLocalAgent)' } elseif ($localReady) { "listo en http://127.0.0.1:$localAgentPort" } else { 'no está listo' })"
+if (-not $NoWeb) {
+  Write-Host "Web: $webUrl/ $(if ($webReused) { '(ya estaba en marcha)' } else { '(arrancada por demo-up, sin ventana)' })"
+  foreach ($warning in $webWarnings) { Write-Host "AVISO: $warning" }
+}
 Write-Host 'En la página, abre «Reconocedor» y elige una opción. Al terminar: demo-down.cmd o .\whisper-cloud\aws\demo-down.ps1'
